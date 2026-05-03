@@ -612,6 +612,11 @@
     <div id="commentsList" class="space-y-3">
       <div class="py-10 text-center text-sm text-muted-foreground">불러오는 중...</div>
     </div>
+
+    <!-- 관리자 트리거 -->
+    <div class="mt-6 text-right">
+      <button onclick="activateAdmin()" class="text-[10px] text-muted-foreground/20 hover:text-muted-foreground/40 transition-colors select-none">·</button>
+    </div>
   </div>
 </section>
 
@@ -620,6 +625,20 @@
     'https://teugnaahpcpzejbdayyy.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA'
   );
+
+  let isAdmin = false;
+
+  function activateAdmin() {
+    const pw = prompt('비밀번호를 입력하세요');
+    if (pw === 'apple') { isAdmin = true; loadComments(); }
+  }
+
+  async function deleteComment(id) {
+    if (!confirm('이 댓글을 삭제할까요?')) return;
+    const { error } = await sb.from('comments').delete().eq('id', id);
+    if (error) { alert('삭제 실패: ' + error.message); return; }
+    loadComments();
+  }
 
   function esc(t) {
     return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -644,6 +663,7 @@
           <p class="text-sm text-foreground break-words">${esc(c.content)}</p>
           <p class="mt-1 text-[11px] text-muted-foreground/60">${fmtDate(c.created_at)}</p>
         </div>
+        ${isAdmin ? `<button onclick="deleteComment('${c.id}')" class="shrink-0 mt-0.5 text-muted-foreground/30 hover:text-red-400 transition-colors text-sm" title="삭제">🗑</button>` : ''}
       </div>`).join('');
   }
 
