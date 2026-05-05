@@ -27,6 +27,7 @@ module.exports = async function handler(req, res) {
   } catch (_) {}
 
   let weatherDesc = '';
+  let isRainy = false;
   try {
     const controller = new AbortController();
     const tid = setTimeout(() => controller.abort(), 4000);
@@ -35,12 +36,34 @@ module.exports = async function handler(req, res) {
     const wJson = await w.json();
     const c = wJson.current_condition[0];
     weatherDesc = `${c.weatherDesc[0].value}, 기온 ${c.temp_C}°C, 습도 ${c.humidity}%`;
+    isRainy = /rain|drizzle|shower/i.test(c.weatherDesc[0].value);
   } catch {
     const seasons = ['겨울','겨울','봄','봄','봄','여름','여름','여름','가을','가을','가을','겨울'];
     weatherDesc = `${seasons[month - 1]} 날씨`;
   }
 
-  const prompt = `오늘 날짜: ${dateStr} (${month}월 ${timeOfDay}), 서울 날씨: ${weatherDesc}
+  // 어제 술 조회 (비가 아닐 때만 중복 방지)
+  let yesterdayDrink = '';
+  if (!isRainy) {
+    try {
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+      const yRes = await fetch(`${SUPABASE_URL}/rest/v1/daily_drinks?date=eq.${yesterdayStr}&select=data`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      if (yRes.ok) {
+        const yData = await yRes.json();
+        if (yData.length > 0) yesterdayDrink = yData[0].data.drink;
+      }
+    } catch (_) {}
+  }
+
+  const avoidLine = yesterdayDrink
+    ? `\n중요: 어제 추천한 술은 "${yesterdayDrink}"이었으니 오늘은 반드시 다른 술을 추천해줘.`
+    : '';
+
+  const prompt = `오늘 날짜: ${dateStr} (${month}월 ${timeOfDay}), 서울 날씨: ${weatherDesc}${avoidLine}
 
 오늘의 날씨와 계절에 딱 어울리는 술자리 추천을 해줘. 한국 술 문화를 반영하고 감성적으로 부탁해.
 
