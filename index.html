@@ -1177,6 +1177,10 @@ function copyResult(){
   <div class="rl-header">
     <div class="rl-title">🎰 당첨 룰렛</div>
     <p class="rl-subtitle">이름을 추가하고 룰렛을 돌려보세요 (최대 20명)</p>
+    <div style="margin-top:12px;display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:20px;background:linear-gradient(135deg,rgba(181,102,255,0.15),rgba(255,95,176,0.1));border:1px solid rgba(181,102,255,0.35);font-size:12px;font-weight:600;color:#d4a8ff;box-shadow:0 0 16px -4px rgba(181,102,255,0.3)">
+      <span style="font-size:14px">🎲</span>
+      벙비 정산시 천원 이하 잔돈 몰아주기 게임?
+    </div>
   </div>
 
   <div class="rl-input-row">
@@ -1267,11 +1271,17 @@ function copyResult(){
     spinning = true;
     document.getElementById('roulette-spin-btn').disabled = true;
     document.getElementById('roulette-hint').textContent = '돌아가는 중...';
-    const delta = (5+Math.random()*5)*Math.PI*2 + Math.random()*Math.PI*2;
-    const dur = 4000+Math.random()*2000, start = currentAngle, t0 = performance.now();
+    const delta = (6+Math.random()*4)*Math.PI*2 + Math.random()*Math.PI*2;
+    const dur = 5000+Math.random()*2000, start = currentAngle, t0 = performance.now();
+    function easeRoulette(t) {
+      // 빠르게 75%까지 → 마지막 25% 아슬아슬하게 기어가기
+      if (t < 0.75) return (t/0.75) * 0.90;
+      const u = (t-0.75)/0.25;
+      return 0.90 + 0.10*(1-Math.pow(1-u,2));
+    }
     function step(now) {
       const t = Math.min((now-t0)/dur, 1);
-      currentAngle = start + delta*(1-Math.pow(1-t,4));
+      currentAngle = start + delta*easeRoulette(t);
       draw();
       if (t < 1) { requestAnimationFrame(step); return; }
       spinning = false;
