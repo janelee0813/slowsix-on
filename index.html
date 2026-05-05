@@ -107,7 +107,6 @@
     <div class="flex gap-1.5 py-2.5">
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">구성원 가이드</button>
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">모임 정산 계산기</button>
-      <button onclick="showPage('test2')" id="btn-test2" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">테스트2</button>
     </div>
   </div>
 </nav>
@@ -123,7 +122,7 @@
       <svg class="h-3.5 w-3.5 text-neon-pink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span>필독 공지사항</span>
       <span class="mx-1 h-1 w-1 rounded-full bg-border"></span>
-      <span class="text-neon-blue">ver2026.05.03</span>
+      <span class="text-neon-blue">ver2026.05.05</span>
     </div>
     <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl animate-fade-up" style="animation-delay:60ms">
       원활한 모임 운영을 위한<br/>
@@ -1007,11 +1006,6 @@ function copyResult(){
 </script>
 </div>
 
-<div id="page-test2" class="hidden min-h-[80vh] flex items-center justify-center px-5">
-  <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl text-center">
-    <span class="text-gradient-neon">콘텐츠 준비중입니다</span>
-  </h1>
-</div>
 
 <script>
   const sb = window.supabase.createClient(
@@ -1099,20 +1093,20 @@ function copyResult(){
 
 <script>
   function showPage(page) {
-    ['guide', 'test1', 'test2'].forEach(p => {
+    ['guide', 'test1'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       btn.className = p === page
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : '#' + page;
+    const hash = page === 'guide' ? '' : '#calculator';
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
   }
 
   function copyCalcUrl() {
-    const url = location.origin + location.pathname + '#test1';
+    const url = location.origin + location.pathname + '#calculator';
     navigator.clipboard.writeText(url).then(() => {
       const btn = event.currentTarget;
       const orig = btn.innerHTML;
@@ -1126,7 +1120,7 @@ function copyResult(){
   // 해시 기반 초기 페이지 로드
   (function() {
     const hash = location.hash.replace('#', '');
-    if (hash === 'test1' || hash === 'test2') showPage(hash);
+    if (hash === 'calculator') showPage('test1');
   })();
 </script>
 </body>
