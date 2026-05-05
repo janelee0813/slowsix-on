@@ -634,10 +634,379 @@
 
 </div><!-- end page-guide -->
 
-<div id="page-test1" class="hidden min-h-[80vh] flex items-center justify-center px-5">
-  <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl text-center">
-    <span class="text-gradient-neon">콘텐츠 준비중입니다</span>
-  </h1>
+<div id="page-test1" class="hidden">
+<style>
+#page-test1 .calc-app{max-width:480px;margin:0 auto;padding:12px 12px 60px}
+#page-test1 .app-title{text-align:center;padding:24px 0 18px;font-size:24px;font-weight:700;color:#f5f1ff;position:relative}
+#page-test1 .app-title .neon-title{background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#page-test1 .app-title .subtitle{font-size:13px;color:#9b94b3;display:block;margin-top:4px;font-weight:400}
+#page-test1 .card{background:linear-gradient(180deg,rgba(28,21,48,0.85),rgba(21,16,31,0.7));border:1px solid rgba(140,110,200,0.28);border-radius:14px;padding:16px;margin-bottom:12px;backdrop-filter:blur(8px)}
+#page-test1 .card-title{font-size:11px;font-weight:600;color:#9b94b3;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.8px}
+#page-test1 .field{margin-bottom:12px}
+#page-test1 .field label{display:block;font-size:13px;color:#9b94b3;margin-bottom:6px}
+#page-test1 .field input[type=text],#page-test1 .amount-input{width:100%;padding:11px 13px;border:1px solid rgba(140,110,200,0.28);border-radius:10px;font-size:15px;background:rgba(10,6,18,0.5);color:#f5f1ff;outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
+#page-test1 .field input[type=text]:focus,#page-test1 .amount-input:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.2);background:rgba(28,21,48,0.8)}
+#page-test1 .field input::placeholder,#page-test1 .amount-input::placeholder{color:#9b94b3}
+#page-test1 .row{display:flex;gap:8px}
+#page-test1 .row input{flex:1}
+#page-test1 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border:1px solid rgba(140,110,200,0.28);border-radius:10px;font-size:14px;cursor:pointer;background:rgba(28,21,48,0.6);color:#f5f1ff;transition:all .15s;font-family:inherit;-webkit-tap-highlight-color:transparent}
+#page-test1 .btn:hover{background:rgba(181,102,255,0.15);border-color:rgba(181,102,255,0.5)}
+#page-test1 .btn:active{transform:scale(0.97)}
+#page-test1 .btn-primary{background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;border:none;font-weight:600;box-shadow:0 10px 40px -10px rgba(181,102,255,0.7)}
+#page-test1 .btn-primary:hover{filter:brightness(1.08)}
+#page-test1 .btn-danger{color:#ff5f6d;border-color:rgba(255,95,109,0.3);background:transparent}
+#page-test1 .btn-danger:hover{background:rgba(255,95,109,0.1)}
+#page-test1 .btn-sm{padding:7px 12px;font-size:13px}
+#page-test1 .btn-full{width:100%;margin-top:8px;padding:15px;font-size:16px}
+#page-test1 .member-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(181,102,255,0.1);border:1px solid rgba(140,110,200,0.28);border-radius:20px;font-size:13px;margin:4px 4px 4px 0;color:#f5f1ff}
+#page-test1 .chip-remove{cursor:pointer;color:#9b94b3;font-size:16px;line-height:1;padding:0 2px;transition:color .1s}
+#page-test1 .chip-remove:hover{color:#ff5f6d}
+#page-test1 .chips-wrap{min-height:36px;display:flex;flex-wrap:wrap;align-items:flex-start}
+#page-test1 .round-card{background:rgba(10,6,18,0.3);border:1px solid rgba(140,110,200,0.22);border-radius:12px;padding:14px;margin-bottom:10px}
+#page-test1 .round-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+#page-test1 .round-badge{font-size:12px;font-weight:600;background:rgba(181,102,255,0.15);color:#b566ff;padding:5px 12px;border-radius:20px}
+#page-test1 .check-item{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:14px;color:#f5f1ff;-webkit-tap-highlight-color:transparent}
+#page-test1 .check-item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#b566ff;flex-shrink:0}
+#page-test1 .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+#page-test1 .divider{border:none;border-top:1px solid rgba(140,110,200,0.15);margin:10px 0}
+#page-test1 .result-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(140,110,200,0.15)}
+#page-test1 .result-row:last-child{border-bottom:none}
+#page-test1 .result-name{font-size:15px;font-weight:500;color:#f5f1ff}
+#page-test1 .result-amount{font-size:22px;font-weight:700;color:#b566ff}
+#page-test1 .result-host{font-size:11px;background:rgba(181,102,255,0.15);color:#b566ff;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:500}
+#page-test1 .summary-row{display:flex;justify-content:space-between;font-size:13px;color:#9b94b3;padding:5px 0}
+#page-test1 .summary-row span:last-child{color:#f5f1ff;font-weight:500}
+#page-test1 .warn{font-size:12px;color:#ff5f6d;margin-top:4px}
+#page-test1 .info-text{font-size:13px;color:#9b94b3;line-height:1.6}
+#page-test1 .toggle-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;color:#f5f1ff;-webkit-tap-highlight-color:transparent}
+#page-test1 .toggle-row label{cursor:pointer}
+#page-test1 .toggle-row input[type=checkbox]{width:18px;height:18px;accent-color:#b566ff;cursor:pointer;flex-shrink:0}
+#page-test1 .section-add{border:1.5px dashed rgba(140,110,200,0.4);border-radius:12px;padding:14px;text-align:center;cursor:pointer;color:#9b94b3;font-size:14px;margin-bottom:12px;background:transparent;width:100%;transition:all .15s;font-family:inherit;-webkit-tap-highlight-color:transparent}
+#page-test1 .section-add:hover{background:rgba(181,102,255,0.08);border-color:rgba(181,102,255,0.5);color:#b566ff}
+#page-test1 .hint-text{font-size:12px;color:#9b94b3;padding-top:6px;min-height:18px}
+#page-test1 .copy-toast{display:none;text-align:center;font-size:13px;color:#5ee0a8;padding:8px;background:rgba(94,224,168,0.1);border-radius:8px;margin-top:6px}
+#page-test1 #custom-rule-input:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.2);background:rgba(28,21,48,0.8)}
+#page-test1 #custom-rule-input::placeholder{color:#9b94b3}
+</style>
+<div class="calc-app" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+  <div class="app-title">
+    <span class="neon-title">모임 정산 계산기</span>
+    <span class="subtitle">모임 정산을 빠르고 쉽게</span>
+    <span id="visitor-count" style="position:absolute;top:26px;right:0;font-size:11px;color:#9b94b3;font-weight:400"></span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">모임 기본 정보</div>
+    <div class="field">
+      <label>모임명</label>
+      <input type="text" id="bung-name" placeholder="예) 강남역에서 소고기 먹어요" />
+    </div>
+    <div class="field">
+      <label>모임장 이름</label>
+      <input type="text" id="host-name" placeholder="모임장 이름 입력" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">참여 멤버</div>
+    <div class="field">
+      <label>멤버 추가 (모임장은 자동 포함)</label>
+      <div class="row">
+        <input type="text" id="member-input" placeholder="이름 입력 후 추가" />
+        <button class="btn btn-sm" onclick="addMember()">추가</button>
+      </div>
+      <div id="member-warn" class="warn" style="display:none"></div>
+    </div>
+    <div class="chips-wrap" id="member-chips"></div>
+  </div>
+
+  <div id="rounds-section">
+    <div style="padding:0 4px 8px;font-size:11px;font-weight:600;color:#9b94b3;text-transform:uppercase;letter-spacing:0.8px">비용 정산</div>
+    <div id="rounds-list"></div>
+    <button class="section-add" onclick="addRound()">+ 차수 추가</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">정산 수단</div>
+    <div class="field">
+      <label>은행명</label>
+      <input type="text" id="bank-name" placeholder="예) 카카오뱅크" />
+    </div>
+    <div class="field">
+      <label>계좌번호</label>
+      <input type="text" id="account-num" placeholder="예) 3333-12-1234567" />
+    </div>
+    <div class="field">
+      <label>예금주명</label>
+      <input type="text" id="account-holder" placeholder="예금주 이름 / 초성만 기입 가능" />
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="kakao-pay" />
+      <label for="kakao-pay">카카오페이 송금 가능</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">정산시 안내하고 싶은 사항에 체크</div>
+    <div class="toggle-row">
+      <input type="checkbox" id="show-rule" />
+      <label for="show-rule">모든 금액은 1/N로 계산됩니다.</label>
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="show-rule2" />
+      <label for="show-rule2">정산은 모임장의 재량으로 진행됩니다.</label>
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="show-rule3" />
+      <label for="show-rule3">모임에 협의없이 개인적으로 구매해 온 음식은 정산에 포함X</label>
+    </div>
+    <div id="custom-rules-list"></div>
+    <div class="row" style="margin-top:10px;gap:8px">
+      <input type="text" id="custom-rule-input" placeholder="직접 입력 후 추가" style="flex:1;padding:9px 12px;border:1px solid rgba(140,110,200,0.28);border-radius:10px;font-size:14px;background:rgba(10,6,18,0.5);color:#f5f1ff;outline:none" />
+      <button class="btn btn-sm" onclick="addCustomRule()">추가</button>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-full" onclick="calculate()">정산 계산하기</button>
+  <div style="text-align:center;margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div style="display:flex;gap:16px;justify-content:center">
+      <a href="https://www.instagram.com/jane__moment/" target="_blank" rel="noopener" style="color:#9b94b3;transition:color 0.15s" onmouseover="this.style.color='#E1306C'" onmouseout="this.style.color='#9b94b3'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      </a>
+      <a href="https://www.threads.com/@jane__moment" target="_blank" rel="noopener" style="color:#9b94b3;transition:color 0.15s" onmouseover="this.style.color='#f5f1ff'" onmouseout="this.style.color='#9b94b3'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.5 12.01v-.017c.024-3.574 1.204-6.32 3.503-8.164C7.197 2.014 9.991 1.5 12.007 1.5h.013c2.523.017 4.656.782 6.34 2.274 1.594 1.415 2.565 3.398 2.886 5.896l-2.506.34c-.527-3.965-2.951-5.984-6.727-6.01h-.01c-1.67 0-3.876.42-5.402 1.697-1.416 1.182-2.162 3.014-2.18 5.444v.014c0 2.497.72 4.37 2.138 5.564 1.394 1.174 3.396 1.783 5.95 1.8h.007c1.758-.012 3.087-.38 4.06-1.124.88-.674 1.37-1.63 1.49-2.921a4.255 4.255 0 0 0-.048-.806c-.198-1.088-.792-1.808-1.815-2.2-.268 1.574-.832 2.723-1.703 3.418-.943.753-2.163 1.1-3.721 1.06-1.197-.031-2.21-.38-2.94-1.01-.784-.68-1.185-1.642-1.129-2.71.112-2.136 1.762-3.394 4.555-3.52.773-.035 1.498-.02 2.168.044-.088-.56-.298-.99-.637-1.283-.404-.35-.994-.527-1.806-.527h-.027c-.86.006-1.91.275-2.522 1.114l-2.045-1.408C9.57 4.948 11.045 4.368 12.7 4.356h.033c1.398 0 2.54.354 3.394 1.051.887.724 1.434 1.808 1.624 3.222.222-.034.451-.06.686-.075 1.78-.113 3.244.358 4.195 1.354.877.918 1.345 2.25 1.345 3.848 0 .302-.02.61-.058.922-.287 2.364-1.278 4.137-2.943 5.267-1.546 1.047-3.544 1.576-5.79 1.576z"/></svg>
+      </a>
+    </div>
+    <div style="font-size:11px;color:#9b94b3">Copyright © 2026 Jane. All rights reserved.</div>
+  </div>
+
+  <div id="result-section" style="display:none;margin-top:16px">
+    <div class="card">
+      <div class="card-title">차수별 내역</div>
+      <div id="round-summary"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">최종 정산</div>
+      <div id="final-result"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">정산 방법</div>
+      <div id="payment-result"></div>
+    </div>
+    <div id="rule-result" style="display:none" class="card"></div>
+    <button class="btn btn-full" onclick="copyResult()" style="margin-top:8px">결과 복사하기</button>
+    <div id="copy-toast" class="copy-toast">복사 완료!</div>
+  </div>
+</div>
+<script>
+let state={bungName:'',hostName:'',members:[],rounds:[],roundCounter:0};
+let customRules=[];
+let customRuleCounter=0;
+
+function addCustomRule(){
+  const inp=document.getElementById('custom-rule-input');
+  const text=inp.value.trim();
+  if(!text)return;
+  const id='custom-rule-'+(++customRuleCounter);
+  customRules.push({id,text});
+  inp.value='';
+  renderCustomRules();
+}
+function removeCustomRule(id){
+  customRules=customRules.filter(r=>r.id!==id);
+  renderCustomRules();
+}
+function renderCustomRules(){
+  document.getElementById('custom-rules-list').innerHTML=customRules.map(r=>`
+    <div class="toggle-row" style="align-items:center">
+      <input type="checkbox" id="${r.id}" checked />
+      <label for="${r.id}" style="flex:1">${r.text}</label>
+      <button onclick="removeCustomRule('${r.id}')" style="border:none;background:none;color:#9b94b3;font-size:18px;cursor:pointer;padding:0 2px;line-height:1">×</button>
+    </div>`).join('');
+}
+
+(function(){
+  const today=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  fetch(`https://api.counterapi.dev/v1/janelee0813/meeting-calc-${today}/up`)
+    .then(r=>r.json()).then(d=>{const el=document.getElementById('visitor-count');if(el&&d.count!=null)el.textContent=`Today : ${d.count}`;}).catch(()=>{});
+})();
+
+document.getElementById('host-name').addEventListener('input',function(){
+  state.hostName=this.value.trim();syncHostToMembers();renderMemberChips();
+});
+(function(){
+  const inp=document.getElementById('member-input');
+  let composing=false,pendingAdd=false;
+  inp.addEventListener('compositionstart',function(){composing=true;});
+  inp.addEventListener('compositionend',function(){composing=false;if(pendingAdd){pendingAdd=false;addMember();}});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){if(composing||e.isComposing||e.keyCode===229){pendingAdd=true;}else{e.preventDefault();addMember();}}});
+})();
+document.getElementById('bung-name').addEventListener('input',function(){state.bungName=this.value.trim();});
+(function(){
+  const inp=document.getElementById('custom-rule-input');
+  let composing=false,pendingAdd=false;
+  inp.addEventListener('compositionstart',function(){composing=true;});
+  inp.addEventListener('compositionend',function(){composing=false;if(pendingAdd){pendingAdd=false;addCustomRule();}});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){if(composing||e.isComposing||e.keyCode===229){pendingAdd=true;}else{e.preventDefault();addCustomRule();}}});
+})();
+
+function syncHostToMembers(){
+  state.members=state.members.filter(m=>!m.isHost);
+  if(state.hostName)state.members.unshift({id:'host-0',name:state.hostName,isHost:true});
+}
+function addMember(){
+  const inp=document.getElementById('member-input');
+  const name=inp.value.trim();
+  const warn=document.getElementById('member-warn');
+  if(!name){warn.textContent='이름을 입력하세요';warn.style.display='block';return;}
+  if(state.members.find(m=>m.name===name)){warn.textContent='이미 있는 이름이에요';warn.style.display='block';return;}
+  warn.style.display='none';
+  state.members.push({id:'m-'+Date.now(),name,isHost:false});
+  inp.value='';renderMemberChips();renderRounds();
+}
+function removeMember(id){
+  state.members=state.members.filter(m=>m.id!==id);renderMemberChips();renderRounds();
+}
+function renderMemberChips(){
+  const wrap=document.getElementById('member-chips');
+  if(!state.members.length){wrap.innerHTML='<div style="color:#9b94b3;font-size:13px;padding:4px 0">멤버를 추가해 주세요</div>';return;}
+  wrap.innerHTML=state.members.map(m=>`
+    <span class="member-chip">${m.name}${m.isHost?'<span style="font-size:10px;color:#b566ff;margin-left:2px">벙주</span>':''}
+    ${!m.isHost?`<span class="chip-remove" onclick="removeMember('${m.id}')">×</span>`:''}</span>`).join('');
+}
+function addRound(){
+  state.roundCounter++;
+  state.rounds.push({id:'r-'+Date.now(),roundNumber:state.roundCounter,totalAmount:0,participantIds:[]});
+  renderRounds();
+}
+function removeRound(id){
+  state.rounds=state.rounds.filter(r=>r.id!==id);
+  state.rounds.forEach((r,i)=>{r.roundNumber=i+1});
+  state.roundCounter=state.rounds.length;renderRounds();
+}
+function renderRounds(){
+  const list=document.getElementById('rounds-list');
+  if(!state.rounds.length){list.innerHTML='';return;}
+  list.innerHTML=state.rounds.map(r=>{
+    const share=r.totalAmount>0&&r.participantIds.length>0?'1인 '+Math.round(r.totalAmount/r.participantIds.length).toLocaleString()+'원 × '+r.participantIds.length+'명':'';
+    return `<div class="round-card">
+      <div class="round-header"><span class="round-badge">${r.roundNumber}차</span><button class="btn btn-sm btn-danger" onclick="removeRound('${r.id}')">삭제</button></div>
+      <div class="field"><label>총금액 (원)</label>
+        <input type="text" inputmode="numeric" class="amount-input" placeholder="숫자만 입력" value="${r.totalAmount||''}" oninput="handleAmountInput('${r.id}',this)" onkeydown="return filterNumericKey(event)" />
+      </div>
+      <div class="field"><label>참여 멤버</label>
+        ${state.members.length===0?`<div style="color:#9b94b3;font-size:13px">멤버를 먼저 추가해 주세요</div>`:`<div>
+          <label class="check-item" style="padding:6px 0;margin-bottom:4px;border-bottom:1px solid rgba(140,110,200,0.2)">
+            <input type="checkbox" onchange="toggleAll('${r.id}',this.checked)" ${r.participantIds.length===state.members.length&&state.members.length>0?'checked':''} style="width:18px;height:18px;accent-color:#b566ff;cursor:pointer" /> 전체 선택
+          </label>
+          <div class="check-grid">${state.members.map(m=>`
+            <label class="check-item">
+              <input type="checkbox" ${r.participantIds.includes(m.id)?'checked':''} onchange="toggleParticipant('${r.id}','${m.id}',this.checked)" style="width:18px;height:18px;accent-color:#b566ff;cursor:pointer" />
+              ${m.name}${m.isHost?'<span style="font-size:10px;color:#b566ff"> 벙주</span>':''}
+            </label>`).join('')}</div></div>`}
+      </div>
+      <div class="hint-text">${share}</div></div>`;
+  }).join('');
+}
+function filterNumericKey(e){
+  const allowed=['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Enter','Home','End'];
+  if(allowed.includes(e.key))return true;
+  if(e.key>='0'&&e.key<='9')return true;
+  e.preventDefault();return false;
+}
+function handleAmountInput(id,el){
+  const raw=el.value.replace(/[^0-9]/g,'');
+  const num=parseInt(raw)||0;
+  const r=state.rounds.find(r=>r.id===id);
+  if(r)r.totalAmount=num;
+  el.value=raw;
+  const hint=el.closest('.round-card').querySelector('.hint-text');
+  if(hint)hint.textContent=num>0&&r&&r.participantIds.length>0?'1인 '+Math.round(num/r.participantIds.length).toLocaleString()+'원 × '+r.participantIds.length+'명':'';
+}
+function toggleParticipant(rId,mId,checked){
+  const r=state.rounds.find(r=>r.id===rId);if(!r)return;
+  if(checked)r.participantIds.push(mId);else r.participantIds=r.participantIds.filter(id=>id!==mId);
+  renderRounds();
+}
+function toggleAll(rId,checked){
+  const r=state.rounds.find(r=>r.id===rId);if(!r)return;
+  r.participantIds=checked?state.members.map(m=>m.id):[];renderRounds();
+}
+function calculate(){
+  const bungName=document.getElementById('bung-name').value.trim();
+  const hostName=document.getElementById('host-name').value.trim();
+  if(!bungName){alert('벙명을 입력해 주세요');return;}
+  if(!hostName){alert('벙주 이름을 입력해 주세요');return;}
+  if(state.members.length<2){alert('멤버가 2명 이상이어야 해요');return;}
+  if(!state.rounds.length){alert('차수를 하나 이상 추가해 주세요');return;}
+  for(const r of state.rounds){
+    if(!r.totalAmount||r.totalAmount<=0){alert(`${r.roundNumber}차 총금액을 입력해 주세요`);return;}
+    if(!r.participantIds.length){alert(`${r.roundNumber}차 참여 멤버를 선택해 주세요`);return;}
+  }
+  const totals={};
+  state.members.forEach(m=>{totals[m.id]=0});
+  state.rounds.forEach(r=>{const share=Math.round(r.totalAmount/r.participantIds.length);r.participantIds.forEach(pid=>{totals[pid]=(totals[pid]||0)+share});});
+  document.getElementById('round-summary').innerHTML=state.rounds.map(r=>{
+    const share=Math.round(r.totalAmount/r.participantIds.length);
+    const names=r.participantIds.map(pid=>state.members.find(m=>m.id===pid)?.name||'').join(', ');
+    return `<div class="summary-row"><span>${r.roundNumber}차 (${r.participantIds.length}명)</span><span>${r.totalAmount.toLocaleString()}원 / 1인 ${share.toLocaleString()}원</span></div>
+    <div style="font-size:12px;color:#9b94b3;padding:2px 0 8px">${names}</div>`;
+  }).join('<hr class="divider">');
+  const sorted=[...state.members].sort((a,b)=>(totals[b.id]||0)-(totals[a.id]||0));
+  document.getElementById('final-result').innerHTML=sorted.map(m=>`
+    <div class="result-row"><div class="result-name">${m.name}${m.isHost?'<span class="result-host">벙주</span>':''}</div>
+    <div class="result-amount">${(totals[m.id]||0).toLocaleString()}원</div></div>`).join('');
+  const bank=document.getElementById('bank-name').value.trim();
+  const acc=document.getElementById('account-num').value.trim();
+  const holder=document.getElementById('account-holder').value.trim();
+  const kakao=document.getElementById('kakao-pay').checked;
+  let payHTML='';
+  if(bank||acc||holder)payHTML+=`<div class="summary-row"><span>계좌입금</span><span>${[bank,acc,holder].filter(Boolean).join(' ')}</span></div>`;
+  payHTML+=`<div class="summary-row"><span>카카오페이</span><span>송금 ${kakao?'가능':'불가'}</span></div>`;
+  document.getElementById('payment-result').innerHTML=payHTML;
+  const checkedRules=[
+    {id:'show-rule',text:'모든 금액은 1/N로 계산됩니다.'},
+    {id:'show-rule2',text:'정산은 모임장의 재량으로 진행됩니다.'},
+    {id:'show-rule3',text:'모임에 협의없이 개인적으로 구매해 온 음식은 정산에 포함X'},
+    ...customRules
+  ].filter(r=>{const el=document.getElementById(r.id);return el&&el.checked;});
+  const ruleResultEl=document.getElementById('rule-result');
+  if(checkedRules.length>0){ruleResultEl.innerHTML=checkedRules.map(r=>`<div class="info-text">안내: ${r.text}</div>`).join('');ruleResultEl.style.display='block';}
+  else{ruleResultEl.style.display='none';}
+  document.getElementById('result-section').style.display='block';
+  document.getElementById('result-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function copyResult(){
+  const bungName=document.getElementById('bung-name').value.trim();
+  const hostName=document.getElementById('host-name').value.trim();
+  const totals={};
+  state.members.forEach(m=>{totals[m.id]=0});
+  state.rounds.forEach(r=>{const share=Math.round(r.totalAmount/r.participantIds.length);r.participantIds.forEach(pid=>{totals[pid]=(totals[pid]||0)+share});});
+  const sorted=[...state.members].sort((a,b)=>(totals[b.id]||0)-(totals[a.id]||0));
+  let text=`벙명: ${bungName}\n벙주: ${hostName}\n\n[차수별 내역]\n`;
+  state.rounds.forEach(r=>{const share=Math.round(r.totalAmount/r.participantIds.length);text+=`${r.roundNumber}차 - ${r.totalAmount.toLocaleString()}원 / 참여자 ${r.participantIds.length}명 / 1인 ${share.toLocaleString()}원\n`;});
+  text+=`\n[최종 정산]\n`;
+  sorted.forEach(m=>{text+=`${m.name} ${(totals[m.id]||0).toLocaleString()}원\n`;});
+  const bank=document.getElementById('bank-name').value.trim();
+  const acc=document.getElementById('account-num').value.trim();
+  const holder=document.getElementById('account-holder').value.trim();
+  const kakao=document.getElementById('kakao-pay').checked;
+  text+=`\n[정산 방법]\n`;
+  if(bank||acc||holder)text+=`계좌입금: ${[bank,acc,holder].filter(Boolean).join(' ')}\n`;
+  text+=`카카오페이 송금 ${kakao?'가능':'불가'}\n`;
+  const ruleTexts=[
+    {id:'show-rule',text:'모든 금액은 1/N로 계산됩니다.'},
+    {id:'show-rule2',text:'정산은 모임장의 재량으로 진행됩니다.'},
+    {id:'show-rule3',text:'모임에 협의없이 개인적으로 구매해 온 음식은 정산에 포함X'},
+    ...customRules
+  ].filter(r=>{const el=document.getElementById(r.id);return el&&el.checked;}).map(r=>r.text);
+  if(ruleTexts.length>0)text+=`\n[안내]\n${ruleTexts.join('\n')}\n`;
+  text+=`\n[태그]\n${state.members.map(m=>`@${m.name}`).join('\n')}\n`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const toast=document.getElementById('copy-toast');toast.style.display='block';setTimeout(()=>{toast.style.display='none';},2000);
+  }).catch(()=>alert('복사에 실패했어요. 직접 선택해서 복사해 주세요.'));
+}
+</script>
 </div>
 
 <div id="page-test2" class="hidden min-h-[80vh] flex items-center justify-center px-5">
