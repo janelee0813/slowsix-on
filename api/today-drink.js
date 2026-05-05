@@ -12,7 +12,6 @@ module.exports = async function handler(req, res) {
   const hour = now.getHours();
   const timeOfDay = hour < 12 ? '오전' : hour < 18 ? '오후' : '저녁';
 
-  // 날씨 조회 (wttr.in 서울)
   let weatherDesc = '';
   try {
     const controller = new AbortController();
@@ -29,7 +28,7 @@ module.exports = async function handler(req, res) {
 
   const prompt = `오늘 날짜: ${dateStr} (${month}월 ${timeOfDay}), 서울 날씨: ${weatherDesc}
 
-오늘의 날씨와 계절에 딱 어울리는 술과 안주를 추천해줘. 한국 술 문화를 반영하고 감성적으로 부탁해.
+오늘의 날씨와 계절에 딱 어울리는 술자리 추천을 해줘. 한국 술 문화를 반영하고 감성적으로 부탁해.
 
 반드시 아래 JSON만 응답해 (마크다운, 코드블록, 다른 텍스트 없이):
 {
@@ -39,6 +38,14 @@ module.exports = async function handler(req, res) {
   "snack": "안주 이름",
   "snackEmoji": "이모지 1개",
   "snackDesc": "이 안주 추천 이유 (1~2문장)",
+  "place": "오늘 분위기에 어울리는 장소/술집 스타일 (예: 아늑한 이자카야, 야외 포차 등)",
+  "placeEmoji": "이모지 1개",
+  "placeDesc": "이 장소를 추천하는 이유 (1~2문장, 날씨 연결)",
+  "topic": "오늘 술자리에서 나누기 좋은 대화 주제 한 가지",
+  "topicEmoji": "이모지 1개",
+  "topicDesc": "이 주제가 오늘 술자리에 어울리는 이유 (1~2문장)",
+  "tip": "이 술+안주 조합을 더 맛있게 즐기는 팁 (1~2문장)",
+  "tipEmoji": "이모지 1개",
   "mood": "오늘 술자리 무드 한마디 (10자 이내)",
   "weather": "${weatherDesc}"
 }`;
@@ -53,7 +60,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
+        max_tokens: 900,
         messages: [{ role: 'user', content: prompt }]
       })
     });
