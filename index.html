@@ -1083,12 +1083,14 @@ function copyResult(){
     try {
       const res = await fetch('/api/today-drink');
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (data.error) throw new Error(data.detail || data.error);
       localStorage.setItem(cacheKey, JSON.stringify(data));
       renderDrinks(data);
-    } catch {
+    } catch (e) {
       document.getElementById('drinks-loading').style.display = 'none';
-      document.getElementById('drinks-error').style.display = 'block';
+      const errEl = document.getElementById('drinks-error');
+      errEl.innerHTML = `추천을 불러오지 못했어요.<br/><span style="font-size:12px;opacity:0.6">${e.message}</span>`;
+      errEl.style.display = 'block';
     }
   }
 
