@@ -108,6 +108,7 @@
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">구성원 가이드</button>
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">모임 정산 계산기</button>
       <button onclick="showPage('drinks')" id="btn-drinks" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">오늘의 술</button>
+      <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">당첨 룰렛</button>
     </div>
   </div>
 </nav>
@@ -1134,6 +1135,187 @@ function copyResult(){
 </script>
 </div>
 
+<!-- ROULETTE PAGE -->
+<div id="page-roulette" class="hidden">
+<style>
+  #page-roulette .rl-wrap{max-width:480px;margin:0 auto;padding:40px 20px 60px}
+  #page-roulette .rl-header{text-align:center;margin-bottom:28px}
+  #page-roulette .rl-title{font-size:26px;font-weight:800;background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+  #page-roulette .rl-subtitle{font-size:13px;color:#9b94b3}
+  #page-roulette .rl-input-row{display:flex;gap:8px;margin-bottom:12px}
+  #page-roulette .rl-input{flex:1;padding:11px 14px;border:1px solid rgba(140,110,200,0.32);border-radius:10px;font-size:15px;background:rgba(20,14,36,0.70);color:#f5f1ff;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+  #page-roulette .rl-input:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.2)}
+  #page-roulette .rl-input::placeholder{color:#9b94b3}
+  #page-roulette .rl-add-btn{padding:11px 18px;border-radius:10px;background:rgba(181,102,255,0.2);border:1px solid rgba(181,102,255,0.4);color:#b566ff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+  #page-roulette .rl-add-btn:hover{background:rgba(181,102,255,0.35)}
+  #page-roulette .rl-count-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  #page-roulette .rl-count{font-size:11px;font-weight:600;color:#9b94b3;letter-spacing:0.1em}
+  #page-roulette .rl-clear-btn{font-size:11px;color:#9b94b3;background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 4px;transition:color .15s}
+  #page-roulette .rl-clear-btn:hover{color:#ff5f6d}
+  #page-roulette .rl-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;margin-bottom:24px}
+  #page-roulette .rl-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 8px 5px 10px;border-radius:20px;border:1px solid;font-size:13px;color:#f5f1ff}
+  #page-roulette .rl-chip-x{cursor:pointer;color:#9b94b3;font-size:17px;line-height:1;padding:0 2px;transition:color .1s;margin-left:1px}
+  #page-roulette .rl-chip-x:hover{color:#ff5f6d}
+  #page-roulette .rl-canvas-wrap{display:flex;justify-content:center;margin-bottom:24px}
+  #page-roulette canvas{display:block;max-width:100%}
+  #page-roulette .rl-spin-btn{width:100%;padding:16px;border-radius:12px;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;border:none;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 10px 40px -10px rgba(181,102,255,0.7);letter-spacing:-0.3px}
+  #page-roulette .rl-spin-btn:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+  #page-roulette .rl-spin-btn:active:not(:disabled){transform:scale(0.98)}
+  #page-roulette .rl-spin-btn:disabled{cursor:not-allowed}
+  #page-roulette .rl-hint{text-align:center;font-size:12px;color:#9b94b3;margin-top:10px}
+  #roulette-winner-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,6,18,0.88);backdrop-filter:blur(8px)}
+  #roulette-winner-overlay .rl-winner-card{background:linear-gradient(180deg,rgba(44,33,72,0.99),rgba(21,16,31,0.99));border:1px solid rgba(181,102,255,0.5);border-radius:24px;padding:40px 32px;text-align:center;max-width:320px;width:90%;box-shadow:0 0 80px -10px rgba(181,102,255,0.5),0 0 0 1px rgba(181,102,255,0.1)}
+  #roulette-winner-overlay .rl-winner-emoji{font-size:52px;margin-bottom:12px;animation:rl-pop .4s cubic-bezier(0.34,1.56,0.64,1) both}
+  #roulette-winner-overlay .rl-winner-label{font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#9b94b3;margin-bottom:10px}
+  #roulette-winner-overlay .rl-winner-name{font-size:34px;font-weight:800;background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:24px;word-break:break-all;animation:rl-pop .5s .1s cubic-bezier(0.34,1.56,0.64,1) both}
+  #roulette-winner-overlay .rl-close-btn{padding:11px 32px;border-radius:10px;background:rgba(181,102,255,0.15);border:1px solid rgba(181,102,255,0.4);color:#b566ff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+  #roulette-winner-overlay .rl-close-btn:hover{background:rgba(181,102,255,0.3)}
+  @keyframes rl-pop{0%{opacity:0;transform:scale(0.5)}100%{opacity:1;transform:scale(1)}}
+</style>
+
+<div class="rl-wrap">
+  <div class="rl-header">
+    <div class="rl-title">🎰 당첨 룰렛</div>
+    <p class="rl-subtitle">이름을 추가하고 룰렛을 돌려보세요 (최대 20명)</p>
+  </div>
+
+  <div class="rl-input-row">
+    <input id="roulette-name-input" class="rl-input" placeholder="닉네임 입력 후 Enter" maxlength="10">
+    <button class="rl-add-btn" onclick="rouletteAdd()">+ 추가</button>
+  </div>
+
+  <div class="rl-count-row">
+    <span class="rl-count" id="roulette-count">0 / 20</span>
+    <button class="rl-clear-btn" onclick="rouletteClear()">전체 삭제</button>
+  </div>
+  <div class="rl-chips" id="roulette-chips"></div>
+
+  <div class="rl-canvas-wrap">
+    <canvas id="roulette-canvas" width="320" height="320"></canvas>
+  </div>
+
+  <button id="roulette-spin-btn" class="rl-spin-btn" onclick="rouletteSpin()">🎲 돌리기!</button>
+  <p class="rl-hint" id="roulette-hint">2명 이상 추가해야 돌릴 수 있어요</p>
+</div>
+
+<div id="roulette-winner-overlay">
+  <div class="rl-winner-card">
+    <div class="rl-winner-emoji">🎉</div>
+    <div class="rl-winner-label">당첨자</div>
+    <div class="rl-winner-name" id="roulette-winner-name"></div>
+    <button class="rl-close-btn" onclick="rouletteCloseWinner()">확인</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const COLORS = ['#b566ff','#ff5fb0','#5ec8ff','#5ee0a8','#ffb547','#ff5f6d','#7b66ff','#ff8c5f','#40d9b8','#c566ff','#ff5fd8','#66b5ff','#a8e65e','#ff8065','#5e8fff','#ffda5e','#d45eff','#5effa8','#ff5e9f','#8c66ff'];
+  let names = [], spinning = false, currentAngle = 0;
+
+  const canvas = document.getElementById('roulette-canvas');
+  const ctx = canvas.getContext('2d');
+  const S = canvas.width, CX = S/2, CY = S/2, R = S/2 - 8;
+
+  function draw() {
+    ctx.clearRect(0, 0, S, S);
+    const n = names.length;
+    if (n === 0) {
+      ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2);
+      ctx.fillStyle='rgba(28,21,48,0.9)'; ctx.fill();
+      ctx.strokeStyle='rgba(140,110,200,0.35)'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#9b94b3'; ctx.font='14px Pretendard Variable,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('이름을 추가해주세요', CX, CY);
+    } else {
+      const seg = (Math.PI*2)/n;
+      for (let i=0; i<n; i++) {
+        const a0 = currentAngle + i*seg - Math.PI/2;
+        ctx.beginPath(); ctx.moveTo(CX,CY); ctx.arc(CX,CY,R,a0,a0+seg); ctx.closePath();
+        ctx.fillStyle = COLORS[i%COLORS.length]; ctx.fill();
+        ctx.strokeStyle='rgba(10,6,18,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.save(); ctx.translate(CX,CY); ctx.rotate(a0+seg/2);
+        ctx.textAlign='right'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(10,6,18,0.85)';
+        ctx.font=`bold ${n>12?11:13}px Pretendard Variable,sans-serif`;
+        const label = names[i].length>7 ? names[i].slice(0,6)+'…' : names[i];
+        ctx.fillText(label, R-10, 0); ctx.restore();
+      }
+    }
+    ctx.beginPath(); ctx.arc(CX,CY,13,0,Math.PI*2);
+    ctx.fillStyle='#0a0612'; ctx.fill();
+    ctx.strokeStyle='rgba(181,102,255,0.7)'; ctx.lineWidth=2; ctx.stroke();
+    // pointer triangle at top
+    ctx.beginPath();
+    ctx.moveTo(CX, CY-R+4); ctx.lineTo(CX-11, CY-R-14); ctx.lineTo(CX+11, CY-R-14);
+    ctx.closePath(); ctx.fillStyle='#f5f1ff'; ctx.fill();
+    ctx.strokeStyle='#b566ff'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  function getWinner() {
+    const n = names.length, seg = (Math.PI*2)/n;
+    const norm = ((currentAngle%(Math.PI*2))+(Math.PI*2))%(Math.PI*2);
+    return Math.floor(((Math.PI*2)-norm)%(Math.PI*2)/seg)%n;
+  }
+
+  window.rouletteSpin = function() {
+    if (spinning || names.length < 2) return;
+    spinning = true;
+    document.getElementById('roulette-spin-btn').disabled = true;
+    document.getElementById('roulette-hint').textContent = '돌아가는 중...';
+    const delta = (5+Math.random()*5)*Math.PI*2 + Math.random()*Math.PI*2;
+    const dur = 4000+Math.random()*2000, start = currentAngle, t0 = performance.now();
+    function step(now) {
+      const t = Math.min((now-t0)/dur, 1);
+      currentAngle = start + delta*(1-Math.pow(1-t,4));
+      draw();
+      if (t < 1) { requestAnimationFrame(step); return; }
+      spinning = false;
+      document.getElementById('roulette-spin-btn').disabled = false;
+      document.getElementById('roulette-hint').textContent = '다시 돌려보세요!';
+      const idx = getWinner();
+      document.getElementById('roulette-winner-name').textContent = names[idx];
+      const ov = document.getElementById('roulette-winner-overlay');
+      ov.style.display = 'flex';
+      ov.querySelector('.rl-winner-emoji').style.animation = 'none';
+      ov.querySelector('.rl-winner-name').style.animation = 'none';
+      requestAnimationFrame(() => {
+        ov.querySelector('.rl-winner-emoji').style.animation = '';
+        ov.querySelector('.rl-winner-name').style.animation = '';
+      });
+    }
+    requestAnimationFrame(step);
+  };
+
+  window.rouletteAdd = function() {
+    const input = document.getElementById('roulette-name-input');
+    const name = input.value.trim();
+    if (!name || names.length >= 20) return;
+    names.push(name); input.value = '';
+    refresh(); input.focus();
+  };
+
+  window.rouletteRemove = function(i) { names.splice(i,1); refresh(); };
+  window.rouletteClear = function() { names=[]; currentAngle=0; refresh(); };
+  window.rouletteCloseWinner = function() { document.getElementById('roulette-winner-overlay').style.display='none'; };
+
+  function refresh() {
+    document.getElementById('roulette-chips').innerHTML = names.map((n,i) =>
+      `<span class="rl-chip" style="border-color:${COLORS[i%COLORS.length]}50;background:${COLORS[i%COLORS.length]}18"><span style="width:8px;height:8px;border-radius:50%;background:${COLORS[i%COLORS.length]};flex-shrink:0;display:inline-block"></span>${n}<span class="rl-chip-x" onclick="rouletteRemove(${i})">×</span></span>`
+    ).join('');
+    document.getElementById('roulette-count').textContent = `${names.length} / 20`;
+    const btn = document.getElementById('roulette-spin-btn');
+    btn.disabled = names.length < 2;
+    btn.style.opacity = names.length < 2 ? '0.4' : '1';
+    document.getElementById('roulette-hint').textContent = names.length < 2 ? '2명 이상 추가해야 돌릴 수 있어요' : '준비됐나요? 룰렛을 돌려보세요!';
+    draw();
+  }
+
+  document.getElementById('roulette-name-input').addEventListener('keydown', e => { if(e.key==='Enter') rouletteAdd(); });
+  draw();
+})();
+</script>
+</div>
+
 <script>
   const sb = window.supabase.createClient(
     'https://teugnaahpcpzejbdayyy.supabase.co',
@@ -1220,7 +1402,7 @@ function copyResult(){
 
 <script>
   function showPage(page) {
-    ['guide', 'test1', 'drinks'].forEach(p => {
+    ['guide', 'test1', 'drinks', 'roulette'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       btn.className = p === page
@@ -1262,6 +1444,7 @@ function copyResult(){
     const hash = location.hash.replace('#', '');
     if (hash === 'calculator') showPage('test1');
     else if (hash === 'drinks') showPage('drinks');
+    else if (hash === 'roulette') showPage('roulette');
   })();
 </script>
 </body>
