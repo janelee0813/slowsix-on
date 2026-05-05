@@ -1,3 +1,6 @@
+const SUPABASE_URL = 'https://teugnaahpcpzejbdayyy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -11,6 +14,17 @@ module.exports = async function handler(req, res) {
   const month = now.getMonth() + 1;
   const hour = now.getHours();
   const timeOfDay = hour < 12 ? '오전' : hour < 18 ? '오후' : '저녁';
+
+  // Supabase 캐시 확인
+  try {
+    const cacheRes = await fetch(`${SUPABASE_URL}/rest/v1/daily_drinks?date=eq.${dateStr}&select=data`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (cacheRes.ok) {
+      const cached = await cacheRes.json();
+      if (cached.length > 0) return res.status(200).json(cached[0].data);
+    }
+  } catch (_) {}
 
   let weatherDesc = '';
   try {
@@ -78,6 +92,21 @@ module.exports = async function handler(req, res) {
     }
     const result = JSON.parse(jsonMatch[0]);
     result.date = dateStr;
+
+    // Supabase에 오늘 결과 저장
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/daily_drinks`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ date: dateStr, data: result })
+      });
+    } catch (_) {}
+
     return res.status(200).json(result);
   } catch (e) {
     return res.status(500).json({ error: '서버 오류', detail: e.message });
