@@ -1214,7 +1214,12 @@ function copyResult(){
 
   const canvas = document.getElementById('roulette-canvas');
   const ctx = canvas.getContext('2d');
-  const S = canvas.width, CX = S/2, CY = S/2, R = S/2 - 8;
+  const DPR = window.devicePixelRatio || 1;
+  const S = 320;
+  canvas.width = S * DPR; canvas.height = S * DPR;
+  canvas.style.width = S + 'px'; canvas.style.height = S + 'px';
+  ctx.scale(DPR, DPR);
+  const CX = S/2, CY = S/2, R = S/2 - 8;
 
   function draw() {
     ctx.clearRect(0, 0, S, S);
