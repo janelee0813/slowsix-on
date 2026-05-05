@@ -107,6 +107,7 @@
     <div class="flex gap-1.5 py-2.5">
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">구성원 가이드</button>
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">모임 정산 계산기</button>
+      <button onclick="showPage('drinks')" id="btn-drinks" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">오늘의 술</button>
     </div>
   </div>
 </nav>
@@ -1006,6 +1007,7 @@ function copyResult(){
 </script>
 </div>
 
+<div id="page-drinks" class="hidden min-h-[80vh]"></div>
 
 <script>
   const sb = window.supabase.createClient(
@@ -1093,7 +1095,7 @@ function copyResult(){
 
 <script>
   function showPage(page) {
-    ['guide', 'test1'].forEach(p => {
+    ['guide', 'test1', 'drinks'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       btn.className = p === page
