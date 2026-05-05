@@ -1310,7 +1310,7 @@ function copyResult(){
     draw();
   }
 
-  document.getElementById('roulette-name-input').addEventListener('keydown', e => { if(e.key==='Enter') rouletteAdd(); });
+  document.getElementById('roulette-name-input').addEventListener('keydown', e => { if(e.key==='Enter' && !e.isComposing) rouletteAdd(); });
   draw();
 })();
 </script>
