@@ -84,7 +84,8 @@ module.exports = async function handler(req, res) {
   "tip": "이 술+안주 조합을 더 맛있게 즐기는 팁 (1~2문장)",
   "tipEmoji": "이모지 1개",
   "mood": "오늘 술자리 무드 한마디 (10자 이내)",
-  "weather": "${weatherDesc}"
+  "weather": "${weatherDesc}",
+  "imageQuery": "Unsplash 검색용 영어 키워드 (술 이름 영어 + drink + 분위기, 예: makgeolli korean rice wine glass)"
 }`;
 
   try {
@@ -115,6 +116,20 @@ module.exports = async function handler(req, res) {
     }
     const result = JSON.parse(jsonMatch[0]);
     result.date = dateStr;
+
+    // Unsplash 이미지 검색
+    if (process.env.UNSPLASH_ACCESS_KEY && result.imageQuery) {
+      try {
+        const imgRes = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(result.imageQuery)}&per_page=1&orientation=landscape`, {
+          headers: { Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` }
+        });
+        const imgData = await imgRes.json();
+        if (imgData.results?.[0]) {
+          result.imageUrl = imgData.results[0].urls.regular;
+          result.imageCredit = imgData.results[0].user?.name || '';
+        }
+      } catch (_) {}
+    }
 
     // Supabase에 오늘 결과 저장
     try {

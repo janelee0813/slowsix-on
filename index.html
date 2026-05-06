@@ -1006,75 +1006,87 @@ function copyResult(){
 
 <div id="page-drinks" class="hidden">
 <style>
-#page-drinks .drinks-wrap{max-width:768px;margin:0 auto;padding:40px 20px 60px}
-#page-drinks .drinks-date-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(140,110,200,0.3);background:rgba(28,21,48,0.6);font-size:11px;color:#9b94b3;margin-bottom:20px}
-#page-drinks .drinks-mood{font-size:26px;font-weight:800;line-height:1.25;letter-spacing:-0.5px;background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:28px}
-#page-drinks .drinks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
-@media(max-width:640px){#page-drinks .drinks-grid{grid-template-columns:1fr}}
-#page-drinks .drinks-card{background:linear-gradient(180deg,rgba(44,33,72,0.95),rgba(34,26,58,0.88));border:1px solid rgba(140,110,200,0.35);border-radius:18px;padding:20px}
-#page-drinks .drinks-card-full{background:linear-gradient(180deg,rgba(44,33,72,0.95),rgba(34,26,58,0.88));border:1px solid rgba(140,110,200,0.35);border-radius:18px;padding:20px;margin-bottom:14px}
-#page-drinks .drinks-card-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9b94b3;margin-bottom:12px}
-#page-drinks .drinks-card-main{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-#page-drinks .drinks-emoji{font-size:34px;line-height:1;flex-shrink:0}
-#page-drinks .drinks-name{font-size:20px;font-weight:700;color:#f5f1ff;letter-spacing:-0.3px}
-#page-drinks .drinks-desc{font-size:13px;line-height:1.7;color:#b8b0cc}
-#page-drinks .drinks-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(181,102,255,0.4),rgba(255,95,176,0.3),transparent);margin:4px 0 24px}
+#page-drinks .drinks-wrap{max-width:680px;margin:0 auto;padding:32px 20px 60px}
+#page-drinks .drinks-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+#page-drinks .drinks-date-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(140,110,200,0.3);background:rgba(28,21,48,0.6);font-size:11px;color:#9b94b3}
+#page-drinks .drinks-hero{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;margin-bottom:28px;background:linear-gradient(135deg,rgba(28,21,48,0.9),rgba(44,33,72,0.8))}
+#page-drinks .drinks-hero img{width:100%;height:100%;object-fit:cover;display:block}
+#page-drinks .drinks-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,6,18,0.5) 0%,transparent 50%)}
+#page-drinks .drinks-hero-credit{position:absolute;bottom:8px;right:10px;font-size:10px;color:rgba(255,255,255,0.45)}
+#page-drinks .drinks-hero-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:64px}
+#page-drinks .drinks-mood{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-0.5px;background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+#page-drinks .drinks-weather{font-size:12px;color:#9b94b3;margin-bottom:32px}
+#page-drinks .drinks-section{padding:24px 0;border-bottom:1px solid rgba(140,110,200,0.12)}
+#page-drinks .drinks-section:last-child{border-bottom:none}
+#page-drinks .drinks-section-label{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#b566ff;margin-bottom:10px}
+#page-drinks .drinks-section-title{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#page-drinks .drinks-section-emoji{font-size:26px;line-height:1;flex-shrink:0}
+#page-drinks .drinks-section-name{font-size:22px;font-weight:700;color:#f5f1ff;letter-spacing:-0.3px}
+#page-drinks .drinks-section-desc{font-size:14px;line-height:1.8;color:#b8b0cc;margin:0}
 #page-drinks .drinks-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:14px;color:#9b94b3;font-size:14px}
 #page-drinks .drinks-spinner{width:32px;height:32px;border:2px solid rgba(140,110,200,0.2);border-top-color:#b566ff;border-radius:50%;animation:drinks-spin .8s linear infinite}
 @keyframes drinks-spin{to{transform:rotate(360deg)}}
 </style>
 <div class="drinks-wrap">
-  <div id="drinks-loading">
+  <div id="drinks-loading" class="drinks-loading">
     <div class="drinks-spinner"></div>
     <span>오늘의 술을 고르는 중...</span>
   </div>
   <div id="drinks-content" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div class="drinks-date-badge" style="margin-bottom:0">
+    <div class="drinks-topbar">
+      <div class="drinks-date-badge">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
         <span id="drinks-date-text"></span>
       </div>
-      <button onclick="copyDrinksUrl()" title="URL 복사" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'" id="drinks-share-btn">
+      <button onclick="copyDrinksUrl()" id="drinks-share-btn" title="URL 복사" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         URL 복사
       </button>
     </div>
-    <div class="drinks-mood" id="drinks-mood"></div>
-    <div class="drinks-divider"></div>
 
-    <div class="drinks-grid">
-      <div class="drinks-card">
-        <div class="drinks-card-label">오늘의 술</div>
-        <div class="drinks-card-main">
-          <span class="drinks-emoji" id="drinks-drink-emoji"></span>
-          <span class="drinks-name" id="drinks-drink-name"></span>
-        </div>
-        <p class="drinks-desc" id="drinks-drink-desc"></p>
-      </div>
-      <div class="drinks-card">
-        <div class="drinks-card-label">오늘의 안주</div>
-        <div class="drinks-card-main">
-          <span class="drinks-emoji" id="drinks-snack-emoji"></span>
-          <span class="drinks-name" id="drinks-snack-name"></span>
-        </div>
-        <p class="drinks-desc" id="drinks-snack-desc"></p>
-      </div>
-      <div class="drinks-card">
-        <div class="drinks-card-label">오늘의 장소</div>
-        <div class="drinks-card-main">
-          <span class="drinks-emoji" id="drinks-place-emoji"></span>
-          <span class="drinks-name" id="drinks-place-name"></span>
-        </div>
-        <p class="drinks-desc" id="drinks-place-desc"></p>
-      </div>
+    <div class="drinks-hero" id="drinks-hero">
+      <img id="drinks-hero-img" src="" alt="" style="display:none">
+      <div class="drinks-hero-placeholder" id="drinks-hero-placeholder"></div>
+      <div class="drinks-hero-overlay"></div>
+      <div class="drinks-hero-credit" id="drinks-hero-credit"></div>
     </div>
 
-    <div class="drinks-card-full">
-      <div class="drinks-card-label">이 조합 즐기는 팁</div>
-      <div class="drinks-card-main">
-        <span class="drinks-emoji" id="drinks-tip-emoji"></span>
+    <div class="drinks-mood" id="drinks-mood"></div>
+    <div class="drinks-weather" id="drinks-weather-badge"></div>
+
+    <div class="drinks-section">
+      <div class="drinks-section-label">오늘의 술</div>
+      <div class="drinks-section-title">
+        <span class="drinks-section-emoji" id="drinks-drink-emoji"></span>
+        <span class="drinks-section-name" id="drinks-drink-name"></span>
       </div>
-      <p class="drinks-desc" id="drinks-tip-desc"></p>
+      <p class="drinks-section-desc" id="drinks-drink-desc"></p>
+    </div>
+
+    <div class="drinks-section">
+      <div class="drinks-section-label">오늘의 안주</div>
+      <div class="drinks-section-title">
+        <span class="drinks-section-emoji" id="drinks-snack-emoji"></span>
+        <span class="drinks-section-name" id="drinks-snack-name"></span>
+      </div>
+      <p class="drinks-section-desc" id="drinks-snack-desc"></p>
+    </div>
+
+    <div class="drinks-section">
+      <div class="drinks-section-label">오늘의 장소</div>
+      <div class="drinks-section-title">
+        <span class="drinks-section-emoji" id="drinks-place-emoji"></span>
+        <span class="drinks-section-name" id="drinks-place-name"></span>
+      </div>
+      <p class="drinks-section-desc" id="drinks-place-desc"></p>
+    </div>
+
+    <div class="drinks-section">
+      <div class="drinks-section-label">이 조합 즐기는 팁</div>
+      <div class="drinks-section-title">
+        <span class="drinks-section-emoji" id="drinks-tip-emoji"></span>
+      </div>
+      <p class="drinks-section-desc" id="drinks-tip-desc"></p>
     </div>
   </div>
   <div id="drinks-error" style="display:none;text-align:center;padding:60px 0;color:#9b94b3;font-size:14px">
@@ -1112,8 +1124,24 @@ function copyResult(){
 
   function renderDrinks(d) {
     const now = new Date(new Date().toLocaleString('en', {timeZone:'Asia/Seoul'}));
-    document.getElementById('drinks-date-text').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 · ${d.weather || ''}`;
+    document.getElementById('drinks-date-text').textContent = `${now.getMonth()+1}월 ${now.getDate()}일`;
     document.getElementById('drinks-mood').textContent = `"${d.mood}"`;
+    document.getElementById('drinks-weather-badge').textContent = d.weather || '';
+
+    // 히어로 이미지
+    const img = document.getElementById('drinks-hero-img');
+    const placeholder = document.getElementById('drinks-hero-placeholder');
+    if (d.imageUrl) {
+      img.src = d.imageUrl;
+      img.style.display = 'block';
+      placeholder.style.display = 'none';
+      document.getElementById('drinks-hero-credit').textContent = d.imageCredit ? `Photo by ${d.imageCredit} / Unsplash` : '';
+    } else {
+      img.style.display = 'none';
+      placeholder.style.display = 'flex';
+      placeholder.textContent = d.drinkEmoji || '🍶';
+    }
+
     document.getElementById('drinks-drink-emoji').textContent = d.drinkEmoji;
     document.getElementById('drinks-drink-name').textContent = d.drink;
     document.getElementById('drinks-drink-desc').textContent = d.drinkDesc;
