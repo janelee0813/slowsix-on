@@ -51,6 +51,7 @@
 </script>
 <style>
   html { scroll-behavior: smooth; background:#0a0612; color-scheme: dark; }
+  nav div:first-child::-webkit-scrollbar { display: none; }
   body { background:#0a0612; color:#f5f1ff; font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif; -webkit-font-smoothing:antialiased; }
   ::selection { background: rgba(181,102,255,0.35); }
 
@@ -103,8 +104,8 @@
 
 <!-- Navigation -->
 <nav class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
-  <div class="mx-auto max-w-screen-md px-5">
-    <div class="flex gap-1.5 py-2.5">
+  <div class="mx-auto max-w-screen-md px-5" style="overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none">
+    <div class="flex gap-1.5 py-2.5" style="flex-wrap:nowrap;white-space:nowrap">
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">구성원 가이드</button>
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">모임 정산 계산기</button>
       <button onclick="showPage('drinks')" id="btn-drinks" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">오늘의 술</button>
