@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>모임 운영 가이드</title>
 <meta name="description" content="카카오톡 오픈채팅 커뮤니티에 처음 오신 분들을 위한 온보딩 가이드. 닉네임 설정, 벙 참여, 정산 규칙까지 한 페이지로 빠르게 확인하세요." />
+<meta property="og:title" content="모임 운영 가이드"/>
+<meta property="og:description" content="카카오톡 오픈채팅 커뮤니티 온보딩 가이드. 닉네임 설정, 벙 참여, 정산 규칙까지 한 페이지로 확인하세요."/>
+<meta property="og:url" content="https://opentalk-guide.vercel.app"/>
+<meta property="og:type" content="website"/>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <script src="https://cdn.tailwindcss.com"></script>
@@ -1431,7 +1435,7 @@ function copyResult(){
   }
 
   function copyCalcUrl() {
-    const url = location.origin + location.pathname + '#calculator';
+    const url = location.origin + '/calculator';
     navigator.clipboard.writeText(url).then(() => {
       const btn = event.currentTarget;
       const orig = btn.innerHTML;
@@ -1443,7 +1447,7 @@ function copyResult(){
   }
 
   function copyDrinksUrl() {
-    const url = location.origin + location.pathname + '#drinks';
+    const url = location.origin + '/drinks';
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById('drinks-share-btn');
       const orig = btn.innerHTML;
