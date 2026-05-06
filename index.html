@@ -111,7 +111,7 @@
     <div class="flex gap-1.5 py-2.5">
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">가이드</button>
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">정산 계산기</button>
-      <button onclick="showPage('drinks')" id="btn-drinks" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">오늘의 술</button>
+      <button onclick="showPage('fortune')" id="btn-fortune" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">오늘의 운세</button>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">룰렛</button>
     </div>
   </div>
@@ -1004,157 +1004,177 @@ function copyResult(){
 </script>
 </div>
 
-<div id="page-drinks" class="hidden">
+<div id="page-fortune" class="hidden">
 <style>
-#page-drinks .drinks-wrap{max-width:680px;margin:0 auto;padding:32px 20px 60px}
-#page-drinks .drinks-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-#page-drinks .drinks-date-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(140,110,200,0.3);background:rgba(28,21,48,0.6);font-size:11px;color:#9b94b3}
-#page-drinks .drinks-hero{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;margin-bottom:28px;background:linear-gradient(135deg,rgba(28,21,48,0.9),rgba(44,33,72,0.8))}
-#page-drinks .drinks-hero img{width:100%;height:100%;object-fit:cover;display:block}
-#page-drinks .drinks-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,6,18,0.5) 0%,transparent 50%)}
-#page-drinks .drinks-hero-credit{position:absolute;bottom:8px;right:10px;font-size:10px;color:rgba(255,255,255,0.45)}
-#page-drinks .drinks-hero-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:64px}
-#page-drinks .drinks-mood{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-0.5px;background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
-#page-drinks .drinks-weather{font-size:12px;color:#9b94b3;margin-bottom:32px}
-#page-drinks .drinks-section{padding:24px 0;border-bottom:1px solid rgba(140,110,200,0.12)}
-#page-drinks .drinks-section:last-child{border-bottom:none}
-#page-drinks .drinks-section-label{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#b566ff;margin-bottom:10px}
-#page-drinks .drinks-section-title{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-#page-drinks .drinks-section-emoji{font-size:26px;line-height:1;flex-shrink:0}
-#page-drinks .drinks-section-name{font-size:22px;font-weight:700;color:#f5f1ff;letter-spacing:-0.3px}
-#page-drinks .drinks-section-desc{font-size:14px;line-height:1.8;color:#b8b0cc;margin:0}
-#page-drinks .drinks-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:14px;color:#9b94b3;font-size:14px}
-#page-drinks .drinks-spinner{width:32px;height:32px;border:2px solid rgba(140,110,200,0.2);border-top-color:#b566ff;border-radius:50%;animation:drinks-spin .8s linear infinite}
-@keyframes drinks-spin{to{transform:rotate(360deg)}}
+#page-fortune .ft-wrap{max-width:680px;margin:0 auto;padding:32px 20px 60px}
+#page-fortune .ft-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+#page-fortune .ft-date{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(140,110,200,0.3);background:rgba(28,21,48,0.6);font-size:11px;color:#9b94b3}
+#page-fortune .ft-refresh{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+#page-fortune .ft-refresh:hover{border-color:rgba(181,102,255,0.6);color:#b566ff}
+#page-fortune .ft-overall{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-0.5px;background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+#page-fortune .ft-overall-desc{font-size:14px;line-height:1.8;color:#b8b0cc;margin-bottom:32px}
+#page-fortune .ft-section{padding:22px 0;border-bottom:1px solid rgba(140,110,200,0.12)}
+#page-fortune .ft-section:last-child{border-bottom:none}
+#page-fortune .ft-section-label{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#b566ff;margin-bottom:8px}
+#page-fortune .ft-section-title{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+#page-fortune .ft-section-emoji{font-size:22px;line-height:1;flex-shrink:0}
+#page-fortune .ft-section-name{font-size:20px;font-weight:700;color:#f5f1ff;letter-spacing:-0.3px}
+#page-fortune .ft-stars{display:flex;gap:3px;margin-bottom:8px}
+#page-fortune .ft-star{font-size:14px}
+#page-fortune .ft-section-desc{font-size:14px;line-height:1.8;color:#b8b0cc;margin:0}
+#page-fortune .ft-lucky{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:28px 0}
+#page-fortune .ft-lucky-item{background:linear-gradient(180deg,rgba(44,33,72,0.8),rgba(28,21,48,0.7));border:1px solid rgba(140,110,200,0.25);border-radius:12px;padding:14px 12px;text-align:center}
+#page-fortune .ft-lucky-icon{font-size:20px;margin-bottom:6px}
+#page-fortune .ft-lucky-label{font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#9b94b3;margin-bottom:4px}
+#page-fortune .ft-lucky-value{font-size:15px;font-weight:700;color:#f5f1ff}
+#page-fortune .ft-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:14px;color:#9b94b3;font-size:14px}
+#page-fortune .ft-spinner{width:32px;height:32px;border:2px solid rgba(140,110,200,0.2);border-top-color:#b566ff;border-radius:50%;animation:ft-spin .8s linear infinite}
+@keyframes ft-spin{to{transform:rotate(360deg)}}
 </style>
-<div class="drinks-wrap">
-  <div id="drinks-loading" class="drinks-loading">
-    <div class="drinks-spinner"></div>
-    <span>오늘의 술을 고르는 중...</span>
+<div class="ft-wrap">
+  <div id="fortune-loading" class="ft-loading">
+    <div class="ft-spinner"></div>
+    <span>오늘의 운세를 보는 중...</span>
   </div>
-  <div id="drinks-content" style="display:none">
-    <div class="drinks-topbar">
-      <div class="drinks-date-badge">
+  <div id="fortune-content" style="display:none">
+    <div class="ft-topbar">
+      <div class="ft-date">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <span id="drinks-date-text"></span>
+        <span id="fortune-date-text"></span>
       </div>
-      <button onclick="copyDrinksUrl()" id="drinks-share-btn" title="URL 복사" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        URL 복사
+      <button class="ft-refresh" onclick="loadFortune(true)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        운세 다시 보기
       </button>
     </div>
 
-    <div class="drinks-hero" id="drinks-hero">
-      <img id="drinks-hero-img" src="" alt="" style="display:none">
-      <div class="drinks-hero-placeholder" id="drinks-hero-placeholder"></div>
-      <div class="drinks-hero-overlay"></div>
-      <div class="drinks-hero-credit" id="drinks-hero-credit"></div>
+    <div class="ft-overall" id="fortune-overall"></div>
+    <p class="ft-overall-desc" id="fortune-overall-desc"></p>
+
+    <div class="ft-section">
+      <div class="ft-section-label">애정운</div>
+      <div class="ft-section-title">
+        <span class="ft-section-emoji">💕</span>
+        <span class="ft-section-name" id="fortune-love"></span>
+      </div>
+      <div class="ft-stars" id="fortune-love-stars"></div>
+      <p class="ft-section-desc" id="fortune-love-desc"></p>
     </div>
 
-    <div class="drinks-mood" id="drinks-mood"></div>
-    <div class="drinks-weather" id="drinks-weather-badge"></div>
-
-    <div class="drinks-section">
-      <div class="drinks-section-label">오늘의 술</div>
-      <div class="drinks-section-title">
-        <span class="drinks-section-emoji" id="drinks-drink-emoji"></span>
-        <span class="drinks-section-name" id="drinks-drink-name"></span>
+    <div class="ft-section">
+      <div class="ft-section-label">직업운</div>
+      <div class="ft-section-title">
+        <span class="ft-section-emoji">💼</span>
+        <span class="ft-section-name" id="fortune-work"></span>
       </div>
-      <p class="drinks-section-desc" id="drinks-drink-desc"></p>
+      <div class="ft-stars" id="fortune-work-stars"></div>
+      <p class="ft-section-desc" id="fortune-work-desc"></p>
     </div>
 
-    <div class="drinks-section">
-      <div class="drinks-section-label">오늘의 안주</div>
-      <div class="drinks-section-title">
-        <span class="drinks-section-emoji" id="drinks-snack-emoji"></span>
-        <span class="drinks-section-name" id="drinks-snack-name"></span>
+    <div class="ft-section">
+      <div class="ft-section-label">재물운</div>
+      <div class="ft-section-title">
+        <span class="ft-section-emoji">💰</span>
+        <span class="ft-section-name" id="fortune-money"></span>
       </div>
-      <p class="drinks-section-desc" id="drinks-snack-desc"></p>
+      <div class="ft-stars" id="fortune-money-stars"></div>
+      <p class="ft-section-desc" id="fortune-money-desc"></p>
     </div>
 
-    <div class="drinks-section">
-      <div class="drinks-section-label">오늘의 장소</div>
-      <div class="drinks-section-title">
-        <span class="drinks-section-emoji" id="drinks-place-emoji"></span>
-        <span class="drinks-section-name" id="drinks-place-name"></span>
+    <div class="ft-section">
+      <div class="ft-section-label">건강운</div>
+      <div class="ft-section-title">
+        <span class="ft-section-emoji">🌿</span>
+        <span class="ft-section-name" id="fortune-health"></span>
       </div>
-      <p class="drinks-section-desc" id="drinks-place-desc"></p>
+      <div class="ft-stars" id="fortune-health-stars"></div>
+      <p class="ft-section-desc" id="fortune-health-desc"></p>
     </div>
 
-    <div class="drinks-section">
-      <div class="drinks-section-label">이 조합 즐기는 팁</div>
-      <div class="drinks-section-title">
-        <span class="drinks-section-emoji" id="drinks-tip-emoji"></span>
+    <div class="ft-lucky">
+      <div class="ft-lucky-item">
+        <div class="ft-lucky-icon">🎨</div>
+        <div class="ft-lucky-label">행운의 색</div>
+        <div class="ft-lucky-value" id="fortune-color"></div>
       </div>
-      <p class="drinks-section-desc" id="drinks-tip-desc"></p>
+      <div class="ft-lucky-item">
+        <div class="ft-lucky-icon">🔢</div>
+        <div class="ft-lucky-label">행운의 숫자</div>
+        <div class="ft-lucky-value" id="fortune-number"></div>
+      </div>
+      <div class="ft-lucky-item">
+        <div class="ft-lucky-icon">✨</div>
+        <div class="ft-lucky-label">오늘의 키워드</div>
+        <div class="ft-lucky-value" id="fortune-keyword"></div>
+      </div>
+    </div>
+
+    <div class="ft-section" style="border-top:1px solid rgba(140,110,200,0.12)">
+      <div class="ft-section-label">오늘의 조언</div>
+      <p class="ft-section-desc" id="fortune-advice" style="margin-top:8px"></p>
     </div>
   </div>
-  <div id="drinks-error" style="display:none;text-align:center;padding:60px 0;color:#9b94b3;font-size:14px">
-    추천을 불러오지 못했어요.<br/>잠시 후 다시 시도해주세요.
+  <div id="fortune-error" style="display:none;text-align:center;padding:60px 0;color:#9b94b3;font-size:14px">
+    운세를 불러오지 못했어요.<br/>잠시 후 다시 시도해주세요.
   </div>
 </div>
 <script>
-  async function loadDrinks(force) {
+  function stars(score) {
+    return Array.from({length:5}, (_,i) => `<span class="ft-star">${i < score ? '★' : '☆'}</span>`).join('');
+  }
+
+  async function loadFortune(force) {
     const now = new Date(new Date().toLocaleString('en', {timeZone:'Asia/Seoul'}));
     const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    const cacheKey = 'drinks_v2_' + today;
+    const cacheKey = 'fortune_v1_' + today;
 
-    document.getElementById('drinks-loading').style.display = 'flex';
-    document.getElementById('drinks-content').style.display = 'none';
-    document.getElementById('drinks-error').style.display = 'none';
+    document.getElementById('fortune-loading').style.display = 'flex';
+    document.getElementById('fortune-content').style.display = 'none';
+    document.getElementById('fortune-error').style.display = 'none';
 
     if (!force) {
       const cached = localStorage.getItem(cacheKey);
-      if (cached) { renderDrinks(JSON.parse(cached)); return; }
+      if (cached) { renderFortune(JSON.parse(cached)); return; }
     }
 
     try {
-      const res = await fetch('/api/today-drink');
+      const res = await fetch('/api/today-fortune');
       const data = await res.json();
       if (data.error) throw new Error(data.detail || data.error);
       localStorage.setItem(cacheKey, JSON.stringify(data));
-      renderDrinks(data);
+      renderFortune(data);
     } catch (e) {
-      document.getElementById('drinks-loading').style.display = 'none';
-      const errEl = document.getElementById('drinks-error');
-      errEl.innerHTML = `추천을 불러오지 못했어요.<br/><span style="font-size:12px;opacity:0.6">${e.message}</span>`;
+      document.getElementById('fortune-loading').style.display = 'none';
+      const errEl = document.getElementById('fortune-error');
+      errEl.innerHTML = `운세를 불러오지 못했어요.<br/><span style="font-size:12px;opacity:0.6">${e.message}</span>`;
       errEl.style.display = 'block';
     }
   }
 
-  function renderDrinks(d) {
+  function renderFortune(d) {
     const now = new Date(new Date().toLocaleString('en', {timeZone:'Asia/Seoul'}));
-    document.getElementById('drinks-date-text').textContent = `${now.getMonth()+1}월 ${now.getDate()}일`;
-    document.getElementById('drinks-mood').textContent = `"${d.mood}"`;
-    document.getElementById('drinks-weather-badge').textContent = d.weather || '';
-
-    // 히어로 이미지
-    const img = document.getElementById('drinks-hero-img');
-    const placeholder = document.getElementById('drinks-hero-placeholder');
-    if (d.imageUrl) {
-      img.src = d.imageUrl;
-      img.style.display = 'block';
-      placeholder.style.display = 'none';
-      document.getElementById('drinks-hero-credit').textContent = d.imageCredit ? `Photo by ${d.imageCredit} / Unsplash` : '';
-    } else {
-      img.style.display = 'none';
-      placeholder.style.display = 'flex';
-      placeholder.textContent = d.drinkEmoji || '🍶';
-    }
-
-    document.getElementById('drinks-drink-emoji').textContent = d.drinkEmoji;
-    document.getElementById('drinks-drink-name').textContent = d.drink;
-    document.getElementById('drinks-drink-desc').textContent = d.drinkDesc;
-    document.getElementById('drinks-snack-emoji').textContent = d.snackEmoji;
-    document.getElementById('drinks-snack-name').textContent = d.snack;
-    document.getElementById('drinks-snack-desc').textContent = d.snackDesc;
-    document.getElementById('drinks-place-emoji').textContent = d.placeEmoji || '🏮';
-    document.getElementById('drinks-place-name').textContent = d.place || '';
-    document.getElementById('drinks-place-desc').textContent = d.placeDesc || '';
-    document.getElementById('drinks-tip-emoji').textContent = d.tipEmoji || '💡';
-    document.getElementById('drinks-tip-desc').textContent = d.tip || '';
-    document.getElementById('drinks-loading').style.display = 'none';
-    document.getElementById('drinks-content').style.display = 'block';
+    const days = ['일','월','화','수','목','금','토'];
+    document.getElementById('fortune-date-text').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
+    document.getElementById('fortune-overall').textContent = `"${d.overall}"`;
+    document.getElementById('fortune-overall-desc').textContent = d.overallDesc;
+    document.getElementById('fortune-love').textContent = d.love;
+    document.getElementById('fortune-love-stars').innerHTML = stars(d.loveScore);
+    document.getElementById('fortune-love-desc').textContent = d.loveDesc;
+    document.getElementById('fortune-work').textContent = d.work;
+    document.getElementById('fortune-work-stars').innerHTML = stars(d.workScore);
+    document.getElementById('fortune-work-desc').textContent = d.workDesc;
+    document.getElementById('fortune-money').textContent = d.money;
+    document.getElementById('fortune-money-stars').innerHTML = stars(d.moneyScore);
+    document.getElementById('fortune-money-desc').textContent = d.moneyDesc;
+    document.getElementById('fortune-health').textContent = d.health;
+    document.getElementById('fortune-health-stars').innerHTML = stars(d.healthScore);
+    document.getElementById('fortune-health-desc').textContent = d.healthDesc;
+    document.getElementById('fortune-color').textContent = d.luckyColor;
+    document.getElementById('fortune-number').textContent = d.luckyNumber;
+    document.getElementById('fortune-keyword').textContent = d.luckyKeyword;
+    document.getElementById('fortune-advice').textContent = d.advice;
+    document.getElementById('fortune-loading').style.display = 'none';
+    document.getElementById('fortune-content').style.display = 'block';
   }
 </script>
 </div>
@@ -1441,7 +1461,7 @@ function copyResult(){
 
 <script>
   function showPage(page) {
-    ['guide', 'test1', 'drinks', 'roulette'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       btn.className = p === page
@@ -1451,7 +1471,7 @@ function copyResult(){
     const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
-    if (page === 'drinks') loadDrinks();
+    if (page === 'fortune') loadFortune();
   }
 
   function copyCalcUrl() {
@@ -1466,23 +1486,12 @@ function copyResult(){
     });
   }
 
-  function copyDrinksUrl() {
-    const url = location.origin + '/drinks';
-    navigator.clipboard.writeText(url).then(() => {
-      const btn = document.getElementById('drinks-share-btn');
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5ee0a8" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 복사됨!';
-      btn.style.borderColor = 'rgba(94,224,168,0.5)';
-      btn.style.color = '#5ee0a8';
-      setTimeout(() => { btn.innerHTML = orig; btn.style.borderColor = 'rgba(140,110,200,0.35)'; btn.style.color = '#9b94b3'; }, 2000);
-    });
-  }
 
   // 해시 기반 초기 페이지 로드
   (function() {
     const hash = location.hash.replace('#', '');
     if (hash === 'calculator') showPage('test1');
-    else if (hash === 'drinks') showPage('drinks');
+    else if (hash === 'fortune') showPage('fortune');
     else if (hash === 'roulette') showPage('roulette');
   })();
 </script>
