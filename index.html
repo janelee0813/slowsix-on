@@ -1244,7 +1244,7 @@ async function hbRenderResult(myNick){
         <div class="hb-my-chips">${me.selectedHobbies.map(h=>`<span class="hb-my-chip">${h}</span>`).join("")}</div>
       </div>`:""}
       <div class="hb-result-section">
-        <div class="hb-result-title"><i class="ti ti-trophy"></i> 우리방 인기 벙 TOP 10</div>
+        <div class="hb-result-title"><i class="ti ti-trophy"></i> 우리방 인기 벙 전체 순위</div>
         <div class="hb-rank-list" id="hbRankList"></div>
       </div>
     </div>
@@ -1272,7 +1272,7 @@ function hbRenderRank(arr){
     cnt[h]=(cnt[h]||0)+1;
     (mem[h]=mem[h]||[]).push(d.nickname);
   }));
-  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
   const max=top[0]?top[0][1]:1;
   const medals=["🥇","🥈","🥉"];
   const el=document.getElementById("hbRankList");
