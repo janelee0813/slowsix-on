@@ -1247,14 +1247,9 @@ async function hbRenderResult(myNick){
         <div class="hb-result-title"><i class="ti ti-trophy"></i> 우리방 인기 벙 TOP 10</div>
         <div class="hb-rank-list" id="hbRankList"></div>
       </div>
-      <div class="hb-result-section">
-        <div class="hb-result-title"><i class="ti ti-users"></i> 취미별 관심 멤버</div>
-        <div class="hb-member-list" id="hbMemberList"></div>
-      </div>
     </div>
   `;
   hbRenderRank(arr);
-  hbRenderMembers(arr);
 }
 
 async function hbGoEdit(){
@@ -1272,8 +1267,11 @@ async function hbGoEdit(){
 }
 
 function hbRenderRank(arr){
-  const cnt={};
-  arr.forEach(d=>d.selectedHobbies.forEach(h=>cnt[h]=(cnt[h]||0)+1));
+  const cnt={};const mem={};
+  arr.forEach(d=>d.selectedHobbies.forEach(h=>{
+    cnt[h]=(cnt[h]||0)+1;
+    (mem[h]=mem[h]||[]).push(d.nickname);
+  }));
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const max=top[0]?top[0][1]:1;
   const medals=["🥇","🥈","🥉"];
@@ -1285,24 +1283,9 @@ function hbRenderRank(arr){
       <div style="flex:1">
         <div class="hb-rank-name">${name}</div>
         <div class="hb-rank-bar-row"><div class="hb-rank-bar-bg"><div class="hb-rank-bar-fill" style="width:${Math.round(c/max*100)}%"></div></div></div>
+        <div style="margin-top:5px;font-size:11px;color:#6b6480;line-height:1.7">${(mem[name]||[]).join(' · ')}</div>
       </div>
       <div class="hb-rank-count">${c}명</div>
-    </div>`).join("");
-}
-
-function hbRenderMembers(arr){
-  const cnt={};const mem={};
-  arr.forEach(d=>d.selectedHobbies.forEach(h=>{cnt[h]=(cnt[h]||0)+1;(mem[h]=mem[h]||[]).push(d.nickname)}));
-  const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
-  const el=document.getElementById("hbMemberList");
-  if(!sorted.length){el.innerHTML=`<div class="hb-no-result">아직 데이터가 없어요.</div>`;return}
-  el.innerHTML=sorted.map(([name,c])=>`
-    <div class="hb-member-row">
-      <div class="hb-member-header" onclick="hbToggleMem(this)">
-        <span class="hb-mh-left">${name}</span>
-        <div class="hb-mh-right"><span>${c}명</span><i class="ti ti-chevron-down hb-chevron"></i></div>
-      </div>
-      <div class="hb-member-body">${mem[name].join(", ")}</div>
     </div>`).join("");
 }
 
