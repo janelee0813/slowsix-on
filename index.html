@@ -1922,7 +1922,7 @@ function wcCompareSection(){
   }
   const divider=`<div style="width:1px;background:rgba(140,110,200,0.12);margin:0 4px;align-self:stretch"></div>`;
   return`<div class="wc-card">
-    <div class="wc-card-title" style="margin-bottom:12px">📈 참여자 비교 현황</div>
+    <div class="wc-card-title" style="margin-bottom:12px">📈 참여자 누적 현황</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${legend}</div>
     <div style="display:flex;gap:4px;align-items:flex-end">
       ${group('누적 횟수',d=>d.count)}${divider}${group('누적 칼로리 (kcal)',d=>d.cal)}${divider}${group('누적 시간 (분)',d=>d.dur)}
