@@ -1700,8 +1700,10 @@ function wcStats(nick){
   return{
     weekCount:wd.length,
     weekCal:wd.reduce((s,r)=>s+(r.calories||0),0),
+    weekDur:wd.reduce((s,r)=>s+(r.duration||0),0),
     totalCount:td.length,
-    totalCal:td.reduce((s,r)=>s+(r.calories||0),0)
+    totalCal:td.reduce((s,r)=>s+(r.calories||0),0),
+    totalDur:td.reduce((s,r)=>s+(r.duration||0),0)
   };
 }
 function wcToast(msg,err=false){
@@ -1874,6 +1876,7 @@ function wcRender(){
             return`<div class="wc-today-item done"><span class="wc-nick">✅ ${p.nickname}</span><span class="wc-kcal">${rec.duration||0}분 · ${wcFmt(rec.calories)} kcal</span></div>`;
           }).join('')}</div>`}
     </div>
+    ${wcCompareSection()}
   `;
 }
 
@@ -1887,6 +1890,45 @@ function wcCopyUrl(){
     btn.style.borderColor='rgba(94,224,168,0.5)';btn.style.color='#5ee0a8';
     setTimeout(()=>{btn.innerHTML=orig;btn.style.borderColor='rgba(140,110,200,0.35)';btn.style.color='#9b94b3';},2000);
   });
+}
+
+function wcCompareSection(){
+  if(wcParts.length===0)return'';
+  const COLORS=['#b566ff','#ff5fb0','#5ec8ff','#5ee0a8','#ffb547'];
+  const data=wcParts.map((p,i)=>{
+    const s=wcStats(p.nickname);
+    return{nick:p.nickname,color:COLORS[i%COLORS.length],count:s.totalCount,cal:s.totalCal,dur:s.totalDur};
+  });
+  const maxCount=Math.max(...data.map(d=>d.count),1);
+  const maxCal=Math.max(...data.map(d=>d.cal),1);
+  const maxDur=Math.max(...data.map(d=>d.dur),1);
+  function barRows(getValue,getMax,unit){
+    return data.map(d=>{
+      const val=getValue(d);
+      const pct=Math.round(val/getMax*100);
+      return`<div style="margin-bottom:9px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;color:#9b94b3;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.nick}</span>
+          <span style="font-size:12px;font-weight:600;color:#f5f1ff">${wcFmt(val)}${unit}</span>
+        </div>
+        <div style="height:7px;background:rgba(140,110,200,0.15);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${d.color};border-radius:4px;transition:width .4s ease;box-shadow:0 0 6px ${d.color}60"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  const sep='<div style="height:1px;background:rgba(140,110,200,0.12);margin:14px 0"></div>';
+  return`<div class="wc-card">
+    <div class="wc-card-title">📈 참여자 비교 현황</div>
+    <div style="font-size:11px;font-weight:700;color:#6b6480;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px">누적 횟수</div>
+    ${barRows(d=>d.count,maxCount,'회')}
+    ${sep}
+    <div style="font-size:11px;font-weight:700;color:#6b6480;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px">누적 칼로리</div>
+    ${barRows(d=>d.cal,maxCal,' kcal')}
+    ${sep}
+    <div style="font-size:11px;font-weight:700;color:#6b6480;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px">누적 시간</div>
+    ${barRows(d=>d.dur,maxDur,'분')}
+  </div>`;
 }
 
 window.wcAddParticipant=wcAddParticipant;
