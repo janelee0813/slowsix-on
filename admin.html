@@ -1,10 +1,743 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>관리자</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>관리자 대시보드 — 모임 운영관리</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={
+  theme:{extend:{
+    fontFamily:{sans:['Pretendard Variable','Pretendard','-apple-system','BlinkMacSystemFont','Apple SD Gothic Neo','Segoe UI','Roboto','sans-serif']},
+    colors:{background:'#0a0612',surface:'#15101f','surface-elevated':'#1c1530',foreground:'#f5f1ff',muted:'#1a1428','muted-foreground':'#9b94b3',border:'rgba(140,110,200,0.22)','neon-purple':'#b566ff','neon-pink':'#ff5fb0','neon-blue':'#5ec8ff',warning:'#ffb547',success:'#5ee0a8',destructive:'#ff5f6d'}
+  }}
+}
+</script>
+<style>
+html{scroll-behavior:smooth;background:#0a0612;color-scheme:dark}
+body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(181,102,255,0.35)}
+.text-gradient-neon{background:linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent}
+.neon-card{position:relative;background:linear-gradient(180deg,rgba(28,21,48,0.85),rgba(21,16,31,0.7));border:1px solid rgba(140,110,200,0.28);backdrop-filter:blur(8px);border-radius:1rem;transition:transform .3s ease,box-shadow .3s ease}
+.neon-card:hover{transform:translateY(-2px);box-shadow:0 10px 40px -15px rgba(181,102,255,0.5)}
+.neon-card-glow::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(181,102,255,0.7),rgba(255,95,176,0.4),rgba(94,200,255,0.6));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.divider-neon{height:1px;background:linear-gradient(90deg,transparent,rgba(181,102,255,0.6),rgba(255,95,176,0.5),transparent)}
+.grid-bg{background-image:radial-gradient(circle at 20% 0%,rgba(181,102,255,0.18),transparent 45%),radial-gradient(circle at 80% 10%,rgba(255,95,176,0.14),transparent 50%),radial-gradient(circle at 50% 100%,rgba(94,200,255,0.12),transparent 55%)}
+#sidebar{width:220px;min-width:220px;transition:transform .3s ease}
+.menu-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:500;color:#9b94b3;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.menu-item:hover{background:rgba(181,102,255,0.08);color:#d4a0ff;border-color:rgba(181,102,255,0.2)}
+.menu-item.active{background:linear-gradient(135deg,rgba(181,102,255,0.2),rgba(255,95,176,0.1));color:#f5f1ff;border-color:rgba(181,102,255,0.4);box-shadow:0 2px 12px -4px rgba(181,102,255,0.3)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-warn1{background:rgba(255,181,71,0.15);color:#ffb547;border:1px solid rgba(255,181,71,0.3)}
+.badge-warn2{background:rgba(255,95,176,0.15);color:#ff5fb0;border:1px solid rgba(255,95,176,0.3)}
+.badge-danger{background:rgba(255,95,109,0.15);color:#ff5f6d;border:1px solid rgba(255,95,109,0.3)}
+.badge-ok{background:rgba(94,224,168,0.15);color:#5ee0a8;border:1px solid rgba(94,224,168,0.3)}
+.badge-blue{background:rgba(94,200,255,0.15);color:#5ec8ff;border:1px solid rgba(94,200,255,0.3)}
+.badge-purple{background:rgba(181,102,255,0.15);color:#b566ff;border:1px solid rgba(181,102,255,0.3)}
+.badge-gray{background:rgba(140,110,200,0.1);color:#9b94b3;border:1px solid rgba(140,110,200,0.2)}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px}
+.admin-table th{text-align:left;padding:8px 12px;color:#9b94b3;font-weight:600;font-size:11px;letter-spacing:0.4px;border-bottom:1px solid rgba(140,110,200,0.2)}
+.admin-table td{padding:10px 12px;border-bottom:1px solid rgba(140,110,200,0.1);color:#f5f1ff;vertical-align:middle}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:rgba(181,102,255,0.04)}
+.form-input{width:100%;padding:9px 12px;border:1px solid rgba(140,110,200,0.28);border-radius:8px;font-size:14px;background:rgba(10,6,18,0.6);color:#f5f1ff;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+.form-input:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.18)}
+.form-input::placeholder{color:#6b6480}
+.form-label{display:block;font-size:12px;font-weight:600;color:#9b94b3;margin-bottom:5px}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:rgba(181,102,255,0.1);border:1px solid rgba(181,102,255,0.3);color:#b566ff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-secondary:hover{background:rgba(181,102,255,0.2)}
+.btn-danger{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(255,95,109,0.1);border:1px solid rgba(255,95,109,0.25);color:#ff5f6d;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-danger:hover{background:rgba(255,95,109,0.2)}
+.btn-edit{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(94,200,255,0.08);border:1px solid rgba(94,200,255,0.2);color:#5ec8ff;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-edit:hover{background:rgba(94,200,255,0.15)}
+.btn-copy{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(94,224,168,0.08);border:1px solid rgba(94,224,168,0.2);color:#5ee0a8;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-copy:hover{background:rgba(94,224,168,0.15)}
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(10,6,18,0.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:#15101f;border:1px solid rgba(140,110,200,0.35);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1530;border:1px solid rgba(181,102,255,0.4);color:#f5f1ff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(181,102,255,0.25)}
+#toast.show{opacity:1}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(181,102,255,0.3);border-radius:2px}
+@media(max-width:768px){#sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%)}#sidebar.open{transform:translateX(0)}#main-content{margin-left:0!important}}
+</style>
 </head>
-<body>
+<body class="min-h-screen">
+
+<div id="toast"></div>
+
+<!-- 로그인 페이지 -->
+<div id="login-page" class="min-h-screen flex items-center justify-center px-4">
+  <div class="grid-bg fixed inset-0 -z-10"></div>
+  <div class="w-full max-w-sm">
+    <a href="/" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-neon-purple transition-colors mb-8">
+      <i class="ti ti-arrow-left text-base"></i> 가이드로 돌아가기
+    </a>
+    <div class="neon-card neon-card-glow p-7">
+      <div class="text-center mb-7">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 ring-1 ring-neon-purple/40 mb-4">
+          <i class="ti ti-shield-lock text-xl text-neon-purple"></i>
+        </div>
+        <h1 class="text-xl font-bold text-foreground tracking-tight">관리자 로그인</h1>
+        <p class="mt-1.5 text-xs text-muted-foreground leading-relaxed">운영 기록 보호를 위해 관리자 로그인 후<br/>이용할 수 있습니다.</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="form-label">이메일</label>
+          <input id="login-id" type="email" class="form-input" placeholder="관리자 이메일 입력" autocomplete="username"/>
+        </div>
+        <div>
+          <label class="form-label">비밀번호</label>
+          <input id="login-pw" type="password" class="form-input" placeholder="비밀번호 입력" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+        </div>
+        <div id="login-error" class="hidden rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-xs text-destructive font-medium">
+          이메일 또는 비밀번호가 올바르지 않습니다.
+        </div>
+        <button onclick="doLogin()" id="login-btn" class="btn-primary w-full justify-center py-3 text-sm rounded-xl mt-2">
+          <i class="ti ti-login text-base"></i> 로그인
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 어드민 페이지 -->
+<div id="admin-page" class="hidden min-h-screen flex">
+  <div id="sidebar" class="h-screen sticky top-0 bg-surface border-r border-border flex flex-col py-5 px-3 gap-1 overflow-y-auto">
+    <div class="px-2 mb-4">
+      <div class="flex items-center gap-2.5">
+        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-neon-purple/40 to-neon-pink/20 ring-1 ring-neon-purple/40">
+          <i class="ti ti-shield-lock text-sm text-neon-purple"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-foreground">운영 관리</div>
+          <div class="text-[10px] text-muted-foreground">관리자 전용</div>
+        </div>
+      </div>
+    </div>
+    <div class="divider-neon mb-3"></div>
+    <div class="menu-item active" onclick="showSection('dashboard')" id="menu-dashboard"><i class="ti ti-layout-dashboard text-base"></i> 운영 현황</div>
+    <div class="menu-item" onclick="showSection('warnings')" id="menu-warnings"><i class="ti ti-alert-triangle text-base"></i> 경고자 관리</div>
+    <div class="menu-item" onclick="showSection('reentry')" id="menu-reentry"><i class="ti ti-door-enter text-base"></i> 재입장 관리</div>
+    <div class="menu-item" onclick="showSection('issues')" id="menu-issues"><i class="ti ti-file-description text-base"></i> 멤버 이슈 기록</div>
+    <div class="menu-item" onclick="showSection('notices')" id="menu-notices"><i class="ti ti-speakerphone text-base"></i> 공지문 양식</div>
+    <div class="menu-item" onclick="showSection('search')" id="menu-search"><i class="ti ti-search text-base"></i> 멤버 통합 검색</div>
+    <div class="menu-item" onclick="showSection('backup')" id="menu-backup"><i class="ti ti-settings text-base"></i> 백업/설정</div>
+    <div class="flex-1"></div>
+    <div class="divider-neon mb-3"></div>
+    <a href="/" class="menu-item"><i class="ti ti-home text-base"></i> 가이드로 돌아가기</a>
+    <div class="menu-item text-destructive hover:text-destructive" onclick="doLogout()"><i class="ti ti-logout text-base"></i> 로그아웃</div>
+  </div>
+
+  <div id="main-content" class="flex-1 min-w-0 flex flex-col">
+    <div class="sticky top-0 z-30 bg-background/90 backdrop-blur border-b border-border px-5 py-3 flex items-center gap-3">
+      <button class="md:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted-foreground hover:text-foreground" onclick="toggleSidebar()">
+        <i class="ti ti-menu-2 text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <span id="header-title" class="text-base font-bold text-foreground truncate">운영 현황</span>
+        <span class="hidden sm:inline text-[11px] text-muted-foreground border border-border rounded-full px-2 py-0.5">관리자 모드</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/" class="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground border border-border rounded-full px-3 py-1.5 hover:border-neon-purple/50 hover:text-neon-purple transition-colors">
+          <i class="ti ti-arrow-left text-xs"></i> 가이드
+        </a>
+        <button onclick="doLogout()" class="inline-flex items-center gap-1.5 text-xs text-destructive border border-destructive/30 rounded-full px-3 py-1.5 hover:bg-destructive/10 transition-colors">
+          <i class="ti ti-logout text-xs"></i> 로그아웃
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 p-5 overflow-y-auto">
+
+      <!-- 운영 현황 -->
+      <div id="section-dashboard">
+        <div class="mb-6"><h2 class="text-xl font-bold text-foreground">운영 현황</h2><p class="text-sm text-muted-foreground mt-1">커뮤니티 전체 운영 상태를 한눈에 확인하세요.</p></div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6" id="stat-cards"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="alert-boxes"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="neon-card neon-card-glow p-5">
+            <div class="flex items-center gap-2 mb-4"><i class="ti ti-alert-triangle text-warning text-base"></i><h3 class="text-sm font-bold text-foreground">최근 경고 기록</h3></div>
+            <div id="recent-warnings"></div>
+          </div>
+          <div class="neon-card neon-card-glow p-5">
+            <div class="flex items-center gap-2 mb-4"><i class="ti ti-file-description text-neon-blue text-base"></i><h3 class="text-sm font-bold text-foreground">최근 이슈 기록</h3></div>
+            <div id="recent-issues"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 경고자 관리 -->
+      <div id="section-warnings" class="hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <div class="flex-1"><h2 class="text-xl font-bold text-foreground">경고자 관리</h2><p class="text-sm text-muted-foreground mt-1">경고를 받은 멤버의 기록을 관리합니다.</p></div>
+          <button class="btn-primary" onclick="openWarningModal()"><i class="ti ti-plus text-sm"></i> 경고 기록 추가</button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+          <div class="relative flex-1"><i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i><input type="text" id="warning-search" class="form-input pl-9" placeholder="닉네임으로 검색" oninput="renderWarnings()"/></div>
+          <select id="warning-filter" class="form-input sm:w-36" onchange="renderWarnings()"><option value="">전체 횟수</option><option value="1">1회</option><option value="2">2회</option><option value="3">3회 이상</option></select>
+        </div>
+        <div class="neon-card neon-card-glow overflow-hidden">
+          <div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>날짜</th><th>닉네임</th><th>횟수</th><th>경고사유</th><th>공지여부</th><th>상태</th><th>관리</th></tr></thead><tbody id="warnings-tbody"></tbody></table></div>
+          <div id="warnings-empty" class="hidden py-12 text-center text-sm text-muted-foreground"><i class="ti ti-inbox text-3xl block mb-2 opacity-40"></i>경고 기록이 없습니다.</div>
+        </div>
+      </div>
+
+      <!-- 재입장 관리 -->
+      <div id="section-reentry" class="hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <div class="flex-1"><h2 class="text-xl font-bold text-foreground">재입장 관리</h2><p class="text-sm text-muted-foreground mt-1">입퇴장 기록을 관리합니다. 재입장 3회까지 허용.</p></div>
+          <button class="btn-primary" onclick="openReentryModal()"><i class="ti ti-plus text-sm"></i> 재입장 기록 추가</button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+          <div class="relative flex-1"><i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i><input type="text" id="reentry-search" class="form-input pl-9" placeholder="닉네임으로 검색" oninput="renderReentries()"/></div>
+          <select id="reentry-filter" class="form-input sm:w-40" onchange="renderReentries()"><option value="">전체 상태</option><option value="허용">허용 (1회)</option><option value="주의">주의 (2회)</option><option value="마지막">마지막 허용 (3회)</option><option value="제한">재입장 제한 (4회+)</option></select>
+        </div>
+        <div class="neon-card neon-card-glow overflow-hidden">
+          <div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>날짜</th><th>닉네임</th><th>구분</th><th>누적 횟수</th><th>상태</th><th>기록자</th><th>메모</th><th>관리</th></tr></thead><tbody id="reentry-tbody"></tbody></table></div>
+          <div id="reentry-empty" class="hidden py-12 text-center text-sm text-muted-foreground"><i class="ti ti-inbox text-3xl block mb-2 opacity-40"></i>재입장 기록이 없습니다.</div>
+        </div>
+      </div>
+
+      <!-- 멤버 이슈 기록 -->
+      <div id="section-issues" class="hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <div class="flex-1"><h2 class="text-xl font-bold text-foreground">멤버 이슈 기록</h2><p class="text-sm text-muted-foreground mt-1">경고 전 참고용 이슈를 기록합니다.</p></div>
+          <button class="btn-primary" onclick="openIssueModal()"><i class="ti ti-plus text-sm"></i> 이슈 기록 추가</button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+          <div class="relative flex-1"><i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i><input type="text" id="issue-search" class="form-input pl-9" placeholder="닉네임으로 검색" oninput="renderIssues()"/></div>
+          <select id="issue-type-filter" class="form-input sm:w-36" onchange="renderIssues()"><option value="">전체 유형</option><option value="태도">태도</option><option value="분쟁">분쟁</option><option value="노쇼">노쇼</option><option value="광고">광고</option><option value="수익공개">수익공개</option><option value="기타">기타</option></select>
+          <select id="issue-importance-filter" class="form-input sm:w-32" onchange="renderIssues()"><option value="">전체 중요도</option><option value="낮음">낮음</option><option value="보통">보통</option><option value="높음">높음</option></select>
+        </div>
+        <div class="neon-card neon-card-glow overflow-hidden">
+          <div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>날짜</th><th>닉네임</th><th>유형</th><th>중요도</th><th>기록자</th><th>내용 요약</th><th>후속 조치</th><th>관리</th></tr></thead><tbody id="issues-tbody"></tbody></table></div>
+          <div id="issues-empty" class="hidden py-12 text-center text-sm text-muted-foreground"><i class="ti ti-inbox text-3xl block mb-2 opacity-40"></i>이슈 기록이 없습니다.</div>
+        </div>
+      </div>
+
+      <!-- 공지문 양식 -->
+      <div id="section-notices" class="hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <div class="flex-1"><h2 class="text-xl font-bold text-foreground">공지문 양식</h2><p class="text-sm text-muted-foreground mt-1">오픈채팅방에 붙여넣을 공지문을 관리합니다.</p></div>
+          <button class="btn-primary" onclick="openNoticeModal()"><i class="ti ti-plus text-sm"></i> 공지문 추가</button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+          <div class="relative flex-1"><i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i><input type="text" id="notice-search" class="form-input pl-9" placeholder="공지문 검색" oninput="renderNotices()"/></div>
+          <select id="notice-category-filter" class="form-input sm:w-40" onchange="renderNotices()"><option value="">전체 카테고리</option><option value="노쇼">노쇼</option><option value="수익공개">수익공개</option><option value="분쟁">분쟁</option><option value="광고">광고</option><option value="재입장 제한">재입장 제한</option><option value="메시지 삭제">메시지 삭제</option><option value="비공식 모임">비공식 모임</option><option value="기타">기타</option></select>
+        </div>
+        <div id="notices-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div id="notices-empty" class="hidden py-12 text-center text-sm text-muted-foreground"><i class="ti ti-inbox text-3xl block mb-2 opacity-40"></i>공지문이 없습니다.</div>
+      </div>
+
+      <!-- 멤버 통합 검색 -->
+      <div id="section-search" class="hidden">
+        <div class="mb-6"><h2 class="text-xl font-bold text-foreground">멤버 통합 검색</h2><p class="text-sm text-muted-foreground mt-1">닉네임으로 모든 기록을 한눈에 확인합니다.</p></div>
+        <div class="relative mb-4"><i class="ti ti-search absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"></i><input type="text" id="member-search-input" class="form-input pl-10 py-3 text-base" placeholder="닉네임 입력 후 검색" onkeydown="if(event.key==='Enter')searchMember()"/></div>
+        <button class="btn-primary mb-6" onclick="searchMember()"><i class="ti ti-search text-sm"></i> 검색</button>
+        <div id="member-search-result"></div>
+      </div>
+
+      <!-- 백업/설정 -->
+      <div id="section-backup" class="hidden">
+        <div class="mb-6"><h2 class="text-xl font-bold text-foreground">백업 / 설정</h2><p class="text-sm text-muted-foreground mt-1">데이터를 백업하거나 불러올 수 있습니다.</p></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="neon-card neon-card-glow p-5"><h3 class="text-sm font-bold text-foreground mb-1 flex items-center gap-2"><i class="ti ti-database-export text-neon-purple"></i> 전체 데이터 내보내기</h3><p class="text-xs text-muted-foreground mb-4">모든 기록을 JSON 파일로 저장합니다.</p><button class="btn-secondary w-full justify-center" onclick="exportJSON()"><i class="ti ti-download text-sm"></i> JSON 내보내기</button></div>
+          <div class="neon-card neon-card-glow p-5"><h3 class="text-sm font-bold text-foreground mb-1 flex items-center gap-2"><i class="ti ti-database-import text-neon-blue"></i> 데이터 불러오기</h3><p class="text-xs text-muted-foreground mb-4">저장된 JSON 파일을 불러옵니다.</p><label class="btn-secondary w-full justify-center cursor-pointer"><i class="ti ti-upload text-sm"></i> JSON 불러오기<input type="file" accept=".json" class="hidden" onchange="importJSON(this)"/></label></div>
+          <div class="neon-card neon-card-glow p-5"><h3 class="text-sm font-bold text-foreground mb-1 flex items-center gap-2"><i class="ti ti-table-export text-success"></i> CSV 다운로드</h3><p class="text-xs text-muted-foreground mb-4">각 기록을 CSV 파일로 다운로드합니다.</p><div class="flex flex-col gap-2"><button class="btn-copy justify-center" onclick="exportCSV('warnings')"><i class="ti ti-download text-xs"></i> 경고 기록 CSV</button><button class="btn-copy justify-center" onclick="exportCSV('issues')"><i class="ti ti-download text-xs"></i> 이슈 기록 CSV</button><button class="btn-copy justify-center" onclick="exportCSV('reentries')"><i class="ti ti-download text-xs"></i> 재입장 기록 CSV</button></div></div>
+          <div class="neon-card neon-card-glow p-5 border border-destructive/20"><h3 class="text-sm font-bold text-destructive mb-1 flex items-center gap-2"><i class="ti ti-trash text-destructive"></i> 전체 데이터 초기화</h3><p class="text-xs text-muted-foreground mb-4">모든 기록이 영구적으로 삭제됩니다.</p><button class="btn-danger w-full justify-center" onclick="resetAllData()"><i class="ti ti-trash text-xs"></i> 전체 초기화</button></div>
+        </div>
+        <div class="neon-card neon-card-glow p-6">
+          <div class="flex items-center gap-2 mb-4"><i class="ti ti-info-circle text-neon-blue text-lg"></i><h3 class="text-sm font-bold text-foreground">운영 기록 작성 원칙</h3></div>
+          <div class="space-y-2 mb-5">
+            <div class="flex items-start gap-2.5 text-sm text-foreground/85"><i class="ti ti-circle-check text-success text-sm mt-0.5 shrink-0"></i>감정적인 표현 금지 — 사실 중심으로 작성</div>
+            <div class="flex items-start gap-2.5 text-sm text-foreground/85"><i class="ti ti-circle-check text-success text-sm mt-0.5 shrink-0"></i>추측보다는 실제 행동 위주 기록</div>
+            <div class="flex items-start gap-2.5 text-sm text-foreground/85"><i class="ti ti-circle-check text-success text-sm mt-0.5 shrink-0"></i>실명, 전화번호, 주소 등 민감 정보 저장 금지</div>
+            <div class="flex items-start gap-2.5 text-sm text-foreground/85"><i class="ti ti-circle-check text-success text-sm mt-0.5 shrink-0"></i>닉네임 기준으로만 관리 · 운영진 외 접근 금지</div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="rounded-xl border border-success/25 bg-success/5 p-3.5"><div class="text-[11px] font-bold text-success mb-1.5 flex items-center gap-1"><i class="ti ti-thumb-up text-xs"></i> 좋은 기록 예시</div><p class="text-xs text-foreground/80 leading-relaxed">2026-05-12 모임 당일 30분 전 불참 의사 전달. 이전에도 유사한 취소 이력이 있어 노쇼 주의 대상으로 기록.</p></div>
+            <div class="rounded-xl border border-destructive/25 bg-destructive/5 p-3.5"><div class="text-[11px] font-bold text-destructive mb-1.5 flex items-center gap-1"><i class="ti ti-thumb-down text-xs"></i> 피해야 할 기록 예시</div><p class="text-xs text-foreground/80 leading-relaxed">이 사람 진짜 이상함. 성격 문제 있어 보임.</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="sidebar-overlay" class="hidden fixed inset-0 z-40 bg-black/60 md:hidden" onclick="toggleSidebar()"></div>
+
+<!-- 경고 모달 -->
+<div id="warning-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5"><h3 class="text-base font-bold text-foreground" id="warning-modal-title">경고 기록 추가</h3><button onclick="closeModal('warning-modal')" class="text-muted-foreground hover:text-foreground"><i class="ti ti-x text-lg"></i></button></div>
+    <input type="hidden" id="warning-edit-id"/>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div><label class="form-label">경고 날짜 *</label><input type="date" id="w-date" class="form-input"/></div>
+      <div><label class="form-label">닉네임 *</label><input type="text" id="w-nickname" class="form-input" placeholder="닉네임 입력"/></div>
+      <div><label class="form-label">경고 횟수 *</label><select id="w-count" class="form-input"><option value="1">1회</option><option value="2">2회</option><option value="3">3회</option><option value="4">4회 이상</option></select></div>
+      <div><label class="form-label">기록자</label><input type="text" id="w-recorder" class="form-input" placeholder="기록자 이름"/></div>
+      <div class="sm:col-span-2"><label class="form-label">경고 사유 *</label><input type="text" id="w-reason" class="form-input" placeholder="경고 사유 입력"/></div>
+      <div class="sm:col-span-2"><label class="form-label">메모</label><textarea id="w-memo" class="form-input" rows="2" placeholder="추가 메모"></textarea></div>
+      <div class="sm:col-span-2 flex items-center gap-2"><input type="checkbox" id="w-announced" class="w-4 h-4 accent-purple-500 cursor-pointer"/><label for="w-announced" class="text-sm text-foreground cursor-pointer">채팅방 공지 완료</label></div>
+    </div>
+    <div class="flex justify-end gap-2 mt-5"><button onclick="closeModal('warning-modal')" class="btn-secondary">취소</button><button onclick="saveWarning()" class="btn-primary">저장</button></div>
+  </div>
+</div>
+
+<!-- 재입장 모달 -->
+<div id="reentry-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5"><h3 class="text-base font-bold text-foreground" id="reentry-modal-title">재입장 기록 추가</h3><button onclick="closeModal('reentry-modal')" class="text-muted-foreground hover:text-foreground"><i class="ti ti-x text-lg"></i></button></div>
+    <input type="hidden" id="reentry-edit-id"/>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div><label class="form-label">날짜 *</label><input type="date" id="r-date" class="form-input"/></div>
+      <div><label class="form-label">닉네임 *</label><input type="text" id="r-nickname" class="form-input" placeholder="닉네임 입력"/></div>
+      <div><label class="form-label">구분 *</label><select id="r-type" class="form-input"><option value="입장">입장</option><option value="퇴장">퇴장</option><option value="재입장">재입장</option></select></div>
+      <div><label class="form-label">누적 재입장 횟수 *</label><select id="r-count" class="form-input"><option value="1">1회</option><option value="2">2회</option><option value="3">3회</option><option value="4">4회</option><option value="5">5회 이상</option></select></div>
+      <div><label class="form-label">기록자</label><input type="text" id="r-recorder" class="form-input" placeholder="기록자 이름"/></div>
+      <div><label class="form-label">메모</label><input type="text" id="r-memo" class="form-input" placeholder="메모"/></div>
+    </div>
+    <div class="flex justify-end gap-2 mt-5"><button onclick="closeModal('reentry-modal')" class="btn-secondary">취소</button><button onclick="saveReentry()" class="btn-primary">저장</button></div>
+  </div>
+</div>
+
+<!-- 이슈 모달 -->
+<div id="issue-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5"><h3 class="text-base font-bold text-foreground" id="issue-modal-title">이슈 기록 추가</h3><button onclick="closeModal('issue-modal')" class="text-muted-foreground hover:text-foreground"><i class="ti ti-x text-lg"></i></button></div>
+    <input type="hidden" id="issue-edit-id"/>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div><label class="form-label">날짜 *</label><input type="date" id="i-date" class="form-input"/></div>
+      <div><label class="form-label">대상 닉네임 *</label><input type="text" id="i-nickname" class="form-input" placeholder="닉네임 입력"/></div>
+      <div><label class="form-label">기록자</label><input type="text" id="i-recorder" class="form-input" placeholder="기록자 이름"/></div>
+      <div><label class="form-label">이슈 유형</label><select id="i-type" class="form-input"><option value="태도">태도</option><option value="분쟁">분쟁</option><option value="노쇼">노쇼</option><option value="광고">광고</option><option value="수익공개">수익공개</option><option value="기타">기타</option></select></div>
+      <div><label class="form-label">중요도</label><select id="i-importance" class="form-input"><option value="낮음">낮음</option><option value="보통" selected>보통</option><option value="높음">높음</option></select></div>
+      <div><label class="form-label">후속 조치</label><select id="i-followup" class="form-input"><option value="없음">없음</option><option value="주의">주의</option><option value="경고 검토">경고 검토</option><option value="운영진 논의 필요">운영진 논의 필요</option></select></div>
+      <div class="sm:col-span-2"><label class="form-label">내용 *</label><textarea id="i-content" class="form-input" rows="3" placeholder="이슈 내용을 사실 중심으로 기록하세요"></textarea></div>
+    </div>
+    <div class="flex justify-end gap-2 mt-5"><button onclick="closeModal('issue-modal')" class="btn-secondary">취소</button><button onclick="saveIssue()" class="btn-primary">저장</button></div>
+  </div>
+</div>
+
+<!-- 공지문 모달 -->
+<div id="notice-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5"><h3 class="text-base font-bold text-foreground" id="notice-modal-title">공지문 추가</h3><button onclick="closeModal('notice-modal')" class="text-muted-foreground hover:text-foreground"><i class="ti ti-x text-lg"></i></button></div>
+    <input type="hidden" id="notice-edit-id"/>
+    <div class="space-y-3">
+      <div><label class="form-label">공지문 제목 *</label><input type="text" id="n-title" class="form-input" placeholder="공지문 제목"/></div>
+      <div><label class="form-label">카테고리</label><select id="n-category" class="form-input"><option value="노쇼">노쇼</option><option value="수익공개">수익공개</option><option value="분쟁">분쟁</option><option value="광고">광고</option><option value="재입장 제한">재입장 제한</option><option value="메시지 삭제">메시지 삭제</option><option value="비공식 모임">비공식 모임</option><option value="기타" selected>기타</option></select></div>
+      <div><label class="form-label">공지문 내용 *</label><textarea id="n-content" class="form-input" rows="7" placeholder="공지문 내용 입력"></textarea></div>
+      <div><label class="form-label">메모</label><input type="text" id="n-memo" class="form-input" placeholder="내부 메모 (공지문에 포함되지 않음)"/></div>
+      <div class="flex items-center gap-2"><input type="checkbox" id="n-active" class="w-4 h-4 accent-purple-500 cursor-pointer" checked/><label for="n-active" class="text-sm text-foreground cursor-pointer">활성화</label></div>
+    </div>
+    <div class="flex justify-end gap-2 mt-5"><button onclick="closeModal('notice-modal')" class="btn-secondary">취소</button><button onclick="saveNotice()" class="btn-primary">저장</button></div>
+  </div>
+</div>
+
+<!-- 공지문 전체보기 모달 -->
+<div id="notice-view-modal" class="modal-overlay hidden">
+  <div class="modal-box max-w-lg">
+    <div class="flex items-center justify-between mb-4"><h3 class="text-base font-bold text-foreground" id="notice-view-title"></h3><button onclick="closeModal('notice-view-modal')" class="text-muted-foreground hover:text-foreground"><i class="ti ti-x text-lg"></i></button></div>
+    <pre id="notice-view-content" class="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap bg-surface/50 rounded-xl p-4 border border-border"></pre>
+    <div class="flex justify-end gap-2 mt-4"><button onclick="closeModal('notice-view-modal')" class="btn-secondary">닫기</button><button onclick="copyNoticeContent()" class="btn-copy"><i class="ti ti-copy text-xs"></i> 복사하기</button></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://teugnaahpcpzejbdayyy.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let data={warnings:[],reentries:[],issues:[],notices:[]};
+
+// ─── Auth ───
+async function doLogin(){
+  const email=document.getElementById('login-id').value.trim();
+  const pw=document.getElementById('login-pw').value;
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 animate-spin text-base"></i> 로그인 중...';
+  const{error}=await sb.auth.signInWithPassword({email,password:pw});
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-login text-base"></i> 로그인';
+  if(error){document.getElementById('login-error').classList.remove('hidden');}
+  else{document.getElementById('login-error').classList.add('hidden');await enterAdmin();}
+}
+
+async function doLogout(){
+  if(!confirm('로그아웃 하시겠습니까?'))return;
+  await sb.auth.signOut();location.reload();
+}
+
+async function enterAdmin(){
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('admin-page').classList.remove('hidden');
+  await loadAllData();
+  renderDashboard();
+}
+
+window.addEventListener('DOMContentLoaded',async()=>{
+  const{data:{session}}=await sb.auth.getSession();
+  if(session)await enterAdmin();
+});
+
+// ─── Data ───
+async function loadAllData(){
+  const[w,r,i,n]=await Promise.all([
+    sb.from('admin_warnings').select('*').order('date',{ascending:false}),
+    sb.from('admin_reentries').select('*').order('date',{ascending:false}),
+    sb.from('admin_issues').select('*').order('date',{ascending:false}),
+    sb.from('admin_notices').select('*').order('created_at',{ascending:false}),
+  ]);
+  if(!w.error)data.warnings=w.data||[];
+  if(!r.error)data.reentries=r.data||[];
+  if(!i.error)data.issues=i.data||[];
+  if(!n.error)data.notices=n.data||[];
+}
+
+// ─── Utils ───
+function todayStr(){
+  const n=new Date();
+  return`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderColor=type==='err'?'rgba(255,95,109,0.4)':'rgba(181,102,255,0.4)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+function toggleSidebar(){
+  const s=document.getElementById('sidebar'),ov=document.getElementById('sidebar-overlay');
+  const open=s.classList.toggle('open');ov.classList.toggle('hidden',!open);
+}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.add('hidden');}
+const sectionTitles={dashboard:'운영 현황',warnings:'경고자 관리',reentry:'재입장 관리',issues:'멤버 이슈 기록',notices:'공지문 양식',search:'멤버 통합 검색',backup:'백업/설정'};
+function showSection(name){
+  document.querySelectorAll('[id^="section-"]').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('section-'+name).classList.remove('hidden');
+  document.querySelectorAll('.menu-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('menu-'+name).classList.add('active');
+  document.getElementById('header-title').textContent=sectionTitles[name]||name;
+  if(window.innerWidth<768)closeSidebar();
+  const map={dashboard:renderDashboard,warnings:renderWarnings,reentry:renderReentries,issues:renderIssues,notices:renderNotices};
+  if(map[name])map[name]();
+}
+
+// ─── Badge helpers ───
+function warnBadge(c){c=parseInt(c);if(c>=3)return`<span class="badge badge-danger">강퇴 대상</span>`;if(c==2)return`<span class="badge badge-warn2">강한 주의</span>`;return`<span class="badge badge-warn1">주의</span>`;}
+function reentryBadge(c){c=parseInt(c);if(c>=4)return`<span class="badge badge-danger">재입장 제한</span>`;if(c==3)return`<span class="badge badge-warn2">마지막 허용</span>`;if(c==2)return`<span class="badge badge-warn1">주의</span>`;return`<span class="badge badge-ok">허용</span>`;}
+function importanceBadge(i){if(i==='높음')return`<span class="badge badge-danger">높음</span>`;if(i==='보통')return`<span class="badge badge-warn1">보통</span>`;return`<span class="badge badge-gray">낮음</span>`;}
+
+// ─── Dashboard ───
+function renderDashboard(){
+  const w=data.warnings,r=data.reentries,i=data.issues,n=data.notices;
+  const nickMaxWarn={};
+  w.forEach(x=>{if(!nickMaxWarn[x.nickname]||nickMaxWarn[x.nickname]<x.count)nickMaxWarn[x.nickname]=x.count});
+  const stats=[
+    {label:'총 경고 대상자',value:Object.keys(nickMaxWarn).length,icon:'ti-users',color:'text-neon-purple',bg:'bg-neon-purple/10',border:'border-neon-purple/20'},
+    {label:'경고 1회',value:w.filter(x=>x.count==1).length,icon:'ti-alert-circle',color:'text-warning',bg:'bg-warning/10',border:'border-warning/20'},
+    {label:'경고 2회',value:w.filter(x=>x.count==2).length,icon:'ti-alert-triangle',color:'text-neon-pink',bg:'bg-neon-pink/10',border:'border-neon-pink/20'},
+    {label:'강퇴 검토 대상',value:w.filter(x=>x.count>=3).length,icon:'ti-user-x',color:'text-destructive',bg:'bg-destructive/10',border:'border-destructive/20'},
+    {label:'재입장 제한 대상',value:r.filter(x=>x.count>=4).length,icon:'ti-door-off',color:'text-destructive',bg:'bg-destructive/10',border:'border-destructive/20'},
+    {label:'이슈 기록 수',value:i.length,icon:'ti-file-text',color:'text-neon-blue',bg:'bg-neon-blue/10',border:'border-neon-blue/20'},
+    {label:'공지문 양식',value:n.filter(x=>x.active).length,icon:'ti-speakerphone',color:'text-success',bg:'bg-success/10',border:'border-success/20'},
+  ];
+  document.getElementById('stat-cards').innerHTML=stats.map(s=>`
+    <div class="neon-card p-4 border ${s.border}">
+      <div class="flex items-center gap-2 mb-2"><div class="flex h-8 w-8 items-center justify-center rounded-xl ${s.bg}"><i class="ti ${s.icon} text-sm ${s.color}"></i></div></div>
+      <div class="text-2xl font-bold ${s.color}">${s.value}</div>
+      <div class="text-xs text-muted-foreground mt-0.5">${s.label}</div>
+    </div>`).join('');
+  const kickTargets=[...new Set(w.filter(x=>x.count>=3).map(x=>x.nickname))];
+  const limitTargets=[...new Set(r.filter(x=>x.count>=4).map(x=>x.nickname))];
+  document.getElementById('alert-boxes').innerHTML=`
+    <div class="neon-card p-5 border border-destructive/25">
+      <div class="flex items-center gap-2 mb-3"><i class="ti ti-user-x text-destructive"></i><h3 class="text-sm font-bold">강퇴 검토 대상자</h3><span class="badge badge-danger ml-auto">${kickTargets.length}명</span></div>
+      ${kickTargets.length===0?'<p class="text-xs text-muted-foreground">해당 없음</p>':kickTargets.map(n=>`<div class="flex items-center gap-2 py-1.5 border-b border-border last:border-0"><span class="badge badge-danger">${n}</span><span class="text-xs text-muted-foreground">경고 ${Math.max(...w.filter(x=>x.nickname===n).map(x=>x.count))}회</span></div>`).join('')}
+    </div>
+    <div class="neon-card p-5 border border-neon-pink/25">
+      <div class="flex items-center gap-2 mb-3"><i class="ti ti-door-off text-neon-pink"></i><h3 class="text-sm font-bold">재입장 제한 대상자</h3><span class="badge badge-warn2 ml-auto">${limitTargets.length}명</span></div>
+      ${limitTargets.length===0?'<p class="text-xs text-muted-foreground">해당 없음</p>':limitTargets.map(n=>`<div class="flex items-center gap-2 py-1.5 border-b border-border last:border-0"><span class="badge badge-warn2">${n}</span><span class="text-xs text-muted-foreground">재입장 ${Math.max(...r.filter(x=>x.nickname===n).map(x=>x.count))}회</span></div>`).join('')}
+    </div>`;
+  const rw=[...w].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  document.getElementById('recent-warnings').innerHTML=rw.length===0?'<p class="text-xs text-muted-foreground">기록이 없습니다.</p>':rw.map(x=>`<div class="flex items-center gap-2 py-2 border-b border-border last:border-0 text-xs"><span class="text-muted-foreground w-20 shrink-0">${x.date}</span><span class="font-medium flex-1">${x.nickname}</span>${warnBadge(x.count)}</div>`).join('');
+  const ri=[...i].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  document.getElementById('recent-issues').innerHTML=ri.length===0?'<p class="text-xs text-muted-foreground">기록이 없습니다.</p>':ri.map(x=>`<div class="flex items-center gap-2 py-2 border-b border-border last:border-0 text-xs"><span class="text-muted-foreground w-20 shrink-0">${x.date}</span><span class="font-medium flex-1">${x.nickname}</span>${importanceBadge(x.importance)}</div>`).join('');
+}
+
+// ─── Warnings ───
+function renderWarnings(){
+  const q=(document.getElementById('warning-search')?.value||'').toLowerCase();
+  const f=document.getElementById('warning-filter')?.value||'';
+  let rows=[...data.warnings].sort((a,b)=>b.date.localeCompare(a.date));
+  if(q)rows=rows.filter(x=>x.nickname.toLowerCase().includes(q));
+  if(f){if(f==='3')rows=rows.filter(x=>x.count>=3);else rows=rows.filter(x=>String(x.count)===f);}
+  const tbody=document.getElementById('warnings-tbody'),empty=document.getElementById('warnings-empty');
+  if(!rows.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=rows.map(x=>`<tr>
+    <td class="text-muted-foreground">${x.date}</td><td class="font-medium">${x.nickname}</td><td class="text-center">${x.count}회</td>
+    <td class="max-w-[160px] truncate">${x.reason}</td>
+    <td class="text-center">${x.announced?'<span class="badge badge-ok">완료</span>':'<span class="badge badge-gray">미완료</span>'}</td>
+    <td>${warnBadge(x.count)}</td>
+    <td><div class="flex gap-1"><button class="btn-edit" onclick="editWarning('${x.id}')"><i class="ti ti-edit text-xs"></i></button><button class="btn-danger" onclick="deleteWarning('${x.id}')"><i class="ti ti-trash text-xs"></i></button></div></td>
+  </tr>`).join('');
+}
+function openWarningModal(id){
+  document.getElementById('warning-modal-title').textContent=id?'경고 기록 수정':'경고 기록 추가';
+  document.getElementById('warning-edit-id').value=id||'';
+  if(id){const x=data.warnings.find(w=>w.id===id);if(!x)return;document.getElementById('w-date').value=x.date;document.getElementById('w-nickname').value=x.nickname;document.getElementById('w-count').value=x.count;document.getElementById('w-reason').value=x.reason;document.getElementById('w-announced').checked=x.announced;document.getElementById('w-recorder').value=x.recorder||'';document.getElementById('w-memo').value=x.memo||'';}
+  else{document.getElementById('w-date').value=todayStr();document.getElementById('w-nickname').value='';document.getElementById('w-count').value='1';document.getElementById('w-reason').value='';document.getElementById('w-announced').checked=false;document.getElementById('w-recorder').value='';document.getElementById('w-memo').value='';}
+  document.getElementById('warning-modal').classList.remove('hidden');
+}
+function editWarning(id){openWarningModal(id)}
+async function deleteWarning(id){
+  if(!confirm('이 경고 기록을 삭제하시겠습니까?'))return;
+  const{error}=await sb.from('admin_warnings').delete().eq('id',id);
+  if(error){showToast('삭제 실패','err');return;}
+  data.warnings=data.warnings.filter(x=>x.id!==id);renderWarnings();showToast('삭제되었습니다.');
+}
+async function saveWarning(){
+  const editId=document.getElementById('warning-edit-id').value;
+  const obj={date:document.getElementById('w-date').value,nickname:document.getElementById('w-nickname').value.trim(),count:parseInt(document.getElementById('w-count').value),reason:document.getElementById('w-reason').value.trim(),announced:document.getElementById('w-announced').checked,recorder:document.getElementById('w-recorder').value.trim(),memo:document.getElementById('w-memo').value.trim()};
+  if(!obj.date||!obj.nickname||!obj.reason){showToast('필수 항목을 입력해주세요.','err');return;}
+  if(editId){
+    const{error}=await sb.from('admin_warnings').update(obj).eq('id',editId);
+    if(error){showToast('저장 실패','err');return;}
+    const i=data.warnings.findIndex(x=>x.id===editId);if(i>=0)data.warnings[i]={...data.warnings[i],...obj};
+  }else{
+    const{data:row,error}=await sb.from('admin_warnings').insert(obj).select().single();
+    if(error){showToast('저장 실패','err');return;}
+    data.warnings.unshift(row);
+  }
+  closeModal('warning-modal');renderWarnings();showToast('저장되었습니다.');
+}
+
+// ─── Reentries ───
+function renderReentries(){
+  const q=(document.getElementById('reentry-search')?.value||'').toLowerCase();
+  const f=document.getElementById('reentry-filter')?.value||'';
+  let rows=[...data.reentries].sort((a,b)=>b.date.localeCompare(a.date));
+  if(q)rows=rows.filter(x=>x.nickname.toLowerCase().includes(q));
+  if(f==='허용')rows=rows.filter(x=>x.count==1);else if(f==='주의')rows=rows.filter(x=>x.count==2);else if(f==='마지막')rows=rows.filter(x=>x.count==3);else if(f==='제한')rows=rows.filter(x=>x.count>=4);
+  const tbody=document.getElementById('reentry-tbody'),empty=document.getElementById('reentry-empty');
+  if(!rows.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=rows.map(x=>`<tr>
+    <td class="text-muted-foreground">${x.date}</td><td class="font-medium">${x.nickname}</td>
+    <td><span class="badge badge-blue">${x.type}</span></td><td class="text-center font-semibold">${x.count}회</td>
+    <td>${reentryBadge(x.count)}</td><td class="text-muted-foreground">${x.recorder||'-'}</td>
+    <td class="text-muted-foreground max-w-[120px] truncate">${x.memo||'-'}</td>
+    <td><div class="flex gap-1"><button class="btn-edit" onclick="editReentry('${x.id}')"><i class="ti ti-edit text-xs"></i></button><button class="btn-danger" onclick="deleteReentry('${x.id}')"><i class="ti ti-trash text-xs"></i></button></div></td>
+  </tr>`).join('');
+}
+function openReentryModal(id){
+  document.getElementById('reentry-modal-title').textContent=id?'재입장 기록 수정':'재입장 기록 추가';
+  document.getElementById('reentry-edit-id').value=id||'';
+  if(id){const x=data.reentries.find(r=>r.id===id);if(!x)return;document.getElementById('r-date').value=x.date;document.getElementById('r-nickname').value=x.nickname;document.getElementById('r-type').value=x.type;document.getElementById('r-count').value=x.count;document.getElementById('r-recorder').value=x.recorder||'';document.getElementById('r-memo').value=x.memo||'';}
+  else{document.getElementById('r-date').value=todayStr();document.getElementById('r-nickname').value='';document.getElementById('r-type').value='재입장';document.getElementById('r-count').value='1';document.getElementById('r-recorder').value='';document.getElementById('r-memo').value='';}
+  document.getElementById('reentry-modal').classList.remove('hidden');
+}
+function editReentry(id){openReentryModal(id)}
+async function deleteReentry(id){
+  if(!confirm('이 재입장 기록을 삭제하시겠습니까?'))return;
+  const{error}=await sb.from('admin_reentries').delete().eq('id',id);
+  if(error){showToast('삭제 실패','err');return;}
+  data.reentries=data.reentries.filter(x=>x.id!==id);renderReentries();showToast('삭제되었습니다.');
+}
+async function saveReentry(){
+  const editId=document.getElementById('reentry-edit-id').value;
+  const obj={date:document.getElementById('r-date').value,nickname:document.getElementById('r-nickname').value.trim(),type:document.getElementById('r-type').value,count:parseInt(document.getElementById('r-count').value),recorder:document.getElementById('r-recorder').value.trim(),memo:document.getElementById('r-memo').value.trim()};
+  if(!obj.date||!obj.nickname){showToast('필수 항목을 입력해주세요.','err');return;}
+  if(editId){
+    const{error}=await sb.from('admin_reentries').update(obj).eq('id',editId);
+    if(error){showToast('저장 실패','err');return;}
+    const i=data.reentries.findIndex(x=>x.id===editId);if(i>=0)data.reentries[i]={...data.reentries[i],...obj};
+  }else{
+    const{data:row,error}=await sb.from('admin_reentries').insert(obj).select().single();
+    if(error){showToast('저장 실패','err');return;}
+    data.reentries.unshift(row);
+  }
+  closeModal('reentry-modal');renderReentries();showToast('저장되었습니다.');
+}
+
+// ─── Issues ───
+function renderIssues(){
+  const q=(document.getElementById('issue-search')?.value||'').toLowerCase();
+  const ft=document.getElementById('issue-type-filter')?.value||'';
+  const fi=document.getElementById('issue-importance-filter')?.value||'';
+  let rows=[...data.issues].sort((a,b)=>b.date.localeCompare(a.date));
+  if(q)rows=rows.filter(x=>x.nickname.toLowerCase().includes(q));
+  if(ft)rows=rows.filter(x=>x.type===ft);
+  if(fi)rows=rows.filter(x=>x.importance===fi);
+  const tbody=document.getElementById('issues-tbody'),empty=document.getElementById('issues-empty');
+  if(!rows.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=rows.map(x=>`<tr>
+    <td class="text-muted-foreground">${x.date}</td><td class="font-medium">${x.nickname}</td>
+    <td><span class="badge badge-blue">${x.type}</span></td><td>${importanceBadge(x.importance)}</td>
+    <td class="text-muted-foreground">${x.recorder||'-'}</td>
+    <td class="max-w-[160px] truncate text-sm">${(x.content||'').slice(0,40)}…</td>
+    <td><span class="badge badge-purple">${x.followup}</span></td>
+    <td><div class="flex gap-1"><button class="btn-edit" onclick="editIssue('${x.id}')"><i class="ti ti-edit text-xs"></i></button><button class="btn-danger" onclick="deleteIssue('${x.id}')"><i class="ti ti-trash text-xs"></i></button></div></td>
+  </tr>`).join('');
+}
+function openIssueModal(id){
+  document.getElementById('issue-modal-title').textContent=id?'이슈 기록 수정':'이슈 기록 추가';
+  document.getElementById('issue-edit-id').value=id||'';
+  if(id){const x=data.issues.find(i=>i.id===id);if(!x)return;document.getElementById('i-date').value=x.date;document.getElementById('i-nickname').value=x.nickname;document.getElementById('i-recorder').value=x.recorder||'';document.getElementById('i-type').value=x.type;document.getElementById('i-importance').value=x.importance;document.getElementById('i-followup').value=x.followup;document.getElementById('i-content').value=x.content;}
+  else{document.getElementById('i-date').value=todayStr();document.getElementById('i-nickname').value='';document.getElementById('i-recorder').value='';document.getElementById('i-type').value='태도';document.getElementById('i-importance').value='보통';document.getElementById('i-followup').value='없음';document.getElementById('i-content').value='';}
+  document.getElementById('issue-modal').classList.remove('hidden');
+}
+function editIssue(id){openIssueModal(id)}
+async function deleteIssue(id){
+  if(!confirm('이 이슈 기록을 삭제하시겠습니까?'))return;
+  const{error}=await sb.from('admin_issues').delete().eq('id',id);
+  if(error){showToast('삭제 실패','err');return;}
+  data.issues=data.issues.filter(x=>x.id!==id);renderIssues();showToast('삭제되었습니다.');
+}
+async function saveIssue(){
+  const editId=document.getElementById('issue-edit-id').value;
+  const obj={date:document.getElementById('i-date').value,nickname:document.getElementById('i-nickname').value.trim(),recorder:document.getElementById('i-recorder').value.trim(),type:document.getElementById('i-type').value,importance:document.getElementById('i-importance').value,followup:document.getElementById('i-followup').value,content:document.getElementById('i-content').value.trim()};
+  if(!obj.date||!obj.nickname||!obj.content){showToast('필수 항목을 입력해주세요.','err');return;}
+  if(editId){
+    const{error}=await sb.from('admin_issues').update(obj).eq('id',editId);
+    if(error){showToast('저장 실패','err');return;}
+    const i=data.issues.findIndex(x=>x.id===editId);if(i>=0)data.issues[i]={...data.issues[i],...obj};
+  }else{
+    const{data:row,error}=await sb.from('admin_issues').insert(obj).select().single();
+    if(error){showToast('저장 실패','err');return;}
+    data.issues.unshift(row);
+  }
+  closeModal('issue-modal');renderIssues();showToast('저장되었습니다.');
+}
+
+// ─── Notices ───
+function renderNotices(){
+  const q=(document.getElementById('notice-search')?.value||'').toLowerCase();
+  const fc=document.getElementById('notice-category-filter')?.value||'';
+  let rows=[...data.notices].sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  if(q)rows=rows.filter(x=>x.title.toLowerCase().includes(q)||x.content.toLowerCase().includes(q));
+  if(fc)rows=rows.filter(x=>x.category===fc);
+  const grid=document.getElementById('notices-grid'),empty=document.getElementById('notices-empty');
+  if(!rows.length){grid.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  grid.innerHTML=rows.map(x=>`
+    <div class="neon-card neon-card-glow p-5 flex flex-col gap-3">
+      <div class="flex items-start justify-between gap-2">
+        <div><span class="badge badge-purple mb-2">${x.category}</span><h3 class="text-sm font-bold text-foreground">${x.title}</h3>${x.memo?`<p class="text-xs text-muted-foreground mt-1">${x.memo}</p>`:''}</div>
+        <span class="badge ${x.active?'badge-ok':'badge-gray'} shrink-0">${x.active?'활성':'비활성'}</span>
+      </div>
+      <p class="text-xs text-muted-foreground leading-relaxed">${(x.content||'').slice(0,100)}…</p>
+      <div class="flex gap-1.5 mt-auto">
+        <button class="btn-copy flex-1 justify-center" onclick="viewNotice('${x.id}')"><i class="ti ti-eye text-xs"></i> 전체 보기</button>
+        <button class="btn-edit" onclick="editNotice('${x.id}')"><i class="ti ti-edit text-xs"></i></button>
+        <button class="btn-danger" onclick="deleteNotice('${x.id}')"><i class="ti ti-trash text-xs"></i></button>
+      </div>
+    </div>`).join('');
+}
+function openNoticeModal(id){
+  document.getElementById('notice-modal-title').textContent=id?'공지문 수정':'공지문 추가';
+  document.getElementById('notice-edit-id').value=id||'';
+  if(id){const x=data.notices.find(n=>n.id===id);if(!x)return;document.getElementById('n-title').value=x.title;document.getElementById('n-category').value=x.category;document.getElementById('n-content').value=x.content;document.getElementById('n-memo').value=x.memo||'';document.getElementById('n-active').checked=x.active;}
+  else{document.getElementById('n-title').value='';document.getElementById('n-category').value='기타';document.getElementById('n-content').value='';document.getElementById('n-memo').value='';document.getElementById('n-active').checked=true;}
+  document.getElementById('notice-modal').classList.remove('hidden');
+}
+function editNotice(id){openNoticeModal(id)}
+async function deleteNotice(id){
+  if(!confirm('이 공지문을 삭제하시겠습니까?'))return;
+  const{error}=await sb.from('admin_notices').delete().eq('id',id);
+  if(error){showToast('삭제 실패','err');return;}
+  data.notices=data.notices.filter(x=>x.id!==id);renderNotices();showToast('삭제되었습니다.');
+}
+async function saveNotice(){
+  const editId=document.getElementById('notice-edit-id').value;
+  const obj={title:document.getElementById('n-title').value.trim(),category:document.getElementById('n-category').value,content:document.getElementById('n-content').value.trim(),memo:document.getElementById('n-memo').value.trim(),active:document.getElementById('n-active').checked};
+  if(!obj.title||!obj.content){showToast('필수 항목을 입력해주세요.','err');return;}
+  if(editId){
+    const{error}=await sb.from('admin_notices').update(obj).eq('id',editId);
+    if(error){showToast('저장 실패','err');return;}
+    const i=data.notices.findIndex(x=>x.id===editId);if(i>=0)data.notices[i]={...data.notices[i],...obj};
+  }else{
+    const{data:row,error}=await sb.from('admin_notices').insert(obj).select().single();
+    if(error){showToast('저장 실패','err');return;}
+    data.notices.unshift(row);
+  }
+  closeModal('notice-modal');renderNotices();showToast('저장되었습니다.');
+}
+function viewNotice(id){
+  const x=data.notices.find(n=>n.id===id);if(!x)return;
+  document.getElementById('notice-view-title').textContent=x.title;
+  document.getElementById('notice-view-content').textContent=x.content;
+  document.getElementById('notice-view-modal').classList.remove('hidden');
+}
+function copyNoticeContent(){
+  navigator.clipboard.writeText(document.getElementById('notice-view-content').textContent).then(()=>showToast('복사되었습니다.'));
+}
+
+// ─── Search ───
+function searchMember(){
+  const q=document.getElementById('member-search-input').value.trim().toLowerCase();
+  if(!q){showToast('닉네임을 입력해주세요.','err');return;}
+  const w=data.warnings.filter(x=>x.nickname.toLowerCase().includes(q));
+  const r=data.reentries.filter(x=>x.nickname.toLowerCase().includes(q));
+  const i=data.issues.filter(x=>x.nickname.toLowerCase().includes(q));
+  const result=document.getElementById('member-search-result');
+  if(!w.length&&!r.length&&!i.length){result.innerHTML='<p class="text-sm text-muted-foreground">검색 결과가 없습니다.</p>';return;}
+  result.innerHTML=`
+    ${w.length?`<div class="neon-card neon-card-glow p-5 mb-4"><h3 class="text-sm font-bold mb-3 flex items-center gap-2"><i class="ti ti-alert-triangle text-warning"></i> 경고 기록 (${w.length}건)</h3>${w.map(x=>`<div class="flex gap-2 py-2 text-xs border-b border-border last:border-0"><span class="text-muted-foreground w-20">${x.date}</span><span class="flex-1">${x.reason}</span>${warnBadge(x.count)}</div>`).join('')}</div>`:''}
+    ${r.length?`<div class="neon-card neon-card-glow p-5 mb-4"><h3 class="text-sm font-bold mb-3 flex items-center gap-2"><i class="ti ti-door-enter text-neon-blue"></i> 재입장 기록 (${r.length}건)</h3>${r.map(x=>`<div class="flex gap-2 py-2 text-xs border-b border-border last:border-0"><span class="text-muted-foreground w-20">${x.date}</span><span class="flex-1">${x.type}</span>${reentryBadge(x.count)}</div>`).join('')}</div>`:''}
+    ${i.length?`<div class="neon-card neon-card-glow p-5"><h3 class="text-sm font-bold mb-3 flex items-center gap-2"><i class="ti ti-file-description text-neon-blue"></i> 이슈 기록 (${i.length}건)</h3>${i.map(x=>`<div class="flex gap-2 py-2 text-xs border-b border-border last:border-0"><span class="text-muted-foreground w-20">${x.date}</span><span class="flex-1 truncate">${(x.content||'').slice(0,50)}…</span>${importanceBadge(x.importance)}</div>`).join('')}</div>`:''}
+  `;
+}
+
+// ─── Backup ───
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`admin_backup_${todayStr()}.json`;a.click();
+}
+async function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  try{
+    const imported=JSON.parse(await file.text());
+    const strip=arr=>(arr||[]).map(({id,created_at,...rest})=>rest);
+    const ops=[];
+    if(imported.warnings?.length)ops.push(sb.from('admin_warnings').insert(strip(imported.warnings)));
+    if(imported.reentries?.length)ops.push(sb.from('admin_reentries').insert(strip(imported.reentries)));
+    if(imported.issues?.length)ops.push(sb.from('admin_issues').insert(strip(imported.issues)));
+    if(imported.notices?.length)ops.push(sb.from('admin_notices').insert(strip(imported.notices)));
+    await Promise.all(ops);
+    await loadAllData();renderDashboard();showToast('데이터를 불러왔습니다.');
+  }catch(e){showToast('파일 형식이 올바르지 않습니다.','err');}
+  input.value='';
+}
+function exportCSV(type){
+  const map={warnings:{rows:data.warnings,cols:['date','nickname','count','reason','announced','recorder','memo']},issues:{rows:data.issues,cols:['date','nickname','type','importance','recorder','content','followup']},reentries:{rows:data.reentries,cols:['date','nickname','type','count','recorder','memo']}};
+  const{rows,cols}=map[type];
+  const csv=[cols.join(','),...rows.map(r=>cols.map(c=>`"${String(r[c]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download=`${type}_${todayStr()}.csv`;a.click();
+}
+async function resetAllData(){
+  if(!confirm('정말 모든 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.'))return;
+  if(prompt('확인을 위해 "전체삭제"를 입력하세요')!=='전체삭제'){showToast('취소되었습니다.');return;}
+  await Promise.all([
+    sb.from('admin_warnings').delete().not('id','is',null),
+    sb.from('admin_reentries').delete().not('id','is',null),
+    sb.from('admin_issues').delete().not('id','is',null),
+    sb.from('admin_notices').delete().not('id','is',null),
+  ]);
+  data={warnings:[],reentries:[],issues:[],notices:[]};
+  renderDashboard();showToast('전체 초기화 완료');
+}
+</script>
 </body>
 </html>
