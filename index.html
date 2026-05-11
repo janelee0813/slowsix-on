@@ -1123,6 +1123,10 @@ function hbRenderSelect(){
       <div class="hb-title">우리방 <span>취미지도</span> 🗺️</div>
       <div class="hb-sub">관심 있는 벙을 모두 선택해주세요.<br>저장하면 다른 사람들이 선택한 결과를 볼 수 있어요!</div>
       <div class="hb-hint">중복 선택 가능 · 닉네임만 입력 · 저장 후 바로 결과 확인</div>
+      <button onclick="hbCopyUrl()" style="margin-top:10px;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'" id="hbShareBtnSelect">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        URL 공유
+      </button>
     </div>
     <div class="hb-section">
       <div class="hb-search-wrap" style="margin-top:4px">
@@ -1212,7 +1216,13 @@ function hbRenderResult(myNick){
       <div class="hb-badge"><i class="ti ti-map-2"></i> 우리방 취미지도</div>
       <div class="hb-result-nick"><span>${myNick}</span>의 취미지도 🗺️</div>
       <div class="hb-result-sub">저장된 내 관심벙과 우리방 전체 결과를 확인해봐.</div>
-      <button class="hb-edit-btn" onclick="hbGoEdit()"><i class="ti ti-edit"></i> 내 선택 수정하기</button>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="hb-edit-btn" style="flex:1;margin-top:0" onclick="hbGoEdit()"><i class="ti ti-edit"></i> 내 선택 수정하기</button>
+        <button onclick="hbCopyUrl()" style="display:inline-flex;align-items:center;gap:5px;padding:10px 16px;border:1.5px solid rgba(140,110,200,0.25);border-radius:8px;background:rgba(181,102,255,0.08);font-size:13px;color:#9b94b3;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap" onmouseover="this.style.borderColor='rgba(181,102,255,0.5)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.25)';this.style.color='#9b94b3'" id="hbShareBtnResult">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          URL 공유
+        </button>
+      </div>
     </div>
     <div class="hb-section">
       ${me?`<div class="hb-result-section">
@@ -1295,6 +1305,19 @@ function hbReset(){
   }
 }
 
+function hbCopyUrl() {
+  const url = location.origin + location.pathname + '#hobby-map';
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('hbShareBtnSelect') || document.getElementById('hbShareBtnResult');
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5ee0a8" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 복사됨!';
+    btn.style.borderColor = 'rgba(94,224,168,0.5)';
+    btn.style.color = '#5ee0a8';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.borderColor = 'rgba(140,110,200,0.35)'; btn.style.color = '#9b94b3'; }, 2000);
+  });
+}
+
 window.hbOnSearch=hbOnSearch;
 window.hbToggle=hbToggle;
 window.hbValidate=hbValidate;
@@ -1302,6 +1325,7 @@ window.hbSave=hbSave;
 window.hbGoEdit=hbGoEdit;
 window.hbToggleMem=hbToggleMem;
 window.hbReset=hbReset;
+window.hbCopyUrl=hbCopyUrl;
 
 hobbyInit();
 })();
@@ -1597,7 +1621,7 @@ hobbyInit();
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : '#' + page;
+    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#hobby-map' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
   }
@@ -1619,7 +1643,7 @@ hobbyInit();
   (function() {
     const hash = location.hash.replace('#', '');
     if (hash === 'calculator') showPage('test1');
-    else if (hash === 'fortune') showPage('fortune');
+    else if (hash === 'hobby-map' || hash === 'fortune') showPage('fortune');
     else if (hash === 'roulette') showPage('roulette');
   })();
 </script>
