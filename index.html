@@ -1869,11 +1869,11 @@ function wcRender(){
       <div class="wc-card-title">📅 오늘 인증 현황 <span style="font-weight:400;color:#6b6480;font-size:11px;margin-left:4px">${t}</span></div>
       ${wcParts.length===0
         ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
-        :`<div class="wc-today-list">${wcParts.map(p=>{
+        :`<div style="display:flex;flex-wrap:wrap;gap:6px">${wcParts.map(p=>{
             const rec=todayMap[p.nickname];
-            if(!rec)return`<div class="wc-today-item"><span class="wc-nick">⏳ ${p.nickname}</span><span class="wc-kcal">미인증</span></div>`;
-            if(!rec.is_completed)return`<div class="wc-today-item"><span class="wc-nick">❌ ${p.nickname}</span><span class="wc-kcal">0분 · 0 kcal</span></div>`;
-            return`<div class="wc-today-item done"><span class="wc-nick">✅ ${p.nickname}</span><span class="wc-kcal">${rec.duration||0}분 · ${wcFmt(rec.calories)} kcal</span></div>`;
+            if(!rec)return`<div style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:20px;background:rgba(21,16,31,0.8);border:1px solid rgba(140,110,200,0.18);font-size:12px;color:#9b94b3">⏳ ${p.nickname}</div>`;
+            if(!rec.is_completed)return`<div style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:20px;background:rgba(21,16,31,0.8);border:1px solid rgba(255,95,109,0.2);font-size:12px;color:#9b94b3">❌ ${p.nickname}</div>`;
+            return`<div style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:20px;background:rgba(94,224,168,0.08);border:1px solid rgba(94,224,168,0.3);font-size:12px;color:#5ee0a8;font-weight:500">✅ ${p.nickname} <span style="color:#9b94b3;font-weight:400">${rec.duration||0}분·${wcFmt(rec.calories)}kcal</span></div>`;
           }).join('')}</div>`}
     </div>
     ${wcCompareSection()}
