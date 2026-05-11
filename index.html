@@ -1675,7 +1675,7 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let wcParts=[];
 let wcRecs=[];
-const wcForm={date:wcToday(),nickname:'',isCompleted:true,calories:''};
+const wcForm={date:wcToday(),nickname:'',isCompleted:true,calories:'',duration:''};
 window.wcForm=wcForm;
 
 function wcToday(){
@@ -1753,20 +1753,22 @@ async function wcSaveRecord(){
   const dateVal=document.getElementById('wc-inp-date').value;
   const nickVal=document.getElementById('wc-inp-person').value;
   const calEl=document.getElementById('wc-inp-cal');
+  const durEl=document.getElementById('wc-inp-dur');
   const calVal=wcForm.isCompleted?(parseInt(calEl?calEl.value:0)||0):0;
+  const durVal=wcForm.isCompleted?(parseInt(durEl?durEl.value:0)||0):0;
   if(!dateVal){wcToast('날짜를 선택해주세요',true);return}
   if(!nickVal){wcToast('닉네임을 선택해주세요',true);return}
   const btn=document.getElementById('wc-save-btn');
   btn.disabled=true;btn.textContent='저장 중...';
   const{data,error}=await sb.from('wc_records')
-    .upsert({date:dateVal,nickname:nickVal,is_completed:wcForm.isCompleted,calories:calVal},{onConflict:'date,nickname'})
+    .upsert({date:dateVal,nickname:nickVal,is_completed:wcForm.isCompleted,calories:calVal,duration:durVal},{onConflict:'date,nickname'})
     .select().single();
   if(error){wcToast('저장 실패',true)}
   else{
     const idx=wcRecs.findIndex(r=>r.date===dateVal&&r.nickname===nickVal);
     if(idx>=0){wcRecs[idx]=data;wcToast('기록 수정 완료! ✏️')}
     else{wcRecs.push(data);wcToast('인증 저장 완료! 🎉')}
-    wcForm.isCompleted=true;wcForm.calories='';wcForm.nickname='';
+    wcForm.isCompleted=true;wcForm.calories='';wcForm.duration='';wcForm.nickname='';
     wcRender();
   }
   btn.disabled=false;btn.textContent='💾 인증 저장';
@@ -1820,6 +1822,13 @@ function wcRender(){
         </div>
       </div>
       <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}">
+        <span class="wc-label">운동 시간</span>
+        <div class="wc-cal-wrap">
+          <input type="number" id="wc-inp-dur" placeholder="0" value="${wcForm.isCompleted?wcForm.duration:0}" min="0" max="999" oninput="wcForm.duration=this.value" style="width:100%"/>
+          <span class="wc-cal-unit">분</span>
+        </div>
+      </div>
+      <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}">
         <span class="wc-label">소모 칼로리</span>
         <div class="wc-cal-wrap">
           <input type="number" id="wc-inp-cal" placeholder="0" value="${wcForm.isCompleted?wcForm.calories:0}" min="0" max="9999" oninput="wcForm.calories=this.value" style="width:100%"/>
@@ -1861,8 +1870,8 @@ function wcRender(){
         :`<div class="wc-today-list">${wcParts.map(p=>{
             const rec=todayMap[p.nickname];
             if(!rec)return`<div class="wc-today-item"><span class="wc-nick">⏳ ${p.nickname}</span><span class="wc-kcal">미인증</span></div>`;
-            if(!rec.is_completed)return`<div class="wc-today-item"><span class="wc-nick">❌ ${p.nickname}</span><span class="wc-kcal">0 kcal</span></div>`;
-            return`<div class="wc-today-item done"><span class="wc-nick">✅ ${p.nickname}</span><span class="wc-kcal">${wcFmt(rec.calories)} kcal</span></div>`;
+            if(!rec.is_completed)return`<div class="wc-today-item"><span class="wc-nick">❌ ${p.nickname}</span><span class="wc-kcal">0분 · 0 kcal</span></div>`;
+            return`<div class="wc-today-item done"><span class="wc-nick">✅ ${p.nickname}</span><span class="wc-kcal">${rec.duration||0}분 · ${wcFmt(rec.calories)} kcal</span></div>`;
           }).join('')}</div>`}
     </div>
   `;
