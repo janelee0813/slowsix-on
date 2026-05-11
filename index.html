@@ -1840,6 +1840,7 @@ function wcRender(){
       <button class="wc-btn-primary" id="wc-save-btn" onclick="wcSaveRecord()">💾 인증 저장</button>
     </div>
     <hr class="wc-sep"/>
+    ${wcProgressBar()}
     <div class="wc-card">
       <div class="wc-card-title">📊 참여자 실행현황</div>
       ${wcParts.length===0
@@ -1890,6 +1891,31 @@ function wcCopyUrl(){
     btn.style.borderColor='rgba(94,224,168,0.5)';btn.style.color='#5ee0a8';
     setTimeout(()=>{btn.innerHTML=orig;btn.style.borderColor='rgba(140,110,200,0.35)';btn.style.color='#9b94b3';},2000);
   });
+}
+
+function wcProgressBar(){
+  const start=new Date('2026-05-11');
+  const end=new Date('2026-06-11');
+  const today=new Date(wcToday());
+  const total=Math.round((end-start)/(1000*60*60*24));
+  const elapsed=Math.max(0,Math.min(Math.round((today-start)/(1000*60*60*24)),total));
+  const remaining=Math.max(0,Math.round((end-today)/(1000*60*60*24)));
+  const pct=Math.round(elapsed/total*100);
+  const statusText=today>end?'챌린지 종료':`D-${remaining}`;
+  return`<div style="background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:16px 20px;margin-bottom:0.875rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:700;color:#f5f1ff">⚡ ${statusText}</div>
+      <div style="font-size:12px;color:#9b94b3">${elapsed}일 경과 · 잔여 ${remaining}일</div>
+    </div>
+    <div style="height:10px;background:rgba(140,110,200,0.15);border-radius:5px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);border-radius:5px;box-shadow:0 0 10px rgba(181,102,255,0.5)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:7px">
+      <span style="font-size:10px;color:#6b6480">5월 11일 시작</span>
+      <span style="font-size:11px;color:#b566ff;font-weight:700">${pct}%</span>
+      <span style="font-size:10px;color:#6b6480">6월 11일 종료</span>
+    </div>
+  </div>`;
 }
 
 function wcCompareSection(){
