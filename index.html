@@ -115,6 +115,7 @@
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">정산 계산기</button>
       <button onclick="showPage('fortune')" id="btn-fortune" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">취미공유</button>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">룰렛</button>
+      <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다이어트</button>
     </div>
   </div>
 </nav>
@@ -1609,9 +1610,12 @@ hobbyInit();
   loadComments();
 </script>
 
+<div id="page-diet" class="hidden">
+</div>
+
 <script>
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'diet'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       btn.className = p === page
@@ -1642,6 +1646,7 @@ hobbyInit();
     if (hash === 'calculator') showPage('test1');
     else if (hash === 'hobby-map' || hash === 'fortune') showPage('fortune');
     else if (hash === 'roulette') showPage('roulette');
+    else if (hash === 'diet') showPage('diet');
   })();
 </script>
 </body>
