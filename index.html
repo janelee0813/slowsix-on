@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -1091,6 +1092,10 @@ function copyResult(){
 <div id="hobby-app"></div>
 <script>
 (function(){
+const SUPABASE_URL='https://teugnaahpcpzejbdayyy.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 const CATS=[
   {key:"카페·대화",icon:"☕",items:["커피벙","브런치벙","디저트벙","심야카페벙","동네산책+카페벙"]},
   {key:"맛집·술",icon:"🍖",items:["맛집벙","고기벙","회벙","치맥벙","피맥벙","와인벙","전통주벙","이자카야벙","포차벙","빵지순례벙","마라탕벙","오마카세벙","파인다이닝벙"]},
@@ -1101,18 +1106,21 @@ const CATS=[
   {key:"여행·드라이브",icon:"🚗",items:["드라이브벙","심야드라이브벙","피크닉벙","근교카페벙","바다벙","캠핑벙","당일치기여행벙","야경벙","계절나들이벙"]},
   {key:"감성·라이프스타일",icon:"✨",items:["감성술벙","LP바벙","레트로벙","반려동물벙","퍼스널컬러벙"]}
 ];
-const KEY_ALL="hobbymap_v1";
 const KEY_ME="hobbymap_me";
 let hbSel=[];
 let hbQ="";
 
-function hbGetAll(){try{return JSON.parse(localStorage.getItem(KEY_ALL)||"[]")}catch{return[]}}
-function hbSetAll(arr){localStorage.setItem(KEY_ALL,JSON.stringify(arr))}
 function hbGetNick(){return localStorage.getItem(KEY_ME)||""}
 function hbSetNick(n){localStorage.setItem(KEY_ME,n)}
 
-function hobbyInit(){
-  hbGetNick()?hbRenderResult(hbGetNick()):hbRenderSelect();
+async function hbGetAll(){
+  const{data,error}=await sb.from('hobby_map').select('nickname,hobbies');
+  if(error){console.error(error);return[]}
+  return data.map(r=>({nickname:r.nickname,selectedHobbies:r.hobbies||[]}));
+}
+
+async function hobbyInit(){
+  hbGetNick()?await hbRenderResult(hbGetNick()):hbRenderSelect();
 }
 
 function hbRenderSelect(){
@@ -1194,22 +1202,29 @@ function hbValidate(){
   err.textContent="";btn.className="hb-save-btn active";
 }
 
-function hbSave(){
+async function hbSave(){
   if(document.getElementById("hbSaveBtn").classList.contains("disabled"))return;
   const nick=document.getElementById("hbNickInput").value.trim();
-  const arr=hbGetAll();
-  const now=new Date().toISOString();
-  const idx=arr.findIndex(d=>d.nickname===nick);
-  if(idx>-1){arr[idx].selectedHobbies=[...hbSel];arr[idx].updatedAt=now}
-  else arr.push({nickname:nick,selectedHobbies:[...hbSel],createdAt:now,updatedAt:now});
-  hbSetAll(arr);hbSetNick(nick);
-  const toast=document.getElementById("hbToast");
-  toast.classList.add("show");
+  const btn=document.getElementById("hbSaveBtn");
+  btn.textContent="저장 중...";btn.className="hb-save-btn disabled";
+  const{error}=await sb.from('hobby_map').upsert(
+    {nickname:nick,hobbies:[...hbSel],updated_at:new Date().toISOString()},
+    {onConflict:'nickname'}
+  );
+  if(error){
+    console.error(error);
+    btn.textContent="저장 실패. 다시 시도해주세요.";
+    setTimeout(()=>hbValidate(),2000);
+    return;
+  }
+  hbSetNick(nick);
+  document.getElementById("hbToast").classList.add("show");
   setTimeout(()=>{hbRenderResult(nick)},1200);
 }
 
-function hbRenderResult(myNick){
-  const arr=hbGetAll();
+async function hbRenderResult(myNick){
+  document.getElementById("hobby-app").innerHTML=`<div style="text-align:center;padding:80px 0;color:#9b94b3;font-size:14px">불러오는 중...</div>`;
+  const arr=await hbGetAll();
   const me=arr.find(d=>d.nickname===myNick);
   document.getElementById("hobby-app").innerHTML=`
     <div class="hb-result-hero">
@@ -1244,9 +1259,10 @@ function hbRenderResult(myNick){
   hbRenderMembers(arr);
 }
 
-function hbGoEdit(){
+async function hbGoEdit(){
   const myNick=hbGetNick();
-  const me=hbGetAll().find(d=>d.nickname===myNick);
+  const arr=await hbGetAll();
+  const me=arr.find(d=>d.nickname===myNick);
   hbRenderSelect();
   if(me){
     hbSel=[...me.selectedHobbies];
@@ -1297,9 +1313,9 @@ function hbToggleMem(h){
   h.querySelector(".hb-chevron").classList.toggle("open");
 }
 
-function hbReset(){
+async function hbReset(){
   if(confirm("정말 전체 데이터를 삭제할까요?")){
-    localStorage.removeItem(KEY_ALL);
+    await sb.from('hobby_map').delete().not('id','is',null);
     localStorage.removeItem(KEY_ME);
     hbRenderSelect();
   }
