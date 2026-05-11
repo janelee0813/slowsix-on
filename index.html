@@ -1611,6 +1611,264 @@ hobbyInit();
 </script>
 
 <div id="page-diet" class="hidden">
+<style>
+#wc-app{max-width:520px;margin:0 auto;padding:1rem 1rem 3rem}
+.wc-header{text-align:center;padding:1.5rem 0 1rem}
+.wc-header h1{font-size:22px;font-weight:700;color:#f5f1ff;letter-spacing:-0.5px}
+.wc-header p{font-size:13px;color:#9b94b3;margin-top:4px}
+.wc-card{background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:1.125rem 1.25rem;margin-bottom:0.875rem}
+.wc-card-title{font-size:12px;font-weight:600;color:#9b94b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:0.875rem;display:flex;align-items:center;gap:5px}
+.wc-row{display:flex;align-items:center;gap:8px;margin-bottom:0.625rem}
+.wc-label{font-size:13px;color:#9b94b3;min-width:76px}
+#wc-app input[type="text"],#wc-app input[type="date"],#wc-app input[type="number"],#wc-app select{flex:1;width:100%;font-size:14px;padding:8px 11px;border-radius:8px;border:1px solid rgba(140,110,200,0.25);background:#0a0612;color:#f5f1ff;outline:none;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;font-family:inherit}
+#wc-app input:focus,#wc-app select:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.15)}
+#wc-app input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:0.4;filter:invert(1)}
+#wc-app input::placeholder{color:#6b6480}
+#wc-app select option{background:#15101f;color:#f5f1ff}
+.wc-toggle-row{display:flex;gap:6px;flex:1}
+.wc-toggle-btn{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(140,110,200,0.25);background:#15101f;color:#9b94b3;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit}
+.wc-toggle-btn:hover{border-color:rgba(140,110,200,0.5)}
+.wc-toggle-btn.yes{background:rgba(94,224,168,0.1);border-color:rgba(94,224,168,0.4);color:#5ee0a8}
+.wc-toggle-btn.no{background:rgba(255,95,109,0.1);border-color:rgba(255,95,109,0.35);color:#ff5f6d}
+.wc-btn-primary{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:0.75rem;transition:all .2s;letter-spacing:-0.2px;font-family:inherit;box-shadow:0 6px 24px -6px rgba(181,102,255,0.5)}
+.wc-btn-primary:hover{filter:brightness(1.08)}
+.wc-btn-primary:active{transform:scale(0.98)}
+.wc-btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.wc-btn-secondary{padding:8px 14px;border-radius:8px;border:1px solid rgba(140,110,200,0.25);background:rgba(181,102,255,0.08);color:#9b94b3;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit}
+.wc-btn-secondary:hover{border-color:rgba(181,102,255,0.5);color:#b566ff}
+.wc-toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#1c1530;border:1px solid rgba(181,102,255,0.4);color:#f5f1ff;padding:9px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(181,102,255,0.2)}
+.wc-toast.show{opacity:1}
+.wc-toast.error{border-color:rgba(255,95,109,0.4)}
+.wc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:0.625rem}
+.wc-chip{display:inline-flex;align-items:center;gap:2px;background:rgba(181,102,255,0.1);border:1px solid rgba(181,102,255,0.3);border-radius:30px;padding:4px 10px 4px 12px;font-size:13px;font-weight:500;color:#d4a0ff}
+.wc-chip-del{cursor:pointer;color:#9b94b3;font-size:17px;line-height:1;padding:0 2px;border:none;background:none;transition:color .15s}
+.wc-chip-del:hover{color:#ff5f6d}
+hr.wc-sep{border:none;border-top:1px solid rgba(140,110,200,0.15);margin:0.25rem 0 0.875rem}
+.wc-stats-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wc-table{width:100%;border-collapse:collapse;font-size:13px;min-width:360px}
+.wc-table th{text-align:left;padding:6px 8px;color:#9b94b3;font-weight:600;border-bottom:1px solid rgba(140,110,200,0.15);font-size:11px;letter-spacing:0.3px;white-space:nowrap}
+.wc-table td{padding:9px 8px;border-bottom:1px solid rgba(140,110,200,0.1);color:#f5f1ff;vertical-align:middle}
+.wc-table tr:last-child td{border-bottom:none}
+.wc-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.wc-badge-ok{display:inline-block;background:rgba(94,224,168,0.12);color:#5ee0a8;border-radius:20px;padding:3px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.wc-badge-prog{display:inline-block;background:rgba(140,110,200,0.12);color:#9b94b3;border-radius:20px;padding:3px 9px;font-size:12px;font-weight:500;white-space:nowrap}
+.wc-avatar{width:28px;height:28px;border-radius:50%;background:rgba(181,102,255,0.15);color:#b566ff;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.wc-today-list{display:flex;flex-direction:column;gap:8px}
+.wc-today-item{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-radius:8px;background:rgba(21,16,31,0.8);border:1px solid rgba(140,110,200,0.18);transition:background .15s}
+.wc-today-item.done{background:rgba(94,224,168,0.08);border-color:rgba(94,224,168,0.3)}
+.wc-nick{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;color:#f5f1ff}
+.wc-kcal{font-size:13px;font-variant-numeric:tabular-nums;color:#9b94b3}
+.wc-today-item.done .wc-nick{color:#5ee0a8}
+.wc-today-item.done .wc-kcal{color:#5ee0a8;font-weight:600}
+.wc-empty{color:#6b6480;font-size:13px;text-align:center;padding:1.75rem 0}
+.wc-cal-wrap{display:flex;align-items:center;gap:6px;flex:1}
+.wc-cal-unit{font-size:13px;color:#9b94b3;white-space:nowrap}
+.wc-disabled{opacity:0.38;pointer-events:none}
+</style>
+<div id="wc-app"></div>
+<div class="wc-toast" id="wc-toast"></div>
+<script>
+(function(){
+const SUPABASE_URL='https://teugnaahpcpzejbdayyy.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let wcParts=[];
+let wcRecs=[];
+const wcForm={date:wcToday(),nickname:'',isCompleted:true,calories:''};
+window.wcForm=wcForm;
+
+function wcToday(){
+  const n=new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+function wcFmt(n){return Number(n||0).toLocaleString('ko-KR')}
+function wcGetMonday(d){
+  const dt=new Date(d);const day=dt.getDay();
+  dt.setDate(dt.getDate()+(day===0?-6:1-day));
+  return dt.toISOString().slice(0,10);
+}
+function wcWeekRange(){
+  const mon=wcGetMonday(wcToday());
+  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  return{mon,sun:sun.toISOString().slice(0,10)};
+}
+function wcStats(nick){
+  const{mon,sun}=wcWeekRange();
+  const wd=wcRecs.filter(r=>r.nickname===nick&&r.is_completed&&r.date>=mon&&r.date<=sun);
+  const td=wcRecs.filter(r=>r.nickname===nick&&r.is_completed);
+  return{
+    weekCount:wd.length,
+    weekCal:wd.reduce((s,r)=>s+(r.calories||0),0),
+    totalCount:td.length,
+    totalCal:td.reduce((s,r)=>s+(r.calories||0),0)
+  };
+}
+function wcToast(msg,err=false){
+  const t=document.getElementById('wc-toast');
+  t.textContent=msg;
+  t.className='wc-toast'+(err?' error':'')+' show';
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+async function wcInit(){
+  const[p,r]=await Promise.all([
+    sb.from('wc_participants').select('*').order('created_at'),
+    sb.from('wc_records').select('*')
+  ]);
+  if(!p.error)wcParts=p.data;
+  if(!r.error)wcRecs=r.data;
+  wcRender();
+}
+
+async function wcAddParticipant(){
+  const inp=document.getElementById('wc-inp-nick');
+  const nick=inp.value.trim();
+  if(!nick){wcToast('닉네임을 입력해주세요',true);return}
+  if(wcParts.find(p=>p.nickname===nick)){wcToast('이미 등록된 닉네임이에요',true);return}
+  const btn=document.getElementById('wc-reg-btn');
+  btn.disabled=true;btn.textContent='등록 중...';
+  const{data,error}=await sb.from('wc_participants').insert({nickname:nick}).select().single();
+  if(error){wcToast('등록 실패',true)}
+  else{wcParts.push(data);inp.value='';wcToast(`${nick} 등록 완료!`);wcRender()}
+  btn.disabled=false;btn.textContent='등록';
+}
+
+async function wcDeleteParticipant(nick){
+  if(!confirm(`"${nick}"을(를) 삭제할까요?\n관련 인증 기록은 유지됩니다.`))return;
+  const{error}=await sb.from('wc_participants').delete().eq('nickname',nick);
+  if(error){wcToast('삭제 실패',true);return}
+  wcParts=wcParts.filter(p=>p.nickname!==nick);
+  if(wcForm.nickname===nick)wcForm.nickname='';
+  wcToast(`${nick} 삭제됨`);wcRender();
+}
+
+function wcSetCompleted(val){
+  wcForm.isCompleted=val;
+  if(!val)wcForm.calories=0;
+  wcRender();
+}
+
+async function wcSaveRecord(){
+  const dateVal=document.getElementById('wc-inp-date').value;
+  const nickVal=document.getElementById('wc-inp-person').value;
+  const calEl=document.getElementById('wc-inp-cal');
+  const calVal=wcForm.isCompleted?(parseInt(calEl?calEl.value:0)||0):0;
+  if(!dateVal){wcToast('날짜를 선택해주세요',true);return}
+  if(!nickVal){wcToast('닉네임을 선택해주세요',true);return}
+  const btn=document.getElementById('wc-save-btn');
+  btn.disabled=true;btn.textContent='저장 중...';
+  const{data,error}=await sb.from('wc_records')
+    .upsert({date:dateVal,nickname:nickVal,is_completed:wcForm.isCompleted,calories:calVal},{onConflict:'date,nickname'})
+    .select().single();
+  if(error){wcToast('저장 실패',true)}
+  else{
+    const idx=wcRecs.findIndex(r=>r.date===dateVal&&r.nickname===nickVal);
+    if(idx>=0){wcRecs[idx]=data;wcToast('기록 수정 완료! ✏️')}
+    else{wcRecs.push(data);wcToast('인증 저장 완료! 🎉')}
+    wcForm.isCompleted=true;wcForm.calories='';wcForm.nickname='';
+    wcRender();
+  }
+  btn.disabled=false;btn.textContent='💾 인증 저장';
+}
+
+function wcRender(){
+  const app=document.getElementById('wc-app');
+  const t=wcToday();
+  const todayMap={};
+  wcRecs.filter(r=>r.date===t).forEach(r=>{todayMap[r.nickname]=r});
+  app.innerHTML=`
+    <div class="wc-header">
+      <h1>🏃 운동 인증 챌린지</h1>
+      <p>주간 5회 달성을 목표로 함께 운동해요!</p>
+    </div>
+    <div class="wc-card">
+      <div class="wc-card-title">👥 참여자 등록</div>
+      <div class="wc-row">
+        <input type="text" id="wc-inp-nick" placeholder="닉네임을 입력하세요" maxlength="20" style="flex:1" onkeydown="if(event.key==='Enter')wcAddParticipant()"/>
+        <button class="wc-btn-secondary" id="wc-reg-btn" onclick="wcAddParticipant()">등록</button>
+      </div>
+      ${wcParts.length>0
+        ?`<div class="wc-chips">${wcParts.map(p=>`<span class="wc-chip">${p.nickname}<button class="wc-chip-del" onclick="wcDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}')">×</button></span>`).join('')}</div>`
+        :`<p style="font-size:13px;color:#6b6480;margin-top:8px">참여자를 등록하면 이곳에 표시됩니다</p>`}
+    </div>
+    <div class="wc-card">
+      <div class="wc-card-title">✏️ 오늘의 운동 인증</div>
+      <div class="wc-row">
+        <span class="wc-label">날짜</span>
+        <input type="date" id="wc-inp-date" value="${wcForm.date}" onchange="wcForm.date=this.value"/>
+      </div>
+      <div class="wc-row">
+        <span class="wc-label">닉네임</span>
+        <select id="wc-inp-person" onchange="wcForm.nickname=this.value">
+          <option value="">선택하세요</option>
+          ${wcParts.map(p=>`<option value="${p.nickname}"${wcForm.nickname===p.nickname?' selected':''}>${p.nickname}</option>`).join('')}
+        </select>
+      </div>
+      <div class="wc-row">
+        <span class="wc-label">실행 여부</span>
+        <div class="wc-toggle-row">
+          <button class="wc-toggle-btn${wcForm.isCompleted?' yes':''}" onclick="wcSetCompleted(true)">✅ 했다</button>
+          <button class="wc-toggle-btn${!wcForm.isCompleted?' no':''}" onclick="wcSetCompleted(false)">❌ 안 했다</button>
+        </div>
+      </div>
+      <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}">
+        <span class="wc-label">소모 칼로리</span>
+        <div class="wc-cal-wrap">
+          <input type="number" id="wc-inp-cal" placeholder="0" value="${wcForm.isCompleted?wcForm.calories:0}" min="0" max="9999" oninput="wcForm.calories=this.value" style="width:100%"/>
+          <span class="wc-cal-unit">kcal</span>
+        </div>
+      </div>
+      <button class="wc-btn-primary" id="wc-save-btn" onclick="wcSaveRecord()">💾 인증 저장</button>
+    </div>
+    <hr class="wc-sep"/>
+    <div class="wc-card">
+      <div class="wc-card-title">📊 참여자 실행현황</div>
+      ${wcParts.length===0
+        ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
+        :`<div class="wc-stats-wrap"><table class="wc-table">
+            <thead><tr>
+              <th>닉네임</th>
+              <th style="text-align:right">이번 주</th>
+              <th style="text-align:right">주간 kcal</th>
+              <th style="text-align:right">총 횟수</th>
+              <th style="text-align:right">총 kcal</th>
+              <th>미션</th>
+            </tr></thead>
+            <tbody>${wcParts.map(p=>{const s=wcStats(p.nickname);return`
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:7px"><span class="wc-avatar">${p.nickname.slice(0,1)}</span><span style="font-weight:600">${p.nickname}</span></div></td>
+                <td class="num" style="font-weight:600">${s.weekCount}회</td>
+                <td class="num">${wcFmt(s.weekCal)}</td>
+                <td class="num">${s.totalCount}회</td>
+                <td class="num">${wcFmt(s.totalCal)}</td>
+                <td><span class="${s.weekCount>=5?'wc-badge-ok':'wc-badge-prog'}">${s.weekCount>=5?'✅ 미션 성공':'⏳ 진행중'}</span></td>
+              </tr>`;}).join('')}
+            </tbody>
+          </table></div>`}
+    </div>
+    <div class="wc-card">
+      <div class="wc-card-title">📅 오늘 인증 현황 <span style="font-weight:400;color:#6b6480;font-size:11px;margin-left:4px">${t}</span></div>
+      ${wcParts.length===0
+        ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
+        :`<div class="wc-today-list">${wcParts.map(p=>{
+            const rec=todayMap[p.nickname];
+            if(!rec)return`<div class="wc-today-item"><span class="wc-nick">⏳ ${p.nickname}</span><span class="wc-kcal">미인증</span></div>`;
+            if(!rec.is_completed)return`<div class="wc-today-item"><span class="wc-nick">❌ ${p.nickname}</span><span class="wc-kcal">0 kcal</span></div>`;
+            return`<div class="wc-today-item done"><span class="wc-nick">✅ ${p.nickname}</span><span class="wc-kcal">${wcFmt(rec.calories)} kcal</span></div>`;
+          }).join('')}</div>`}
+    </div>
+  `;
+}
+
+window.wcAddParticipant=wcAddParticipant;
+window.wcDeleteParticipant=wcDeleteParticipant;
+window.wcSetCompleted=wcSetCompleted;
+window.wcSaveRecord=wcSaveRecord;
+
+wcInit();
+})();
+</script>
 </div>
 
 <script>
