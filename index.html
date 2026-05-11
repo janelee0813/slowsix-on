@@ -1127,7 +1127,7 @@ function hbRenderSelect(){
     <div class="hb-section">
       <div class="hb-search-wrap" style="margin-top:4px">
         <i class="ti ti-search hb-search-icon"></i>
-        <input type="text" id="hbSearchInput" placeholder="찾고 싶은 벙을 검색해봐" oninput="hbOnSearch()">
+        <input type="text" id="hbSearchInput" placeholder="찾고 싶은 벙을 검색해보세요" oninput="hbOnSearch()">
       </div>
       <div class="hb-count-label" id="hbCountLabel">현재 선택한 벙: <strong>0개</strong></div>
       <div id="hbHobbyGroups"></div>
@@ -1136,9 +1136,9 @@ function hbRenderSelect(){
         <div class="hb-preview-chips" id="hbPreviewChips"><span class="hb-preview-empty">아직 선택한 벙이 없어요.</span></div>
       </div>
       <div class="hb-nick-card">
-        <div class="hb-nick-label">닉네임을 입력해주세요</div>
-        <div class="hb-nick-hint">꼭 오픈채팅방에서 쓰는 닉네임과 동일하게 적어주세요!<br>ex) 제인 강남 남 82</div>
-        <input type="text" id="hbNickInput" placeholder="예: 제인" maxlength="12" oninput="hbValidate()">
+        <div class="hb-nick-label">닉네임을 입력해주세요!</div>
+        <div class="hb-nick-hint">오픈채팅방에서 쓰는 닉네임과 동일하게 작성 필수<br>ex) 제인 강남 남 82</div>
+        <input type="text" id="hbNickInput" placeholder="예: 제인 강남 남 82" maxlength="20" oninput="hbValidate()">
         <div class="hb-err-msg" id="hbErrMsg"></div>
       </div>
       <button class="hb-save-btn disabled" id="hbSaveBtn" onclick="hbSave()">선택 완료하고 결과 보기</button>
