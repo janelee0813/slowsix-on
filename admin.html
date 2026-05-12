@@ -363,10 +363,10 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
           </div>
           <select id="reentry-filter" class="form-input sm:w-40" onchange="renderReentries()">
             <option value="">전체 상태</option>
+            <option value="미사용">미사용 (0회)</option>
             <option value="허용">허용 (1회)</option>
             <option value="주의">주의 (2회)</option>
             <option value="마지막">마지막 허용 (3회)</option>
-            <option value="제한">재입장 제한 (4회+)</option>
           </select>
         </div>
 
@@ -656,8 +656,8 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
       </div>
       <div><label class="form-label">누적 재입장 횟수 *</label>
         <select id="r-count" class="form-input">
-          <option value="1">1회</option><option value="2">2회</option>
-          <option value="3">3회</option><option value="4">4회</option><option value="5">5회 이상</option>
+          <option value="0">0회</option><option value="1">1회</option>
+          <option value="2">2회</option><option value="3">3회</option>
         </select>
       </div>
       <div><label class="form-label">기록자</label><input type="text" id="r-recorder" class="form-input" placeholder="기록자 이름"/></div>
@@ -1108,10 +1108,10 @@ async function saveWarning(){
 // ══════════════════════════════════════
 function reentryStatus(count){
   const c=parseInt(count);
-  if(c>=4)return{label:'재입장 제한',cls:'badge-danger'};
   if(c===3)return{label:'마지막 허용',cls:'badge-warn2'};
   if(c===2)return{label:'주의',cls:'badge-warn1'};
-  return{label:'허용',cls:'badge-ok'};
+  if(c===1)return{label:'허용',cls:'badge-ok'};
+  return{label:'미사용',cls:'badge-gray'};
 }
 
 function renderReentries(){
@@ -1120,10 +1120,8 @@ function renderReentries(){
   let rows=[...data.reentries].sort((a,b)=>b.date.localeCompare(a.date));
   if(q)rows=rows.filter(x=>x.nickname.toLowerCase().includes(q));
   if(f){
-    const fMap={'허용':1,'주의':2,'마지막':3,'제한':4};
-    const fCount=fMap[f];
-    if(f==='제한')rows=rows.filter(x=>x.count>=4);
-    else if(fCount)rows=rows.filter(x=>x.count===fCount);
+    const fMap={'미사용':0,'허용':1,'주의':2,'마지막':3};
+    if(f in fMap)rows=rows.filter(x=>x.count===fMap[f]);
   }
   const tbody=document.getElementById('reentry-tbody');
   const empty=document.getElementById('reentry-empty');
