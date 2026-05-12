@@ -620,7 +620,7 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
       <div><label class="form-label">경고 횟수 *</label>
         <select id="w-count" class="form-input">
           <option value="1">1회</option><option value="2">2회</option>
-          <option value="3">3회</option><option value="4">4회 이상</option>
+          <option value="3">3회</option>
         </select>
       </div>
       <div><label class="form-label">기록자</label><input type="text" id="w-recorder" class="form-input" placeholder="기록자 이름"/></div>
@@ -937,7 +937,7 @@ function renderDashboard(){
     {label:'총 경고 대상자',value:totalWarnNicks,icon:'ti-users',color:'text-neon-purple',bg:'bg-neon-purple/10',border:'border-neon-purple/20'},
     {label:'경고 1회',value:w1,icon:'ti-alert-circle',color:'text-warning',bg:'bg-warning/10',border:'border-warning/20'},
     {label:'경고 2회',value:w2,icon:'ti-alert-triangle',color:'text-neon-pink',bg:'bg-neon-pink/10',border:'border-neon-pink/20'},
-    {label:'강퇴 검토 대상',value:w3,icon:'ti-user-x',color:'text-destructive',bg:'bg-destructive/10',border:'border-destructive/20'},
+    {label:'강퇴 대상',value:w3,icon:'ti-user-x',color:'text-destructive',bg:'bg-destructive/10',border:'border-destructive/20'},
     {label:'재입장 제한 대상',value:rLimit,icon:'ti-door-off',color:'text-destructive',bg:'bg-destructive/10',border:'border-destructive/20'},
     {label:'이슈 기록 수',value:i.length,icon:'ti-file-text',color:'text-neon-blue',bg:'bg-neon-blue/10',border:'border-neon-blue/20'},
     {label:'공지문 양식',value:n.filter(x=>x.active).length,icon:'ti-speakerphone',color:'text-success',bg:'bg-success/10',border:'border-success/20'},
@@ -961,7 +961,7 @@ function renderDashboard(){
     <div class="neon-card p-5 border border-destructive/25">
       <div class="flex items-center gap-2 mb-3">
         <i class="ti ti-user-x text-destructive"></i>
-        <h3 class="text-sm font-bold text-foreground">강퇴 검토 대상자</h3>
+        <h3 class="text-sm font-bold text-foreground">강퇴 대상자</h3>
         <span class="badge badge-danger ml-auto">${kickTargets.length}명</span>
       </div>
       ${kickTargets.length===0
@@ -1013,7 +1013,7 @@ function renderDashboard(){
 // ══════════════════════════════════════
 function warnBadge(count){
   const c=parseInt(count);
-  if(c>=3)return`<span class="badge badge-danger">강제퇴장 대상</span>`;
+  if(c>=3)return`<span class="badge badge-danger">강퇴</span>`;
   if(c==2)return`<span class="badge badge-warn2">강한 주의</span>`;
   return`<span class="badge badge-warn1">주의</span>`;
 }
@@ -1417,7 +1417,7 @@ function searchMember(){
     <div class="mb-4 neon-card neon-card-glow p-5">
       <div class="flex items-center gap-3 flex-wrap">
         <div class="text-lg font-bold text-foreground">${q}</div>
-        ${isKick?'<span class="badge badge-danger">강퇴 검토 대상</span>':''}
+        ${isKick?'<span class="badge badge-danger">강퇴 대상</span>':''}
         ${isLimit?'<span class="badge badge-warn2">재입장 제한 대상</span>':''}
         <div class="ml-auto flex gap-3 text-xs text-muted-foreground">
           <span>경고 <strong class="text-foreground">${maxWarn}회</strong></span>
