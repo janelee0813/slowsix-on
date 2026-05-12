@@ -1911,7 +1911,7 @@ function wcRender(){
         </button>
       </div>
     </div>
-    <div class="wc-card">
+    <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
       <div class="wc-row">
         <input type="text" id="wc-inp-nick" placeholder="닉네임을 입력하세요" maxlength="20" style="flex:1" onkeydown="if(event.key==='Enter')wcAddParticipant()"/>
