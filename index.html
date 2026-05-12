@@ -2002,6 +2002,7 @@ function wcCopyUrl(){
 }
 
 function wcWeeklyStreak(){
+  console.log('[streak] wcParts.length=',wcParts.length, wcParts.map(p=>p.nickname));
   if(wcParts.length===0)return'';
   const{mon}=wcWeekRange();
   const today=wcToday();
