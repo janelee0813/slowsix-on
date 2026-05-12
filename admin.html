@@ -875,12 +875,12 @@ function saveData(k){
   localStorage.setItem(KEYS[k],JSON.stringify(data[k]));
 }
 function initData(){
-  loadData();
-  // 샘플 데이터 삽입 (처음 한 번만)
-  if(!localStorage.getItem('admin_sample_loaded')){
-    loadSampleData();
-    localStorage.setItem('admin_sample_loaded','1');
+  // 기존 샘플 데이터 제거
+  if(localStorage.getItem('admin_sample_loaded')){
+    Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
+    localStorage.removeItem('admin_sample_loaded');
   }
+  loadData();
 }
 
 function loadSampleData(){
