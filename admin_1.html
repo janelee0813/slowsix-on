@@ -215,7 +215,7 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
       <i class="ti ti-door-enter text-base"></i> 재입장 관리
     </div>
     <div class="menu-item" onclick="showSection('issues')" id="menu-issues">
-      <i class="ti ti-file-description text-base"></i> 멤버 이슈 기록
+      <i class="ti ti-file-description text-base"></i> 멤버 활동 기록
     </div>
     <div class="menu-item" onclick="showSection('notices')" id="menu-notices">
       <i class="ti ti-speakerphone text-base"></i> 공지문 양식
@@ -388,15 +388,15 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
         </div>
       </div>
 
-      <!-- ▸▸▸ 멤버 이슈 기록 ◂◂◂ -->
+      <!-- ▸▸▸ 멤버 활동 기록 ◂◂◂ -->
       <div id="section-issues" class="hidden">
         <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
           <div class="flex-1">
-            <h2 class="text-xl font-bold text-foreground">멤버 이슈 기록</h2>
-            <p class="text-sm text-muted-foreground mt-1">경고 전 참고용 이슈를 기록합니다.</p>
+            <h2 class="text-xl font-bold text-foreground">멤버 활동 기록</h2>
+            <p class="text-sm text-muted-foreground mt-1">긍정/부정 활동을 기록하고 관리합니다.</p>
           </div>
           <button class="btn-primary" onclick="openIssueModal()">
-            <i class="ti ti-plus text-sm"></i> 이슈 기록 추가
+            <i class="ti ti-plus text-sm"></i> 활동 기록 추가
           </button>
         </div>
 
@@ -405,14 +405,27 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
             <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i>
             <input type="text" id="issue-search" class="form-input pl-9" placeholder="닉네임으로 검색" oninput="renderIssues()"/>
           </div>
+          <select id="issue-polarity-filter" class="form-input sm:w-28" onchange="renderIssues()">
+            <option value="">긍정/부정</option>
+            <option value="긍정">긍정</option>
+            <option value="부정">부정</option>
+          </select>
           <select id="issue-type-filter" class="form-input sm:w-36" onchange="renderIssues()">
             <option value="">전체 유형</option>
-            <option value="태도">태도</option>
-            <option value="분쟁">분쟁</option>
-            <option value="노쇼">노쇼</option>
-            <option value="광고">광고</option>
-            <option value="수익공개">수익공개</option>
-            <option value="기타">기타</option>
+            <optgroup label="— 부정">
+              <option value="태도">태도</option>
+              <option value="분쟁">분쟁</option>
+              <option value="노쇼">노쇼</option>
+              <option value="광고">광고</option>
+              <option value="수익공개">수익공개</option>
+              <option value="기타">기타</option>
+            </optgroup>
+            <optgroup label="— 긍정">
+              <option value="모범행동">모범행동</option>
+              <option value="적극참여">적극참여</option>
+              <option value="배려">배려</option>
+              <option value="칭찬">칭찬</option>
+            </optgroup>
           </select>
           <select id="issue-importance-filter" class="form-input sm:w-32" onchange="renderIssues()">
             <option value="">전체 중요도</option>
@@ -427,7 +440,7 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>날짜</th><th>닉네임</th><th>유형</th><th>중요도</th>
+                  <th>날짜</th><th>닉네임</th><th>구분</th><th>유형</th><th>중요도</th>
                   <th>기록자</th><th>내용 요약</th><th>후속 조치</th><th>관리</th>
                 </tr>
               </thead>
@@ -674,19 +687,32 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
 <div id="issue-modal" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="flex items-center justify-between mb-5">
-      <h3 class="text-base font-bold text-foreground" id="issue-modal-title">이슈 기록 추가</h3>
+      <h3 class="text-base font-bold text-foreground" id="issue-modal-title">활동 기록 추가</h3>
       <button onclick="closeModal('issue-modal')" class="text-muted-foreground hover:text-foreground"><i class="ti ti-x text-lg"></i></button>
     </div>
     <input type="hidden" id="issue-edit-id"/>
+    <div class="mb-4">
+      <label class="form-label mb-2">구분 *</label>
+      <div class="flex gap-2">
+        <button type="button" id="i-polarity-neg" onclick="setIssuePolarity('부정')" class="flex-1 py-2 rounded-lg border text-sm font-600 transition-all bg-destructive/15 border-destructive/40 text-destructive">부정</button>
+        <button type="button" id="i-polarity-pos" onclick="setIssuePolarity('긍정')" class="flex-1 py-2 rounded-lg border text-sm font-600 transition-all border-border text-muted-foreground">긍정</button>
+      </div>
+    </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div><label class="form-label">날짜 *</label><input type="date" id="i-date" class="form-input"/></div>
       <div><label class="form-label">대상 닉네임 *</label><input type="text" id="i-nickname" class="form-input" placeholder="닉네임 입력"/></div>
       <div><label class="form-label">기록자</label><input type="text" id="i-recorder" class="form-input" placeholder="기록자 이름"/></div>
-      <div><label class="form-label">이슈 유형</label>
+      <div><label class="form-label">유형</label>
         <select id="i-type" class="form-input">
-          <option value="태도">태도</option><option value="분쟁">분쟁</option>
-          <option value="노쇼">노쇼</option><option value="광고">광고</option>
-          <option value="수익공개">수익공개</option><option value="기타">기타</option>
+          <optgroup label="— 부정">
+            <option value="태도">태도</option><option value="분쟁">분쟁</option>
+            <option value="노쇼">노쇼</option><option value="광고">광고</option>
+            <option value="수익공개">수익공개</option><option value="기타">기타</option>
+          </optgroup>
+          <optgroup label="— 긍정">
+            <option value="모범행동">모범행동</option><option value="적극참여">적극참여</option>
+            <option value="배려">배려</option><option value="칭찬">칭찬</option>
+          </optgroup>
         </select>
       </div>
       <div><label class="form-label">중요도</label>
@@ -700,7 +726,7 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
           <option value="경고 검토">경고 검토</option><option value="운영진 논의 필요">운영진 논의 필요</option>
         </select>
       </div>
-      <div class="sm:col-span-2"><label class="form-label">내용 *</label><textarea id="i-content" class="form-input" rows="3" placeholder="이슈 내용을 사실 중심으로 기록하세요"></textarea></div>
+      <div class="sm:col-span-2"><label class="form-label">내용 *</label><textarea id="i-content" class="form-input" rows="3" placeholder="내용을 사실 중심으로 기록하세요"></textarea></div>
     </div>
     <div class="flex justify-end gap-2 mt-5">
       <button onclick="closeModal('issue-modal')" class="btn-secondary">취소</button>
@@ -889,7 +915,7 @@ function uid(){return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)
 // ══════════════════════════════════════
 // 네비게이션
 // ══════════════════════════════════════
-const sectionTitles={dashboard:'운영 현황',warnings:'경고자 관리',reentry:'재입장 관리',issues:'멤버 이슈 기록',notices:'공지문 양식',search:'멤버 통합 검색',backup:'백업/설정'};
+const sectionTitles={dashboard:'운영 현황',warnings:'경고자 관리',reentry:'재입장 관리',issues:'멤버 활동 기록',notices:'공지문 양식',search:'멤버 통합 검색',backup:'백업/설정'};
 
 function showSection(name){
   document.querySelectorAll('[id^="section-"]').forEach(el=>el.classList.add('hidden'));
@@ -1209,12 +1235,20 @@ function importanceBadge(imp){
   return`<span class="badge badge-gray">${imp}</span>`;
 }
 
+function polarityBadge(p){
+  return p==='긍정'
+    ?`<span class="badge badge-ok">긍정</span>`
+    :`<span class="badge badge-danger">부정</span>`;
+}
+
 function renderIssues(){
   const q=(document.getElementById('issue-search')?.value||'').toLowerCase();
+  const fp=document.getElementById('issue-polarity-filter')?.value||'';
   const ft=document.getElementById('issue-type-filter')?.value||'';
   const fi=document.getElementById('issue-importance-filter')?.value||'';
   let rows=[...data.issues].sort((a,b)=>b.date.localeCompare(a.date));
   if(q)rows=rows.filter(x=>x.nickname.toLowerCase().includes(q));
+  if(fp)rows=rows.filter(x=>(x.polarity||'부정')===fp);
   if(ft)rows=rows.filter(x=>x.type===ft);
   if(fi)rows=rows.filter(x=>x.importance===fi);
   const tbody=document.getElementById('issues-tbody');
@@ -1224,7 +1258,8 @@ function renderIssues(){
   tbody.innerHTML=rows.map(x=>`<tr>
     <td class="text-muted-foreground">${x.date}</td>
     <td class="font-medium">${x.nickname}</td>
-    <td><span class="badge badge-purple">${x.type}</span></td>
+    <td>${polarityBadge(x.polarity||'부정')}</td>
+    <td><span class="badge ${(x.polarity||'부정')==='긍정'?'badge-ok':'badge-purple'}">${x.type}</span></td>
     <td>${importanceBadge(x.importance)}</td>
     <td class="text-muted-foreground">${x.recorder||'-'}</td>
     <td class="max-w-[150px] text-xs text-muted-foreground">${x.content.slice(0,40)}${x.content.length>40?'…':''}</td>
@@ -1238,12 +1273,29 @@ function renderIssues(){
   </tr>`).join('');
 }
 
+function setIssuePolarity(p){
+  const neg=document.getElementById('i-polarity-neg');
+  const pos=document.getElementById('i-polarity-pos');
+  if(p==='부정'){
+    neg.className='flex-1 py-2 rounded-lg border text-sm font-semibold transition-all bg-destructive/15 border-destructive/40 text-destructive';
+    pos.className='flex-1 py-2 rounded-lg border text-sm font-semibold transition-all border-border text-muted-foreground';
+  }else{
+    pos.className='flex-1 py-2 rounded-lg border text-sm font-semibold transition-all bg-success/15 border-success/40 text-success';
+    neg.className='flex-1 py-2 rounded-lg border text-sm font-semibold transition-all border-border text-muted-foreground';
+  }
+  neg.dataset.selected=(p==='부정')?'true':'false';
+}
+function getIssuePolarity(){
+  return document.getElementById('i-polarity-neg').dataset.selected==='true'?'부정':'긍정';
+}
+
 function openIssueModal(id){
-  document.getElementById('issue-modal-title').textContent=id?'이슈 기록 수정':'이슈 기록 추가';
+  document.getElementById('issue-modal-title').textContent=id?'활동 기록 수정':'활동 기록 추가';
   document.getElementById('issue-edit-id').value=id||'';
   if(id){
     const x=data.issues.find(i=>i.id===id);
     if(!x)return;
+    setIssuePolarity(x.polarity||'부정');
     document.getElementById('i-date').value=x.date;
     document.getElementById('i-nickname').value=x.nickname;
     document.getElementById('i-recorder').value=x.recorder||'';
@@ -1252,6 +1304,7 @@ function openIssueModal(id){
     document.getElementById('i-content').value=x.content;
     document.getElementById('i-followup').value=x.followup;
   } else {
+    setIssuePolarity('부정');
     document.getElementById('i-date').value=todayStr();
     document.getElementById('i-nickname').value='';
     document.getElementById('i-recorder').value='';
@@ -1273,6 +1326,7 @@ async function deleteIssue(id){
 async function saveIssue(){
   const editId=document.getElementById('issue-edit-id').value;
   const obj={
+    polarity:getIssuePolarity(),
     date:document.getElementById('i-date').value,
     nickname:document.getElementById('i-nickname').value.trim(),
     recorder:document.getElementById('i-recorder').value.trim(),
