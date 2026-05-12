@@ -1918,7 +1918,6 @@ function wcRender(){
         </button>
       </div>
     </div>
-    ${wcWeeklyStreak()}
     ${wcProgressBar()}
     <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
@@ -2001,46 +2000,6 @@ function wcCopyUrl(){
   });
 }
 
-function wcWeeklyStreak(){
-  console.log('[streak] wcParts.length=',wcParts.length, wcParts.map(p=>p.nickname));
-  if(wcParts.length===0)return'';
-  const{mon}=wcWeekRange();
-  const today=wcToday();
-  const days=['월','화','수','목','금','토','일'];
-  const weekDates=Array.from({length:7},(_,i)=>{
-    const d=new Date(mon);d.setDate(d.getDate()+i);
-    return d.toISOString().slice(0,10);
-  });
-  const rows=wcParts.map(p=>{
-    const dots=weekDates.map((date,i)=>{
-      const done=wcRecs.some(r=>r.nickname===p.nickname&&r.date===date&&r.is_completed);
-      const isToday=date===today;
-      const isFuture=date>today;
-      let circle;
-      if(done){
-        circle=`<div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#b566ff,#ff5fb0);box-shadow:0 0 12px rgba(181,102,255,0.7);display:flex;align-items:center;justify-content:center;font-size:14px">🔥</div>`;
-      }else if(isFuture){
-        circle=`<div style="width:30px;height:30px;border-radius:50%;border:1.5px dashed rgba(140,110,200,0.2);background:rgba(140,110,200,0.05)"></div>`;
-      }else if(isToday){
-        circle=`<div style="width:30px;height:30px;border-radius:50%;border:1.5px solid rgba(181,102,255,0.5);background:rgba(181,102,255,0.1);display:flex;align-items:center;justify-content:center;font-size:10px;color:#b566ff;font-weight:700">오늘</div>`;
-      }else{
-        circle=`<div style="width:30px;height:30px;border-radius:50%;background:rgba(140,110,200,0.08);border:1px solid rgba(140,110,200,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#3a3458">✕</div>`;
-      }
-      return`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">${circle}<span style="font-size:9px;color:${isFuture?'#2a2240':'#6b6480'}">${days[i]}</span></div>`;
-    }).join('');
-    const weekDone=wcRecs.filter(r=>r.nickname===p.nickname&&r.is_completed&&weekDates.includes(r.date)).length;
-    const nick=p.nickname.length>6?p.nickname.slice(0,6)+'…':p.nickname;
-    return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;last-child:margin-bottom:0">
-      <span style="font-size:11px;font-weight:600;color:#f5f1ff;min-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nick}</span>
-      <div style="display:flex;gap:5px;flex:1;justify-content:space-between">${dots}</div>
-      <span style="font-size:11px;color:${weekDone>=5?'#5ee0a8':'#b566ff'};font-weight:700;min-width:26px;text-align:right">${weekDone}/5</span>
-    </div>`;
-  }).join('');
-  return`<div style="background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:16px 20px;margin-bottom:0.875rem">
-    <div style="font-size:11px;font-weight:700;color:#9b94b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px">🔥 이번 주 출석 현황</div>
-    ${rows}
-  </div>`;
-}
 
 function wcProgressBar(){
   const start=new Date('2026-05-11');
