@@ -654,64 +654,101 @@
 
 <script>
 (function(){
-  const s=document.createElement('style');
-  s.textContent=`
-    .sr{opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
-    .sr.in{opacity:1;transform:none}
-    .sr-d1{transition-delay:.09s}.sr-d2{transition-delay:.18s}.sr-d3{transition-delay:.27s}
+  // 히어로 animate-fade-up 즉시 비활성화 (flash 방지)
+  const early=document.createElement('style');
+  early.textContent=`
+    #page-guide section:first-of-type .animate-fade-up,
+    #page-guide section:first-of-type .animate-glow-pulse{animation:none!important}
   `;
-  document.head.appendChild(s);
+  document.head.appendChild(early);
+
+  // 인라인 스타일로 숨기기 → 애니메이션 후 완전히 제거 (hover 등 기존 CSS 유지)
+  function hide(el,tx,ty,sc){
+    el.style.opacity='0';
+    el.style.transform=`translateX(${tx}px) translateY(${ty}px) scale(${sc})`;
+    el.style.transition='none';
+  }
+  function reveal(el,delay){
+    setTimeout(()=>{
+      el.style.transition='opacity .75s cubic-bezier(.22,1,.36,1),transform .75s cubic-bezier(.22,1,.36,1)';
+      el.style.opacity='1';
+      el.style.transform='translateX(0) translateY(0) scale(1)';
+      el.addEventListener('transitionend',()=>{
+        el.style.opacity='';el.style.transform='';el.style.transition='';
+      },{once:true});
+    },delay||0);
+  }
 
   function setup(){
     const guide=document.getElementById('page-guide');
     if(!guide)return;
 
+    // ── 히어로: 시간 기반 순차 등장 ──
+    const hero=guide.querySelector('section:first-of-type');
+    if(hero){
+      const badge=hero.querySelector('.mb-6.inline-flex');
+      const h1=hero.querySelector('h1');
+      const p=hero.querySelector('p.mt-5');
+      const card=hero.querySelector('.neon-card.mt-8');
+      const cta=hero.querySelector('.mt-10');
+      [badge,h1,p,card,cta].filter(Boolean).forEach((el,i)=>{
+        hide(el,0,36,1);
+        reveal(el,120+i*170);
+      });
+    }
+
+    // ── 섹션: 스크롤 기반 다양한 애니메이션 ──
+    const animated=[];
     guide.querySelectorAll('section:not(:first-of-type)').forEach(sec=>{
       if(sec.id==='comments-section')return;
 
-      // 섹션 헤더
+      // 섹션 헤더 → 위에서
       const hdr=sec.querySelector('.mb-8');
-      if(hdr)hdr.classList.add('sr');
+      if(hdr){hide(hdr,0,40,1);animated.push([hdr,0,40,1,0]);}
 
-      // 태그 칩 묶음
+      // 태그칩 → 위에서
       const chips=sec.querySelector('.flex.flex-wrap.gap-2\\.5');
-      if(chips)chips.classList.add('sr');
+      if(chips){hide(chips,0,30,1);animated.push([chips,0,30,1,0]);}
 
-      // 카드들 (순차 딜레이)
-      sec.querySelectorAll('.neon-card, .rounded-2xl').forEach((c,i)=>{
-        c.classList.add('sr');
-        if(i===1)c.classList.add('sr-d1');
-        else if(i===2)c.classList.add('sr-d2');
-        else if(i===3)c.classList.add('sr-d3');
+      // 카드 → 위/왼/오른/확대 순환
+      const cardDirs=[[0,40,1],[-50,0,1],[50,0,1],[0,20,0.88]];
+      sec.querySelectorAll('.neon-card').forEach((c,i)=>{
+        const[tx,ty,sc]=cardDirs[i%cardDirs.length];
+        hide(c,tx,ty,sc);
+        animated.push([c,tx,ty,sc,i<4?i*100:0]);
       });
 
-      // 타임라인 항목
-      sec.querySelectorAll('.relative.pl-12, .relative.pl-14').forEach((c,i)=>{
-        if(!c.classList.contains('sr')){
-          c.classList.add('sr');
-          if(i===1)c.classList.add('sr-d1');
-          else if(i===2)c.classList.add('sr-d2');
-        }
+      // 경고/안내 박스 → 확대
+      sec.querySelectorAll('.rounded-2xl').forEach((el,i)=>{
+        if(el.style.opacity!=='0'){hide(el,0,20,0.9);animated.push([el,0,20,0.9,i*80]);}
       });
 
-      // 규칙/정책 리스트 항목
-      sec.querySelectorAll('.space-y-3>div,.space-y-4>div').forEach((c,i)=>{
-        if(!c.classList.contains('sr')){
-          c.classList.add('sr');
-          if(i===1)c.classList.add('sr-d1');
-          else if(i===2)c.classList.add('sr-d2');
-          else if(i===3)c.classList.add('sr-d3');
+      // 타임라인 → 왼쪽에서
+      sec.querySelectorAll('.relative.pl-12,.relative.pl-14').forEach((el,i)=>{
+        if(el.style.opacity!=='0'){hide(el,-55,0,1);animated.push([el,-55,0,1,i*110]);}
+      });
+
+      // 규칙 항목 → 좌우 교대
+      sec.querySelectorAll('.space-y-3>div,.space-y-4>div').forEach((el,i)=>{
+        if(el.style.opacity!=='0'){
+          const tx=i%2===0?-45:45;
+          hide(el,tx,0,1);animated.push([el,tx,0,1,i*90]);
         }
       });
     });
 
+    // 스크롤 감지 후 reveal
     const obs=new IntersectionObserver(entries=>{
       entries.forEach(e=>{
-        if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}
+        if(e.isIntersecting){
+          const found=animated.find(a=>a[0]===e.target);
+          reveal(e.target,found?found[4]:0);
+          obs.unobserve(e.target);
+        }
       });
     },{threshold:0.06,rootMargin:'0px 0px -40px 0px'});
 
-    guide.querySelectorAll('.sr').forEach(el=>obs.observe(el));
+    animated.forEach(([el])=>obs.observe(el));
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);
