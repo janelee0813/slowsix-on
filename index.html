@@ -1911,6 +1911,7 @@ function wcRender(){
         </button>
       </div>
     </div>
+    ${wcProgressBar()}
     <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
       <div class="wc-row">
@@ -1958,7 +1959,6 @@ function wcRender(){
       <button class="wc-btn-primary" id="wc-save-btn" onclick="wcSaveRecord()">💾 인증 저장</button>
     </div>
     <hr class="wc-sep"/>
-    ${wcProgressBar()}
     <div class="wc-card">
       <div class="wc-card-title">📊 참여자 실행현황</div>
       ${wcParts.length===0
