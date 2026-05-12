@@ -652,6 +652,72 @@
   </div>
 </section>
 
+<script>
+(function(){
+  const s=document.createElement('style');
+  s.textContent=`
+    .sr{opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+    .sr.in{opacity:1;transform:none}
+    .sr-d1{transition-delay:.09s}.sr-d2{transition-delay:.18s}.sr-d3{transition-delay:.27s}
+  `;
+  document.head.appendChild(s);
+
+  function setup(){
+    const guide=document.getElementById('page-guide');
+    if(!guide)return;
+
+    guide.querySelectorAll('section:not(:first-of-type)').forEach(sec=>{
+      if(sec.id==='comments-section')return;
+
+      // 섹션 헤더
+      const hdr=sec.querySelector('.mb-8');
+      if(hdr)hdr.classList.add('sr');
+
+      // 태그 칩 묶음
+      const chips=sec.querySelector('.flex.flex-wrap.gap-2\\.5');
+      if(chips)chips.classList.add('sr');
+
+      // 카드들 (순차 딜레이)
+      sec.querySelectorAll('.neon-card, .rounded-2xl').forEach((c,i)=>{
+        c.classList.add('sr');
+        if(i===1)c.classList.add('sr-d1');
+        else if(i===2)c.classList.add('sr-d2');
+        else if(i===3)c.classList.add('sr-d3');
+      });
+
+      // 타임라인 항목
+      sec.querySelectorAll('.relative.pl-12, .relative.pl-14').forEach((c,i)=>{
+        if(!c.classList.contains('sr')){
+          c.classList.add('sr');
+          if(i===1)c.classList.add('sr-d1');
+          else if(i===2)c.classList.add('sr-d2');
+        }
+      });
+
+      // 규칙/정책 리스트 항목
+      sec.querySelectorAll('.space-y-3>div,.space-y-4>div').forEach((c,i)=>{
+        if(!c.classList.contains('sr')){
+          c.classList.add('sr');
+          if(i===1)c.classList.add('sr-d1');
+          else if(i===2)c.classList.add('sr-d2');
+          else if(i===3)c.classList.add('sr-d3');
+        }
+      });
+    });
+
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}
+      });
+    },{threshold:0.06,rootMargin:'0px 0px -40px 0px'});
+
+    guide.querySelectorAll('.sr').forEach(el=>obs.observe(el));
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);
+  else setup();
+})();
+</script>
 </div><!-- end page-guide -->
 
 <div id="page-test1" class="hidden">
