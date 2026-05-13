@@ -1918,6 +1918,7 @@ function wcRender(){
         </button>
       </div>
     </div>
+    ${wcParticipantCards()}
     ${wcProgressBar()}
     <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
@@ -1986,6 +1987,7 @@ function wcRender(){
     </div>
     ${wcCompareSection()}
   `;
+  setTimeout(wcInitPlayerDrag,20);
 }
 
 function wcCopyUrl(){
@@ -2000,6 +2002,62 @@ function wcCopyUrl(){
   });
 }
 
+
+function wcParticipantCards(){
+  const players=[
+    {nick:'엘라',initial:'엘',color:'#b566ff',glow:'rgba(181,102,255,0.55)'},
+    {nick:'하늘',initial:'하',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
+    {nick:'제인',initial:'제',color:'#5ec8ff',glow:'rgba(94,200,255,0.55)'},
+  ];
+  const cards=players.map(p=>`<div class="wc-player-card" data-glow="${p.glow}" style="flex:1;min-width:0;position:relative;background:linear-gradient(180deg,rgba(28,21,48,0.92),rgba(21,16,31,0.78));border:1px solid ${p.color}50;border-radius:16px;padding:18px 10px 15px;text-align:center;cursor:grab;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;user-select:none;-webkit-user-select:none">
+    <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,${p.color}28,${p.color}10);border:2px solid ${p.color}60;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:17px;font-weight:800;color:${p.color};box-shadow:0 0 20px -5px ${p.glow},inset 0 0 12px ${p.color}10;letter-spacing:-0.5px;font-family:inherit">${p.initial}</div>
+    <div style="font-size:13px;font-weight:700;color:#f5f1ff;letter-spacing:-0.3px">${p.nick}</div>
+    <div style="margin-top:6px;font-size:11px;color:${p.color};font-weight:600;background:${p.color}18;border:1px solid ${p.color}30;border-radius:20px;padding:3px 9px;display:inline-block">참가중 🔥</div>
+  </div>`).join('');
+  return`<div style="margin-bottom:0.875rem">
+    <div style="font-size:11px;font-weight:700;color:#9b94b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">🏅 참가 선수</div>
+    <div id="wc-players-row" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px">
+      ${cards}
+    </div>
+  </div>`;
+}
+
+function wcInitPlayerDrag(){
+  const row=document.getElementById('wc-players-row');
+  if(!row)return;
+  let isDown=false,startX,scrollLeft;
+  row.addEventListener('mousedown',e=>{
+    isDown=true;
+    startX=e.pageX-row.offsetLeft;
+    scrollLeft=row.scrollLeft;
+    row.style.cursor='grabbing';
+    row.querySelectorAll('.wc-player-card').forEach(c=>{c.style.cursor='grabbing';});
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!isDown)return;
+    isDown=false;
+    if(row){row.style.cursor='grab';row.querySelectorAll('.wc-player-card').forEach(c=>{c.style.cursor='grab';});}
+  });
+  row.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    e.preventDefault();
+    row.scrollLeft=scrollLeft-(e.pageX-row.offsetLeft-startX);
+  });
+  row.querySelectorAll('.wc-player-card').forEach(card=>{
+    card.addEventListener('mouseenter',()=>{
+      if(isDown)return;
+      card.style.transform='translateY(-5px) scale(1.04)';
+      card.style.boxShadow=`0 14px 36px -8px ${card.dataset.glow}`;
+    });
+    card.addEventListener('mouseleave',()=>{
+      card.style.transform='';
+      card.style.boxShadow='';
+    });
+    card.addEventListener('mousedown',()=>{
+      card.style.transform='translateY(-2px) scale(0.97)';
+    });
+  });
+}
 
 function wcProgressBar(){
   const start=new Date('2026-05-11');
