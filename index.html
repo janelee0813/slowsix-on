@@ -1225,6 +1225,7 @@ const CATS=[
 const KEY_ME="hobbymap_me";
 let hbSel=[];
 let hbQ="";
+let hbAllArr=[];
 
 function hbGetNick(){return localStorage.getItem(KEY_ME)||""}
 function hbSetNick(n){localStorage.setItem(KEY_ME,n)}
@@ -1340,6 +1341,7 @@ async function hbSave(){
 async function hbRenderResult(myNick){
   document.getElementById("hobby-app").innerHTML=`<div style="text-align:center;padding:80px 0;color:#9b94b3;font-size:14px">불러오는 중...</div>`;
   const arr=await hbGetAll();
+  hbAllArr=arr;
   const me=arr.find(d=>d.nickname===myNick);
   document.getElementById("hobby-app").innerHTML=`
     <div class="hb-result-hero">
@@ -1355,10 +1357,14 @@ async function hbRenderResult(myNick){
       </div>
     </div>
     <div class="hb-section">
-      ${me?`<div class="hb-result-section">
-        <div class="hb-result-title"><i class="ti ti-user-circle"></i> ${myNick}이 선택한 관심벙</div>
-        <div class="hb-my-chips">${me.selectedHobbies.map(h=>`<span class="hb-my-chip">${h}</span>`).join("")}</div>
-      </div>`:""}
+      <div class="hb-result-section">
+        <div class="hb-result-title"><i class="ti ti-search"></i> 닉네임으로 검색</div>
+        <div style="position:relative;margin-bottom:10px">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#6b6480;font-size:15px;pointer-events:none">🔍</span>
+          <input type="text" id="hbPersonSearch" placeholder="닉네임을 입력하세요" oninput="hbSearchPerson()" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid rgba(140,110,200,0.25);border-radius:10px;font-size:14px;color:#f5f1ff;background:#0a0612;outline:none;font-family:inherit;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='#b566ff'" onblur="this.style.borderColor='rgba(140,110,200,0.25)'"/>
+        </div>
+        <div id="hbPersonResult"></div>
+      </div>
       <div class="hb-result-section">
         <div class="hb-result-title"><i class="ti ti-trophy"></i> 결과보기</div>
         <div class="hb-rank-list" id="hbRankList"></div>
@@ -1380,6 +1386,21 @@ async function hbGoEdit(){
       hbRenderHobbies();hbValidate();
     },50);
   }
+}
+
+function hbSearchPerson(){
+  const q=document.getElementById('hbPersonSearch').value.trim();
+  const el=document.getElementById('hbPersonResult');
+  if(!q){el.innerHTML='';return;}
+  const found=hbAllArr.filter(d=>d.nickname.includes(q));
+  if(!found.length){el.innerHTML=`<p style="font-size:13px;color:#6b6480;margin:0">검색 결과가 없어요.</p>`;return;}
+  el.innerHTML=found.map(d=>`
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:600;color:#b566ff;margin-bottom:6px">${d.nickname}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${d.selectedHobbies.length?d.selectedHobbies.map(h=>`<span class="hb-my-chip">${h}</span>`).join(''):'<span style="font-size:12px;color:#6b6480">선택한 벙이 없어요</span>'}
+      </div>
+    </div>`).join('');
 }
 
 function hbRenderRank(arr){
@@ -1432,6 +1453,7 @@ function hbCopyUrl() {
 }
 
 window.hbOnSearch=hbOnSearch;
+window.hbSearchPerson=hbSearchPerson;
 window.hbToggle=hbToggle;
 window.hbValidate=hbValidate;
 window.hbSave=hbSave;
