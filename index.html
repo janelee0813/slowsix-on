@@ -1931,6 +1931,8 @@ function wcRender(){
         ?`<div class="wc-chips">${wcParts.map(p=>`<span class="wc-chip">${p.nickname}<button class="wc-chip-del" onclick="wcDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}')">×</button></span>`).join('')}</div>`
         :`<p style="font-size:13px;color:#6b6480;margin-top:8px">참여자를 등록하면 이곳에 표시됩니다</p>`}
     </div>
+    ${wcCompareSection()}
+    <hr class="wc-sep"/>
     <div class="wc-card">
       <div class="wc-card-title" style="margin-bottom:${wcFormOpen?'0.875rem':'0'};display:flex;justify-content:space-between;align-items:center;${wcFormOpen?'cursor:pointer':''}" ${wcFormOpen?'onclick="wcCloseForm()"':''}>
         <span>✏️ 오늘의 운동 인증</span>
@@ -1949,8 +1951,6 @@ function wcRender(){
         인증 입력하기
       </button>`}
     </div>
-    <hr class="wc-sep"/>
-    ${wcCompareSection()}
     <div class="wc-card">
       <div class="wc-card-title">📊 참여자 실행현황</div>
       ${wcParts.length===0
