@@ -13,6 +13,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -1369,9 +1370,15 @@ async function hbRenderResult(myNick){
         </div>
         <div id="hbPersonResult"></div>
       </div>
-      <div class="hb-result-section">
-        <div class="hb-result-title"><i class="ti ti-heart"></i> 취미 궁합 매칭</div>
-        <p style="font-size:12px;color:#6b6480;margin:-6px 0 14px">나와 겹치는 벙이 가장 많은 사람 TOP 3</p>
+      <div class="hb-result-section" id="hbMatchCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div class="hb-result-title" style="margin-bottom:0"><i class="ti ti-heart"></i> 취미 궁합 매칭</div>
+          <button onclick="hbCaptureMatch()" title="이미지로 저장" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid rgba(140,110,200,0.3);border-radius:8px;background:rgba(140,110,200,0.08);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.5)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.3)';this.style.color='#9b94b3'">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            저장
+          </button>
+        </div>
+        <p style="font-size:12px;color:#6b6480;margin:0 0 14px">나와 겹치는 벙이 가장 많은 사람 TOP 4</p>
         ${myNick?`
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
             <span style="font-size:12px;color:#6b6480">기준</span>
@@ -1419,6 +1426,19 @@ async function hbGoEdit(){
   }
 }
 
+async function hbCaptureMatch(){
+  const card=document.getElementById('hbMatchCard');
+  if(!card)return;
+  const btn=card.querySelector('button[onclick="hbCaptureMatch()"]');
+  if(btn)btn.style.visibility='hidden';
+  const canvas=await html2canvas(card,{backgroundColor:'#0f0a1a',scale:2,useCORS:true});
+  if(btn)btn.style.visibility='visible';
+  const link=document.createElement('a');
+  link.download='취미궁합_매칭.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
 function hbToggleMatchChange(){
   const wrap=document.getElementById('hbMatchChangeWrap');
   if(wrap)wrap.style.display=wrap.style.display==='none'?'block':'none';
@@ -1444,18 +1464,19 @@ function hbMatchPerson(nick){
     .map(d=>{const common=d.selectedHobbies.filter(h=>mySet.has(h));return{nick:d.nickname,common,count:common.length};})
     .filter(d=>d.count>0)
     .sort((a,b)=>b.count-a.count)
-    .slice(0,3);
+    .slice(0,4);
   if(!matches.length){el.innerHTML=`<p style="font-size:13px;color:#6b6480;margin:0">아직 겹치는 벙이 있는 사람이 없어요.</p>`;return;}
   const medals=[
     {icon:'🥇',bg:'rgba(255,198,0,0.08)',border:'rgba(255,198,0,0.35)',glow:'0 0 14px rgba(255,198,0,0.2)',nick:'rgba(255,218,80,0.95)'},
     {icon:'🥈',bg:'rgba(180,190,210,0.08)',border:'rgba(180,190,210,0.3)',glow:'none',nick:'rgba(200,210,230,0.9)'},
     {icon:'🥉',bg:'rgba(200,130,60,0.08)',border:'rgba(200,130,60,0.3)',glow:'none',nick:'rgba(210,160,100,0.9)'},
+    {icon:'4',bg:'rgba(100,100,140,0.06)',border:'rgba(140,110,200,0.2)',glow:'none',nick:'#b094d0'},
   ];
   el.innerHTML=matches.map((m,i)=>{
     const md=medals[i];
     return`<div style="padding:13px 14px;border-radius:12px;background:${md.bg};border:1.5px solid ${md.border};box-shadow:${md.glow};margin-bottom:8px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <span style="font-size:20px">${md.icon}</span>
+        <span style="font-size:${i<3?'20':'14'}px;${i===3?'width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(140,110,200,0.2);color:#9b94b3;font-weight:700;flex-shrink:0':''}">${md.icon}</span>
         <span style="font-size:15px;font-weight:700;color:${md.nick}">${m.nick}</span>
         <span style="margin-left:auto;font-size:12px;color:#6b6480;font-weight:500">공통 ${m.count}개</span>
       </div>
@@ -1550,6 +1571,7 @@ function hbCopyUrl() {
 }
 
 window.hbOnSearch=hbOnSearch;
+window.hbCaptureMatch=hbCaptureMatch;
 window.hbMatchPerson=hbMatchPerson;
 window.hbToggleMatchChange=hbToggleMatchChange;
 window.hbOnMatchChange=hbOnMatchChange;
