@@ -1181,12 +1181,12 @@ function copyResult(){
 .hb-my-chips{display:flex;flex-wrap:wrap;gap:6px}
 .hb-my-chip{background:rgba(181,102,255,0.12);border:1px solid rgba(181,102,255,0.3);border-radius:12px;padding:5px 12px;font-size:13px;color:#d4a0ff;font-weight:500}
 .hb-rank-list{display:flex;flex-direction:column;gap:7px}
-.hb-rank-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(21,16,31,0.8);border:1px solid rgba(140,110,200,0.18)}
+.hb-rank-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;background:rgba(21,16,31,0.8);border:1px solid rgba(140,110,200,0.18)}
 .hb-rank-item.top1{background:rgba(181,102,255,0.1);border-color:rgba(181,102,255,0.35)}
 .hb-rank-item.top2{background:rgba(255,95,176,0.08);border-color:rgba(255,95,176,0.25)}
 .hb-rank-item.top3{background:rgba(94,200,255,0.07);border-color:rgba(94,200,255,0.2)}
-.hb-rank-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:rgba(140,110,200,0.2);color:#9b94b3}
-.hb-rank-name{flex:1;font-size:14px;font-weight:600;color:#f5f1ff}
+.hb-rank-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:rgba(140,110,200,0.2);color:#9b94b3;margin-top:2px}
+.hb-rank-name{flex:1;font-size:15px;font-weight:700;color:#f5f1ff}
 .hb-rank-count{font-size:13px;color:#9b94b3;font-weight:500;flex-shrink:0}
 .hb-rank-bar-row{display:flex;align-items:center;gap:8px;margin-top:4px}
 .hb-rank-bar-bg{flex:1;height:3px;background:rgba(140,110,200,0.2);border-radius:2px}
@@ -1516,7 +1516,7 @@ function hbRenderRank(arr){
         <div style="flex:1">
           <div class="hb-rank-name">${name}</div>
           <div class="hb-rank-bar-row"><div class="hb-rank-bar-bg"><div class="hb-rank-bar-fill" style="width:${Math.round(c/max*100)}%"></div></div></div>
-          <div style="margin-top:5px;font-size:11px;color:#6b6480;line-height:1.7">${(mem[name]||[]).join(' · ')}</div>
+          <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">${(mem[name]||[]).map(n=>`<span style="font-size:12px;padding:3px 9px;border-radius:999px;background:rgba(140,110,200,0.12);border:1px solid rgba(140,110,200,0.25);color:#9b94b3">${n}</span>`).join('')}</div>
         </div>
         <div class="hb-rank-count">${c}명</div>
       </div>`).join("");
