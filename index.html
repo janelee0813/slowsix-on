@@ -1998,9 +1998,7 @@ function wcParticipantCards(){
     {nick:'하늘',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
     {nick:'제인',color:'#5ec8ff',glow:'rgba(94,200,255,0.55)'},
   ];
-  const cards=players.map(p=>`<div class="wc-player-card" data-glow="${p.glow}" style="flex:1;min-width:0;position:relative;background:linear-gradient(180deg,rgba(28,21,48,0.92),rgba(21,16,31,0.78));border:1px solid ${p.color}50;border-radius:16px;padding:16px 10px;display:flex;align-items:center;justify-content:center;cursor:grab;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;user-select:none;-webkit-user-select:none">
-    <div style="padding:10px 18px;border-radius:100px;background:linear-gradient(135deg,${p.color}22,${p.color}0a);border:2px solid ${p.color}65;box-shadow:0 0 18px -5px ${p.glow},inset 0 0 10px ${p.color}08;font-size:14px;font-weight:800;color:${p.color};letter-spacing:-0.3px;white-space:nowrap;font-family:inherit">${p.nick}</div>
-  </div>`).join('');
+  const cards=players.map(p=>`<div class="wc-player-card" data-glow="${p.glow}" style="flex:1;min-width:0;position:relative;background:linear-gradient(180deg,rgba(28,21,48,0.92),rgba(21,16,31,0.78));border:1px solid ${p.color}50;border-radius:16px;padding:18px 10px;display:flex;align-items:center;justify-content:center;cursor:grab;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;user-select:none;-webkit-user-select:none;font-size:18px;font-weight:800;color:${p.color};letter-spacing:-0.5px;text-shadow:0 0 16px ${p.glow}">${p.nick}</div>`).join('');
   return`<div style="margin-bottom:0.875rem">
     <div style="font-size:11px;font-weight:700;color:#9b94b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">🏅 참가 선수</div>
     <div id="wc-players-row" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px">
