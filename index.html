@@ -1437,11 +1437,8 @@ function hbRenderRank(arr){
       const fs=Math.round(11+r*10);
       const pv=Math.round(5+r*6);
       const ph=Math.round(11+r*11);
-      const bg=`rgba(181,102,255,${(0.08+r*0.22).toFixed(2)})`;
-      const border=`rgba(181,102,255,${(0.18+r*0.42).toFixed(2)})`;
-      const color=r>0.55?'#d4a0ff':r>0.2?'#b094d0':'#7a7090';
-      const fw=r>0.4?600:400;
-      return`<span title="${c}명 선택" style="font-size:${fs}px;padding:${pv}px ${ph}px;border-radius:999px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fw};white-space:nowrap;cursor:default">${name}<span style="font-size:${Math.round(fs*0.78)}px;opacity:0.65;margin-left:4px">${c}</span></span>`;
+      const glow=r>0.15?`0 0 ${Math.round(r*10)}px rgba(181,102,255,${(r*0.55).toFixed(2)}),0 0 ${Math.round(r*22)}px rgba(181,102,255,${(r*0.25).toFixed(2)})`:'none';
+      return`<span title="${c}명 선택" style="font-size:${fs}px;padding:${pv}px ${ph}px;border-radius:999px;background:rgba(181,102,255,0.1);border:1.5px solid rgba(181,102,255,0.35);color:#c8a0f0;font-weight:500;white-space:nowrap;cursor:default;box-shadow:${glow}">${name}<span style="font-size:${Math.round(fs*0.78)}px;opacity:0.6;margin-left:4px">${c}</span></span>`;
     }).join('')}</div>`;
   } else {
     const medals=["🥇","🥈","🥉"];
