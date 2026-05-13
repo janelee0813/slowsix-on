@@ -1371,11 +1371,22 @@ async function hbRenderResult(myNick){
       </div>
       <div class="hb-result-section">
         <div class="hb-result-title"><i class="ti ti-heart"></i> 취미 궁합 매칭</div>
-        <p style="font-size:12px;color:#6b6480;margin:-6px 0 12px">나와 겹치는 벙이 가장 많은 사람 TOP 3</p>
-        <select id="hbMatchSelect" onchange="hbMatchPerson()" style="width:100%;padding:10px 14px;border:1.5px solid rgba(140,110,200,0.25);border-radius:10px;font-size:14px;color:#f5f1ff;background:#0a0612;outline:none;font-family:inherit;margin-bottom:12px;appearance:none">
-          <option value="">내 닉네임을 선택하세요</option>
-          ${arr.map(d=>`<option value="${d.nickname}">${d.nickname}</option>`).join('')}
-        </select>
+        <p style="font-size:12px;color:#6b6480;margin:-6px 0 14px">나와 겹치는 벙이 가장 많은 사람 TOP 3</p>
+        ${myNick?`
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <span style="font-size:12px;color:#6b6480">기준</span>
+            <span id="hbMatchNickLabel" style="padding:5px 14px;border-radius:999px;background:rgba(181,102,255,0.15);border:1.5px solid rgba(181,102,255,0.45);color:#d4a0ff;font-size:13px;font-weight:600;box-shadow:0 0 10px rgba(181,102,255,0.2)">${myNick}</span>
+            <button onclick="hbToggleMatchChange()" style="margin-left:auto;font-size:12px;color:#6b6480;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline">변경</button>
+          </div>
+          <div id="hbMatchChangeWrap" style="display:none;margin-bottom:12px">
+            <select id="hbMatchSelect" onchange="hbOnMatchChange()" style="width:100%;padding:10px 14px;border:1.5px solid rgba(140,110,200,0.25);border-radius:10px;font-size:14px;color:#f5f1ff;background:#0a0612;outline:none;font-family:inherit;appearance:none">
+              ${arr.map(d=>`<option value="${d.nickname}"${d.nickname===myNick?' selected':''}>${d.nickname}</option>`).join('')}
+            </select>
+          </div>`
+        :`<select id="hbMatchSelect" onchange="hbOnMatchChange()" style="width:100%;padding:10px 14px;border:1.5px solid rgba(140,110,200,0.25);border-radius:10px;font-size:14px;color:#f5f1ff;background:#0a0612;outline:none;font-family:inherit;margin-bottom:12px;appearance:none">
+            <option value="">닉네임을 선택하세요</option>
+            ${arr.map(d=>`<option value="${d.nickname}">${d.nickname}</option>`).join('')}
+          </select>`}
         <div id="hbMatchResult"></div>
       </div>
       <div class="hb-result-section">
@@ -1391,6 +1402,7 @@ async function hbRenderResult(myNick){
     </div>
   `;
   hbRenderRank(arr);
+  if(myNick) hbMatchPerson(myNick);
 }
 
 async function hbGoEdit(){
@@ -1407,8 +1419,21 @@ async function hbGoEdit(){
   }
 }
 
-function hbMatchPerson(){
-  const myNick=document.getElementById('hbMatchSelect').value;
+function hbToggleMatchChange(){
+  const wrap=document.getElementById('hbMatchChangeWrap');
+  if(wrap)wrap.style.display=wrap.style.display==='none'?'block':'none';
+}
+function hbOnMatchChange(){
+  const nick=document.getElementById('hbMatchSelect').value;
+  if(!nick)return;
+  const label=document.getElementById('hbMatchNickLabel');
+  if(label)label.textContent=nick;
+  const wrap=document.getElementById('hbMatchChangeWrap');
+  if(wrap)wrap.style.display='none';
+  hbMatchPerson(nick);
+}
+function hbMatchPerson(nick){
+  const myNick=nick||document.getElementById('hbMatchSelect')?.value;
   const el=document.getElementById('hbMatchResult');
   if(!myNick){el.innerHTML='';return;}
   const me=hbAllArr.find(d=>d.nickname===myNick);
@@ -1526,6 +1551,8 @@ function hbCopyUrl() {
 
 window.hbOnSearch=hbOnSearch;
 window.hbMatchPerson=hbMatchPerson;
+window.hbToggleMatchChange=hbToggleMatchChange;
+window.hbOnMatchChange=hbOnMatchChange;
 window.hbSearchPerson=hbSearchPerson;
 window.hbSetView=hbSetView;
 window.hbToggle=hbToggle;
