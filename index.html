@@ -1909,7 +1909,7 @@ function wcRender(){
   wcRecs.filter(r=>r.date===t).forEach(r=>{todayMap[r.nickname]=r});
   app.innerHTML=`
     <div class="wc-header">
-      <h1>🏃 다이어트 인증 챌린지</h1>
+      <h1>🏃 운동 인증 챌린지</h1>
       <p>주간 5회 달성을 목표로 함께 운동해요!</p>
       <div style="text-align:right;margin-top:6px">
         <button onclick="wcCopyUrl()" id="wc-share-btn" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
@@ -1973,17 +1973,6 @@ function wcRender(){
               </tr>`;}).join('')}
             </tbody>
           </table></div>`}
-    </div>
-    <div class="wc-card">
-      <div class="wc-card-title">📅 오늘 인증 현황 <span style="font-weight:400;color:#6b6480;font-size:11px;margin-left:4px">${t}</span></div>
-      ${wcParts.length===0
-        ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
-        :`<div style="display:flex;flex-wrap:wrap;gap:7px">${wcParts.map(p=>{
-            const rec=todayMap[p.nickname];
-            if(!rec)return`<div style="display:inline-flex;align-items:center;padding:6px 12px;border-radius:20px;border:1px solid rgba(140,110,200,0.15);font-size:13px;color:#4a4460;opacity:0.5">${p.nickname} <span style="margin-left:4px;font-size:11px">(미인증)</span></div>`;
-            if(!rec.is_completed)return`<div style="display:inline-flex;align-items:center;padding:6px 12px;border-radius:20px;border:1px solid rgba(255,95,109,0.2);font-size:13px;color:#7a4450;opacity:0.6">❌ ${p.nickname}</div>`;
-            return`<div style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;background:linear-gradient(to right,#b566ff,#ff5fb0);font-size:13px;font-weight:600;color:#0a0612;box-shadow:0 4px 14px -4px rgba(181,102,255,0.6)">${p.nickname} <span style="font-size:11px;font-weight:400;opacity:0.85">${rec.duration||0}분·${wcFmt(rec.calories)}kcal</span></div>`;
-          }).join('')}</div>`}
     </div>
     ${wcCompareSection()}
   `;
