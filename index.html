@@ -60,6 +60,7 @@
   html { scroll-behavior: smooth; background:#0a0612; color-scheme: dark; }
   body { background:#0a0612; color:#f5f1ff; font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif; -webkit-font-smoothing:antialiased; }
   ::selection { background: rgba(181,102,255,0.35); }
+  @keyframes onlinePulse{0%,100%{opacity:1;box-shadow:0 0 6px #5ee0a8}50%{opacity:0.4;box-shadow:0 0 2px #5ee0a8}}
 
   .text-gradient-neon{
     background: linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);
@@ -119,7 +120,11 @@
 <!-- Navigation -->
 <nav class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
   <div class="mx-auto max-w-screen-md px-5">
-    <div class="flex gap-1.5 py-2.5">
+    <div class="flex items-center gap-1.5 py-2.5">
+      <div id="online-badge" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(94,224,168,0.08);border:1px solid rgba(94,224,168,0.25);color:#5ee0a8;font-size:11px;font-weight:500;white-space:nowrap;flex-shrink:0;margin-right:2px">
+        <span style="width:5px;height:5px;border-radius:50%;background:#5ee0a8;box-shadow:0 0 6px #5ee0a8;animation:onlinePulse 2s ease-in-out infinite"></span>
+        <span id="online-num">-</span>명
+      </div>
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">가이드</button>
       <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">정산 계산기</button>
       <button onclick="showPage('fortune')" id="btn-fortune" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple"><span class="sm:hidden">취미</span><span class="hidden sm:inline">취미공유</span></button>
@@ -128,6 +133,21 @@
     </div>
   </div>
 </nav>
+<script>
+(function(){
+  const SUPABASE_URL='https://teugnaahpcpzejbdayyy.supabase.co';
+  const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+  const sbP=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const ch=sbP.channel('presence-online');
+  ch.on('presence',{event:'sync'},()=>{
+    const n=Object.keys(ch.presenceState()).length;
+    const el=document.getElementById('online-num');
+    if(el)el.textContent=n;
+  }).subscribe(async s=>{
+    if(s==='SUBSCRIBED') await ch.track({t:Date.now()});
+  });
+})();
+</script>
 
 <div id="page-guide">
 
