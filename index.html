@@ -1745,6 +1745,8 @@ hobbyInit();
 .wc-toggle-btn:hover{border-color:rgba(140,110,200,0.5)}
 .wc-toggle-btn.yes{background:rgba(94,224,168,0.1);border-color:rgba(94,224,168,0.4);color:#5ee0a8}
 .wc-toggle-btn.no{background:rgba(255,95,109,0.1);border-color:rgba(255,95,109,0.35);color:#ff5f6d}
+.wc-toggle-btn.pass{background:rgba(255,198,0,0.1);border-color:rgba(255,198,0,0.4);color:#ffc600}
+.wc-toggle-btn:disabled{opacity:0.38;cursor:not-allowed}
 .wc-btn-primary{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:0.75rem;transition:all .2s;letter-spacing:-0.2px;font-family:inherit;box-shadow:0 6px 24px -6px rgba(181,102,255,0.5)}
 .wc-btn-primary:hover{filter:brightness(1.08)}
 .wc-btn-primary:active{transform:scale(0.98)}
@@ -1801,7 +1803,7 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let wcParts=[];
 let wcRecs=[];
 let wcFormOpen=false;
-const wcForm={date:wcToday(),nickname:'',isCompleted:true,calories:'',duration:''};
+const wcForm={date:wcToday(),nickname:'',isCompleted:true,isPass:false,calories:'',duration:''};
 window.wcForm=wcForm;
 
 function wcToday(){
@@ -1873,8 +1875,18 @@ async function wcDeleteParticipant(nick){
 
 function wcSetCompleted(val){
   wcForm.isCompleted=val;
+  wcForm.isPass=false;
   if(!val)wcForm.calories=0;
   wcRender();
+}
+function wcSetPass(){
+  wcForm.isCompleted=false;
+  wcForm.isPass=true;
+  wcForm.calories=0;
+  wcRender();
+}
+function wcGetPassCount(nick){
+  return wcRecs.filter(r=>r.nickname===nick&&r.is_pass).length;
 }
 
 async function wcSaveRecord(){
@@ -1886,21 +1898,26 @@ async function wcSaveRecord(){
   const durVal=wcForm.isCompleted?(parseInt(durEl?durEl.value:0)||0):0;
   if(!dateVal){wcToast('날짜를 선택해주세요',true);return}
   if(!nickVal){wcToast('닉네임을 선택해주세요',true);return}
+  if(wcForm.isPass&&wcGetPassCount(nickVal)>=2){wcToast('패스는 최대 2번만 사용할 수 있어요',true);return}
   const btn=document.getElementById('wc-save-btn');
   btn.disabled=true;btn.textContent='저장 중...';
   const existing=wcRecs.find(r=>r.date===dateVal&&r.nickname===nickVal);
   const newCal=existing?(existing.calories||0)+calVal:calVal;
   const newDur=existing?(existing.duration||0)+durVal:durVal;
   const newCompleted=wcForm.isCompleted||(existing?.is_completed??false);
+  const newIsPass=wcForm.isPass&&!newCompleted;
   const{data,error}=await sb.from('wc_records')
-    .upsert({date:dateVal,nickname:nickVal,is_completed:newCompleted,calories:newCal,duration:newDur},{onConflict:'date,nickname'})
+    .upsert({date:dateVal,nickname:nickVal,is_completed:newCompleted,is_pass:newIsPass,calories:newCal,duration:newDur},{onConflict:'date,nickname'})
     .select().single();
   if(error){wcToast('저장 실패',true)}
   else{
     const idx=wcRecs.findIndex(r=>r.date===dateVal&&r.nickname===nickVal);
-    if(idx>=0){wcRecs[idx]=data;wcToast(`기록 추가! +${durVal}분 +${wcFmt(calVal)}kcal`)}
-    else{wcRecs.push(data);wcToast('인증 저장 완료! 🎉')}
-    wcForm.isCompleted=true;wcForm.calories='';wcForm.duration='';wcForm.nickname='';
+    if(idx>=0){wcRecs[idx]=data;}
+    else{wcRecs.push(data);}
+    if(wcForm.isPass){wcToast(`패스 사용! 남은 패스 ${2-wcGetPassCount(nickVal)}회`);}
+    else if(idx>=0){wcToast(`기록 추가! +${durVal}분 +${wcFmt(calVal)}kcal`);}
+    else{wcToast('인증 저장 완료! 🎉');}
+    wcForm.isCompleted=true;wcForm.isPass=false;wcForm.calories='';wcForm.duration='';wcForm.nickname='';
     wcFormOpen=false;
     wcRender();
   }
@@ -1945,8 +1962,8 @@ function wcRender(){
       ${wcFormOpen?`
       <div id="wc-form-rows">
         <div class="wc-row"><span class="wc-label">날짜</span><input type="date" id="wc-inp-date" value="${wcForm.date}" onchange="wcForm.date=this.value"/></div>
-        <div class="wc-row"><span class="wc-label">닉네임</span><select id="wc-inp-person" onchange="wcForm.nickname=this.value"><option value="">선택하세요</option>${wcParts.map(p=>`<option value="${p.nickname}"${wcForm.nickname===p.nickname?' selected':''}>${p.nickname}</option>`).join('')}</select></div>
-        <div class="wc-row"><span class="wc-label">실행 여부</span><div class="wc-toggle-row"><button class="wc-toggle-btn${wcForm.isCompleted?' yes':''}" onclick="wcSetCompleted(true)">✅ 했다</button><button class="wc-toggle-btn${!wcForm.isCompleted?' no':''}" onclick="wcSetCompleted(false)">❌ 안 했다</button></div></div>
+        <div class="wc-row"><span class="wc-label">닉네임</span><select id="wc-inp-person" onchange="wcForm.nickname=this.value;wcRender()"><option value="">선택하세요</option>${wcParts.map(p=>`<option value="${p.nickname}"${wcForm.nickname===p.nickname?' selected':''}>${p.nickname}</option>`).join('')}</select></div>
+        <div class="wc-row"><span class="wc-label">실행 여부</span><div class="wc-toggle-row">${(()=>{const pc=wcForm.nickname?wcGetPassCount(wcForm.nickname):0;const pd=pc>=2;return`<button class="wc-toggle-btn${wcForm.isCompleted?' yes':''}" onclick="wcSetCompleted(true)">✅ 했다</button><button class="wc-toggle-btn${wcForm.isPass?' pass':''}" onclick="wcSetPass()" ${pd?'disabled title="패스 소진"':''}>${pd?'🚫 패스 소진':`🎫 패스 (${2-pc}회 남음)`}</button><button class="wc-toggle-btn${(!wcForm.isCompleted&&!wcForm.isPass)?' no':''}" onclick="wcSetCompleted(false)">❌ 안 했다</button>`})()}</div></div>
         <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}"><span class="wc-label">운동 시간</span><div class="wc-cal-wrap"><input type="number" id="wc-inp-dur" placeholder="0" value="${wcForm.isCompleted?wcForm.duration:0}" min="0" max="999" oninput="wcForm.duration=this.value" style="width:100%"/><span class="wc-cal-unit">분</span></div></div>
         <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}"><span class="wc-label">소모 칼로리</span><div class="wc-cal-wrap"><input type="number" id="wc-inp-cal" placeholder="0" value="${wcForm.isCompleted?wcForm.calories:0}" min="0" max="9999" oninput="wcForm.calories=this.value" style="width:100%"/><span class="wc-cal-unit">kcal</span></div></div>
         <button class="wc-btn-primary" id="wc-save-btn" onclick="wcSaveRecord()">💾 인증 저장</button>
@@ -2160,6 +2177,7 @@ function wcCloseForm(){
 window.wcAddParticipant=wcAddParticipant;
 window.wcDeleteParticipant=wcDeleteParticipant;
 window.wcSetCompleted=wcSetCompleted;
+window.wcSetPass=wcSetPass;
 window.wcSaveRecord=wcSaveRecord;
 window.wcCopyUrl=wcCopyUrl;
 window.wcOpenForm=wcOpenForm;
