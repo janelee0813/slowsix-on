@@ -125,7 +125,7 @@
   <div class="mx-auto max-w-screen-md px-5">
     <div class="flex items-center gap-1.5 py-2.5">
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all">가이드</button>
-      <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">정산 계산기</button>
+      <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">벙비계산기</button>
       <button onclick="showPage('fortune')" id="btn-fortune" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple"><span class="sm:hidden">취미</span><span class="hidden sm:inline">취미공유</span></button>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">룰렛</button>
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
@@ -407,7 +407,7 @@
 
     <div class="mt-6 flex items-center gap-4">
       <button onclick="showPage('test1')" class="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-5 py-3 text-sm font-semibold text-background shadow-[0_10px_40px_-10px_rgba(181,102,255,0.7)] transition-transform hover:scale-[1.02]">
-        정산 계산기
+        벙비계산기
       </button>
       <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
         <svg class="h-3.5 w-3.5 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
@@ -833,12 +833,12 @@
 </style>
 <div class="calc-app" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
   <div class="app-title">
-    <span class="neon-title">모임 정산 계산기</span>
+    <span class="neon-title">벙비 계산기</span>
     <button onclick="copyCalcUrl()" title="URL 복사" style="position:absolute;top:24px;right:0;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       URL 복사
     </button>
-    <span class="subtitle">모임 정산을 빠르고 쉽게</span>
+    <span class="subtitle">벙비 정산을 쉽고 빠르게</span>
   </div>
 
   <div class="card">
