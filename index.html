@@ -1999,9 +1999,9 @@ function wcCopyUrl(){
 
 function wcParticipantCards(){
   const players=[
-    {nick:'엘라',color:'#b566ff',glow:'rgba(181,102,255,0.55)'},
-    {nick:'하늘',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
     {nick:'제인',color:'#5ec8ff',glow:'rgba(94,200,255,0.55)'},
+    {nick:'하늘',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
+    {nick:'엘라',color:'#b566ff',glow:'rgba(181,102,255,0.55)'},
   ];
   function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return h;}
   function makeChar(nick,color,glow,salt){
