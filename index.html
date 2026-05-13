@@ -1887,10 +1887,13 @@ function wcSetPass(){
   wcRender();
 }
 function wcGetPassCount(nick){
-  return parseInt(localStorage.getItem(`wc_pass_${nick}`)||'0');
+  return wcParts.find(p=>p.nickname===nick)?.pass_count||0;
 }
-function wcIncrPassCount(nick){
-  localStorage.setItem(`wc_pass_${nick}`,wcGetPassCount(nick)+1);
+async function wcIncrPassCount(nick){
+  const newCount=wcGetPassCount(nick)+1;
+  await sb.from('wc_participants').update({pass_count:newCount}).eq('nickname',nick);
+  const pt=wcParts.find(p=>p.nickname===nick);
+  if(pt)pt.pass_count=newCount;
 }
 
 async function wcSaveRecord(){
@@ -1919,7 +1922,7 @@ async function wcSaveRecord(){
     if(idx>=0){wcRecs[idx]=data;}
     else{wcRecs.push(data);}
     if(isPass){
-      wcIncrPassCount(nickVal);
+      await wcIncrPassCount(nickVal);
       wcToast(`패스 사용! 남은 패스 ${2-wcGetPassCount(nickVal)}회`);
     }else if(idx>=0){wcToast(`기록 추가! +${durVal}분 +${wcFmt(calVal)}kcal`);}
     else{wcToast('인증 저장 완료! 🎉');}
