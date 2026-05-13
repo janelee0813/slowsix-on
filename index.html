@@ -1888,13 +1888,17 @@ async function wcSaveRecord(){
   if(!nickVal){wcToast('닉네임을 선택해주세요',true);return}
   const btn=document.getElementById('wc-save-btn');
   btn.disabled=true;btn.textContent='저장 중...';
+  const existing=wcRecs.find(r=>r.date===dateVal&&r.nickname===nickVal);
+  const newCal=existing?(existing.calories||0)+calVal:calVal;
+  const newDur=existing?(existing.duration||0)+durVal:durVal;
+  const newCompleted=wcForm.isCompleted||(existing?.is_completed??false);
   const{data,error}=await sb.from('wc_records')
-    .upsert({date:dateVal,nickname:nickVal,is_completed:wcForm.isCompleted,calories:calVal,duration:durVal},{onConflict:'date,nickname'})
+    .upsert({date:dateVal,nickname:nickVal,is_completed:newCompleted,calories:newCal,duration:newDur},{onConflict:'date,nickname'})
     .select().single();
   if(error){wcToast('저장 실패',true)}
   else{
     const idx=wcRecs.findIndex(r=>r.date===dateVal&&r.nickname===nickVal);
-    if(idx>=0){wcRecs[idx]=data;wcToast('기록 수정 완료! ✏️')}
+    if(idx>=0){wcRecs[idx]=data;wcToast(`기록 추가! +${durVal}분 +${wcFmt(calVal)}kcal`)}
     else{wcRecs.push(data);wcToast('인증 저장 완료! 🎉')}
     wcForm.isCompleted=true;wcForm.calories='';wcForm.duration='';wcForm.nickname='';
     wcFormOpen=false;
