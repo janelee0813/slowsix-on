@@ -1191,6 +1191,9 @@ function copyResult(){
 .hb-rank-bar-row{display:flex;align-items:center;gap:8px;margin-top:4px}
 .hb-rank-bar-bg{flex:1;height:3px;background:rgba(140,110,200,0.2);border-radius:2px}
 .hb-rank-bar-fill{height:3px;border-radius:2px;background:linear-gradient(90deg,#b566ff,#ff5fb0)}
+.hb-view-tab{padding:5px 14px;border-radius:20px;border:1.5px solid rgba(140,110,200,0.25);background:transparent;font-size:12px;font-weight:600;color:#6b6480;cursor:pointer;font-family:inherit;transition:all .15s}
+.hb-view-tab.on{background:rgba(181,102,255,0.15);border-color:rgba(181,102,255,0.5);color:#b566ff}
+.hb-bubble-cloud{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0}
 .hb-member-list{display:flex;flex-direction:column;gap:6px}
 .hb-member-row{border:1px solid rgba(140,110,200,0.22);border-radius:10px;overflow:hidden}
 .hb-member-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:#15101f;transition:background .15s}
@@ -1226,6 +1229,7 @@ const KEY_ME="hobbymap_me";
 let hbSel=[];
 let hbQ="";
 let hbAllArr=[];
+let hbView='summary';
 
 function hbGetNick(){return localStorage.getItem(KEY_ME)||""}
 function hbSetNick(n){localStorage.setItem(KEY_ME,n)}
@@ -1366,8 +1370,14 @@ async function hbRenderResult(myNick){
         <div id="hbPersonResult"></div>
       </div>
       <div class="hb-result-section">
-        <div class="hb-result-title"><i class="ti ti-trophy"></i> 결과보기</div>
-        <div class="hb-rank-list" id="hbRankList"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="hb-result-title" style="margin-bottom:0"><i class="ti ti-trophy"></i> 결과보기</div>
+          <div style="display:flex;gap:6px">
+            <button class="hb-view-tab${hbView==='summary'?' on':''}" onclick="hbSetView('summary')">요약</button>
+            <button class="hb-view-tab${hbView==='full'?' on':''}" onclick="hbSetView('full')">전체</button>
+          </div>
+        </div>
+        <div id="hbRankList"></div>
       </div>
     </div>
   `;
@@ -1403,6 +1413,14 @@ function hbSearchPerson(){
     </div>`).join('');
 }
 
+function hbSetView(v){
+  hbView=v;
+  document.querySelectorAll('.hb-view-tab').forEach(b=>b.classList.remove('on'));
+  const idx=v==='summary'?0:1;
+  document.querySelectorAll('.hb-view-tab')[idx]?.classList.add('on');
+  hbRenderRank(hbAllArr);
+}
+
 function hbRenderRank(arr){
   const cnt={};const mem={};
   arr.forEach(d=>d.selectedHobbies.forEach(h=>{
@@ -1411,19 +1429,33 @@ function hbRenderRank(arr){
   }));
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
   const max=top[0]?top[0][1]:1;
-  const medals=["🥇","🥈","🥉"];
   const el=document.getElementById("hbRankList");
   if(!top.length){el.innerHTML=`<div class="hb-no-result">아직 데이터가 없어요.</div>`;return}
-  el.innerHTML=top.map(([name,c],i)=>`
-    <div class="hb-rank-item${i<3?" top"+(i+1):""}">
-      <div class="hb-rank-badge">${i<3?medals[i]:i+1}</div>
-      <div style="flex:1">
-        <div class="hb-rank-name">${name}</div>
-        <div class="hb-rank-bar-row"><div class="hb-rank-bar-bg"><div class="hb-rank-bar-fill" style="width:${Math.round(c/max*100)}%"></div></div></div>
-        <div style="margin-top:5px;font-size:11px;color:#6b6480;line-height:1.7">${(mem[name]||[]).join(' · ')}</div>
-      </div>
-      <div class="hb-rank-count">${c}명</div>
-    </div>`).join("");
+  if(hbView==='summary'){
+    el.innerHTML=`<div class="hb-bubble-cloud">${top.map(([name,c])=>{
+      const r=max>1?(c-1)/(max-1):1;
+      const fs=Math.round(11+r*10);
+      const pv=Math.round(5+r*6);
+      const ph=Math.round(11+r*11);
+      const bg=`rgba(181,102,255,${(0.08+r*0.22).toFixed(2)})`;
+      const border=`rgba(181,102,255,${(0.18+r*0.42).toFixed(2)})`;
+      const color=r>0.55?'#d4a0ff':r>0.2?'#b094d0':'#7a7090';
+      const fw=r>0.4?600:400;
+      return`<span title="${c}명 선택" style="font-size:${fs}px;padding:${pv}px ${ph}px;border-radius:999px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fw};white-space:nowrap;cursor:default">${name}<span style="font-size:${Math.round(fs*0.78)}px;opacity:0.65;margin-left:4px">${c}</span></span>`;
+    }).join('')}</div>`;
+  } else {
+    const medals=["🥇","🥈","🥉"];
+    el.innerHTML=top.map(([name,c],i)=>`
+      <div class="hb-rank-item${i<3?" top"+(i+1):""}">
+        <div class="hb-rank-badge">${i<3?medals[i]:i+1}</div>
+        <div style="flex:1">
+          <div class="hb-rank-name">${name}</div>
+          <div class="hb-rank-bar-row"><div class="hb-rank-bar-bg"><div class="hb-rank-bar-fill" style="width:${Math.round(c/max*100)}%"></div></div></div>
+          <div style="margin-top:5px;font-size:11px;color:#6b6480;line-height:1.7">${(mem[name]||[]).join(' · ')}</div>
+        </div>
+        <div class="hb-rank-count">${c}명</div>
+      </div>`).join("");
+  }
 }
 
 function hbToggleMem(h){
@@ -1454,6 +1486,7 @@ function hbCopyUrl() {
 
 window.hbOnSearch=hbOnSearch;
 window.hbSearchPerson=hbSearchPerson;
+window.hbSetView=hbSetView;
 window.hbToggle=hbToggle;
 window.hbValidate=hbValidate;
 window.hbSave=hbSave;
