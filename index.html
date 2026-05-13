@@ -2003,7 +2003,35 @@ function wcParticipantCards(){
     {nick:'하늘',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
     {nick:'제인',color:'#5ec8ff',glow:'rgba(94,200,255,0.55)'},
   ];
-  const cards=players.map(p=>`<div class="wc-player-card" data-glow="${p.glow}" style="flex:1;min-width:0;position:relative;background:linear-gradient(180deg,rgba(28,21,48,0.92),rgba(21,16,31,0.78));border:1px solid ${p.color}50;border-radius:16px;padding:18px 10px;display:flex;align-items:center;justify-content:center;cursor:grab;transition:box-shadow .3s ease;user-select:none;-webkit-user-select:none;font-size:18px;font-weight:800;color:${p.color};letter-spacing:-0.5px;text-shadow:0 0 16px ${p.glow}">${p.nick}</div>`).join('');
+  function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return h;}
+  function makeChar(nick,color,glow,salt){
+    const h=hash(nick);
+    const base=h+salt*47;
+    const dur=(2.2+(h%5)*0.25).toFixed(2)+'s';
+    const del=((salt*3%4)*0.35).toFixed(2)+'s';
+    const hair=base%4,acc=(base+11)%4,eye=(base+23)%3;
+    const s1=[12+(h%10),20+(h*3)%18],s2=[62-(h%8),28+(h*7)%15],s3=[58+(h%14),68+(h*5)%12];
+    const d1=(1.4+h%2).toFixed(1)+'s',d2=(1.7+((h>>2)%2)*.8).toFixed(1)+'s',d3=(2.0+(h%8)*.1).toFixed(1)+'s';
+    const H=[
+      `<path d="M22 42C20 28,25 16,40 16C55 16,60 28,58 42" fill="${color}28" stroke="${color}" stroke-width="1.5"/><path d="M25 34L20 18L30 30 M40 30L40 14L46 28 M55 34L60 18L50 30" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+      `<path d="M20 44C18 26,24 14,40 14C56 14,62 26,60 44" fill="${color}22" stroke="${color}" stroke-width="2"/>`,
+      `<path d="M22 40C20 26,25 14,40 14C55 14,60 26,58 40" fill="${color}25" stroke="${color}" stroke-width="1.5"/><path d="M22 46C19 56,18 66,22 76 M58 46C61 56,62 66,58 76" stroke="${color}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>`,
+      `<circle cx="23" cy="34" r="9" fill="${color}25" stroke="${color}" stroke-width="1.5"/><circle cx="57" cy="34" r="9" fill="${color}25" stroke="${color}" stroke-width="1.5"/><path d="M30 38C28 30,36 18,40 18C44 18,52 30,50 38" fill="${color}20" stroke="${color}" stroke-width="1.5"/>`,
+    ];
+    const A=[
+      '',
+      `<path d="M26 32L30 18L40 26L50 18L54 32Z" fill="${color}25" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/><circle cx="26" cy="32" r="2.5" fill="${color}"/><circle cx="40" cy="25" r="2.5" fill="${color}"/><circle cx="54" cy="32" r="2.5" fill="${color}"/>`,
+      `<path d="M40 15L42.5 22L50 20L44 26L47 33L40 28L33 33L36 26L30 20L37.5 22Z" fill="${color}35" stroke="${color}" stroke-width="1.5"/>`,
+      `<path d="M22 36L18 18L32 28Z" fill="${color}30" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/><path d="M58 36L62 18L48 28Z" fill="${color}30" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>`,
+    ];
+    const E=[
+      `<circle cx="33" cy="54" r="4" fill="${color}"/><circle cx="47" cy="54" r="4" fill="${color}"/><circle cx="35" cy="52" r="1.5" fill="white" opacity="0.9"/><circle cx="49" cy="52" r="1.5" fill="white" opacity="0.9"/>`,
+      `<circle cx="33" cy="54" r="5" fill="none" stroke="${color}" stroke-width="2"/><circle cx="33" cy="54" r="2.5" fill="${color}"/><circle cx="47" cy="54" r="5" fill="none" stroke="${color}" stroke-width="2"/><circle cx="47" cy="54" r="2.5" fill="${color}"/><circle cx="35" cy="52" r="1.2" fill="white" opacity="0.8"/><circle cx="49" cy="52" r="1.2" fill="white" opacity="0.8"/>`,
+      `<path d="M29 52Q33 58 37 52" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M43 52Q47 58 51 52" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    ];
+    return `<svg viewBox="0 0 80 90" width="68" height="68" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;filter:drop-shadow(0 0 5px ${color}) drop-shadow(0 0 14px ${glow})"><g><animateTransform attributeName="transform" type="translate" values="0,0;0,-7;0,0" dur="${dur}" begin="${del}" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" keyTimes="0;0.5;1"/><circle cx="40" cy="60" r="30" fill="none" stroke="${color}" stroke-width="0.8" opacity="0.2"/>${H[hair]}<circle cx="40" cy="57" r="23" fill="${color}10" stroke="${color}" stroke-width="2.2"/>${A[acc]}<ellipse cx="27" cy="63" rx="5.5" ry="3.5" fill="${color}" opacity="0.16"/><ellipse cx="53" cy="63" rx="5.5" ry="3.5" fill="${color}" opacity="0.16"/>${E[eye]}<path d="M33 67Q40 74 47 67" stroke="${color}" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="${s1[0]}" cy="${s1[1]}" r="2" fill="${color}"><animate attributeName="opacity" values="0;1;0" dur="${d1}" repeatCount="indefinite"/><animate attributeName="r" values="0.5;2.5;0.5" dur="${d1}" repeatCount="indefinite"/></circle><circle cx="${s2[0]}" cy="${s2[1]}" r="1.5" fill="${color}"><animate attributeName="opacity" values="0;0.8;0" dur="${d2}" begin="0.7s" repeatCount="indefinite"/></circle><circle cx="${s3[0]}" cy="${s3[1]}" r="1" fill="${color}"><animate attributeName="opacity" values="0;0.7;0" dur="${d3}" begin="1.2s" repeatCount="indefinite"/></circle></g></svg>`;
+  }
+  const cards=players.map((p,i)=>`<div class="wc-player-card" data-glow="${p.glow}" style="flex:1;min-width:0;background:linear-gradient(180deg,rgba(28,21,48,0.92),rgba(21,16,31,0.78));border:1px solid ${p.color}50;border-radius:16px;padding:10px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:grab;transition:box-shadow .3s ease;user-select:none;-webkit-user-select:none">${makeChar(p.nick,p.color,p.glow,i)}<div style="font-size:13px;font-weight:800;color:${p.color};letter-spacing:-0.3px;text-shadow:0 0 12px ${p.glow}">${p.nick}</div></div>`).join('');
   return`<div style="margin-bottom:0.875rem">
     <div style="font-size:11px;font-weight:700;color:#9b94b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">🏅 참가 선수</div>
     <div id="wc-players-row" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px">
