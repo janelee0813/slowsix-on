@@ -1788,6 +1788,7 @@ hr.wc-sep{border:none;border-top:1px solid rgba(140,110,200,0.15);margin:0.25rem
   .wc-table td:first-child>div{gap:0}
   .wc-stats-wrap{overflow-x:visible}
 }
+@keyframes wcBarRise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 </style>
 <div id="wc-app"></div>
 <div class="wc-toast" id="wc-toast"></div>
@@ -1949,6 +1950,7 @@ function wcRender(){
       </button>`}
     </div>
     <hr class="wc-sep"/>
+    ${wcCompareSection()}
     <div class="wc-card">
       <div class="wc-card-title">📊 참여자 실행현황</div>
       ${wcParts.length===0
@@ -1974,7 +1976,6 @@ function wcRender(){
             </tbody>
           </table></div>`}
     </div>
-    ${wcCompareSection()}
   `;
   setTimeout(wcInitPlayerDrag,20);
 }
@@ -2091,7 +2092,7 @@ function wcCompareSection(){
         ${items.map(({d,disp})=>`<div style="flex:1;text-align:center;font-size:10px;font-weight:700;color:${d.color};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${disp}</div>`).join('')}
       </div>
       <div style="display:flex;align-items:flex-end;gap:3px;height:${CHART_H}px">
-        ${items.map(({d,barH})=>`<div style="flex:1;height:${barH}px;background:${d.color};border-radius:3px 3px 0 0;box-shadow:0 0 8px ${d.color}40"></div>`).join('')}
+        ${items.map(({d,barH},i)=>`<div style="flex:1;height:${barH}px;background:${d.color};border-radius:3px 3px 0 0;box-shadow:0 0 8px ${d.color}40;transform-origin:center bottom;animation:wcBarRise .7s cubic-bezier(.22,1,.36,1) ${i*100}ms both"></div>`).join('')}
       </div>
       <div style="height:1px;background:rgba(140,110,200,0.3);margin-bottom:6px"></div>
       <div style="text-align:center;font-size:11px;color:#6b6480;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${label}</div>
