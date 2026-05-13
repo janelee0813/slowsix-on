@@ -13,7 +13,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -1431,12 +1431,15 @@ async function hbCaptureMatch(){
   if(!card)return;
   const btn=card.querySelector('button[onclick="hbCaptureMatch()"]');
   if(btn)btn.style.visibility='hidden';
-  const canvas=await html2canvas(card,{backgroundColor:'#0f0a1a',scale:2,useCORS:true});
-  if(btn)btn.style.visibility='visible';
-  const link=document.createElement('a');
-  link.download='취미궁합_매칭.png';
-  link.href=canvas.toDataURL('image/png');
-  link.click();
+  try{
+    const dataUrl=await htmlToImage.toPng(card,{pixelRatio:2,cacheBust:true});
+    const link=document.createElement('a');
+    link.download='취미궁합_매칭.png';
+    link.href=dataUrl;
+    link.click();
+  }finally{
+    if(btn)btn.style.visibility='visible';
+  }
 }
 
 function hbToggleMatchChange(){
