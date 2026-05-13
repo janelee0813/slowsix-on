@@ -1999,9 +1999,9 @@ function wcCopyUrl(){
 
 function wcParticipantCards(){
   const players=[
-    {nick:'제인',color:'#5ec8ff',glow:'rgba(94,200,255,0.55)'},
-    {nick:'하늘',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
     {nick:'엘라',color:'#b566ff',glow:'rgba(181,102,255,0.55)'},
+    {nick:'하늘',color:'#ff5fb0',glow:'rgba(255,95,176,0.55)'},
+    {nick:'제인',color:'#5ec8ff',glow:'rgba(94,200,255,0.55)'},
   ];
   function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return h;}
   function makeChar(nick,color,glow,salt){
@@ -2100,7 +2100,9 @@ function wcCompareSection(){
   if(wcParts.length===0)return'';
   const COLORS=['#b566ff','#ff5fb0','#5ec8ff','#5ee0a8','#ffb547'];
   const CHART_H=120;
-  const data=wcParts.map((p,i)=>{
+  const ORDER=['엘라','하늘','제인'];
+  const sorted=[...wcParts].sort((a,b)=>{const ai=ORDER.indexOf(a.nickname),bi=ORDER.indexOf(b.nickname);return(ai<0?99:ai)-(bi<0?99:bi);});
+  const data=sorted.map((p,i)=>{
     const s=wcStats(p.nickname);
     return{nick:p.nickname,color:COLORS[i%COLORS.length],count:s.totalCount,cal:s.totalCal,dur:s.totalDur};
   });
