@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏃 운동 인증 챌린지</title>
+  <style>
+    /* ── 기본 초기화 & 변수 ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f6f3;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.1);
+      --border-hover: rgba(0,0,0,0.22);
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b;
+      --text-hint: #aaa;
+      --green: #1D9E75;
+      --green-dark: #0F6E56;
+      --green-bg: #E1F5EE;
+      --green-border: #5DCAA5;
+      --red: #D85A30;
+      --red-bg: #FAECE7;
+      --red-border: #F0997B;
+      --radius-md: 8px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+    }
+
+    body {
+      font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    /* ── 레이아웃 ── */
+    .app {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 1rem 1rem;
+    }
+
+    /* ── 헤더 ── */
+    .header {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.125rem 1.25rem;
+      margin-bottom: 0.875rem;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── 폼 행 ── */
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.625rem;
+    }
+    .label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      min-width: 76px;
+    }
+
+    /* ── 입력 요소 ── */
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select {
+      flex: 1;
+      width: 100%;
+      font-size: 14px;
+      padding: 8px 11px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border-hover);
+      background: #fafafa;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+    }
+    /* 날짜 입력 캘린더 아이콘 색상 */
+    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.5; }
+
+    /* ── 토글 버튼 ── */
+    .toggle-row { display: flex; gap: 6px; flex: 1; }
+    .toggle-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border-hover);
+      background: #fafafa;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toggle-btn:hover { border-color: var(--border-hover); background: #f0f0f0; }
+    .toggle-btn.active-yes {
+      background: var(--green-bg);
+      border-color: var(--green-border);
+      color: var(--green-dark);
+    }
+    .toggle-btn.active-no {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+      color: var(--red);
+    }
+
+    /* ── 버튼 ── */
+    .btn-primary {
+      width: 100%;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--green);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: background 0.15s;
+      letter-spacing: -0.2px;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border-hover);
+      background: #fafafa;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #efefef; }
+
+    /* ── 토스트 메시지 ── */
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #fff;
+      padding: 9px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── 참여자 칩 ── */
+    .participant-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 0.625rem;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--green-bg);
+      border: 0.5px solid var(--green-border);
+      border-radius: 30px;
+      padding: 4px 10px 4px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--green-dark);
+    }
+    .chip-del {
+      cursor: pointer;
+      color: var(--green);
+      font-size: 17px;
+      line-height: 1;
+      padding: 0 2px;
+      border: none;
+      background: none;
+      transition: color 0.15s;
+    }
+    .chip-del:hover { color: var(--red); }
+
+    /* ── 구분선 ── */
+    hr.sep { border: none; border-top: 0.5px solid var(--border); margin: 0.25rem 0 0.875rem; }
+
+    /* ── 실행현황 테이블 ── */
+    .stats-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 380px;
+    }
+    .stats-table th {
+      text-align: left;
+      padding: 6px 8px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 11px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .stats-table td {
+      padding: 9px 8px;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .stats-table tr:last-child td { border-bottom: none; }
+    .stats-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* ── 미션 상태 배지 ── */
+    .badge-success {
+      display: inline-block;
+      background: var(--green-bg);
+      color: var(--green-dark);
+      border-radius: 20px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-progress {
+      display: inline-block;
+      background: #f0f0f0;
+      color: var(--text-secondary);
+      border-radius: 20px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* ── 아바타 ── */
+    .nick-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--green-bg);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── 오늘 인증 현황 ── */
+    .today-list { display: flex; flex-direction: column; gap: 8px; }
+    .today-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 13px;
+      border-radius: var(--radius-md);
+      background: #fafafa;
+      border: 0.5px solid var(--border);
+      transition: background 0.15s;
+    }
+    .today-item.done {
+      background: var(--green-bg);
+      border-color: var(--green-border);
+    }
+    .today-item .nick-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .today-item .kcal-text { font-size: 13px; font-variant-numeric: tabular-nums; }
+    .today-item.done .nick-name { color: var(--green-dark); }
+    .today-item.done .kcal-text { color: var(--green); font-weight: 600; }
+
+    /* ── 빈 상태 ── */
+    .empty {
+      color: var(--text-hint);
+      font-size: 13px;
+      text-align: center;
+      padding: 1.75rem 0;
+    }
+
+    /* ── 칼로리 입력 행 ── */
+    .cal-input-wrap { display: flex; align-items: center; gap: 6px; flex: 1; }
+    .cal-unit { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+    .disabled-row { opacity: 0.38; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app"></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── localStorage 키 ──
+    const LS_P = 'wc_participants';
+    const LS_R = 'wc_records';
+
+    // ── 데이터 로드/저장 ──
+    function loadP() {
+      try { return JSON.parse(localStorage.getItem(LS_P)) || []; }
+      catch (e) { return []; }
+    }
+    function saveP(d) { localStorage.setItem(LS_P, JSON.stringify(d)); }
+
+    function loadR() {
+      try { return JSON.parse(localStorage.getItem(LS_R)) || []; }
+      catch (e) { return []; }
+    }
+    function saveR(d) { localStorage.setItem(LS_R, JSON.stringify(d)); }
+
+    // ── 상태 ──
+    let participants = loadP();
+    let records = loadR();
+
+    // 폼 상태 (전역으로 관리)
+    const form = {
+      date: todayStr(),
+      nickname: '',
+      isCompleted: true,
+      calories: ''
+    };
+
+    // ── 유틸 함수 ──
+
+    /** 오늘 날짜 YYYY-MM-DD 반환 */
+    function todayStr() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    /** 숫자 천 단위 콤마 포맷 */
+    function fmt(n) {
+      return Number(n || 0).toLocaleString('ko-KR');
+    }
+
+    /** 해당 날짜가 속한 주의 월요일 날짜 반환 */
+    function getMonday(dateStr) {
+      const dt = new Date(dateStr);
+      const day = dt.getDay(); // 0=일, 1=월 ...
+      const diff = day === 0 ? -6 : 1 - day;
+      dt.setDate(dt.getDate() + diff);
+      return dt.toISOString().slice(0, 10);
+    }
+
+    /** 이번 주 월~일 범위 반환 */
+    function getWeekRange() {
+      const mon = getMonday(todayStr());
+      const sun = new Date(mon);
+      sun.setDate(sun.getDate() + 6);
+      return { mon, sun: sun.toISOString().slice(0, 10) };
+    }
+
+    /** 참여자별 통계 계산 */
+    function calcStats(nick) {
+      const { mon, sun } = getWeekRange();
+
+      // 이번 주 완료 기록
+      const weekDone = records.filter(r =>
+        r.nickname === nick && r.isCompleted &&
+        r.date >= mon && r.date <= sun
+      );
+
+      // 이번 주 칼로리 (완료 여부 무관)
+      const weekCal = records
+        .filter(r => r.nickname === nick && r.isCompleted && r.date >= mon && r.date <= sun)
+        .reduce((s, r) => s + (r.calories || 0), 0);
+
+      // 전체 완료 횟수
+      const totalDone = records.filter(r => r.nickname === nick && r.isCompleted);
+
+      // 전체 누적 칼로리
+      const totalCal = records
+        .filter(r => r.nickname === nick && r.isCompleted)
+        .reduce((s, r) => s + (r.calories || 0), 0);
+
+      return {
+        weekCount: weekDone.length,
+        weekCal,
+        totalCount: totalDone.length,
+        totalCal
+      };
+    }
+
+    // ── 토스트 메시지 ──
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = isError ? var(--red) : '#1D9E75';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+    // CSS 변수 참조 불가 → 직접 색상 사용
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = isError ? '#D85A30' : '#1D9E75';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── 참여자 추가 ──
+    function addParticipant() {
+      const inp = document.getElementById('inp-nick');
+      const nick = inp.value.trim();
+      if (!nick) { showToast('닉네임을 입력해주세요', true); return; }
+      if (participants.find(p => p.nickname === nick)) {
+        showToast('이미 등록된 닉네임이에요', true); return;
+      }
+      participants.push({ id: Date.now(), nickname: nick, createdAt: todayStr() });
+      saveP(participants);
+      inp.value = '';
+      showToast(`${nick} 등록 완료!`);
+      render();
+    }
+
+    // ── 참여자 삭제 ──
+    function deleteParticipant(nick) {
+      if (!confirm(`"${nick}"을(를) 삭제할까요?\n관련 인증 기록은 유지됩니다.`)) return;
+      participants = participants.filter(p => p.nickname !== nick);
+      saveP(participants);
+      if (form.nickname === nick) form.nickname = '';
+      showToast(`${nick} 삭제됨`);
+      render();
+    }
+
+    // ── 실행 여부 토글 ──
+    function setCompleted(val) {
+      form.isCompleted = val;
+      if (!val) form.calories = 0;
+      render();
+    }
+
+    // ── 인증 저장 ──
+    function saveRecord() {
+      const dateVal = document.getElementById('inp-date').value;
+      const nickVal = document.getElementById('inp-person').value;
+      const calEl   = document.getElementById('inp-cal');
+      const calVal  = form.isCompleted ? (parseInt(calEl ? calEl.value : 0) || 0) : 0;
+
+      if (!dateVal) { showToast('날짜를 선택해주세요', true); return; }
+      if (!nickVal) { showToast('닉네임을 선택해주세요', true); return; }
+
+      const rec = {
+        date: dateVal,
+        nickname: nickVal,
+        isCompleted: form.isCompleted,
+        calories: calVal
+      };
+
+      // 같은 날짜 + 닉네임이면 덮어쓰기
+      const idx = records.findIndex(r => r.date === dateVal && r.nickname === nickVal);
+      if (idx >= 0) {
+        records[idx] = rec;
+        showToast('기록 수정 완료! ✏️');
+      } else {
+        records.push(rec);
+        showToast('인증 저장 완료! 🎉');
+      }
+
+      saveR(records);
+
+      // 폼 초기화
+      form.isCompleted = true;
+      form.calories = '';
+      form.nickname = '';
+
+      render();
+    }
+
+    // ── 메인 렌더 함수 ──
+    function render() {
+      const app = document.getElementById('app');
+      const t = todayStr();
+
+      // 오늘 기록 맵 (닉네임 → 기록)
+      const todayMap = {};
+      records.filter(r => r.date === t).forEach(r => { todayMap[r.nickname] = r; });
+
+      // 참여자 표시 순서: 엘라, 하늘, 제인 고정
+      const ORDER = ['엘라', '하늘', '제인'];
+      const sortedParticipants = [...participants].sort((a, b) => {
+        const ai = ORDER.indexOf(a.nickname);
+        const bi = ORDER.indexOf(b.nickname);
+        const aIdx = ai === -1 ? ORDER.length : ai;
+        const bIdx = bi === -1 ? ORDER.length : bi;
+        return aIdx - bIdx;
+      });
+
+      app.innerHTML = `
+        <!-- 헤더 -->
+        <div class="header">
+          <h1>🏃 운동 인증 챌린지</h1>
+          <p>주간 5회 달성을 목표로 함께 운동해요!</p>
+        </div>
+
+        <!-- 참여자 등록 카드 -->
+        <div class="card">
+          <div class="card-title">👥 참여자 등록</div>
+          <div class="row">
+            <input
+              type="text"
+              id="inp-nick"
+              placeholder="닉네임을 입력하세요"
+              maxlength="12"
+              style="flex:1"
+              onkeydown="if(event.key==='Enter') addParticipant()"
+            />
+            <button class="btn-secondary" onclick="addParticipant()">등록</button>
+          </div>
+          ${participants.length > 0
+            ? `<div class="participant-chips">
+                ${sortedParticipants.map(p => `
+                  <span class="chip">
+                    ${p.nickname}
+                    <button class="chip-del" onclick="deleteParticipant('${p.nickname.replace(/'/g, "\\'")}')" title="${p.nickname} 삭제">×</button>
+                  </span>
+                `).join('')}
+              </div>`
+            : `<p style="font-size:13px;color:var(--text-hint);margin-top:8px;">참여자를 등록하면 이곳에 표시됩니다</p>`
+          }
+        </div>
+
+        <!-- 운동 인증 입력 카드 -->
+        <div class="card">
+          <div class="card-title">✏️ 오늘의 운동 인증</div>
+
+          <div class="row">
+            <span class="label">날짜</span>
+            <input type="date" id="inp-date" value="${form.date}" onchange="form.date=this.value" />
+          </div>
+
+          <div class="row">
+            <span class="label">닉네임</span>
+            <select id="inp-person" onchange="form.nickname=this.value">
+              <option value="">선택하세요</option>
+              ${sortedParticipants.map(p => `
+                <option value="${p.nickname}" ${form.nickname === p.nickname ? 'selected' : ''}>${p.nickname}</option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="row">
+            <span class="label">실행 여부</span>
+            <div class="toggle-row">
+              <button class="toggle-btn ${form.isCompleted ? 'active-yes' : ''}" onclick="setCompleted(true)">✅ 했다</button>
+              <button class="toggle-btn ${!form.isCompleted ? 'active-no' : ''}" onclick="setCompleted(false)">❌ 안 했다</button>
+            </div>
+          </div>
+
+          <div class="row ${form.isCompleted ? '' : 'disabled-row'}">
+            <span class="label">소모 칼로리</span>
+            <div class="cal-input-wrap">
+              <input
+                type="number"
+                id="inp-cal"
+                placeholder="0"
+                value="${form.isCompleted ? form.calories : 0}"
+                min="0"
+                max="9999"
+                oninput="form.calories=this.value"
+                style="width:100%"
+              />
+              <span class="cal-unit">kcal</span>
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="saveRecord()">💾 인증 저장</button>
+        </div>
+
+        <hr class="sep" />
+
+        <!-- 참여자 실행현황 -->
+        <div class="card">
+          <div class="card-title">📊 참여자 실행현황</div>
+          ${participants.length === 0
+            ? `<p class="empty">참여자를 등록하면 현황이 표시됩니다</p>`
+            : `<div class="stats-wrap">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>닉네임</th>
+                      <th style="text-align:right">이번 주</th>
+                      <th style="text-align:right">주간 kcal</th>
+                      <th style="text-align:right">총 횟수</th>
+                      <th style="text-align:right">총 kcal</th>
+                      <th>미션</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${sortedParticipants.map(p => {
+                      const s = calcStats(p.nickname);
+                      return `
+                        <tr>
+                          <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                              <span class="nick-avatar">${p.nickname.slice(0, 1)}</span>
+                              <span style="font-weight:600">${p.nickname}</span>
+                            </div>
+                          </td>
+                          <td class="num" style="font-weight:600">${s.weekCount}회</td>
+                          <td class="num">${fmt(s.weekCal)}</td>
+                          <td class="num">${s.totalCount}회</td>
+                          <td class="num">${fmt(s.totalCal)}</td>
+                          <td>
+                            <span class="${s.weekCount >= 5 ? 'badge-success' : 'badge-progress'}">
+                              ${s.weekCount >= 5 ? '✅ 미션 성공' : '⏳ 진행중'}
+                            </span>
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>`
+          }
+        </div>
+
+        <!-- 오늘 인증 현황 -->
+        <div class="card">
+          <div class="card-title">
+            📅 오늘 인증 현황
+            <span style="font-weight:400;color:var(--text-hint);font-size:11px;margin-left:4px">${t}</span>
+          </div>
+          ${participants.length === 0
+            ? `<p class="empty">참여자를 등록하면 현황이 표시됩니다</p>`
+            : `<div class="today-list">
+                ${sortedParticipants.map(p => {
+                  const rec = todayMap[p.nickname];
+
+                  // 오늘 기록 없음 → 미인증
+                  if (!rec) return `
+                    <div class="today-item">
+                      <span class="nick-name">⏳ ${p.nickname}</span>
+                      <span class="kcal-text" style="color:var(--text-hint)">미인증</span>
+                    </div>
+                  `;
+
+                  // 안 했다
+                  if (!rec.isCompleted) return `
+                    <div class="today-item">
+                      <span class="nick-name">❌ ${p.nickname}</span>
+                      <span class="kcal-text" style="color:var(--text-secondary)">0 kcal</span>
+                    </div>
+                  `;
+
+                  // 했다 ✅
+                  return `
+                    <div class="today-item done">
+                      <span class="nick-name">✅ ${p.nickname}</span>
+                      <span class="kcal-text">${fmt(rec.calories)} kcal</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>`
+          }
+        </div>
+      `;
+    }
+
+    // ── 초기 렌더 ──
+    render();
+  </script>
+</body>
+</html>
