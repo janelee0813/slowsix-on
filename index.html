@@ -2403,5 +2403,63 @@ wcInit();
     else if (hash === 'diet') showPage('diet');
   })();
 </script>
+
+<style>
+.pet{position:fixed;font-size:28px;cursor:pointer;user-select:none;z-index:9999;transition:transform .1s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
+.pet:active{transform:scale(1.4) rotate(-15deg)}
+.pet-bubble{position:fixed;background:#fff;border-radius:14px;padding:5px 10px;font-size:12px;color:#333;box-shadow:0 2px 10px rgba(0,0,0,.15);pointer-events:none;z-index:10000;white-space:nowrap;opacity:0;transition:opacity .2s}
+</style>
+
+<script>
+(function(){
+  const PETS=[
+    {emoji:'🐱',msgs:['냥~','밥줘','졸려…','꾹꾹','기지개 중']},
+    {emoji:'🐶',msgs:['왈!','산책가자!','꼬리흔들기 중','멍~','반가워!']}
+  ];
+  const BUBBLE_MSGS_ON_CLICK=['앗!','살살해줘','히히','뭐야!','ㅎㅎ'];
+  const bubble=document.createElement('div');
+  bubble.className='pet-bubble';
+  document.body.appendChild(bubble);
+  let bubbleTimer=null;
+
+  function showBubble(x,y,msg){
+    bubble.textContent=msg;
+    bubble.style.left=x+'px';
+    bubble.style.top=(y-38)+'px';
+    bubble.style.opacity='1';
+    clearTimeout(bubbleTimer);
+    bubbleTimer=setTimeout(()=>bubble.style.opacity='0',1400);
+  }
+
+  PETS.forEach(cfg=>{
+    const el=document.createElement('div');
+    el.className='pet'; el.textContent=cfg.emoji;
+    document.body.appendChild(el);
+
+    let x=Math.random()*(window.innerWidth-60)+10;
+    let y=Math.random()*(window.innerHeight-80)+40;
+    let vx=(Math.random()*1.2+0.4)*(Math.random()<.5?1:-1);
+    let vy=(Math.random()*0.8+0.3)*(Math.random()<.5?1:-1);
+    let flip=vx<0;
+
+    el.addEventListener('click',e=>{
+      el.style.transform='scale(1.5) rotate(-20deg)';
+      setTimeout(()=>el.style.transform='',300);
+      const msg=cfg.msgs[Math.floor(Math.random()*cfg.msgs.length)];
+      showBubble(x,y,msg);
+    });
+
+    function move(){
+      x+=vx; y+=vy;
+      if(x<10||x>window.innerWidth-50){vx*=-1;flip=vx<0;}
+      if(y<40||y>window.innerHeight-60){vy*=-1;}
+      el.style.left=x+'px'; el.style.top=y+'px';
+      el.style.transform=flip?'scaleX(-1)':'scaleX(1)';
+      requestAnimationFrame(move);
+    }
+    move();
+  });
+})();
+</script>
 </body>
 </html>
