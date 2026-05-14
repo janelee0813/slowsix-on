@@ -1615,97 +1615,118 @@ hobbyInit();
 <!-- ROULETTE PAGE -->
 <div id="page-roulette" class="hidden">
 <style>
-  .tama-preview-wrap{max-width:480px;margin:0 auto;padding:40px 20px 60px;text-align:center}
-  .tama-preview-title{font-size:22px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
-  .tama-preview-sub{font-size:12px;color:#6b6480;margin-bottom:40px}
-  .tama-stages{display:flex;align-items:flex-end;justify-content:center;gap:20px;flex-wrap:wrap}
-  .tama-stage{display:flex;flex-direction:column;align-items:center;gap:10px}
-  .tama-label{font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:0.05em}
-  .tama-day{font-size:10px;color:#6b6480}
-  .tama-char{border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;animation:tama-float 3s ease-in-out infinite}
-  .tama-char .eyes{display:flex;gap:var(--eg);margin-bottom:var(--mb)}
-  .tama-char .eye{width:var(--ew);height:var(--ew);border-radius:50%;background:#fff}
-  .tama-char .mouth{width:var(--mw);height:var(--mh);border-radius:0 0 var(--mr) var(--mr);border:var(--mb2) solid #fff;border-top:none}
-  @keyframes tama-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .tp-wrap{max-width:500px;margin:0 auto;padding:40px 20px 60px;text-align:center}
+  .tp-title{font-size:22px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+  .tp-sub{font-size:12px;color:#6b6480;margin-bottom:44px}
+  .tp-stages{display:flex;align-items:flex-end;justify-content:center;gap:18px;flex-wrap:wrap}
+  .tp-stage{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .tp-lbl{font-size:11px;color:#9b94b3;font-weight:600}
+  .tp-day{font-size:10px;color:#6b6480}
+  /* 고양이 공통 */
+  .cat{position:relative;display:inline-block;animation:cat-float 3s ease-in-out infinite}
+  .cat .ear{position:absolute;top:0;width:0;height:0;z-index:1}
+  .cat .ear.l{left:0}
+  .cat .ear.r{right:0}
+  .cat .face{position:absolute;bottom:0;left:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+  .cat .eyes{display:flex;align-items:center}
+  .cat .eye{border-radius:50%;background:#fff}
+  .cat .nose{border-radius:50%;background:rgba(255,255,255,0.8)}
+  .cat .mouth{border-radius:0 0 99px 99px;border-style:solid;border-color:#fff;border-top:none;margin-top:1px}
+  @keyframes cat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 </style>
-<div class="tama-preview-wrap">
-  <div class="tama-preview-title">🌱 성장 단계 프리뷰</div>
-  <div class="tama-preview-sub">함께 키우면 이렇게 자라요</div>
-  <div class="tama-stages">
+<div class="tp-wrap">
+  <div class="tp-title">🌱 성장 단계 프리뷰</div>
+  <div class="tp-sub">함께 키우면 이렇게 자라요</div>
+  <div class="tp-stages">
 
-    <!-- 1단계: 아기 (Day 1–6) -->
-    <div class="tama-stage">
-      <div class="tama-char" style="
-        width:32px;height:32px;
-        background:#b566ff;
-        box-shadow:0 0 8px 3px rgba(181,102,255,0.6),0 0 20px 6px rgba(181,102,255,0.3);
-        --eg:4px;--ew:3px;--mb:2px;--mw:6px;--mh:3px;--mr:3px;--mb2:1.5px;
-        animation-delay:0s">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-        <div class="mouth"></div>
+    <!-- 1단계: 아기 Day1–6 face=36 ear_hw=10 ear_h=13 -->
+    <div class="tp-stage">
+      <div class="cat" style="width:36px;height:47px;animation-delay:0s">
+        <div class="ear l" style="border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:14px solid #b566ff;left:2px"></div>
+        <div class="ear r" style="border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:14px solid #b566ff;right:2px"></div>
+        <div class="face" style="width:36px;height:36px;background:#b566ff;box-shadow:0 0 8px 3px rgba(181,102,255,0.65),0 0 22px 6px rgba(181,102,255,0.3)">
+          <div class="eyes" style="gap:5px;margin-bottom:2px">
+            <div class="eye" style="width:4px;height:4px"></div>
+            <div class="eye" style="width:4px;height:4px"></div>
+          </div>
+          <div class="nose" style="width:4px;height:3px"></div>
+          <div class="mouth" style="width:7px;height:3px;border-width:1.5px"></div>
+        </div>
       </div>
-      <div class="tama-label">아기</div>
-      <div class="tama-day">Day 1–6</div>
+      <div class="tp-lbl">아기</div>
+      <div class="tp-day">Day 1–6</div>
     </div>
 
-    <!-- 2단계: 유아 (Day 7–12) -->
-    <div class="tama-stage">
-      <div class="tama-char" style="
-        width:46px;height:46px;
-        background:#d45eff;
-        box-shadow:0 0 10px 4px rgba(212,94,255,0.65),0 0 26px 8px rgba(212,94,255,0.3);
-        --eg:5px;--ew:4px;--mb:3px;--mw:9px;--mh:4px;--mr:4px;--mb2:1.5px;
-        animation-delay:.4s">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-        <div class="mouth"></div>
+    <!-- 2단계: 유아 Day7–12 face=50 ear_hw=14 ear_h=18 -->
+    <div class="tp-stage">
+      <div class="cat" style="width:50px;height:64px;animation-delay:.5s">
+        <div class="ear l" style="border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:19px solid #d45eff;left:3px"></div>
+        <div class="ear r" style="border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:19px solid #d45eff;right:3px"></div>
+        <div class="face" style="width:50px;height:50px;background:#d45eff;box-shadow:0 0 10px 4px rgba(212,94,255,0.65),0 0 28px 8px rgba(212,94,255,0.28)">
+          <div class="eyes" style="gap:7px;margin-bottom:3px">
+            <div class="eye" style="width:5px;height:5px"></div>
+            <div class="eye" style="width:5px;height:5px"></div>
+          </div>
+          <div class="nose" style="width:5px;height:4px"></div>
+          <div class="mouth" style="width:9px;height:4px;border-width:1.5px"></div>
+        </div>
       </div>
-      <div class="tama-label">유아</div>
-      <div class="tama-day">Day 7–12</div>
+      <div class="tp-lbl">유아</div>
+      <div class="tp-day">Day 7–12</div>
     </div>
 
-    <!-- 3단계: 청소년 (Day 13–19) -->
-    <div class="tama-stage">
-      <div class="tama-char" style="
-        width:62px;height:62px;
-        background:#ff5fb0;
-        box-shadow:0 0 14px 5px rgba(255,95,176,0.7),0 0 34px 10px rgba(255,95,176,0.3);
-        --eg:7px;--ew:5px;--mb:4px;--mw:12px;--mh:5px;--mr:5px;--mb2:2px;
-        animation-delay:.8s">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-        <div class="mouth"></div>
+    <!-- 3단계: 청소년 Day13–19 face=66 ear_hw=18 ear_h=24 -->
+    <div class="tp-stage">
+      <div class="cat" style="width:66px;height:84px;animation-delay:1s">
+        <div class="ear l" style="border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:25px solid #ff5fb0;left:4px"></div>
+        <div class="ear r" style="border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:25px solid #ff5fb0;right:4px"></div>
+        <div class="face" style="width:66px;height:66px;background:#ff5fb0;box-shadow:0 0 14px 5px rgba(255,95,176,0.7),0 0 36px 10px rgba(255,95,176,0.3)">
+          <div class="eyes" style="gap:10px;margin-bottom:4px">
+            <div class="eye" style="width:7px;height:7px"></div>
+            <div class="eye" style="width:7px;height:7px"></div>
+          </div>
+          <div class="nose" style="width:7px;height:5px"></div>
+          <div class="mouth" style="width:12px;height:5px;border-width:2px"></div>
+        </div>
       </div>
-      <div class="tama-label">청소년</div>
-      <div class="tama-day">Day 13–19</div>
+      <div class="tp-lbl">청소년</div>
+      <div class="tp-day">Day 13–19</div>
     </div>
 
-    <!-- 4단계: 청년 (Day 20–25) -->
-    <div class="tama-stage">
-      <div class="tama-char" style="
-        width:80px;height:80px;
-        background:#00d4ff;
-        box-shadow:0 0 18px 7px rgba(0,212,255,0.7),0 0 44px 14px rgba(0,212,255,0.3);
-        --eg:9px;--ew:7px;--mb:5px;--mw:16px;--mh:7px;--mr:6px;--mb2:2px;
-        animation-delay:1.2s">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-        <div class="mouth"></div>
+    <!-- 4단계: 청년 Day20–25 face=84 ear_hw=23 ear_h=31 -->
+    <div class="tp-stage">
+      <div class="cat" style="width:84px;height:107px;animation-delay:1.5s">
+        <div class="ear l" style="border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:32px solid #00d4ff;left:5px"></div>
+        <div class="ear r" style="border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:32px solid #00d4ff;right:5px"></div>
+        <div class="face" style="width:84px;height:84px;background:#00d4ff;box-shadow:0 0 18px 7px rgba(0,212,255,0.7),0 0 44px 14px rgba(0,212,255,0.28)">
+          <div class="eyes" style="gap:13px;margin-bottom:5px">
+            <div class="eye" style="width:9px;height:9px"></div>
+            <div class="eye" style="width:9px;height:9px"></div>
+          </div>
+          <div class="nose" style="width:9px;height:6px"></div>
+          <div class="mouth" style="width:15px;height:6px;border-width:2px"></div>
+        </div>
       </div>
-      <div class="tama-label">청년</div>
-      <div class="tama-day">Day 20–25</div>
+      <div class="tp-lbl">청년</div>
+      <div class="tp-day">Day 20–25</div>
     </div>
 
-    <!-- 5단계: 어른 (Day 26–30) -->
-    <div class="tama-stage">
-      <div class="tama-char" style="
-        width:100px;height:100px;
-        background:linear-gradient(135deg,#b566ff,#ff5fb0,#00d4ff);
-        box-shadow:0 0 24px 10px rgba(181,102,255,0.75),0 0 56px 18px rgba(255,95,176,0.35),0 0 80px 24px rgba(0,212,255,0.2);
-        --eg:12px;--ew:9px;--mb:7px;--mw:20px;--mh:9px;--mr:8px;--mb2:2.5px;
-        animation-delay:1.6s">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-        <div class="mouth"></div>
+    <!-- 5단계: 어른 Day26–30 face=104 ear_hw=28 ear_h=38 -->
+    <div class="tp-stage">
+      <div class="cat" style="width:104px;height:132px;animation-delay:2s">
+        <div class="ear l" style="border-left:27px solid transparent;border-right:27px solid transparent;border-bottom:39px solid #b566ff;left:6px"></div>
+        <div class="ear r" style="border-left:27px solid transparent;border-right:27px solid transparent;border-bottom:39px solid #b566ff;right:6px"></div>
+        <div class="face" style="width:104px;height:104px;background:linear-gradient(135deg,#b566ff,#ff5fb0,#00d4ff);box-shadow:0 0 24px 10px rgba(181,102,255,0.75),0 0 56px 18px rgba(255,95,176,0.35),0 0 80px 24px rgba(0,212,255,0.2)">
+          <div class="eyes" style="gap:16px;margin-bottom:7px">
+            <div class="eye" style="width:11px;height:11px"></div>
+            <div class="eye" style="width:11px;height:11px"></div>
+          </div>
+          <div class="nose" style="width:11px;height:8px"></div>
+          <div class="mouth" style="width:18px;height:8px;border-width:2.5px"></div>
+        </div>
       </div>
-      <div class="tama-label">어른 ✨</div>
-      <div class="tama-day">Day 26–30</div>
+      <div class="tp-lbl">어른 ✨</div>
+      <div class="tp-day">Day 26–30</div>
     </div>
 
   </div>
