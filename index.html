@@ -1614,6 +1614,102 @@ hobbyInit();
 
 <!-- ROULETTE PAGE -->
 <div id="page-roulette" class="hidden">
+<style>
+  .tama-preview-wrap{max-width:480px;margin:0 auto;padding:40px 20px 60px;text-align:center}
+  .tama-preview-title{font-size:22px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+  .tama-preview-sub{font-size:12px;color:#6b6480;margin-bottom:40px}
+  .tama-stages{display:flex;align-items:flex-end;justify-content:center;gap:20px;flex-wrap:wrap}
+  .tama-stage{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .tama-label{font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:0.05em}
+  .tama-day{font-size:10px;color:#6b6480}
+  .tama-char{border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;animation:tama-float 3s ease-in-out infinite}
+  .tama-char .eyes{display:flex;gap:var(--eg);margin-bottom:var(--mb)}
+  .tama-char .eye{width:var(--ew);height:var(--ew);border-radius:50%;background:#fff}
+  .tama-char .mouth{width:var(--mw);height:var(--mh);border-radius:0 0 var(--mr) var(--mr);border:var(--mb2) solid #fff;border-top:none}
+  @keyframes tama-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+</style>
+<div class="tama-preview-wrap">
+  <div class="tama-preview-title">🌱 성장 단계 프리뷰</div>
+  <div class="tama-preview-sub">함께 키우면 이렇게 자라요</div>
+  <div class="tama-stages">
+
+    <!-- 1단계: 아기 (Day 1–6) -->
+    <div class="tama-stage">
+      <div class="tama-char" style="
+        width:32px;height:32px;
+        background:#b566ff;
+        box-shadow:0 0 8px 3px rgba(181,102,255,0.6),0 0 20px 6px rgba(181,102,255,0.3);
+        --eg:4px;--ew:3px;--mb:2px;--mw:6px;--mh:3px;--mr:3px;--mb2:1.5px;
+        animation-delay:0s">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="tama-label">아기</div>
+      <div class="tama-day">Day 1–6</div>
+    </div>
+
+    <!-- 2단계: 유아 (Day 7–12) -->
+    <div class="tama-stage">
+      <div class="tama-char" style="
+        width:46px;height:46px;
+        background:#d45eff;
+        box-shadow:0 0 10px 4px rgba(212,94,255,0.65),0 0 26px 8px rgba(212,94,255,0.3);
+        --eg:5px;--ew:4px;--mb:3px;--mw:9px;--mh:4px;--mr:4px;--mb2:1.5px;
+        animation-delay:.4s">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="tama-label">유아</div>
+      <div class="tama-day">Day 7–12</div>
+    </div>
+
+    <!-- 3단계: 청소년 (Day 13–19) -->
+    <div class="tama-stage">
+      <div class="tama-char" style="
+        width:62px;height:62px;
+        background:#ff5fb0;
+        box-shadow:0 0 14px 5px rgba(255,95,176,0.7),0 0 34px 10px rgba(255,95,176,0.3);
+        --eg:7px;--ew:5px;--mb:4px;--mw:12px;--mh:5px;--mr:5px;--mb2:2px;
+        animation-delay:.8s">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="tama-label">청소년</div>
+      <div class="tama-day">Day 13–19</div>
+    </div>
+
+    <!-- 4단계: 청년 (Day 20–25) -->
+    <div class="tama-stage">
+      <div class="tama-char" style="
+        width:80px;height:80px;
+        background:#00d4ff;
+        box-shadow:0 0 18px 7px rgba(0,212,255,0.7),0 0 44px 14px rgba(0,212,255,0.3);
+        --eg:9px;--ew:7px;--mb:5px;--mw:16px;--mh:7px;--mr:6px;--mb2:2px;
+        animation-delay:1.2s">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="tama-label">청년</div>
+      <div class="tama-day">Day 20–25</div>
+    </div>
+
+    <!-- 5단계: 어른 (Day 26–30) -->
+    <div class="tama-stage">
+      <div class="tama-char" style="
+        width:100px;height:100px;
+        background:linear-gradient(135deg,#b566ff,#ff5fb0,#00d4ff);
+        box-shadow:0 0 24px 10px rgba(181,102,255,0.75),0 0 56px 18px rgba(255,95,176,0.35),0 0 80px 24px rgba(0,212,255,0.2);
+        --eg:12px;--ew:9px;--mb:7px;--mw:20px;--mh:9px;--mr:8px;--mb2:2.5px;
+        animation-delay:1.6s">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="tama-label">어른 ✨</div>
+      <div class="tama-day">Day 26–30</div>
+    </div>
+
+  </div>
+</div>
 </div>
 
 <script>
@@ -2210,65 +2306,6 @@ wcInit();
     else if (hash === 'roulette') showPage('roulette');
     else if (hash === 'diet') showPage('diet');
   })();
-</script>
-
-<style>
-.pet{position:fixed;width:20px;height:20px;border-radius:50%;cursor:pointer;user-select:none;z-index:9999;transition:transform .15s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;opacity:1}
-.pet-eyes{display:flex;gap:3px}
-.pet-eye{width:3px;height:3px;border-radius:50%;background:#fff}
-.pet-mouth{width:5px;height:3px;border-radius:0 0 4px 4px;border:1.5px solid #fff;border-top:none}
-.pet-bubble{position:fixed;background:rgba(255,255,255,0.95);border-radius:14px;padding:5px 10px;font-size:12px;color:#333;box-shadow:0 2px 14px rgba(0,0,0,.2);pointer-events:none;z-index:10000;white-space:nowrap;opacity:0;transition:opacity .2s}
-</style>
-
-<script>
-(function(){
-  const PETS=[
-    {color:'#ff6eb4',glow:'rgba(255,110,180,0.7)',msgs:['살살해줘~','히히','반가워!','설레는 중','두근두근']},
-    {color:'#00e5ff',glow:'rgba(0,229,255,0.7)',msgs:['앗!','뭐야!','ㅎㅎ','나야나','좋아좋아']},
-    {color:'#b06fff',glow:'rgba(176,111,255,0.7)',msgs:['음…','몽글몽글','꿈꾸는 중','반짝✨','포근해']}
-  ];
-  const bubble=document.createElement('div');
-  bubble.className='pet-bubble';
-  document.body.appendChild(bubble);
-  let bubbleTimer=null;
-
-  function showBubble(x,y,msg){
-    bubble.textContent=msg;
-    bubble.style.left=x+'px';
-    bubble.style.top=(y-44)+'px';
-    bubble.style.opacity='1';
-    clearTimeout(bubbleTimer);
-    bubbleTimer=setTimeout(()=>bubble.style.opacity='0',1500);
-  }
-
-  PETS.forEach(cfg=>{
-    const el=document.createElement('div');
-    el.className='pet';
-    el.style.cssText=`background:${cfg.color};box-shadow:0 0 6px 2px ${cfg.glow},0 0 14px 4px ${cfg.glow}`;
-    el.innerHTML=`<div class="pet-eyes"><div class="pet-eye"></div><div class="pet-eye"></div></div><div class="pet-mouth"></div>`;
-    document.body.appendChild(el);
-
-    let x=Math.random()*(window.innerWidth-60)+10;
-    let y=Math.random()*(window.innerHeight-80)+40;
-    let vx=(Math.random()*0.25+0.08)*(Math.random()<.5?1:-1);
-    let vy=(Math.random()*0.18+0.06)*(Math.random()<.5?1:-1);
-
-    el.addEventListener('click',()=>{
-      el.style.transform='scale(1.6) rotate(-20deg)';
-      setTimeout(()=>el.style.transform='',300);
-      showBubble(x,y,cfg.msgs[Math.floor(Math.random()*cfg.msgs.length)]);
-    });
-
-    function move(){
-      x+=vx; y+=vy;
-      if(x<10||x>window.innerWidth-50) vx*=-1;
-      if(y<40||y>window.innerHeight-60) vy*=-1;
-      el.style.left=x+'px'; el.style.top=y+'px';
-      requestAnimationFrame(move);
-    }
-    move();
-  });
-})();
 </script>
 </body>
 </html>
