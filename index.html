@@ -2405,10 +2405,10 @@ wcInit();
 </script>
 
 <style>
-.pet{position:fixed;width:40px;height:40px;border-radius:50%;cursor:pointer;user-select:none;z-index:9999;transition:transform .15s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.pet-eyes{display:flex;gap:6px}
-.pet-eye{width:5px;height:5px;border-radius:50%;background:#fff}
-.pet-mouth{width:10px;height:5px;border-radius:0 0 6px 6px;border:2px solid #fff;border-top:none}
+.pet{position:fixed;width:20px;height:20px;border-radius:50%;cursor:pointer;user-select:none;z-index:9999;transition:transform .15s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;opacity:0.55}
+.pet-eyes{display:flex;gap:3px}
+.pet-eye{width:3px;height:3px;border-radius:50%;background:#fff}
+.pet-mouth{width:5px;height:3px;border-radius:0 0 4px 4px;border:1.5px solid #fff;border-top:none}
 .pet-bubble{position:fixed;background:rgba(255,255,255,0.95);border-radius:14px;padding:5px 10px;font-size:12px;color:#333;box-shadow:0 2px 14px rgba(0,0,0,.2);pointer-events:none;z-index:10000;white-space:nowrap;opacity:0;transition:opacity .2s}
 </style>
 
@@ -2436,14 +2436,14 @@ wcInit();
   PETS.forEach(cfg=>{
     const el=document.createElement('div');
     el.className='pet';
-    el.style.cssText=`background:${cfg.color};box-shadow:0 0 12px 4px ${cfg.glow},0 0 28px 8px ${cfg.glow}`;
+    el.style.cssText=`background:${cfg.color};box-shadow:0 0 6px 2px ${cfg.glow},0 0 14px 4px ${cfg.glow}`;
     el.innerHTML=`<div class="pet-eyes"><div class="pet-eye"></div><div class="pet-eye"></div></div><div class="pet-mouth"></div>`;
     document.body.appendChild(el);
 
     let x=Math.random()*(window.innerWidth-60)+10;
     let y=Math.random()*(window.innerHeight-80)+40;
-    let vx=(Math.random()*0.6+0.2)*(Math.random()<.5?1:-1);
-    let vy=(Math.random()*0.4+0.15)*(Math.random()<.5?1:-1);
+    let vx=(Math.random()*0.25+0.08)*(Math.random()<.5?1:-1);
+    let vy=(Math.random()*0.18+0.06)*(Math.random()<.5?1:-1);
 
     el.addEventListener('click',()=>{
       el.style.transform='scale(1.6) rotate(-20deg)';
