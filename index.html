@@ -1615,115 +1615,154 @@ hobbyInit();
 <!-- ROULETTE PAGE -->
 <div id="page-roulette" class="hidden">
 <style>
-  .tp-wrap{max-width:500px;margin:0 auto;padding:40px 20px 60px;text-align:center}
+  .tp-wrap{max-width:560px;margin:0 auto;padding:40px 16px 60px;text-align:center}
   .tp-title{font-size:22px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
   .tp-sub{font-size:12px;color:#6b6480;margin-bottom:44px}
-  .tp-stages{display:flex;align-items:flex-end;justify-content:center;gap:18px;flex-wrap:wrap}
+  .tp-stages{display:flex;align-items:flex-end;justify-content:center;gap:14px;flex-wrap:wrap}
   .tp-stage{display:flex;flex-direction:column;align-items:center;gap:10px}
   .tp-lbl{font-size:11px;color:#9b94b3;font-weight:600}
   .tp-day{font-size:10px;color:#6b6480}
-  /* 고양이 공통 */
-  .cat{position:relative;display:inline-block;animation:cat-float 3s ease-in-out infinite}
-  .cat .ear{position:absolute;top:0;width:0;height:0;z-index:1}
-  .cat .ear.l{left:0}
-  .cat .ear.r{right:0}
-  .cat .face{position:absolute;bottom:0;left:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
-  .cat .eyes{display:flex;align-items:center}
-  .cat .eye{border-radius:50%;background:#fff}
-  .cat .nose{border-radius:50%;background:rgba(255,255,255,0.8)}
-  .cat .mouth{border-radius:0 0 99px 99px;border-style:solid;border-color:#fff;border-top:none;margin-top:1px}
-  @keyframes cat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .tc{display:inline-block;animation:cat-float 3s ease-in-out infinite}
+  .te{transform-box:fill-box;transform-origin:50% 50%;animation:eye-blink 4s linear infinite}
+  @keyframes cat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes eye-blink{0%,88%,100%{transform:scaleY(1)}93%{transform:scaleY(0.08)}}
 </style>
 <div class="tp-wrap">
   <div class="tp-title">🌱 성장 단계 프리뷰</div>
   <div class="tp-sub">함께 키우면 이렇게 자라요</div>
   <div class="tp-stages">
 
-    <!-- 1단계: 아기 Day1–6 face=36 ear_hw=10 ear_h=13 -->
+    <!-- 아기 Day1–6 -->
     <div class="tp-stage">
-      <div class="cat" style="width:36px;height:47px;animation-delay:0s">
-        <div class="ear l" style="border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:14px solid #b566ff;left:2px"></div>
-        <div class="ear r" style="border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:14px solid #b566ff;right:2px"></div>
-        <div class="face" style="width:36px;height:36px;background:#b566ff;box-shadow:0 0 8px 3px rgba(181,102,255,0.65),0 0 22px 6px rgba(181,102,255,0.3)">
-          <div class="eyes" style="gap:5px;margin-bottom:2px">
-            <div class="eye" style="width:4px;height:4px"></div>
-            <div class="eye" style="width:4px;height:4px"></div>
-          </div>
-          <div class="nose" style="width:4px;height:3px"></div>
-          <div class="mouth" style="width:7px;height:3px;border-width:1.5px"></div>
-        </div>
+      <div class="tc" style="animation-delay:0s;filter:drop-shadow(0 0 5px rgba(181,102,255,.85)) drop-shadow(0 0 14px rgba(181,102,255,.4))">
+        <svg width="46" height="64" viewBox="0 0 100 140">
+          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#b566ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.6s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#b566ff"/>
+          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#b566ff"/>
+          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#b566ff"/>
+          <polygon points="30,25 39,6 53,21" fill="#b566ff"/>
+          <polygon points="47,21 61,6 70,25" fill="#b566ff"/>
+          <circle cx="50" cy="36" r="22" fill="#b566ff"/>
+          <polygon points="34,14 39,8 48,14" fill="rgba(255,255,255,.28)"/>
+          <polygon points="52,14 61,8 66,14" fill="rgba(255,255,255,.28)"/>
+          <g class="te" transform="translate(43,33)"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <g class="te" transform="translate(57,33)" style="animation-delay:.08s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <ellipse cx="50" cy="41" rx="2.5" ry="2" fill="rgba(255,255,255,.8)"/>
+          <path d="M47,43.5 Q50,47 53,43.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <line x1="28" y1="38" x2="43" y2="41" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="28" y1="43" x2="43" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="41" x2="72" y2="38" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="43" x2="72" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+        </svg>
       </div>
       <div class="tp-lbl">아기</div>
       <div class="tp-day">Day 1–6</div>
     </div>
 
-    <!-- 2단계: 유아 Day7–12 face=50 ear_hw=14 ear_h=18 -->
+    <!-- 유아 Day7–12 -->
     <div class="tp-stage">
-      <div class="cat" style="width:50px;height:64px;animation-delay:.5s">
-        <div class="ear l" style="border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:19px solid #d45eff;left:3px"></div>
-        <div class="ear r" style="border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:19px solid #d45eff;right:3px"></div>
-        <div class="face" style="width:50px;height:50px;background:#d45eff;box-shadow:0 0 10px 4px rgba(212,94,255,0.65),0 0 28px 8px rgba(212,94,255,0.28)">
-          <div class="eyes" style="gap:7px;margin-bottom:3px">
-            <div class="eye" style="width:5px;height:5px"></div>
-            <div class="eye" style="width:5px;height:5px"></div>
-          </div>
-          <div class="nose" style="width:5px;height:4px"></div>
-          <div class="mouth" style="width:9px;height:4px;border-width:1.5px"></div>
-        </div>
+      <div class="tc" style="animation-delay:.5s;filter:drop-shadow(0 0 6px rgba(212,94,255,.85)) drop-shadow(0 0 16px rgba(212,94,255,.4))">
+        <svg width="60" height="84" viewBox="0 0 100 140">
+          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#d45eff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.4s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#d45eff"/>
+          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#d45eff"/>
+          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#d45eff"/>
+          <polygon points="30,25 39,6 53,21" fill="#d45eff"/>
+          <polygon points="47,21 61,6 70,25" fill="#d45eff"/>
+          <circle cx="50" cy="36" r="22" fill="#d45eff"/>
+          <polygon points="34,14 39,8 48,14" fill="rgba(255,255,255,.28)"/>
+          <polygon points="52,14 61,8 66,14" fill="rgba(255,255,255,.28)"/>
+          <g class="te" transform="translate(43,33)" style="animation-delay:.5s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <g class="te" transform="translate(57,33)" style="animation-delay:.58s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <ellipse cx="50" cy="41" rx="2.5" ry="2" fill="rgba(255,255,255,.8)"/>
+          <path d="M47,43.5 Q50,47 53,43.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <line x1="28" y1="38" x2="43" y2="41" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="28" y1="43" x2="43" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="41" x2="72" y2="38" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="43" x2="72" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+        </svg>
       </div>
       <div class="tp-lbl">유아</div>
       <div class="tp-day">Day 7–12</div>
     </div>
 
-    <!-- 3단계: 청소년 Day13–19 face=66 ear_hw=18 ear_h=24 -->
+    <!-- 청소년 Day13–19 -->
     <div class="tp-stage">
-      <div class="cat" style="width:66px;height:84px;animation-delay:1s">
-        <div class="ear l" style="border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:25px solid #ff5fb0;left:4px"></div>
-        <div class="ear r" style="border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:25px solid #ff5fb0;right:4px"></div>
-        <div class="face" style="width:66px;height:66px;background:#ff5fb0;box-shadow:0 0 14px 5px rgba(255,95,176,0.7),0 0 36px 10px rgba(255,95,176,0.3)">
-          <div class="eyes" style="gap:10px;margin-bottom:4px">
-            <div class="eye" style="width:7px;height:7px"></div>
-            <div class="eye" style="width:7px;height:7px"></div>
-          </div>
-          <div class="nose" style="width:7px;height:5px"></div>
-          <div class="mouth" style="width:12px;height:5px;border-width:2px"></div>
-        </div>
+      <div class="tc" style="animation-delay:1s;filter:drop-shadow(0 0 7px rgba(255,95,176,.85)) drop-shadow(0 0 18px rgba(255,95,176,.4))">
+        <svg width="74" height="104" viewBox="0 0 100 140">
+          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#ff5fb0" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.8s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#ff5fb0"/>
+          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#ff5fb0"/>
+          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#ff5fb0"/>
+          <polygon points="30,25 39,6 53,21" fill="#ff5fb0"/>
+          <polygon points="47,21 61,6 70,25" fill="#ff5fb0"/>
+          <circle cx="50" cy="36" r="22" fill="#ff5fb0"/>
+          <polygon points="34,14 39,8 48,14" fill="rgba(255,255,255,.28)"/>
+          <polygon points="52,14 61,8 66,14" fill="rgba(255,255,255,.28)"/>
+          <g class="te" transform="translate(43,33)" style="animation-delay:1s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <g class="te" transform="translate(57,33)" style="animation-delay:1.08s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <ellipse cx="50" cy="41" rx="2.5" ry="2" fill="rgba(255,255,255,.8)"/>
+          <path d="M47,43.5 Q50,47 53,43.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <line x1="28" y1="38" x2="43" y2="41" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="28" y1="43" x2="43" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="41" x2="72" y2="38" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="43" x2="72" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+        </svg>
       </div>
       <div class="tp-lbl">청소년</div>
       <div class="tp-day">Day 13–19</div>
     </div>
 
-    <!-- 4단계: 청년 Day20–25 face=84 ear_hw=23 ear_h=31 -->
+    <!-- 청년 Day20–25 -->
     <div class="tp-stage">
-      <div class="cat" style="width:84px;height:107px;animation-delay:1.5s">
-        <div class="ear l" style="border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:32px solid #00d4ff;left:5px"></div>
-        <div class="ear r" style="border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:32px solid #00d4ff;right:5px"></div>
-        <div class="face" style="width:84px;height:84px;background:#00d4ff;box-shadow:0 0 18px 7px rgba(0,212,255,0.7),0 0 44px 14px rgba(0,212,255,0.28)">
-          <div class="eyes" style="gap:13px;margin-bottom:5px">
-            <div class="eye" style="width:9px;height:9px"></div>
-            <div class="eye" style="width:9px;height:9px"></div>
-          </div>
-          <div class="nose" style="width:9px;height:6px"></div>
-          <div class="mouth" style="width:15px;height:6px;border-width:2px"></div>
-        </div>
+      <div class="tc" style="animation-delay:1.5s;filter:drop-shadow(0 0 8px rgba(0,212,255,.85)) drop-shadow(0 0 20px rgba(0,212,255,.4))">
+        <svg width="90" height="126" viewBox="0 0 100 140">
+          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#00d4ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#00d4ff"/>
+          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#00d4ff"/>
+          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#00d4ff"/>
+          <polygon points="30,25 39,6 53,21" fill="#00d4ff"/>
+          <polygon points="47,21 61,6 70,25" fill="#00d4ff"/>
+          <circle cx="50" cy="36" r="22" fill="#00d4ff"/>
+          <polygon points="34,14 39,8 48,14" fill="rgba(255,255,255,.28)"/>
+          <polygon points="52,14 61,8 66,14" fill="rgba(255,255,255,.28)"/>
+          <g class="te" transform="translate(43,33)" style="animation-delay:1.5s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <g class="te" transform="translate(57,33)" style="animation-delay:1.58s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <ellipse cx="50" cy="41" rx="2.5" ry="2" fill="rgba(255,255,255,.8)"/>
+          <path d="M47,43.5 Q50,47 53,43.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <line x1="28" y1="38" x2="43" y2="41" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="28" y1="43" x2="43" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="41" x2="72" y2="38" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="43" x2="72" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+        </svg>
       </div>
       <div class="tp-lbl">청년</div>
       <div class="tp-day">Day 20–25</div>
     </div>
 
-    <!-- 5단계: 어른 Day26–30 face=104 ear_hw=28 ear_h=38 -->
+    <!-- 어른 Day26–30 -->
     <div class="tp-stage">
-      <div class="cat" style="width:104px;height:132px;animation-delay:2s">
-        <div class="ear l" style="border-left:27px solid transparent;border-right:27px solid transparent;border-bottom:39px solid #b566ff;left:6px"></div>
-        <div class="ear r" style="border-left:27px solid transparent;border-right:27px solid transparent;border-bottom:39px solid #b566ff;right:6px"></div>
-        <div class="face" style="width:104px;height:104px;background:linear-gradient(135deg,#b566ff,#ff5fb0,#00d4ff);box-shadow:0 0 24px 10px rgba(181,102,255,0.75),0 0 56px 18px rgba(255,95,176,0.35),0 0 80px 24px rgba(0,212,255,0.2)">
-          <div class="eyes" style="gap:16px;margin-bottom:7px">
-            <div class="eye" style="width:11px;height:11px"></div>
-            <div class="eye" style="width:11px;height:11px"></div>
-          </div>
-          <div class="nose" style="width:11px;height:8px"></div>
-          <div class="mouth" style="width:18px;height:8px;border-width:2.5px"></div>
-        </div>
+      <div class="tc" style="animation-delay:2s;filter:drop-shadow(0 0 10px rgba(181,102,255,.9)) drop-shadow(0 0 24px rgba(255,95,176,.5)) drop-shadow(0 0 36px rgba(0,212,255,.3))">
+        <svg width="108" height="151" viewBox="0 0 100 140">
+          <defs><linearGradient id="tg5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ff5fb0"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient></defs>
+          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#b566ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.3s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="97" rx="24" ry="30" fill="url(#tg5)"/>
+          <ellipse cx="37" cy="126" rx="9" ry="6" fill="url(#tg5)"/>
+          <ellipse cx="63" cy="126" rx="9" ry="6" fill="url(#tg5)"/>
+          <polygon points="30,25 39,6 53,21" fill="#b566ff"/>
+          <polygon points="47,21 61,6 70,25" fill="#00d4ff"/>
+          <circle cx="50" cy="36" r="22" fill="url(#tg5)"/>
+          <polygon points="34,14 39,8 48,14" fill="rgba(255,255,255,.28)"/>
+          <polygon points="52,14 61,8 66,14" fill="rgba(255,255,255,.28)"/>
+          <g class="te" transform="translate(43,33)" style="animation-delay:2s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <g class="te" transform="translate(57,33)" style="animation-delay:2.08s"><circle r="4" fill="white"/><circle r="2.5" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1" fill="white"/></g>
+          <ellipse cx="50" cy="41" rx="2.5" ry="2" fill="rgba(255,255,255,.8)"/>
+          <path d="M47,43.5 Q50,47 53,43.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <line x1="28" y1="38" x2="43" y2="41" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="28" y1="43" x2="43" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="41" x2="72" y2="38" stroke="white" stroke-width=".8" opacity=".45"/>
+          <line x1="57" y1="43" x2="72" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+        </svg>
       </div>
       <div class="tp-lbl">어른 ✨</div>
       <div class="tp-day">Day 26–30</div>
