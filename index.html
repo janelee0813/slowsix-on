@@ -2405,18 +2405,20 @@ wcInit();
 </script>
 
 <style>
-.pet{position:fixed;font-size:28px;cursor:pointer;user-select:none;z-index:9999;transition:transform .1s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
-.pet:active{transform:scale(1.4) rotate(-15deg)}
-.pet-bubble{position:fixed;background:#fff;border-radius:14px;padding:5px 10px;font-size:12px;color:#333;box-shadow:0 2px 10px rgba(0,0,0,.15);pointer-events:none;z-index:10000;white-space:nowrap;opacity:0;transition:opacity .2s}
+.pet{position:fixed;width:40px;height:40px;border-radius:50%;cursor:pointer;user-select:none;z-index:9999;transition:transform .15s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.pet-eyes{display:flex;gap:6px}
+.pet-eye{width:5px;height:5px;border-radius:50%;background:#fff}
+.pet-mouth{width:10px;height:5px;border-radius:0 0 6px 6px;border:2px solid #fff;border-top:none}
+.pet-bubble{position:fixed;background:rgba(255,255,255,0.95);border-radius:14px;padding:5px 10px;font-size:12px;color:#333;box-shadow:0 2px 14px rgba(0,0,0,.2);pointer-events:none;z-index:10000;white-space:nowrap;opacity:0;transition:opacity .2s}
 </style>
 
 <script>
 (function(){
   const PETS=[
-    {emoji:'🐱',msgs:['냥~','밥줘','졸려…','꾹꾹','기지개 중']},
-    {emoji:'🐶',msgs:['왈!','산책가자!','꼬리흔들기 중','멍~','반가워!']}
+    {color:'#ff6eb4',glow:'rgba(255,110,180,0.7)',msgs:['살살해줘~','히히','반가워!','설레는 중','두근두근']},
+    {color:'#00e5ff',glow:'rgba(0,229,255,0.7)',msgs:['앗!','뭐야!','ㅎㅎ','나야나','좋아좋아']},
+    {color:'#b06fff',glow:'rgba(176,111,255,0.7)',msgs:['음…','몽글몽글','꿈꾸는 중','반짝✨','포근해']}
   ];
-  const BUBBLE_MSGS_ON_CLICK=['앗!','살살해줘','히히','뭐야!','ㅎㅎ'];
   const bubble=document.createElement('div');
   bubble.className='pet-bubble';
   document.body.appendChild(bubble);
@@ -2425,36 +2427,35 @@ wcInit();
   function showBubble(x,y,msg){
     bubble.textContent=msg;
     bubble.style.left=x+'px';
-    bubble.style.top=(y-38)+'px';
+    bubble.style.top=(y-44)+'px';
     bubble.style.opacity='1';
     clearTimeout(bubbleTimer);
-    bubbleTimer=setTimeout(()=>bubble.style.opacity='0',1400);
+    bubbleTimer=setTimeout(()=>bubble.style.opacity='0',1500);
   }
 
   PETS.forEach(cfg=>{
     const el=document.createElement('div');
-    el.className='pet'; el.textContent=cfg.emoji;
+    el.className='pet';
+    el.style.cssText=`background:${cfg.color};box-shadow:0 0 12px 4px ${cfg.glow},0 0 28px 8px ${cfg.glow}`;
+    el.innerHTML=`<div class="pet-eyes"><div class="pet-eye"></div><div class="pet-eye"></div></div><div class="pet-mouth"></div>`;
     document.body.appendChild(el);
 
     let x=Math.random()*(window.innerWidth-60)+10;
     let y=Math.random()*(window.innerHeight-80)+40;
-    let vx=(Math.random()*1.2+0.4)*(Math.random()<.5?1:-1);
-    let vy=(Math.random()*0.8+0.3)*(Math.random()<.5?1:-1);
-    let flip=vx<0;
+    let vx=(Math.random()*0.6+0.2)*(Math.random()<.5?1:-1);
+    let vy=(Math.random()*0.4+0.15)*(Math.random()<.5?1:-1);
 
-    el.addEventListener('click',e=>{
-      el.style.transform='scale(1.5) rotate(-20deg)';
+    el.addEventListener('click',()=>{
+      el.style.transform='scale(1.6) rotate(-20deg)';
       setTimeout(()=>el.style.transform='',300);
-      const msg=cfg.msgs[Math.floor(Math.random()*cfg.msgs.length)];
-      showBubble(x,y,msg);
+      showBubble(x,y,cfg.msgs[Math.floor(Math.random()*cfg.msgs.length)]);
     });
 
     function move(){
       x+=vx; y+=vy;
-      if(x<10||x>window.innerWidth-50){vx*=-1;flip=vx<0;}
-      if(y<40||y>window.innerHeight-60){vy*=-1;}
+      if(x<10||x>window.innerWidth-50) vx*=-1;
+      if(y<40||y>window.innerHeight-60) vy*=-1;
       el.style.left=x+'px'; el.style.top=y+'px';
-      el.style.transform=flip?'scaleX(-1)':'scaleX(1)';
       requestAnimationFrame(move);
     }
     move();
