@@ -2105,6 +2105,8 @@ function wcRender(){
   const t=wcToday();
   const todayMap={};
   wcRecs.filter(r=>r.date===t).forEach(r=>{todayMap[r.nickname]=r});
+  const _WC_ORDER=['엘라','하늘','제인'];
+  const wcSorted=[...wcParts].sort((a,b)=>{const ai=_WC_ORDER.indexOf(a.nickname),bi=_WC_ORDER.indexOf(b.nickname);return(ai<0?99:ai)-(bi<0?99:bi);});
   app.innerHTML=`
     <div class="wc-header">
       <h1>🏃 운동 인증 챌린지</h1>
@@ -2125,7 +2127,7 @@ function wcRender(){
         <button class="wc-btn-secondary" id="wc-reg-btn" onclick="wcAddParticipant()">등록</button>
       </div>
       ${wcParts.length>0
-        ?`<div class="wc-chips">${wcParts.map(p=>`<span class="wc-chip">${p.nickname}<button class="wc-chip-del" onclick="wcDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}')">×</button></span>`).join('')}</div>`
+        ?`<div class="wc-chips">${wcSorted.map(p=>`<span class="wc-chip">${p.nickname}<button class="wc-chip-del" onclick="wcDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}')">×</button></span>`).join('')}</div>`
         :`<p style="font-size:13px;color:#6b6480;margin-top:8px">참여자를 등록하면 이곳에 표시됩니다</p>`}
     </div>
     ${wcCompareSection()}
@@ -2138,7 +2140,7 @@ function wcRender(){
       ${wcFormOpen?`
       <div id="wc-form-rows">
         <div class="wc-row"><span class="wc-label">날짜</span><input type="date" id="wc-inp-date" value="${wcForm.date}" onchange="wcForm.date=this.value"/></div>
-        <div class="wc-row"><span class="wc-label">닉네임</span><select id="wc-inp-person" onchange="wcForm.nickname=this.value;wcRender()"><option value="">선택하세요</option>${wcParts.map(p=>`<option value="${p.nickname}"${wcForm.nickname===p.nickname?' selected':''}>${p.nickname}</option>`).join('')}</select></div>
+        <div class="wc-row"><span class="wc-label">닉네임</span><select id="wc-inp-person" onchange="wcForm.nickname=this.value;wcRender()"><option value="">선택하세요</option>${wcSorted.map(p=>`<option value="${p.nickname}"${wcForm.nickname===p.nickname?' selected':''}>${p.nickname}</option>`).join('')}</select></div>
         <div class="wc-row"><span class="wc-label">실행 여부</span><div class="wc-toggle-row">${(()=>{const pc=wcForm.nickname?wcGetPassCount(wcForm.nickname):0;const pd=pc>=2;return`<button class="wc-toggle-btn${wcForm.isCompleted?' yes':''}" onclick="wcSetCompleted(true)">✅ 했다</button><button class="wc-toggle-btn wc-toggle-btn-pass${wcForm.isPass?' pass':''}" onclick="wcSetPass()" ${pd?'disabled title="패스 소진"':''}>${pd?'🚫 패스 소진':wcForm.isPass?`🎫 패스<br>(${2-pc}회 남음)`:'🎫 패스'}</button><button class="wc-toggle-btn${(!wcForm.isCompleted&&!wcForm.isPass)?' no':''}" onclick="wcSetCompleted(false)">❌ 안 했다</button>`})()}</div></div>
         <p style="font-size:11px;color:#6b6480;margin-top:4px;padding-left:84px">패스 2회 사용 가능. 패스 사용시 운동횟수만 1회 올라갑니다.</p>
         <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}"><span class="wc-label">운동 시간</span><div class="wc-cal-wrap"><input type="number" id="wc-inp-dur" placeholder="0" value="${wcForm.isCompleted?wcForm.duration:0}" min="0" max="999" oninput="wcForm.duration=this.value" style="width:100%"/><span class="wc-cal-unit">분</span></div></div>
@@ -2162,7 +2164,7 @@ function wcRender(){
               <th style="text-align:right">총 kcal</th>
               <th>미션</th>
             </tr></thead>
-            <tbody>${wcParts.map(p=>{const s=wcStats(p.nickname);return`
+            <tbody>${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
               <tr>
                 <td><div style="display:flex;align-items:center;gap:7px"><span class="wc-avatar">${p.nickname.slice(0,1)}</span><span style="font-weight:600">${p.nickname}</span></div></td>
                 <td class="num" style="font-weight:600">${s.weekCount}회</td>
