@@ -2681,7 +2681,7 @@ function tamaRenderRank() {
   const el = document.getElementById('tama-rank-list');
   if (!el) return;
   if (!tamaRankData.length) { el.innerHTML = '<p style="font-size:13px;color:#6b6480;text-align:center;margin:8px 0">아직 기록이 없어요</p>'; return; }
-  const medals = ['🥇','🥈','🥉','4위','5위','6위','7위','8위','9위','10위'];
+  const medals = ['🥇','🥈','🥉','4위','5위','6위'];
   el.innerHTML = tamaRankData.map(([nick, cnt], i) =>
     `<div class="tama-log-row"><span>${medals[i]} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`
   ).join('');
@@ -2797,7 +2797,7 @@ function tamaMonthRange() {
 function tamaCountPets(rows) {
   const cnt = {};
   (rows||[]).forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
-  return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6);
 }
 
 async function tamaLoadAllRanks() {
@@ -2835,7 +2835,7 @@ function tamaRenderLastMonth() {
   if (!wrap || !el) return;
   if (!tamaLastMonthData.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  const medals = ['🥇','🥈','🥉','4위','5위','6위','7위','8위','9위','10위'];
+  const medals = ['🥇','🥈','🥉','4위','5위','6위'];
   el.innerHTML = tamaLastMonthData.map(([nick, cnt], i) =>
     `<div class="tama-log-row"><span>${medals[i]} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#9b94b3;font-weight:700">${cnt}회 🤍</span></div>`
   ).join('');
