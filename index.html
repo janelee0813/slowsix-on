@@ -1626,6 +1626,20 @@ hobbyInit();
   .te{transform-box:fill-box;transform-origin:50% 50%;animation:eye-blink 4s linear infinite}
   @keyframes cat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
   @keyframes eye-blink{0%,88%,100%{transform:scaleY(1)}93%{transform:scaleY(0.08)}}
+  /* 다마고찌 메인 */
+  .tama-crd{background:rgba(34,26,58,.65);border:1px solid rgba(140,110,200,.28);border-radius:14px;padding:16px;margin-bottom:12px}
+  .tama-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .tama-stat-row:last-child{margin-bottom:0}
+  .tama-stat-lbl{font-size:13px;color:#9b94b3;white-space:nowrap;width:74px;flex-shrink:0}
+  .tama-bar-wrap{flex:1;height:8px;background:rgba(140,110,200,.2);border-radius:99px;overflow:hidden}
+  .tama-bar{height:100%;border-radius:99px;transition:width .6s,background .6s;width:0}
+  .tama-stat-num{font-size:12px;color:#9b94b3;width:24px;text-align:right;flex-shrink:0}
+  .tama-act-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:14px 6px;border:1px solid rgba(140,110,200,.28);border-radius:12px;background:rgba(28,21,48,.6);color:#f5f1ff;cursor:pointer;font-family:inherit;transition:all .15s;width:100%}
+  .tama-act-btn:hover:not(:disabled){background:rgba(181,102,255,.15);border-color:rgba(181,102,255,.5)}
+  .tama-act-btn:active:not(:disabled){transform:scale(.97)}
+  .tama-cd{font-size:10px;color:#6b6480;line-height:1;min-height:12px}
+  .tama-log-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(140,110,200,.12);font-size:13px}
+  .tama-log-row:last-child{border-bottom:none}
 </style>
 <div class="tp-wrap">
   <div style="position:relative;margin-bottom:6px">
@@ -1722,6 +1736,78 @@ hobbyInit();
 
   </div>
 </div>
+
+<!-- 다마고찌 메인 -->
+<div style="max-width:480px;margin:0 auto;padding:0 16px 60px">
+  <hr style="border:none;border-top:1px solid rgba(140,110,200,.18);margin:0 0 28px"/>
+
+  <div id="tama-loading" style="text-align:center;padding:32px 0;color:#6b6480;font-size:13px">불러오는 중…</div>
+
+  <!-- 캐릭터 -->
+  <div class="tama-crd" id="tama-char-card" style="display:none;text-align:center;padding:28px 16px 20px">
+    <div id="tama-stage-badge" style="margin-bottom:14px"></div>
+    <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
+    <div id="tama-day-info" style="font-size:12px;color:#6b6480;margin-top:10px"></div>
+    <div id="tama-mood-text" style="font-size:13px;color:#9b94b3;margin-top:4px"></div>
+  </div>
+
+  <!-- 상태바 -->
+  <div class="tama-crd" id="tama-stat-card" style="display:none">
+    <div class="tama-stat-row">
+      <span class="tama-stat-lbl">🍚 배고픔</span>
+      <div class="tama-bar-wrap"><div class="tama-bar" id="bar-hunger"></div></div>
+      <span class="tama-stat-num" id="num-hunger">0</span>
+    </div>
+    <div class="tama-stat-row">
+      <span class="tama-stat-lbl">😊 행복도</span>
+      <div class="tama-bar-wrap"><div class="tama-bar" id="bar-happy"></div></div>
+      <span class="tama-stat-num" id="num-happy">0</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#9b94b3;padding-top:10px;border-top:1px solid rgba(140,110,200,.12)">
+      <span>🤍 누적 애정도</span>
+      <span id="num-affection" style="font-weight:700;color:#b566ff;font-size:14px">0회</span>
+    </div>
+  </div>
+
+  <!-- 액션 -->
+  <div class="tama-crd" id="tama-action-card" style="display:none">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">함께 돌봐요</div>
+    <input id="tama-nick" placeholder="닉네임을 입력하세요" maxlength="12"
+      style="width:100%;padding:10px 13px;border:1px solid rgba(140,110,200,.32);border-radius:10px;font-size:14px;background:rgba(20,14,36,.7);color:#f5f1ff;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:12px"
+      oninput="localStorage.setItem('tama_nick',this.value)"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <button class="tama-act-btn" id="btn-feed" onclick="tamaAction('feed')">
+        <span style="font-size:22px">🍚</span>
+        <span style="font-size:12px;font-weight:600">밥주기</span>
+        <span class="tama-cd" id="cd-feed"></span>
+      </button>
+      <button class="tama-act-btn" id="btn-play" onclick="tamaAction('play')">
+        <span style="font-size:22px">🎾</span>
+        <span style="font-size:12px;font-weight:600">놀아주기</span>
+        <span class="tama-cd" id="cd-play"></span>
+      </button>
+      <button class="tama-act-btn" id="btn-pet" onclick="tamaAction('pet')">
+        <span style="font-size:22px">🤍</span>
+        <span style="font-size:12px;font-weight:600">쓰다듬기</span>
+        <span class="tama-cd" id="cd-pet"></span>
+      </button>
+    </div>
+    <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">밥·놀기: 6시간마다 / 쓰다듬기: 2시간마다</p>
+  </div>
+
+  <!-- 최근 활동 -->
+  <div class="tama-crd" id="tama-log-card" style="display:none">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">📋 최근 활동</div>
+    <div id="tama-log-list"></div>
+  </div>
+
+  <!-- 애정 랭킹 -->
+  <div class="tama-crd" id="tama-rank-card" style="display:none">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">🏆 애정 랭킹</div>
+    <div id="tama-rank-list"></div>
+  </div>
+</div>
+
 </div>
 <script>
   function tamaCopyUrl() {
@@ -2314,6 +2400,8 @@ wcInit();
           void el.offsetHeight;
           el.style.animationName = '';
         });
+        if (!tamaReady) { tamaReady = true; tamaInit(); }
+        else tamaRenderCd();
       });
     }
   }
@@ -2339,6 +2427,240 @@ wcInit();
     else if (hash === 'tamagotchi') showPage('roulette');
     else if (hash === 'diet') showPage('diet');
   })();
+</script>
+
+<script>
+// ===== TAMAGOTCHI =====
+let tamaData = null, tamaLogs = [], tamaRankData = [], tamaTick = null, tamaChannel = null, tamaReady = false;
+
+const T_FEED_CD = 6 * 3600000, T_PLAY_CD = 6 * 3600000, T_PET_CD = 2 * 3600000;
+const HUNGER_DECAY = 8, HAPPY_DECAY = 5; // per hour
+
+function tamaDecay(val, rate, since) {
+  return Math.max(0, Math.min(100, val - (Date.now() - new Date(since)) / 3600000 * rate));
+}
+function tamaHunger() { return Math.round(tamaDecay(tamaData.hunger, HUNGER_DECAY, tamaData.last_updated)); }
+function tamaHappy()  { return Math.round(tamaDecay(tamaData.happiness, HAPPY_DECAY, tamaData.last_updated)); }
+function tamaDay()    { return Math.max(1, Math.min(30, Math.floor((Date.now() - new Date(tamaData.born_at)) / 86400000) + 1)); }
+function tamaStageNum() { const d = tamaDay(); return d <= 10 ? 1 : d <= 20 ? 2 : 3; }
+function tamaStageName() { return ['','청소년','청년','어른'][tamaStageNum()]; }
+
+function tamaCatSVG(stage, mood) {
+  const C = [null,
+    {col:'#ff5fb0', ec:'#ff5fb0', ec2:'#ff5fb0', bc:92, brx:22, bry:26, tx:68, ty:110, px:[37,63], py:123, prx:9,  pry:6, w:78},
+    {col:'#00d4ff', ec:'#00d4ff', ec2:'#00d4ff', bc:101,brx:29, bry:34, tx:74, ty:126, px:[35,65], py:139, prx:11, pry:7, w:98},
+    {col:'url(#tg-m)', ec:'#b566ff', ec2:'#00d4ff', bc:106,brx:34, bry:39, tx:81, ty:137, px:[33,67], py:149, prx:13, pry:8, w:118}
+  ][stage];
+  const h = Math.round(C.w * 165 / 100);
+  const mouth = mood === 'happy' ? 'M46,50 Q50,56 54,50' : mood === 'sad' ? 'M46,54 Q50,49 54,54' : 'M47,50 Q50,54 53,50';
+  return `<svg width="${C.w}" height="${h}" viewBox="0 0 100 165" style="overflow:visible">
+    ${stage===3?'<defs><linearGradient id="tg-m" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ff5fb0"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient></defs>':''}
+    <g transform="translate(${C.tx},${C.ty})">
+      <path d="M0,0 C20,-16 24,-42 8,-56" stroke="${C.ec}" stroke-width="7" stroke-linecap="round" fill="none"/>
+      <animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/>
+    </g>
+    <ellipse cx="50" cy="${C.bc}" rx="${C.brx}" ry="${C.bry}" fill="${C.col}"/>
+    <ellipse cx="${C.px[0]}" cy="${C.py}" rx="${C.prx}" ry="${C.pry}" fill="${C.col}"/>
+    <ellipse cx="${C.px[1]}" cy="${C.py}" rx="${C.prx}" ry="${C.pry}" fill="${C.col}"/>
+    <polygon points="29,27 38,8 53,24" fill="${C.ec}"/>
+    <polygon points="47,24 62,8 71,27" fill="${C.ec2}"/>
+    <circle cx="50" cy="40" r="27" fill="${C.col}"/>
+    <polygon points="33,15 38,10 49,15" fill="rgba(255,255,255,.3)"/>
+    <polygon points="51,15 62,10 67,15" fill="rgba(255,255,255,.3)"/>
+    <g transform="translate(43,37)"><g class="te"><circle r="5" fill="white"/><circle r="3" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1.2" fill="white"/></g></g>
+    <g transform="translate(57,37)"><g class="te"><circle r="5" fill="white"/><circle r="3" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1.2" fill="white"/></g></g>
+    <ellipse cx="50" cy="47" rx="3" ry="2.5" fill="rgba(255,255,255,.8)"/>
+    <path d="${mouth}" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <line x1="26" y1="43" x2="43" y2="46" stroke="white" stroke-width=".8" opacity=".45"/>
+    <line x1="26" y1="49" x2="43" y2="49" stroke="white" stroke-width=".8" opacity=".45"/>
+    <line x1="57" y1="46" x2="74" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
+    <line x1="57" y1="49" x2="74" y2="49" stroke="white" stroke-width=".8" opacity=".45"/>
+  </svg>`;
+}
+
+function tamaTimeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (s < 60) return '방금 전';
+  if (s < 3600) return Math.floor(s/60) + '분 전';
+  if (s < 86400) return Math.floor(s/3600) + '시간 전';
+  return Math.floor(s/86400) + '일 전';
+}
+function tamaActionLabel(t) { return {feed:'밥을 줬어요 🍚', play:'놀아줬어요 🎾', pet:'쓰다듬었어요 🤍'}[t] || t; }
+
+function tamaCdLeft(type) {
+  const nick = document.getElementById('tama-nick')?.value.trim();
+  if (!nick) return 0;
+  const cd = {feed:T_FEED_CD, play:T_PLAY_CD, pet:T_PET_CD}[type];
+  return Math.max(0, parseInt(localStorage.getItem(`tama_${type}_${nick}`) || 0) + cd - Date.now());
+}
+function tamaFmtCd(ms) {
+  if (ms <= 0) return '';
+  const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000);
+  return h > 0 ? `${h}h ${m}m 후` : `${m}분 후`;
+}
+
+async function tamaInit() {
+  const loadEl = document.getElementById('tama-loading');
+  const saved = localStorage.getItem('tama_nick');
+  if (saved) document.getElementById('tama-nick').value = saved;
+
+  try {
+    const { data, error } = await sb.from('tamagotchi').select('*').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    if (data) {
+      tamaData = data;
+    } else {
+      const { data: nd, error: ie } = await sb.from('tamagotchi').insert({
+        id: 1, born_at: new Date().toISOString(),
+        hunger: 80, happiness: 80, affection: 0,
+        last_updated: new Date().toISOString()
+      }).select().maybeSingle();
+      if (ie) throw ie;
+      tamaData = nd;
+    }
+  } catch(e) {
+    loadEl.innerHTML = `<div style="color:#ff5f6d;font-size:12px;line-height:1.8">Supabase 테이블이 필요합니다.<br>대시보드 SQL 에디터에서 아래를 실행하세요:<br><br>
+      <code style="font-size:10px;color:#9b94b3;display:block;text-align:left;background:rgba(0,0,0,.3);padding:10px;border-radius:8px;white-space:pre">CREATE TABLE tamagotchi (
+  id INT PRIMARY KEY,
+  born_at TIMESTAMPTZ DEFAULT NOW(),
+  hunger INT DEFAULT 80,
+  happiness INT DEFAULT 80,
+  affection INT DEFAULT 0,
+  last_updated TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE tamagotchi_actions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_nickname TEXT,
+  action_type TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></div>`;
+    return;
+  }
+
+  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(8);
+  tamaLogs = logs || [];
+
+  const { data: pets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet');
+  if (pets) {
+    const cnt = {};
+    pets.forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
+    tamaRankData = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  }
+
+  if (loadEl) loadEl.style.display = 'none';
+  ['tama-char-card','tama-stat-card','tama-action-card','tama-log-card','tama-rank-card'].forEach(id => {
+    document.getElementById(id).style.display = 'block';
+  });
+
+  tamaRender();
+
+  if (tamaChannel) tamaChannel.unsubscribe();
+  tamaChannel = sb.channel('tama-live')
+    .on('postgres_changes', {event:'UPDATE', schema:'public', table:'tamagotchi'}, p => { tamaData = p.new; tamaRender(); })
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'tamagotchi_actions'}, p => {
+      tamaLogs.unshift(p.new);
+      if (tamaLogs.length > 8) tamaLogs.pop();
+      tamaRenderLog();
+    })
+    .subscribe();
+
+  if (tamaTick) clearInterval(tamaTick);
+  tamaTick = setInterval(() => tamaRenderStat(), 30000);
+}
+
+function tamaRender() {
+  if (!tamaData) return;
+  const stage = tamaStageNum();
+  const hunger = tamaHunger(), happy = tamaHappy();
+  const avg = (hunger + happy) / 2;
+  const mood = avg >= 65 ? 'happy' : avg >= 35 ? 'normal' : 'sad';
+
+  // 캐릭터
+  document.getElementById('tama-char-wrap').innerHTML = tamaCatSVG(stage, mood);
+  document.getElementById('tama-stage-badge').innerHTML =
+    `<span style="display:inline-block;font-size:12px;font-weight:700;background:rgba(181,102,255,.15);color:#b566ff;padding:4px 16px;border-radius:20px;border:1px solid rgba(181,102,255,.35)">${tamaStageName()}</span>`;
+  document.getElementById('tama-day-info').textContent = `Day ${tamaDay()} / 30`;
+  document.getElementById('tama-mood-text').textContent =
+    mood === 'happy' ? '행복해요! 😻' : mood === 'sad' ? '돌봄이 필요해요 😿' : '평온해요 🐱';
+
+  // 눈 애니메이션 재시작
+  document.querySelectorAll('#tama-char-wrap .te').forEach(el => {
+    el.style.animationName = 'none'; void el.offsetHeight; el.style.animationName = '';
+  });
+
+  tamaRenderStat();
+  tamaRenderLog();
+  tamaRenderRank();
+  tamaRenderCd();
+}
+
+function tamaRenderStat() {
+  if (!tamaData) return;
+  const hunger = tamaHunger(), happy = tamaHappy();
+  const hColor = h => h > 60 ? '#5ee0a8' : h > 30 ? '#ffb547' : '#ff5f6d';
+  document.getElementById('bar-hunger').style.cssText = `width:${hunger}%;background:${hColor(hunger)}`;
+  document.getElementById('bar-happy').style.cssText  = `width:${happy}%;background:${hColor(happy)}`;
+  document.getElementById('num-hunger').textContent = hunger;
+  document.getElementById('num-happy').textContent  = happy;
+  document.getElementById('num-affection').textContent = `${tamaData.affection}회 💜`;
+  tamaRenderCd();
+}
+
+function tamaRenderLog() {
+  const el = document.getElementById('tama-log-list');
+  el.innerHTML = tamaLogs.length
+    ? tamaLogs.map(l => `<div class="tama-log-row"><span><span style="color:#b566ff;font-weight:600">${l.actor_nickname}</span>님이 ${tamaActionLabel(l.action_type)}</span><span style="color:#6b6480;font-size:11px;margin-left:8px;flex-shrink:0">${tamaTimeAgo(l.created_at)}</span></div>`).join('')
+    : '<p style="font-size:13px;color:#6b6480;text-align:center;margin:8px 0">아직 활동이 없어요</p>';
+}
+
+function tamaRenderRank() {
+  const el = document.getElementById('tama-rank-list');
+  if (!tamaRankData.length) { el.innerHTML = '<p style="font-size:13px;color:#6b6480;text-align:center;margin:8px 0">아직 기록이 없어요</p>'; return; }
+  const medals = ['🥇','🥈','🥉','4위','5위'];
+  el.innerHTML = tamaRankData.map(([nick, cnt], i) =>
+    `<div class="tama-log-row"><span>${medals[i]} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`
+  ).join('');
+}
+
+function tamaRenderCd() {
+  ['feed','play','pet'].forEach(type => {
+    const left = tamaCdLeft(type);
+    const cdEl = document.getElementById(`cd-${type}`);
+    const btn  = document.getElementById(`btn-${type}`);
+    if (!cdEl || !btn) return;
+    cdEl.textContent = tamaFmtCd(left);
+    btn.disabled = left > 0;
+    btn.style.opacity = left > 0 ? '.4' : '1';
+  });
+}
+
+async function tamaAction(type) {
+  const nick = document.getElementById('tama-nick').value.trim();
+  if (!nick) { alert('닉네임을 입력해 주세요!'); document.getElementById('tama-nick').focus(); return; }
+  if (tamaCdLeft(type) > 0) { alert(`아직 쿨다운 중이에요!\n${tamaFmtCd(tamaCdLeft(type))}`); return; }
+
+  localStorage.setItem(`tama_${type}_${nick}`, Date.now());
+
+  const hunger = tamaHunger(), happy = tamaHappy();
+  const updates = { last_updated: new Date().toISOString(), hunger, happiness: happy };
+  if (type === 'feed') updates.hunger = Math.min(100, hunger + 30);
+  else if (type === 'play') updates.happiness = Math.min(100, happy + 25);
+  else if (type === 'pet') updates.affection = (tamaData.affection || 0) + 1;
+
+  const { data } = await sb.from('tamagotchi').update(updates).eq('id', 1).select().maybeSingle();
+  if (data) tamaData = data;
+
+  await sb.from('tamagotchi_actions').insert({ actor_nickname: nick, action_type: type });
+
+  if (type === 'pet') {
+    const ex = tamaRankData.find(([n]) => n === nick);
+    if (ex) ex[1]++; else tamaRankData.unshift([nick, 1]);
+    tamaRankData.sort((a,b) => b[1]-a[1]);
+    tamaRankData = tamaRankData.slice(0,5);
+  }
+
+  tamaRender();
+}
 </script>
 </body>
 </html>
