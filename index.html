@@ -2456,7 +2456,7 @@ wcInit();
 
 <script>
 // ===== TAMAGOTCHI =====
-let tamaData = null, tamaLogs = [], tamaRankData = [], tamaLastMonthData = [], tamaTick = null, tamaChannel = null, tamaReady = false, tamaPrevStage = 0;
+let tamaData = null, tamaLogs = [], tamaRankData = [], tamaLastMonthData = [], tamaTick = null, tamaIdleTick = null, tamaChannel = null, tamaReady = false, tamaPrevStage = 0, tamaBubbleUntil = 0;
 
 const T_WINDOW = { feed: 6 * 3600000, play: 3 * 3600000, pet: 3600000 }; // 윈도우 기간
 const T_MAX   = { feed: 1,           play: 1,           pet: 1      }; // 윈도우당 최대 횟수
@@ -2600,6 +2600,9 @@ CREATE TABLE tamagotchi_actions (
 
   if (tamaTick) clearInterval(tamaTick);
   tamaTick = setInterval(() => tamaRenderStat(), 30000);
+
+  if (tamaIdleTick) clearInterval(tamaIdleTick);
+  tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
 }
 
 function tamaRender() {
@@ -2767,17 +2770,26 @@ function tamaRenderLastMonth() {
 const TAMA_MSGS = {
   feed: ['냠냠~','맛있다!','배불러~','더 줘!','최고야~','꿀맛이야','감사해요!','흡입 완료 🍚','든든해!','밥이 최고!','오늘도 잘 먹었다','냐하~','배고팠어...','이게 행복이지','꺼억','또 주라냥','살짝 부족해','완벽해~'],
   play: ['신나!','야옹!','같이 놀자~','우와~','재밌어!','더 놀아줘','캬~','내가 이겼다!','또 해줘!','최고의 시간!','날아갈 것 같아~','헤헤헤','무적이다!','뛰어!','지치지 않아~','냥냥냥!','이기고 싶다!','재밌는 거 더 없어?'],
-  pet: ['그루릉...','기분 좋아~','또 해줘!','행복해~','이게 바로 천국','냐르르르~','포근해','고마워~','사랑해~','녹아내린다','zzz...','최고의 집사야','살살해줘~','냥','기분 최고!','좋은거 알지?','가지마...','영원히 해줘']
+  pet: ['그루릉...','기분 좋아~','또 해줘!','행복해~','이게 바로 천국','냐르르르~','포근해','고마워~','사랑해~','녹아내린다','zzz...','최고의 집사야','살살해줘~','냥','기분 최고!','좋은거 알지?','가지마...','영원히 해줘'],
+  idle: ['심심해...','놀아줘~','나 여기 있어!','뭐해?','심심하다냥','관심 좀 줘~','나 잊은 거야?','혼자는 싫어','같이 있어줘','배고파...','나랑 놀자~','...','🐱?','누가 없나','콕콕','나 봐줘','시간이 너무 느려','심심해서 잠들뻔','하품 중','나한테 말 걸어줘']
 };
 
 function tamaShowBubble(type) {
   const el = document.getElementById('tama-bubble');
   if (!el) return;
+  const dur = type === 'idle' ? 8 : 2.2; // idle: 8s (약 5초 유지), action: 2.2s
+  tamaBubbleUntil = Date.now() + dur * 1000;
   const msgs = TAMA_MSGS[type];
   el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
   el.style.animation = 'none';
   void el.offsetWidth;
-  el.style.animation = 'tama-bubble-anim 2.2s ease forwards';
+  el.style.animation = `tama-bubble-anim ${dur}s ease forwards`;
+}
+
+function tamaShowIdleBubble() {
+  if (!tamaData) return;
+  if (Date.now() < tamaBubbleUntil) return; // 다른 말풍선 표시 중
+  tamaShowBubble('idle');
 }
 
 function tamaPlayAnim(type) {
