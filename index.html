@@ -1143,6 +1143,278 @@ function copyResult(){
 </div>
 
 <div id="page-fortune" class="hidden">
+<style>
+  .qz-wrap{max-width:480px;margin:0 auto;padding:28px 16px 60px}
+  .qz-card{background:rgba(34,26,58,.65);border:1px solid rgba(140,110,200,.28);border-radius:14px;padding:20px}
+  .qz-visual{background:rgba(20,14,36,.5);border-radius:10px;padding:20px;margin-bottom:18px;text-align:center;min-height:80px;display:flex;align-items:center;justify-content:center}
+  .qz-btn{display:block;width:100%;padding:12px 14px;border:1px solid rgba(140,110,200,.35);border-radius:10px;background:rgba(28,21,48,.6);color:#f5f1ff;font-size:14px;cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;margin-bottom:8px}
+  .qz-btn:hover:not(:disabled){background:rgba(181,102,255,.15);border-color:rgba(181,102,255,.5)}
+  .qz-btn:last-child{margin-bottom:0}
+  .qz-correct{background:rgba(94,224,168,.15)!important;border-color:#5ee0a8!important;color:#5ee0a8!important;font-weight:600}
+  .qz-wrong{background:rgba(255,95,109,.15)!important;border-color:#ff5f6d!important;color:#ff5f6d!important}
+  .qz-explain{background:rgba(181,102,255,.08);border:1px solid rgba(181,102,255,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:#9b94b3;margin-top:14px;line-height:1.7;display:none}
+  .qz-prog-bar{height:4px;background:rgba(140,110,200,.2);border-radius:99px;margin-bottom:18px;overflow:hidden}
+  .qz-prog-fill{height:100%;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);border-radius:99px;transition:width .4s ease}
+</style>
+
+<div class="qz-wrap">
+  <!-- 시작 화면 -->
+  <div id="qz-start" style="text-align:center;padding:48px 0 32px">
+    <div style="font-size:60px;margin-bottom:16px">🧠</div>
+    <div style="font-size:24px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px">착시·인지 퀴즈</div>
+    <p style="color:#9b94b3;font-size:14px;margin-bottom:6px">10문제 · 뇌가 얼마나 속는지 테스트</p>
+    <p style="color:#6b6480;font-size:12px;margin-bottom:36px">10개 다 맞추기 쉽지 않아요 😈</p>
+    <button onclick="qzStart()" style="padding:14px 48px;border-radius:12px;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 10px 40px -10px rgba(181,102,255,.7)">시작하기</button>
+  </div>
+
+  <!-- 문제 화면 -->
+  <div id="qz-q" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span id="qz-num" style="font-size:13px;color:#9b94b3;font-weight:600"></span>
+      <span id="qz-live" style="font-size:13px;color:#b566ff;font-weight:700"></span>
+    </div>
+    <div class="qz-prog-bar"><div class="qz-prog-fill" id="qz-prog"></div></div>
+    <div class="qz-card">
+      <div class="qz-visual" id="qz-visual"></div>
+      <div id="qz-qtext" style="font-size:16px;font-weight:700;color:#f5f1ff;margin-bottom:4px"></div>
+      <div id="qz-qsub" style="font-size:12px;color:#6b6480;margin-bottom:16px"></div>
+      <div id="qz-choices"></div>
+      <div id="qz-explain" class="qz-explain"></div>
+      <button id="qz-next-btn" onclick="qzNext()" style="display:none;width:100%;margin-top:14px;padding:13px;border-radius:10px;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit"></button>
+    </div>
+  </div>
+
+  <!-- 결과 화면 -->
+  <div id="qz-end" style="display:none;text-align:center;padding:48px 0 32px">
+    <div id="qz-end-emoji" style="font-size:64px;margin-bottom:16px"></div>
+    <div id="qz-end-score" style="font-size:32px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px"></div>
+    <div id="qz-end-msg" style="color:#9b94b3;font-size:14px;margin-bottom:36px;line-height:1.6"></div>
+    <button onclick="qzRestart()" style="padding:14px 48px;border-radius:12px;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">다시 도전 🔄</button>
+  </div>
+</div>
+
+<script>
+const QZ = [
+  {
+    visual: `<div style="padding:16px 0"><span style="font-size:60px;font-weight:900;color:#5ec8ff;letter-spacing:-2px">초록</span></div>`,
+    q: '이 글자의 "색깔"은 무엇인가요?',
+    sub: '단어 의미가 아닌, 글자 자체의 색을 고르세요',
+    choices: ['초록색', '파란색(민트)', '보라색', '빨간색'],
+    answer: 1,
+    explain: '🎯 스트룹 효과(Stroop Effect)예요! 뇌는 글자 색깔보다 단어 의미를 먼저 처리해서 헷갈려요. 실제 색은 파란색(민트)이에요.'
+  },
+  {
+    visual: `<div style="font-size:14.5px;line-height:2.2;color:#f5f1ff;text-align:left;letter-spacing:0.8px;font-weight:500">FINISHED FILES ARE THE<br>RESULT OF YEARS OF<br>SCIENTIFIC STUDY COMBINED<br>WITH THE EXPERIENCE<br>OF MANY YEARS</div>`,
+    q: '위 문장에서 알파벳 F는 몇 개인가요?',
+    sub: '꼼꼼하게 세어보세요',
+    choices: ['3개', '4개', '5개', '6개'],
+    answer: 3,
+    explain: '🔍 정답은 6개! FINISHED(1), FILES(1), OF(1), OF(1), scientiFic(1), OF(1). "of"의 F를 놓치기 쉬워요. 뇌가 짧은 단어를 자동으로 건너뛰어요.'
+  },
+  {
+    visual: `<svg viewBox="0 0 300 120" width="100%" style="max-width:300px">
+      <text x="18" y="36" fill="#9b94b3" font-size="13" font-family="inherit">A</text>
+      <line x1="42" y1="30" x2="258" y2="30" stroke="#ff5fb0" stroke-width="3" stroke-linecap="round"/>
+      <line x1="42" y1="30" x2="62" y2="14" stroke="#ff5fb0" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="42" y1="30" x2="62" y2="46" stroke="#ff5fb0" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="258" y1="30" x2="238" y2="14" stroke="#ff5fb0" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="258" y1="30" x2="238" y2="46" stroke="#ff5fb0" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="18" y="96" fill="#9b94b3" font-size="13" font-family="inherit">B</text>
+      <line x1="42" y1="90" x2="258" y2="90" stroke="#5ec8ff" stroke-width="3" stroke-linecap="round"/>
+      <line x1="42" y1="90" x2="22" y2="74" stroke="#5ec8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="42" y1="90" x2="22" y2="106" stroke="#5ec8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="258" y1="90" x2="278" y2="74" stroke="#5ec8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="258" y1="90" x2="278" y2="106" stroke="#5ec8ff" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>`,
+    q: 'A선과 B선 중 어느 쪽이 더 길어 보이나요?',
+    sub: '눈으로만 판단하세요 (자 금지 😄)',
+    choices: ['A선이 더 길다', 'B선이 더 길다', '둘이 같다', 'A가 훨씬 짧다'],
+    answer: 2,
+    explain: '📏 뮬러-라이어 착시(Müller-Lyer)! A와 B는 정확히 같은 길이예요. 화살표 방향에 따라 뇌가 길이를 다르게 인식해요.'
+  },
+  {
+    visual: `<svg viewBox="0 0 320 155" width="100%" style="max-width:320px">
+      <text x="80" y="150" text-anchor="middle" fill="#6b6480" font-size="12" font-family="inherit">A</text>
+      <text x="240" y="150" text-anchor="middle" fill="#6b6480" font-size="12" font-family="inherit">B</text>
+      <circle cx="121" cy="99" r="24" fill="#3a2a5c"/>
+      <circle cx="80" cy="123" r="24" fill="#3a2a5c"/>
+      <circle cx="39" cy="99" r="24" fill="#3a2a5c"/>
+      <circle cx="39" cy="51" r="24" fill="#3a2a5c"/>
+      <circle cx="80" cy="27" r="24" fill="#3a2a5c"/>
+      <circle cx="121" cy="51" r="24" fill="#3a2a5c"/>
+      <circle cx="80" cy="75" r="17" fill="#ff5fb0"/>
+      <circle cx="266" cy="90" r="9" fill="#3a2a5c"/>
+      <circle cx="240" cy="104" r="9" fill="#3a2a5c"/>
+      <circle cx="214" cy="90" r="9" fill="#3a2a5c"/>
+      <circle cx="214" cy="62" r="9" fill="#3a2a5c"/>
+      <circle cx="240" cy="48" r="9" fill="#3a2a5c"/>
+      <circle cx="266" cy="62" r="9" fill="#3a2a5c"/>
+      <circle cx="240" cy="76" r="17" fill="#ff5fb0"/>
+    </svg>`,
+    q: '분홍 원 A와 B 중 어느 쪽이 더 커 보이나요?',
+    sub: '',
+    choices: ['A가 더 크다', 'B가 더 크다', '둘이 같다', 'A가 훨씬 작다'],
+    answer: 2,
+    explain: '⭕ 에빙하우스 착시! A와 B의 분홍 원은 정확히 같은 크기예요. 주변 원의 크기가 달라서 상대적으로 크거나 작아 보여요.'
+  },
+  {
+    visual: `<div style="font-size:24px;font-weight:700;color:#f5f1ff;line-height:2.4;text-align:center">
+      1000<br>+&nbsp;&nbsp;40<br>+ 1000<br>+&nbsp;&nbsp;30<br>+ 1000<br>+&nbsp;&nbsp;20<br>+ 1000<br>+&nbsp;&nbsp;10
+      <div style="border-top:2px solid rgba(181,102,255,.4);margin-top:6px;padding-top:8px;font-size:30px;color:#b566ff">= ?</div>
+    </div>`,
+    q: '위 식을 암산해보세요. 정답은?',
+    sub: '머릿속으로 천천히 더해보세요',
+    choices: ['4,000', '4,100', '5,000', '4,300'],
+    answer: 1,
+    explain: '🔢 정답은 4,100! 1000×4=4,000, 40+30+20+10=100, 합계 4,100. 대부분 5,000이라고 답해요. 암산 중 1000을 한 번 더 더하는 착각이 생겨요.'
+  },
+  {
+    visual: `<div style="display:flex;border-radius:10px;overflow:hidden;height:110px">
+      <div style="flex:1;background:#111;display:flex;align-items:center;justify-content:center">
+        <div style="width:56px;height:56px;background:#808080;border-radius:6px"></div>
+      </div>
+      <div style="flex:1;background:#e0e0e0;display:flex;align-items:center;justify-content:center">
+        <div style="width:56px;height:56px;background:#808080;border-radius:6px"></div>
+      </div>
+    </div>
+    <div style="display:flex;margin-top:6px">
+      <div style="flex:1;text-align:center;font-size:12px;color:#6b6480">A</div>
+      <div style="flex:1;text-align:center;font-size:12px;color:#6b6480">B</div>
+    </div>`,
+    q: 'A와 B 사각형 중 어느 쪽이 더 밝아 보이나요?',
+    sub: '두 사각형의 실제 색은 완전히 같아요',
+    choices: ['A가 더 밝다', 'B가 더 밝다', '둘이 같다', 'B가 훨씬 밝다'],
+    answer: 2,
+    explain: '🎨 동시 대비 착시! A와 B는 #808080으로 완전히 같은 회색이에요. 어두운 배경에선 밝아 보이고, 밝은 배경에선 어두워 보여요.'
+  },
+  {
+    visual: `<div style="padding:16px;background:rgba(0,0,0,.25);border-radius:10px;font-size:18px;color:#f5f1ff;line-height:2.2;text-align:center">
+      봄이 오면 꽃이 피고<br>피고 새들이 노래를<br>부르는 계절이에요
+    </div>`,
+    q: '위 문장에서 이상한 점을 찾으세요',
+    sub: '빠르게 한 번만 읽어보세요',
+    choices: ['문법이 틀렸다', '"피고"가 두 번 반복된다', '아무 이상 없다', '주어가 없다'],
+    answer: 1,
+    explain: '👁️ "피고"가 두 번 반복돼요! 빠르게 읽으면 뇌가 중복 단어를 자동으로 하나로 합쳐버려요. 특히 줄 끝과 줄 시작에 걸쳐있을 때 더 잘 놓쳐요.'
+  },
+  {
+    visual: `<svg viewBox="0 0 200 200" width="170" style="display:block;margin:0 auto">
+      <line x1="100" y1="16" x2="100" y2="136" stroke="#b566ff" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="20" y1="136" x2="180" y2="136" stroke="#5ec8ff" stroke-width="3.5" stroke-linecap="round"/>
+      <text x="118" y="82" fill="#b566ff" font-size="13" font-family="inherit">세로</text>
+      <text x="88" y="162" fill="#5ec8ff" font-size="13" font-family="inherit">가로</text>
+    </svg>`,
+    q: '보라 세로선과 파랑 가로선, 어느 쪽이 더 길어 보이나요?',
+    sub: '실제 두 선은 같은 길이예요',
+    choices: ['세로선이 더 길다', '가로선이 더 길다', '둘이 같다', '차이가 없어 보인다'],
+    answer: 2,
+    explain: '📐 수직-수평 착시! 두 선 모두 같은 길이지만 세로선이 더 길어 보여요. 뇌는 수직 방향을 약 20% 더 길게 인식하는 경향이 있어요.'
+  },
+  {
+    visual: `<svg viewBox="0 0 190 190" width="180" style="display:block;margin:0 auto">
+      <rect x="15" y="15" width="160" height="160" fill="none" stroke="#b566ff" stroke-width="2"/>
+      <line x1="68" y1="15" x2="68" y2="175" stroke="#b566ff" stroke-width="2"/>
+      <line x1="122" y1="15" x2="122" y2="175" stroke="#b566ff" stroke-width="2"/>
+      <line x1="15" y1="68" x2="175" y2="68" stroke="#b566ff" stroke-width="2"/>
+      <line x1="15" y1="122" x2="175" y2="122" stroke="#b566ff" stroke-width="2"/>
+    </svg>`,
+    q: '위 격자에서 정사각형은 모두 몇 개인가요?',
+    sub: '크기가 다른 정사각형도 모두 포함해 세어보세요',
+    choices: ['9개', '12개', '14개', '18개'],
+    answer: 2,
+    explain: '🔲 정답은 14개! 1×1 크기 9개 + 2×2 크기 4개 + 3×3 크기 1개 = 14개. 작은 것만 세면 9개라고 답하기 쉬워요.'
+  },
+  {
+    visual: `<div style="text-align:center;padding:12px 0;font-size:28px;line-height:2.2">
+      🐔 1마리 → 🥚 1개 / 1분<br>
+      <span style="font-size:20px;color:#9b94b3">그렇다면</span><br>
+      🐔×5마리, 5분 = 🥚 <span style="color:#b566ff;font-weight:800">?</span>개
+    </div>`,
+    q: '닭 5마리가 5분 동안 낳는 달걀은 몇 개인가요?',
+    sub: '직관을 믿지 말고 천천히 생각해보세요',
+    choices: ['1개', '5개', '25개', '10개'],
+    answer: 2,
+    explain: '🥚 정답은 25개! 닭 1마리가 5분에 5개, 닭 5마리면 5×5=25개. 많은 분이 "5개"라고 답해요. 비율을 잘못 계산하는 인지 오류예요.'
+  }
+];
+
+let qIdx = 0, score = 0, qzAnswered = false;
+
+function qzStart() {
+  qIdx = 0; score = 0;
+  document.getElementById('qz-start').style.display = 'none';
+  document.getElementById('qz-end').style.display = 'none';
+  document.getElementById('qz-q').style.display = 'block';
+  qzShow();
+}
+
+function qzShow() {
+  qzAnswered = false;
+  const q = QZ[qIdx];
+  document.getElementById('qz-num').textContent = `${qIdx+1} / ${QZ.length}`;
+  document.getElementById('qz-live').textContent = `${score}점`;
+  document.getElementById('qz-prog').style.width = `${(qIdx/QZ.length)*100}%`;
+  document.getElementById('qz-visual').innerHTML = q.visual;
+  document.getElementById('qz-qtext').textContent = q.q;
+  document.getElementById('qz-qsub').textContent = q.sub;
+  const ex = document.getElementById('qz-explain');
+  ex.style.display = 'none'; ex.textContent = '';
+  document.getElementById('qz-next-btn').style.display = 'none';
+  const labels = ['A','B','C','D'];
+  document.getElementById('qz-choices').innerHTML = q.choices
+    .map((c,i) => `<button class="qz-btn" onclick="qzSelect(${i})">${labels[i]}. ${c}</button>`)
+    .join('');
+}
+
+function qzSelect(i) {
+  if (qzAnswered) return;
+  qzAnswered = true;
+  const q = QZ[qIdx];
+  const ok = i === q.answer;
+  if (ok) score++;
+  document.querySelectorAll('.qz-btn').forEach((btn, bi) => {
+    btn.disabled = true;
+    if (bi === q.answer) btn.classList.add('qz-correct');
+    else if (bi === i) btn.classList.add('qz-wrong');
+  });
+  const ex = document.getElementById('qz-explain');
+  ex.style.display = 'block';
+  ex.innerHTML = (ok ? '<span style="color:#5ee0a8">✅ 정답!</span> ' : '<span style="color:#ff5f6d">❌ 오답!</span> ') + q.explain;
+  document.getElementById('qz-live').textContent = `${score}점`;
+  const nb = document.getElementById('qz-next-btn');
+  nb.style.display = 'block';
+  nb.textContent = qIdx < QZ.length-1 ? '다음 문제 →' : '결과 보기 →';
+}
+
+function qzNext() {
+  qIdx++;
+  if (qIdx >= QZ.length) { qzEnd(); return; }
+  qzShow();
+}
+
+function qzEnd() {
+  document.getElementById('qz-q').style.display = 'none';
+  document.getElementById('qz-end').style.display = 'block';
+  const tiers = [
+    {e:'😂', m:'뇌가 완전히 속았어요!\n그래도 인간적이에요 ㅎㅎ'},
+    {e:'😅', m:'착시에 꽤 잘 속는 편이에요\n한 번 더 해봐요!'},
+    {e:'🤔', m:'보통 수준이에요\n다시 하면 더 잘 할 수 있어요'},
+    {e:'😊', m:'착시에 강한 편이에요!\n뇌가 꽤 냉철하네요'},
+    {e:'👏', m:'대단해요!\n웬만해선 안 속는 타입이에요'},
+    {e:'🏆', m:'만점! 뇌가 착시에 면역이 생긴 것 같아요'}
+  ];
+  const t = tiers[Math.min(Math.floor(score/2), 5)];
+  document.getElementById('qz-end-emoji').textContent = t.e;
+  document.getElementById('qz-end-score').textContent = `${score} / ${QZ.length}점`;
+  document.getElementById('qz-end-msg').style.whiteSpace = 'pre-line';
+  document.getElementById('qz-end-msg').textContent = t.m;
+}
+
+function qzRestart() {
+  document.getElementById('qz-end').style.display = 'none';
+  document.getElementById('qz-start').style.display = 'block';
+}
+</script>
 </div>
 
 <!-- ROULETTE PAGE -->
