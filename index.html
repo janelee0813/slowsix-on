@@ -1815,12 +1815,6 @@ hobbyInit();
     <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">밥주기: 6시간 1회 · 놀아주기: 3시간 1회 · 쓰다듬기: 1시간 1회</p>
   </div>
 
-  <!-- 최근 활동 -->
-  <div class="tama-crd" id="tama-log-card" style="display:none">
-    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">📋 최근 활동</div>
-    <div id="tama-log-list"></div>
-  </div>
-
   <!-- 애정 랭킹 -->
   <div class="tama-crd" id="tama-rank-card" style="display:none">
     <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">🏆 <span id="tama-rank-title">이번달 애정 랭킹</span></div>
@@ -1833,6 +1827,12 @@ hobbyInit();
       <span style="font-size:20px;flex-shrink:0">☕</span>
       <span style="font-size:13px;font-weight:700;color:#d4a8ff;line-height:1.5">매달 랭킹 1, 2위에게<br>커피쿠폰 보내드립니다!<br><span style="font-size:11px;font-weight:400;color:#9b94b3">Tip. 실적이 같을 경우 먼저 한 사람이 랭킹이 높음</span></span>
     </div>
+  </div>
+
+  <!-- 최근 활동 -->
+  <div class="tama-crd" id="tama-log-card" style="display:none">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">📋 최근 활동</div>
+    <div id="tama-log-list"></div>
   </div>
 </div>
 
@@ -2578,7 +2578,7 @@ CREATE TABLE tamagotchi_actions (
     return;
   }
 
-  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(8);
+  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(6);
   tamaLogs = logs || [];
 
   await tamaLoadAllRanks();
@@ -2596,7 +2596,7 @@ CREATE TABLE tamagotchi_actions (
     .on('postgres_changes', {event:'UPDATE', schema:'public', table:'tamagotchi'}, p => { tamaData = p.new; tamaRender(); })
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'tamagotchi_actions'}, async p => {
       tamaLogs.unshift(p.new);
-      if (tamaLogs.length > 8) tamaLogs.pop();
+      if (tamaLogs.length > 6) tamaLogs.pop();
       tamaRenderLog();
       if (p.new.action_type === 'pet') await tamaRefreshRank();
     })
