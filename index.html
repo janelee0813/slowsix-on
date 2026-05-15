@@ -2334,6 +2334,15 @@ wcInit();
     const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#hobby-map' : page === 'roulette' ? '#tamagotchi' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
+    if (page === 'roulette') {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('#page-roulette .te').forEach(el => {
+          el.style.animationName = 'none';
+          void el.offsetHeight;
+          el.style.animationName = '';
+        });
+      });
+    }
   }
 
   function copyCalcUrl() {
