@@ -1797,18 +1797,15 @@ hobbyInit();
       oninput="localStorage.setItem('tama_nick',this.value)"/>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
       <button class="tama-act-btn" id="btn-feed" onclick="tamaAction('feed')" style="padding:9px 6px">
-        <span style="font-size:20px">🍚</span>
-        <span style="font-size:12px;font-weight:600">밥주기</span>
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-size:18px">🍚</span><span style="font-size:12px;font-weight:600">밥주기</span></div>
         <span class="tama-cd" id="cd-feed"></span>
       </button>
       <button class="tama-act-btn" id="btn-play" onclick="tamaAction('play')" style="padding:9px 6px">
-        <span style="font-size:20px">🎾</span>
-        <span style="font-size:12px;font-weight:600">놀아주기</span>
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-size:18px">🎾</span><span style="font-size:12px;font-weight:600">놀아주기</span></div>
         <span class="tama-cd" id="cd-play"></span>
       </button>
       <button class="tama-act-btn" id="btn-pet" onclick="tamaAction('pet')" style="padding:9px 6px">
-        <span style="font-size:20px">🤍</span>
-        <span style="font-size:12px;font-weight:600">쓰다듬기</span>
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-size:18px">🤍</span><span style="font-size:12px;font-weight:600">쓰다듬기</span></div>
         <span class="tama-cd" id="cd-pet"></span>
       </button>
     </div>
