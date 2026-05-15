@@ -1648,6 +1648,9 @@ hobbyInit();
   .tama-overlay{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,6,18,.88);backdrop-filter:blur(12px);text-align:center;padding:24px;cursor:pointer}
   .tama-overlay-box{animation:tama-overlay-in .4s cubic-bezier(.34,1.56,.64,1) both}
   .tama-star{position:absolute;font-size:22px;animation:tama-float-star 1.4s ease-out forwards}
+  .tama-bubble{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:rgba(255,255,255,.96);color:#1a0a2e;font-size:13px;font-weight:700;padding:7px 15px;border-radius:18px;white-space:nowrap;box-shadow:0 3px 14px rgba(0,0,0,.18);pointer-events:none;opacity:0;z-index:10}
+  .tama-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:rgba(255,255,255,.96)}
+  @keyframes tama-bubble-anim{0%{opacity:0;transform:translateX(-50%) translateY(6px)}12%{opacity:1;transform:translateX(-50%) translateY(0)}75%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-5px)}}
 </style>
 <div class="tp-wrap" style="display:none">
   <div style="position:relative;margin-bottom:6px">
@@ -1754,7 +1757,10 @@ hobbyInit();
   <!-- 캐릭터 -->
   <div class="tama-crd" id="tama-char-card" style="display:none;text-align:center;padding:28px 16px 20px">
     <div id="tama-stage-badge" style="margin-bottom:14px"></div>
-    <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
+    <div style="position:relative;display:inline-block;margin:16px 0 8px">
+      <div id="tama-bubble" class="tama-bubble"></div>
+      <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
+    </div>
     <div id="tama-day-info" style="font-size:12px;color:#6b6480;margin-top:10px"></div>
     <div id="tama-mood-text" style="font-size:13px;color:#9b94b3;margin-top:4px"></div>
   </div>
@@ -2742,28 +2748,44 @@ function tamaRenderLastMonth() {
   ).join('');
 }
 
+const TAMA_MSGS = {
+  feed: ['냠냠~','맛있다!','배불러~','더 줘!','최고야~','꿀맛이야','감사해요!','흡입 완료 🍚','든든해!','밥이 최고!','오늘도 잘 먹었다','냐하~','배고팠어...','이게 행복이지','꺼억','또 주라냥','살짝 부족해','완벽해~'],
+  play: ['신나!','야옹!','같이 놀자~','우와~','재밌어!','더 놀아줘','캬~','내가 이겼다!','또 해줘!','최고의 시간!','날아갈 것 같아~','헤헤헤','무적이다!','뛰어!','지치지 않아~','냥냥냥!','이기고 싶다!','재밌는 거 더 없어?'],
+  pet: ['그루릉...','기분 좋아~','또 해줘!','행복해~','이게 바로 천국','냐르르르~','포근해','고마워~','사랑해~','녹아내린다','zzz...','최고의 집사야','살살해줘~','냥','기분 최고!','좋은거 알지?','가지마...','영원히 해줘']
+};
+
+function tamaShowBubble(type) {
+  const el = document.getElementById('tama-bubble');
+  if (!el) return;
+  const msgs = TAMA_MSGS[type];
+  el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'tama-bubble-anim 2.2s ease forwards';
+}
+
 function tamaPlayAnim(type) {
   const wrap = document.getElementById('tama-char-wrap');
   if (!wrap) return;
   const dur = { feed: 950, play: 900, pet: 750 }[type];
   const anims = { feed:'tama-bounce .95s ease', play:'tama-shake .9s ease', pet:'tama-pulse .75s ease' };
 
-  // 1단계: 몸 움직임 애니메이션
+  // 1단계: 몸 움직임
   wrap.style.animation = anims[type];
 
-  // 2단계: 몸 애니메이션 끝난 후 표정 변화
+  // 2단계: 몸 끝난 후 → 표정 변화 + 말풍선 동시
   setTimeout(() => {
     wrap.style.animation = 'cat-float 3s ease-in-out infinite';
     const mouth = document.getElementById('tama-mouth');
-    if (!mouth) return;
-    mouth.setAttribute('d', 'M44,50 Q50,58 56,50'); // 활짝 웃는 표정
+    if (mouth) mouth.setAttribute('d', 'M44,50 Q50,58 56,50');
+    tamaShowBubble(type);
 
-    // 3단계: 700ms 후 원래 표정으로 복귀
+    // 3단계: 700ms 후 원래 표정 복귀
     setTimeout(() => {
       const avg = (tamaHunger() + tamaHappy()) / 2;
       const mood = avg >= 65 ? 'happy' : avg >= 35 ? 'normal' : 'sad';
       const paths = { happy:'M46,50 Q50,56 54,50', normal:'M47,50 Q50,54 53,50', sad:'M46,54 Q50,49 54,54' };
-      mouth.setAttribute('d', paths[mood]);
+      if (mouth) mouth.setAttribute('d', paths[mood]);
     }, 700);
   }, dur + 80);
 }
