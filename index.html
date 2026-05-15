@@ -1681,15 +1681,15 @@ hobbyInit();
 
     <!-- 청년 Day17–23 · head r=27 body ry=34 -->
     <div class="tp-stage">
-      <div class="tc" style="animation-delay:1s;filter:drop-shadow(0 0 8px rgba(0,212,255,.85)) drop-shadow(0 0 20px rgba(0,212,255,.4))">
+      <div class="tc" style="animation-delay:1s;filter:drop-shadow(0 0 8px rgba(212,94,255,.85)) drop-shadow(0 0 20px rgba(212,94,255,.4))">
         <svg width="84" height="139" viewBox="0 0 100 165">
-          <g transform="translate(74,126)"><path d="M0,0 C20,-16 24,-42 8,-56" stroke="#00d4ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/></g>
-          <ellipse cx="50" cy="101" rx="29" ry="34" fill="#00d4ff"/>
-          <ellipse cx="35" cy="139" rx="11" ry="7" fill="#00d4ff"/>
-          <ellipse cx="65" cy="139" rx="11" ry="7" fill="#00d4ff"/>
-          <polygon points="29,27 38,8 53,24" fill="#00d4ff"/>
-          <polygon points="47,24 62,8 71,27" fill="#00d4ff"/>
-          <circle cx="50" cy="40" r="27" fill="#00d4ff"/>
+          <g transform="translate(74,126)"><path d="M0,0 C20,-16 24,-42 8,-56" stroke="#d45eff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="101" rx="29" ry="34" fill="#d45eff"/>
+          <ellipse cx="35" cy="139" rx="11" ry="7" fill="#d45eff"/>
+          <ellipse cx="65" cy="139" rx="11" ry="7" fill="#d45eff"/>
+          <polygon points="29,27 38,8 53,24" fill="#d45eff"/>
+          <polygon points="47,24 62,8 71,27" fill="#d45eff"/>
+          <circle cx="50" cy="40" r="27" fill="#d45eff"/>
           <polygon points="33,15 38,10 49,15" fill="rgba(255,255,255,.3)"/>
           <polygon points="51,15 62,10 67,15" fill="rgba(255,255,255,.3)"/>
           <g transform="translate(43,37)"><g class="te" style="animation-delay:1s"><circle r="5" fill="white"/><circle r="3" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1.2" fill="white"/></g></g>
@@ -2448,7 +2448,7 @@ function tamaStageName() { return ['','아깽이','캣춘기','성묘기'][tamaS
 function tamaCatSVG(stage, mood) {
   const C = [null,
     {col:'#ff5fb0', ec:'#ff5fb0', ec2:'#ff5fb0', bc:92, brx:22, bry:26, tx:68, ty:110, px:[37,63], py:123, prx:9,  pry:6, w:78},
-    {col:'#00d4ff', ec:'#00d4ff', ec2:'#00d4ff', bc:101,brx:29, bry:34, tx:74, ty:126, px:[35,65], py:139, prx:11, pry:7, w:98},
+    {col:'#d45eff', ec:'#d45eff', ec2:'#d45eff', bc:101,brx:29, bry:34, tx:74, ty:126, px:[35,65], py:139, prx:11, pry:7, w:98},
     {col:'url(#tg-m)', ec:'#b566ff', ec2:'#00d4ff', bc:106,brx:34, bry:39, tx:81, ty:137, px:[33,67], py:149, prx:13, pry:8, w:118}
   ][stage];
   const h = Math.round(C.w * 165 / 100);
