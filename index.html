@@ -1640,6 +1640,14 @@ hobbyInit();
   .tama-cd{font-size:10px;color:#6b6480;line-height:1;min-height:12px}
   .tama-log-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(140,110,200,.12);font-size:13px}
   .tama-log-row:last-child{border-bottom:none}
+  @keyframes tama-bounce{0%,100%{transform:translateY(0)}20%{transform:translateY(-24px) rotate(-4deg)}45%{transform:translateY(-8px) rotate(2deg)}65%{transform:translateY(-16px) rotate(-2deg)}85%{transform:translateY(-3px) rotate(1deg)}}
+  @keyframes tama-shake{0%,100%{transform:rotate(0) scale(1)}15%{transform:rotate(-18deg) scale(1.05)}35%{transform:rotate(18deg) scale(1.05)}55%{transform:rotate(-10deg) scale(1.02)}75%{transform:rotate(10deg) scale(1.02)}90%{transform:rotate(-4deg)}}
+  @keyframes tama-pulse{0%,100%{transform:scale(1)}40%{transform:scale(1.22)}70%{transform:scale(1.08)}}
+  @keyframes tama-overlay-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+  @keyframes tama-float-star{0%{opacity:0;transform:translateY(0) scale(0)}40%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1.6)}}
+  .tama-overlay{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,6,18,.88);backdrop-filter:blur(12px);text-align:center;padding:24px;cursor:pointer}
+  .tama-overlay-box{animation:tama-overlay-in .4s cubic-bezier(.34,1.56,.64,1) both}
+  .tama-star{position:absolute;font-size:22px;animation:tama-float-star 1.4s ease-out forwards}
 </style>
 <div class="tp-wrap">
   <div style="position:relative;margin-bottom:6px">
@@ -1803,8 +1811,12 @@ hobbyInit();
 
   <!-- 애정 랭킹 -->
   <div class="tama-crd" id="tama-rank-card" style="display:none">
-    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">🏆 애정 랭킹</div>
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">🏆 <span id="tama-rank-title">이번달 애정 랭킹</span></div>
     <div id="tama-rank-list"></div>
+    <div id="tama-lastmonth-wrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(140,110,200,.15)">
+      <div style="font-size:11px;color:#6b6480;font-weight:600;letter-spacing:.8px;margin-bottom:8px">📅 <span id="tama-lastmonth-title">지난달 애정 랭킹</span></div>
+      <div id="tama-lastmonth-list"></div>
+    </div>
   </div>
 </div>
 
@@ -2431,7 +2443,7 @@ wcInit();
 
 <script>
 // ===== TAMAGOTCHI =====
-let tamaData = null, tamaLogs = [], tamaRankData = [], tamaTick = null, tamaChannel = null, tamaReady = false;
+let tamaData = null, tamaLogs = [], tamaRankData = [], tamaLastMonthData = [], tamaTick = null, tamaChannel = null, tamaReady = false, tamaPrevStage = 0;
 
 const T_FEED_CD = 6 * 3600000, T_PLAY_CD = 6 * 3600000, T_PET_CD = 2 * 3600000;
 const HUNGER_DECAY = 8, HAPPY_DECAY = 5; // per hour
@@ -2540,12 +2552,8 @@ CREATE TABLE tamagotchi_actions (
   const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(8);
   tamaLogs = logs || [];
 
-  const { data: pets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet');
-  if (pets) {
-    const cnt = {};
-    pets.forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
-    tamaRankData = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  }
+  await tamaLoadAllRanks();
+  await tamaCheckCycleEnd();
 
   if (loadEl) loadEl.style.display = 'none';
   ['tama-char-card','tama-stat-card','tama-action-card','tama-log-card','tama-rank-card'].forEach(id => {
@@ -2572,6 +2580,11 @@ CREATE TABLE tamagotchi_actions (
 function tamaRender() {
   if (!tamaData) return;
   const stage = tamaStageNum();
+
+  // 성장 단계 전환 감지 (첫 로드 제외)
+  if (tamaPrevStage > 0 && stage > tamaPrevStage) tamaCelebrate('stage');
+  tamaPrevStage = stage;
+
   const hunger = tamaHunger(), happy = tamaHappy();
   const avg = (hunger + happy) / 2;
   const mood = avg >= 65 ? 'happy' : avg >= 35 ? 'normal' : 'sad';
@@ -2616,11 +2629,13 @@ function tamaRenderLog() {
 
 function tamaRenderRank() {
   const el = document.getElementById('tama-rank-list');
+  if (!el) return;
   if (!tamaRankData.length) { el.innerHTML = '<p style="font-size:13px;color:#6b6480;text-align:center;margin:8px 0">아직 기록이 없어요</p>'; return; }
   const medals = ['🥇','🥈','🥉','4위','5위'];
   el.innerHTML = tamaRankData.map(([nick, cnt], i) =>
     `<div class="tama-log-row"><span>${medals[i]} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`
   ).join('');
+  tamaRenderLastMonth();
 }
 
 function tamaRenderCd() {
@@ -2653,16 +2668,124 @@ async function tamaAction(type) {
 
   await sb.from('tamagotchi_actions').insert({ actor_nickname: nick, action_type: type });
 
+  tamaPlayAnim(type);
   tamaRender();
 }
 
-async function tamaRefreshRank() {
-  const { data: pets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet');
-  if (!pets) return;
+function tamaMonthRange() {
+  const now = new Date();
+  const thisStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const lastStart = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString();
+  const monthLabel = (y, m) => `${y}년 ${m+1}월`;
+  return {
+    thisStart, lastStart,
+    thisLabel: monthLabel(now.getFullYear(), now.getMonth()),
+    lastLabel: monthLabel(now.getFullYear(), now.getMonth()-1 < 0 ? now.getFullYear()-1 : now.getFullYear(), now.getMonth()-1 < 0 ? 11 : now.getMonth()-1)
+  };
+}
+
+function tamaCountPets(rows) {
   const cnt = {};
-  pets.forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
-  tamaRankData = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  (rows||[]).forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
+  return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+}
+
+async function tamaLoadAllRanks() {
+  const { thisStart, lastStart, thisLabel, lastLabel } = tamaMonthRange();
+
+  const [{ data: thisPets }, { data: lastPets }] = await Promise.all([
+    sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', thisStart),
+    sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', lastStart).lt('created_at', thisStart)
+  ]);
+
+  tamaRankData = tamaCountPets(thisPets);
+  tamaLastMonthData = tamaCountPets(lastPets);
+
+  const titleEl = document.getElementById('tama-rank-title');
+  if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹`;
+  const lastTitleEl = document.getElementById('tama-lastmonth-title');
+  if (lastTitleEl) lastTitleEl.textContent = `${lastLabel} 애정 랭킹`;
+
   tamaRenderRank();
+  tamaRenderLastMonth();
+}
+
+async function tamaRefreshRank() {
+  const { thisStart, lastStart, thisLabel } = tamaMonthRange();
+  const { data: thisPets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', thisStart);
+  tamaRankData = tamaCountPets(thisPets);
+  const titleEl = document.getElementById('tama-rank-title');
+  if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹`;
+  tamaRenderRank();
+}
+
+function tamaRenderLastMonth() {
+  const wrap = document.getElementById('tama-lastmonth-wrap');
+  const el = document.getElementById('tama-lastmonth-list');
+  if (!wrap || !el) return;
+  if (!tamaLastMonthData.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const medals = ['🥇','🥈','🥉','4위','5위'];
+  el.innerHTML = tamaLastMonthData.map(([nick, cnt], i) =>
+    `<div class="tama-log-row"><span>${medals[i]} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#9b94b3;font-weight:700">${cnt}회 🤍</span></div>`
+  ).join('');
+}
+
+function tamaPlayAnim(type) {
+  const wrap = document.getElementById('tama-char-wrap');
+  if (!wrap) return;
+  const anims = { feed:'tama-bounce .95s ease', play:'tama-shake .9s ease', pet:'tama-pulse .75s ease' };
+  wrap.style.animation = anims[type];
+  setTimeout(() => { wrap.style.animation = 'cat-float 3s ease-in-out infinite'; }, 1050);
+}
+
+function tamaCelebrate(type) {
+  const names = ['','아깽이','캣춘기','성묘기'];
+  const stage = tamaStageNum();
+  const el = document.createElement('div');
+  el.className = 'tama-overlay';
+
+  const stars = ['✨','🌟','💫','⭐','🎊','🎉'].map((s,i) =>
+    `<div class="tama-star" style="left:${10+i*16}%;top:${20+Math.random()*40}%;animation-delay:${i*.15}s">${s}</div>`
+  ).join('');
+
+  if (type === 'stage') {
+    el.innerHTML = `${stars}<div class="tama-overlay-box">
+      <div style="font-size:52px;margin-bottom:14px">🐱</div>
+      <div style="font-size:22px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px">성장했어요!</div>
+      <div style="font-size:17px;color:#f5f1ff;font-weight:700;margin-bottom:6px">${names[stage]} 단계 🎊</div>
+      <div style="font-size:13px;color:#9b94b3;margin-top:4px">모두 함께 키운 덕분이에요</div>
+      <div style="font-size:11px;color:#6b6480;margin-top:20px">탭해서 닫기</div>
+    </div>`;
+  } else {
+    el.innerHTML = `${stars}<div class="tama-overlay-box">
+      <div style="font-size:52px;margin-bottom:14px">🎊</div>
+      <div style="font-size:22px;font-weight:800;background:linear-gradient(100deg,#b566ff,#ff5fb0,#5ec8ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px">성묘 달성!</div>
+      <div style="font-size:14px;color:#9b94b3;margin-bottom:6px">새로운 아깽이가 태어났어요 🐣</div>
+      <div style="font-size:13px;color:#6b6480">함께 또 키워봐요!</div>
+      <div style="font-size:11px;color:#6b6480;margin-top:20px">탭해서 닫기</div>
+    </div>`;
+  }
+
+  document.body.appendChild(el);
+  el.addEventListener('click', () => el.remove());
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 6000);
+}
+
+async function tamaCheckCycleEnd() {
+  if (!tamaData) return;
+  const daysSince = (Date.now() - new Date(tamaData.born_at)) / 86400000;
+  if (daysSince < 30) return;
+  const oldBornAt = tamaData.born_at;
+  const { data } = await sb.from('tamagotchi')
+    .update({ born_at: new Date().toISOString(), hunger: 80, happiness: 80, last_updated: new Date().toISOString() })
+    .eq('id', 1).eq('born_at', oldBornAt).select().maybeSingle();
+  if (data) {
+    tamaData = data;
+    tamaPrevStage = 0;
+    tamaCelebrate('cycle');
+    tamaRender();
+  }
 }
 </script>
 </body>
