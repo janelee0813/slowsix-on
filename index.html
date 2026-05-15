@@ -2557,10 +2557,11 @@ CREATE TABLE tamagotchi_actions (
   if (tamaChannel) tamaChannel.unsubscribe();
   tamaChannel = sb.channel('tama-live')
     .on('postgres_changes', {event:'UPDATE', schema:'public', table:'tamagotchi'}, p => { tamaData = p.new; tamaRender(); })
-    .on('postgres_changes', {event:'INSERT', schema:'public', table:'tamagotchi_actions'}, p => {
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'tamagotchi_actions'}, async p => {
       tamaLogs.unshift(p.new);
       if (tamaLogs.length > 8) tamaLogs.pop();
       tamaRenderLog();
+      if (p.new.action_type === 'pet') await tamaRefreshRank();
     })
     .subscribe();
 
@@ -2652,14 +2653,16 @@ async function tamaAction(type) {
 
   await sb.from('tamagotchi_actions').insert({ actor_nickname: nick, action_type: type });
 
-  if (type === 'pet') {
-    const ex = tamaRankData.find(([n]) => n === nick);
-    if (ex) ex[1]++; else tamaRankData.unshift([nick, 1]);
-    tamaRankData.sort((a,b) => b[1]-a[1]);
-    tamaRankData = tamaRankData.slice(0,5);
-  }
-
   tamaRender();
+}
+
+async function tamaRefreshRank() {
+  const { data: pets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet');
+  if (!pets) return;
+  const cnt = {};
+  pets.forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
+  tamaRankData = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  tamaRenderRank();
 }
 </script>
 </body>
