@@ -1633,14 +1633,26 @@ function qzSaveImage() {
   <div id="tama-loading" style="text-align:center;padding:32px 0;color:#6b6480;font-size:13px">불러오는 중…</div>
 
   <!-- 캐릭터 -->
-  <div class="tama-crd" id="tama-char-card" style="display:none;text-align:center;padding:28px 16px 20px">
-    <div id="tama-stage-badge" style="margin-bottom:14px"></div>
-    <div style="position:relative;display:inline-block;margin:16px 0 8px">
-      <div id="tama-bubble" class="tama-bubble"></div>
-      <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
+  <div class="tama-crd" id="tama-char-card" style="display:none;padding:16px">
+    <div style="display:flex;align-items:stretch;gap:12px">
+      <!-- 스테이지 진행 바 (왼쪽) -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;padding:4px 0">
+        <div style="flex:1;width:8px;background:rgba(140,110,200,.18);border-radius:99px;overflow:hidden;position:relative;min-height:140px">
+          <div id="stage-prog-bar" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#b566ff,#ff5fb0,#5ec8ff);border-radius:99px;transition:height .8s ease;height:0%"></div>
+        </div>
+        <span id="stage-prog-label" style="font-size:9px;color:#6b6480;letter-spacing:.2px;white-space:nowrap;line-height:1.4;text-align:center"></span>
+      </div>
+      <!-- 캐릭터 영역 (오른쪽) -->
+      <div style="flex:1;text-align:center;padding:12px 0 4px">
+        <div id="tama-stage-badge" style="display:none"></div>
+        <div style="position:relative;display:inline-block;margin:6px 0 12px">
+          <div id="tama-bubble" class="tama-bubble"></div>
+          <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
+        </div>
+        <div id="tama-day-info" style="font-size:12px;color:#6b6480;margin-top:4px"></div>
+        <div id="tama-mood-text" style="font-size:13px;color:#9b94b3;margin-top:4px"></div>
+      </div>
     </div>
-    <div id="tama-day-info" style="font-size:12px;color:#6b6480;margin-top:10px"></div>
-    <div id="tama-mood-text" style="font-size:13px;color:#9b94b3;margin-top:4px"></div>
   </div>
 
   <!-- 상태바 -->
@@ -2366,6 +2378,17 @@ function tamaDay()    { return Math.max(1, Math.min(30, Math.floor((Date.now() -
 function tamaStageNum() { const d = tamaDay(); return d <= 10 ? 1 : d <= 20 ? 2 : 3; }
 function tamaStageName() { return ['','아깽이','캣춘기','성묘기'][tamaStageNum()]; }
 
+function tamaUpdateStageBar() {
+  const bar   = document.getElementById('stage-prog-bar');
+  const label = document.getElementById('stage-prog-label');
+  if (!bar || !label) return;
+  const day = tamaDay();             // 1~30
+  const dayInStage = ((day - 1) % 10) + 1; // 1~10
+  const pct = Math.round(dayInStage / 10 * 100);
+  bar.style.height = pct + '%';
+  label.textContent = tamaStageName() + '\n시절';
+}
+
 function tamaCatSVG(stage, mood) {
   const C = [null,
     {col:'#ff5fb0', ec:'#ff5fb0', ec2:'#ff5fb0', bc:92, brx:22, bry:26, tx:68, ty:110, px:[37,63], py:123, prx:9,  pry:6, w:117},
@@ -2518,9 +2541,8 @@ function tamaRender() {
 
   // 캐릭터
   document.getElementById('tama-char-wrap').innerHTML = tamaCatSVG(stage, mood);
-  document.getElementById('tama-stage-badge').innerHTML =
-    `<span style="display:inline-block;font-size:12px;font-weight:700;background:rgba(181,102,255,.15);color:#b566ff;padding:4px 16px;border-radius:20px;border:1px solid rgba(181,102,255,.35)">${tamaStageName()}</span>`;
   document.getElementById('tama-day-info').textContent = `Day ${tamaDay()} / 30`;
+  tamaUpdateStageBar();
   document.getElementById('tama-mood-text').textContent =
     mood === 'happy' ? '행복해요! 😻' : mood === 'sad' ? '돌봄이 필요해요 😿' : '평온해요 🐱';
 
