@@ -1781,7 +1781,7 @@ hobbyInit();
   function tamaCopyUrl() {
     const btn = document.getElementById('tama-share-btn');
     const orig = btn.innerHTML;
-    navigator.clipboard.writeText(location.origin + location.pathname + '#roulette').then(() => {
+    navigator.clipboard.writeText(location.origin + location.pathname + '#tamagotchi').then(() => {
       btn.innerHTML = '✓ 복사됨';
       btn.style.color = '#5ee0a8';
       btn.style.borderColor = 'rgba(94,224,168,0.6)';
@@ -2358,7 +2358,7 @@ wcInit();
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[13px] font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#hobby-map' : '#' + page;
+    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#hobby-map' : page === 'roulette' ? '#tamagotchi' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
   }
@@ -2381,7 +2381,7 @@ wcInit();
     const hash = location.hash.replace('#', '');
     if (hash === 'calculator') showPage('test1');
     else if (hash === 'hobby-map' || hash === 'fortune') showPage('fortune');
-    else if (hash === 'roulette') showPage('roulette');
+    else if (hash === 'tamagotchi' || hash === 'roulette') showPage('roulette');
     else if (hash === 'diet') showPage('diet');
   })();
 </script>
