@@ -1801,7 +1801,8 @@ hobbyInit();
     <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:8px">함께 돌봐요</div>
     <input id="tama-nick" placeholder="닉네임을 입력하세요" maxlength="12"
       style="width:100%;padding:7px 13px;border:1px solid rgba(140,110,200,.32);border-radius:10px;font-size:14px;background:rgba(20,14,36,.7);color:#f5f1ff;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:8px"
-      oninput="localStorage.setItem('tama_nick',this.value)"/>
+      oninput="localStorage.setItem('tama_nick',this.value)"
+      onblur="tamaSyncCooldowns(this.value.trim())"/>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
       <button class="tama-act-btn" id="btn-feed" onclick="tamaAction('feed')" style="padding:9px 6px">
         <div style="display:flex;align-items:center;gap:5px"><span style="font-size:18px">🍚</span><span style="font-size:12px;font-weight:600">밥주기</span></div>
@@ -2556,7 +2557,10 @@ function tamaFmtCd(ms) {
 async function tamaInit() {
   const loadEl = document.getElementById('tama-loading');
   const saved = localStorage.getItem('tama_nick');
-  if (saved) document.getElementById('tama-nick').value = saved;
+  if (saved) {
+    document.getElementById('tama-nick').value = saved;
+    tamaSyncCooldowns(saved); // 서버 기준으로 쿨다운 동기화
+  }
 
   try {
     const { data, error } = await sb.from('tamagotchi').select('*').eq('id', 1).maybeSingle();
@@ -2720,10 +2724,44 @@ function tamaRenderCd() {
   lbl.style.color = pct >= 100 ? '#5ee0a8' : '#6b6480';
 }
 
+async function tamaCheckServerCd(nick, type) {
+  const { data } = await sb.from('tamagotchi_actions')
+    .select('created_at')
+    .eq('actor_nickname', nick)
+    .eq('action_type', type)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data) return 0;
+  const lastTime = new Date(data.created_at).getTime();
+  const left = lastTime + T_WINDOW[type] - Date.now();
+  if (left > 0) {
+    // 서버 기준으로 localStorage 동기화
+    localStorage.setItem(`tama_${type}_${nick}`, JSON.stringify([lastTime]));
+  }
+  return Math.max(0, left);
+}
+
+async function tamaSyncCooldowns(nick) {
+  if (!nick) return;
+  await Promise.all(['feed','play','pet'].map(type => tamaCheckServerCd(nick, type)));
+  tamaRenderCd();
+}
+
 async function tamaAction(type) {
   const nick = document.getElementById('tama-nick').value.trim();
   if (!nick) { alert('닉네임을 입력해 주세요!'); document.getElementById('tama-nick').focus(); return; }
+
+  // 1. 로컬 쿨다운 체크 (빠름)
   if (tamaCdLeft(type) > 0) { alert(`아직 쿨다운 중이에요!\n${tamaFmtCd(tamaCdLeft(type))}`); return; }
+
+  // 2. 서버 쿨다운 체크 (다른 기기 방어)
+  const serverLeft = await tamaCheckServerCd(nick, type);
+  if (serverLeft > 0) {
+    alert(`다른 기기에서 이미 사용했어요!\n${tamaFmtCd(serverLeft)} 후 가능해요`);
+    tamaRenderCd();
+    return;
+  }
 
   const usages = tamaGetUsages(type, nick);
   usages.push(Date.now());
