@@ -1824,12 +1824,7 @@ hobbyInit();
   <div style="max-width:480px;margin:0 auto;padding:0 16px 40px">
     <div style="border:1px dashed rgba(255,95,109,.3);border-radius:12px;padding:14px;background:rgba(255,95,109,.05)">
       <div style="font-size:11px;color:#ff5f6d;font-weight:600;margin-bottom:10px">🧪 테스트용 (삭제 예정)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button onclick="tamaTestReset(0)"  style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">아깽이로 리셋</button>
-        <button onclick="tamaTestReset(9)"  style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">캣춘기로 리셋</button>
-        <button onclick="tamaTestReset(19)" style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">성묘기로 리셋</button>
-        <button onclick="tamaTestReset(30)" style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">Day 30 리셋</button>
-      </div>
+      <button onclick="tamaTestReset()" style="width:100%;padding:10px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:13px;cursor:pointer;font-family:inherit">쿨다운 초기화 (밥주기·놀아주기·쓰다듬기 재사용 가능)</button>
     </div>
   </div>
 
@@ -2785,12 +2780,12 @@ function tamaCelebrate(type) {
   setTimeout(() => { if (el.parentNode) el.remove(); }, 6000);
 }
 
-async function tamaTestReset(daysAgo) {
-  const bornAt = new Date(Date.now() - daysAgo * 86400000).toISOString();
-  const { data } = await sb.from('tamagotchi')
-    .update({ born_at: bornAt, hunger: 80, happiness: 80, last_updated: new Date().toISOString() })
-    .eq('id', 1).select().maybeSingle();
-  if (data) { tamaData = data; tamaPrevStage = 0; tamaRender(); }
+function tamaTestReset() {
+  const nick = document.getElementById('tama-nick')?.value.trim();
+  if (!nick) { alert('닉네임을 먼저 입력해 주세요'); return; }
+  ['feed','play','pet'].forEach(t => localStorage.removeItem(`tama_${t}_${nick}`));
+  tamaRenderCd();
+  alert(`${nick}의 쿨다운이 초기화됐어요!`);
 }
 
 async function tamaCheckCycleEnd() {
