@@ -1790,35 +1790,35 @@ hobbyInit();
   </div>
 
   <!-- 액션 -->
-  <div class="tama-crd" id="tama-action-card" style="display:none">
-    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">함께 돌봐요</div>
+  <div class="tama-crd" id="tama-action-card" style="display:none;padding:12px">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:8px">함께 돌봐요</div>
     <input id="tama-nick" placeholder="닉네임을 입력하세요" maxlength="12"
-      style="width:100%;padding:10px 13px;border:1px solid rgba(140,110,200,.32);border-radius:10px;font-size:14px;background:rgba(20,14,36,.7);color:#f5f1ff;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:12px"
+      style="width:100%;padding:7px 13px;border:1px solid rgba(140,110,200,.32);border-radius:10px;font-size:14px;background:rgba(20,14,36,.7);color:#f5f1ff;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:8px"
       oninput="localStorage.setItem('tama_nick',this.value)"/>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-      <button class="tama-act-btn" id="btn-feed" onclick="tamaAction('feed')">
-        <span style="font-size:22px">🍚</span>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+      <button class="tama-act-btn" id="btn-feed" onclick="tamaAction('feed')" style="padding:9px 6px">
+        <span style="font-size:20px">🍚</span>
         <span style="font-size:12px;font-weight:600">밥주기</span>
         <span class="tama-cd" id="cd-feed"></span>
       </button>
-      <button class="tama-act-btn" id="btn-play" onclick="tamaAction('play')">
-        <span style="font-size:22px">🎾</span>
+      <button class="tama-act-btn" id="btn-play" onclick="tamaAction('play')" style="padding:9px 6px">
+        <span style="font-size:20px">🎾</span>
         <span style="font-size:12px;font-weight:600">놀아주기</span>
         <span class="tama-cd" id="cd-play"></span>
       </button>
-      <button class="tama-act-btn" id="btn-pet" onclick="tamaAction('pet')">
-        <span style="font-size:22px">🤍</span>
+      <button class="tama-act-btn" id="btn-pet" onclick="tamaAction('pet')" style="padding:9px 6px">
+        <span style="font-size:20px">🤍</span>
         <span style="font-size:12px;font-weight:600">쓰다듬기</span>
         <span class="tama-cd" id="cd-pet"></span>
       </button>
     </div>
-    <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">밥주기: 6시간 1회 · 놀아주기: 3시간 1회 · 쓰다듬기: 1시간 1회</p>
-    <div style="margin-top:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <p style="font-size:11px;color:#6b6480;margin-top:8px;text-align:center">밥주기: 6시간 1회 · 놀아주기: 3시간 1회 · 쓰다듬기: 1시간 1회</p>
+    <div style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
         <span style="font-size:11px;color:#9b94b3">🤍 쓰다듬기 재충전</span>
         <span id="pet-cd-label" style="font-size:11px;color:#6b6480"></span>
       </div>
-      <div style="width:100%;height:10px;background:rgba(140,110,200,.18);border-radius:99px;overflow:hidden">
+      <div style="width:100%;height:8px;background:rgba(140,110,200,.18);border-radius:99px;overflow:hidden">
         <div id="pet-cd-bar" style="height:100%;width:0%;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);border-radius:99px;transition:width .8s ease"></div>
       </div>
     </div>
