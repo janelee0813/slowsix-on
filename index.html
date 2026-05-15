@@ -1824,7 +1824,10 @@ hobbyInit();
   <div style="max-width:480px;margin:0 auto;padding:0 16px 40px">
     <div style="border:1px dashed rgba(255,95,109,.3);border-radius:12px;padding:14px;background:rgba(255,95,109,.05)">
       <div style="font-size:11px;color:#ff5f6d;font-weight:600;margin-bottom:10px">🧪 테스트용 (삭제 예정)</div>
-      <button onclick="tamaTestReset()" style="width:100%;padding:10px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:13px;cursor:pointer;font-family:inherit">쿨다운 초기화 (밥주기·놀아주기·쓰다듬기 재사용 가능)</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="tamaTestReset()" style="padding:10px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">쿨다운 초기화</button>
+        <button onclick="tamaDeleteNickData()" style="padding:10px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">내 기록 삭제</button>
+      </div>
     </div>
   </div>
 
@@ -2490,7 +2493,7 @@ function tamaCatSVG(stage, mood) {
     <g transform="translate(43,37)"><g class="te"><circle r="5" fill="white"/><circle r="3" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1.2" fill="white"/></g></g>
     <g transform="translate(57,37)"><g class="te"><circle r="5" fill="white"/><circle r="3" fill="#1a0a2e"/><circle cx="1.5" cy="-1.5" r="1.2" fill="white"/></g></g>
     <ellipse cx="50" cy="47" rx="3" ry="2.5" fill="rgba(255,255,255,.8)"/>
-    <path d="${mouth}" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path id="tama-mouth" d="${mouth}" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
     <line x1="26" y1="43" x2="43" y2="46" stroke="white" stroke-width=".8" opacity=".45"/>
     <line x1="26" y1="49" x2="43" y2="49" stroke="white" stroke-width=".8" opacity=".45"/>
     <line x1="57" y1="46" x2="74" y2="43" stroke="white" stroke-width=".8" opacity=".45"/>
@@ -2742,9 +2745,27 @@ function tamaRenderLastMonth() {
 function tamaPlayAnim(type) {
   const wrap = document.getElementById('tama-char-wrap');
   if (!wrap) return;
+  const dur = { feed: 950, play: 900, pet: 750 }[type];
   const anims = { feed:'tama-bounce .95s ease', play:'tama-shake .9s ease', pet:'tama-pulse .75s ease' };
+
+  // 1단계: 몸 움직임 애니메이션
   wrap.style.animation = anims[type];
-  setTimeout(() => { wrap.style.animation = 'cat-float 3s ease-in-out infinite'; }, 1050);
+
+  // 2단계: 몸 애니메이션 끝난 후 표정 변화
+  setTimeout(() => {
+    wrap.style.animation = 'cat-float 3s ease-in-out infinite';
+    const mouth = document.getElementById('tama-mouth');
+    if (!mouth) return;
+    mouth.setAttribute('d', 'M44,50 Q50,58 56,50'); // 활짝 웃는 표정
+
+    // 3단계: 700ms 후 원래 표정으로 복귀
+    setTimeout(() => {
+      const avg = (tamaHunger() + tamaHappy()) / 2;
+      const mood = avg >= 65 ? 'happy' : avg >= 35 ? 'normal' : 'sad';
+      const paths = { happy:'M46,50 Q50,56 54,50', normal:'M47,50 Q50,54 53,50', sad:'M46,54 Q50,49 54,54' };
+      mouth.setAttribute('d', paths[mood]);
+    }, 700);
+  }, dur + 80);
 }
 
 function tamaCelebrate(type) {
@@ -2786,6 +2807,23 @@ function tamaTestReset() {
   ['feed','play','pet'].forEach(t => localStorage.removeItem(`tama_${t}_${nick}`));
   tamaRenderCd();
   alert(`${nick}의 쿨다운이 초기화됐어요!`);
+}
+
+async function tamaDeleteNickData() {
+  const nick = document.getElementById('tama-nick')?.value.trim();
+  if (!nick) { alert('닉네임을 먼저 입력해 주세요'); return; }
+  if (!confirm(`${nick}의 모든 활동 기록을 삭제할까요?`)) return;
+  await sb.from('tamagotchi_actions').delete().eq('actor_nickname', nick);
+  ['feed','play','pet'].forEach(t => localStorage.removeItem(`tama_${t}_${nick}`));
+  // 애정도 재계산해서 업데이트
+  const { data: all } = await sb.from('tamagotchi_actions').select('id').eq('action_type','pet');
+  await sb.from('tamagotchi').update({ affection: (all||[]).length }).eq('id', 1);
+  await tamaLoadAllRanks();
+  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(8);
+  tamaLogs = logs || [];
+  tamaRenderLog();
+  tamaRenderCd();
+  alert(`${nick}의 기록이 삭제됐어요!`);
 }
 
 async function tamaCheckCycleEnd() {
