@@ -1813,6 +1813,15 @@ hobbyInit();
       </button>
     </div>
     <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">밥주기: 6시간 1회 · 놀아주기: 3시간 1회 · 쓰다듬기: 1시간 1회</p>
+    <div style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;color:#9b94b3">🤍 쓰다듬기 재충전</span>
+        <span id="pet-cd-label" style="font-size:11px;color:#6b6480"></span>
+      </div>
+      <div style="width:100%;height:10px;background:rgba(140,110,200,.18);border-radius:99px;overflow:hidden">
+        <div id="pet-cd-bar" style="height:100%;width:0%;background:linear-gradient(to right,#b566ff,#ff5fb0,#5ec8ff);border-radius:99px;transition:width .8s ease"></div>
+      </div>
+    </div>
   </div>
 
   <!-- 애정 랭킹 -->
@@ -2607,6 +2616,7 @@ CREATE TABLE tamagotchi_actions (
 
   if (tamaIdleTick) clearInterval(tamaIdleTick);
   tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
+  setInterval(tamaRenderCd, 10000);
 }
 
 function tamaRender() {
@@ -2686,6 +2696,24 @@ function tamaRenderCd() {
     btn.disabled = left > 0;
     btn.style.opacity = left > 0 ? '.4' : '1';
   });
+
+  // 쓰다듬기 재충전 바 업데이트
+  const bar = document.getElementById('pet-cd-bar');
+  const lbl = document.getElementById('pet-cd-label');
+  if (!bar || !lbl) return;
+  const nick = document.getElementById('tama-nick')?.value.trim();
+  const win = T_WINDOW.pet;
+  let pct = 100;
+  if (nick) {
+    const usages = tamaGetUsages('pet', nick);
+    if (usages.length > 0) {
+      const elapsed = Date.now() - Math.min(...usages);
+      pct = Math.min(100, Math.round(elapsed / win * 100));
+    }
+  }
+  bar.style.width = pct + '%';
+  lbl.textContent = pct >= 100 ? '사용 가능 ✓' : `${pct}%`;
+  lbl.style.color = pct >= 100 ? '#5ee0a8' : '#6b6480';
 }
 
 async function tamaAction(type) {
