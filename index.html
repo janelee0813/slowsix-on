@@ -1021,7 +1021,7 @@ function renderRounds(){
   const list=document.getElementById('rounds-list');
   if(!state.rounds.length){list.innerHTML='';return;}
   list.innerHTML=state.rounds.map(r=>{
-    const share=r.totalAmount>0&&r.participantIds.length>0?'1인 '+Math.round(r.totalAmount/r.participantIds.length).toLocaleString()+'원 × '+r.participantIds.length+'명':'';
+    const share=r.totalAmount>=0&&r.participantIds.length>0?'1인 '+Math.round(r.totalAmount/r.participantIds.length).toLocaleString()+'원 × '+r.participantIds.length+'명':'';
     return `<div class="round-card">
       <div class="round-header"><span class="round-badge">${r.roundNumber}차</span><button class="btn btn-sm btn-danger" onclick="removeRound('${r.id}')">삭제</button></div>
       <div class="field"><label>총금액 (원)</label>
@@ -1054,7 +1054,7 @@ function handleAmountInput(id,el){
   if(r)r.totalAmount=num;
   el.value=raw;
   const hint=el.closest('.round-card').querySelector('.hint-text');
-  if(hint)hint.textContent=num>0&&r&&r.participantIds.length>0?'1인 '+Math.round(num/r.participantIds.length).toLocaleString()+'원 × '+r.participantIds.length+'명':'';
+  if(hint)hint.textContent=num>=0&&r&&r.participantIds.length>0?'1인 '+Math.round(num/r.participantIds.length).toLocaleString()+'원 × '+r.participantIds.length+'명':'';
 }
 function toggleParticipant(rId,mId,checked){
   const r=state.rounds.find(r=>r.id===rId);if(!r)return;
@@ -1073,7 +1073,7 @@ function calculate(){
   if(state.members.length<2){alert('멤버가 2명 이상이어야 해요');return;}
   if(!state.rounds.length){alert('차수를 하나 이상 추가해 주세요');return;}
   for(const r of state.rounds){
-    if(!r.totalAmount||r.totalAmount<=0){alert(`${r.roundNumber}차 총금액을 입력해 주세요`);return;}
+    if(r.totalAmount<0||r.totalAmount===null||r.totalAmount===undefined){alert(`${r.roundNumber}차 총금액을 입력해 주세요`);return;}
     if(!r.participantIds.length){alert(`${r.roundNumber}차 참여 멤버를 선택해 주세요`);return;}
   }
   const totals={};
