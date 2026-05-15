@@ -2477,9 +2477,9 @@ function tamaStageName() { return ['','아깽이','캣춘기','성묘기'][tamaS
 
 function tamaCatSVG(stage, mood) {
   const C = [null,
-    {col:'#ff5fb0', ec:'#ff5fb0', ec2:'#ff5fb0', bc:92, brx:22, bry:26, tx:68, ty:110, px:[37,63], py:123, prx:9,  pry:6, w:78},
-    {col:'#d45eff', ec:'#d45eff', ec2:'#d45eff', bc:101,brx:29, bry:34, tx:74, ty:126, px:[35,65], py:139, prx:11, pry:7, w:98},
-    {col:'url(#tg-m)', ec:'#b566ff', ec2:'#00d4ff', bc:106,brx:34, bry:39, tx:81, ty:137, px:[33,67], py:149, prx:13, pry:8, w:118}
+    {col:'#ff5fb0', ec:'#ff5fb0', ec2:'#ff5fb0', bc:92, brx:22, bry:26, tx:68, ty:110, px:[37,63], py:123, prx:9,  pry:6, w:117},
+    {col:'#d45eff', ec:'#d45eff', ec2:'#d45eff', bc:101,brx:29, bry:34, tx:74, ty:126, px:[35,65], py:139, prx:11, pry:7, w:147},
+    {col:'url(#tg-m)', ec:'#b566ff', ec2:'#00d4ff', bc:106,brx:34, bry:39, tx:81, ty:137, px:[33,67], py:149, prx:13, pry:8, w:177}
   ][stage];
   const h = Math.round(C.w * 165 / 100);
   const mouth = mood === 'happy' ? 'M46,50 Q50,56 54,50' : mood === 'sad' ? 'M46,54 Q50,49 54,54' : 'M47,50 Q50,54 53,50';
