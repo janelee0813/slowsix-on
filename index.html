@@ -1772,20 +1772,27 @@ hobbyInit();
   </div>
 
   <!-- 상태바 -->
-  <div class="tama-crd" id="tama-stat-card" style="display:none">
-    <div class="tama-stat-row">
-      <span class="tama-stat-lbl">🍚 배고픔</span>
-      <div class="tama-bar-wrap"><div class="tama-bar" id="bar-hunger"></div></div>
-      <span class="tama-stat-num" id="num-hunger">0</span>
-    </div>
-    <div class="tama-stat-row">
-      <span class="tama-stat-lbl">😊 행복도</span>
-      <div class="tama-bar-wrap"><div class="tama-bar" id="bar-happy"></div></div>
-      <span class="tama-stat-num" id="num-happy">0</span>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#9b94b3;padding-top:10px;border-top:1px solid rgba(140,110,200,.12)">
-      <span>🤍 누적 애정도</span>
-      <span id="num-affection" style="font-weight:700;color:#b566ff;font-size:14px">0회</span>
+  <div class="tama-crd" id="tama-stat-card" style="display:none;padding:12px">
+    <div style="display:flex;gap:12px;align-items:center">
+      <!-- 배고픔 + 행복도 -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+        <div class="tama-stat-row" style="margin-bottom:0">
+          <span class="tama-stat-lbl" style="width:62px;font-size:12px">🍚 배고픔</span>
+          <div class="tama-bar-wrap"><div class="tama-bar" id="bar-hunger"></div></div>
+          <span class="tama-stat-num" id="num-hunger">0</span>
+        </div>
+        <div class="tama-stat-row" style="margin-bottom:0">
+          <span class="tama-stat-lbl" style="width:62px;font-size:12px">😊 행복도</span>
+          <div class="tama-bar-wrap"><div class="tama-bar" id="bar-happy"></div></div>
+          <span class="tama-stat-num" id="num-happy">0</span>
+        </div>
+      </div>
+      <!-- 누적 애정도 -->
+      <div style="border-left:1px solid rgba(140,110,200,.18);padding-left:12px;text-align:center;flex-shrink:0">
+        <div style="font-size:10px;color:#9b94b3;margin-bottom:4px">🤍 애정도</div>
+        <div id="num-affection" style="font-weight:800;color:#b566ff;font-size:18px;line-height:1">0</div>
+        <div style="font-size:10px;color:#6b6480;margin-top:2px">회</div>
+      </div>
     </div>
   </div>
 
@@ -2655,7 +2662,7 @@ function tamaRenderStat() {
   document.getElementById('bar-happy').style.cssText  = `width:${happy}%;background:${hColor(happy)}`;
   document.getElementById('num-hunger').textContent = hunger;
   document.getElementById('num-happy').textContent  = happy;
-  document.getElementById('num-affection').textContent = `${tamaData.affection}회 💜`;
+  document.getElementById('num-affection').textContent = tamaData.affection;
   tamaRenderCd();
 }
 
