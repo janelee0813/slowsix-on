@@ -1628,7 +1628,13 @@ hobbyInit();
   @keyframes eye-blink{0%,88%,100%{transform:scaleY(1)}93%{transform:scaleY(0.08)}}
 </style>
 <div class="tp-wrap">
-  <div class="tp-title">🌱 성장 단계 프리뷰</div>
+  <div style="position:relative;margin-bottom:6px">
+    <div class="tp-title">🌱 성장 단계 프리뷰</div>
+    <button id="tama-share-btn" onclick="tamaCopyUrl()" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      URL 공유
+    </button>
+  </div>
   <div class="tp-sub">함께 키우면 이렇게 자라요</div>
   <div class="tp-stages">
 
@@ -1636,10 +1642,10 @@ hobbyInit();
     <div class="tp-stage">
       <div class="tc" style="animation-delay:0s;filter:drop-shadow(0 0 5px rgba(181,102,255,.85)) drop-shadow(0 0 14px rgba(181,102,255,.4))">
         <svg width="46" height="64" viewBox="0 0 100 140">
-          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#b566ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.6s" repeatCount="indefinite" additive="sum"/></g>
-          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#b566ff"/>
-          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#b566ff"/>
-          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#b566ff"/>
+          <g transform="translate(71,100)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#b566ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.6s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="88" rx="24" ry="30" fill="#b566ff"/>
+          <ellipse cx="37" cy="117" rx="9" ry="6" fill="#b566ff"/>
+          <ellipse cx="63" cy="117" rx="9" ry="6" fill="#b566ff"/>
           <polygon points="30,25 39,6 53,21" fill="#b566ff"/>
           <polygon points="47,21 61,6 70,25" fill="#b566ff"/>
           <circle cx="50" cy="36" r="22" fill="#b566ff"/>
@@ -1663,10 +1669,10 @@ hobbyInit();
     <div class="tp-stage">
       <div class="tc" style="animation-delay:.5s;filter:drop-shadow(0 0 6px rgba(212,94,255,.85)) drop-shadow(0 0 16px rgba(212,94,255,.4))">
         <svg width="60" height="84" viewBox="0 0 100 140">
-          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#d45eff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.4s" repeatCount="indefinite" additive="sum"/></g>
-          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#d45eff"/>
-          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#d45eff"/>
-          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#d45eff"/>
+          <g transform="translate(71,100)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#d45eff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.4s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="88" rx="24" ry="30" fill="#d45eff"/>
+          <ellipse cx="37" cy="117" rx="9" ry="6" fill="#d45eff"/>
+          <ellipse cx="63" cy="117" rx="9" ry="6" fill="#d45eff"/>
           <polygon points="30,25 39,6 53,21" fill="#d45eff"/>
           <polygon points="47,21 61,6 70,25" fill="#d45eff"/>
           <circle cx="50" cy="36" r="22" fill="#d45eff"/>
@@ -1690,10 +1696,10 @@ hobbyInit();
     <div class="tp-stage">
       <div class="tc" style="animation-delay:1s;filter:drop-shadow(0 0 7px rgba(255,95,176,.85)) drop-shadow(0 0 18px rgba(255,95,176,.4))">
         <svg width="74" height="104" viewBox="0 0 100 140">
-          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#ff5fb0" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.8s" repeatCount="indefinite" additive="sum"/></g>
-          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#ff5fb0"/>
-          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#ff5fb0"/>
-          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#ff5fb0"/>
+          <g transform="translate(71,100)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#ff5fb0" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.8s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="88" rx="24" ry="30" fill="#ff5fb0"/>
+          <ellipse cx="37" cy="117" rx="9" ry="6" fill="#ff5fb0"/>
+          <ellipse cx="63" cy="117" rx="9" ry="6" fill="#ff5fb0"/>
           <polygon points="30,25 39,6 53,21" fill="#ff5fb0"/>
           <polygon points="47,21 61,6 70,25" fill="#ff5fb0"/>
           <circle cx="50" cy="36" r="22" fill="#ff5fb0"/>
@@ -1717,10 +1723,10 @@ hobbyInit();
     <div class="tp-stage">
       <div class="tc" style="animation-delay:1.5s;filter:drop-shadow(0 0 8px rgba(0,212,255,.85)) drop-shadow(0 0 20px rgba(0,212,255,.4))">
         <svg width="90" height="126" viewBox="0 0 100 140">
-          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#00d4ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/></g>
-          <ellipse cx="50" cy="97" rx="24" ry="30" fill="#00d4ff"/>
-          <ellipse cx="37" cy="126" rx="9" ry="6" fill="#00d4ff"/>
-          <ellipse cx="63" cy="126" rx="9" ry="6" fill="#00d4ff"/>
+          <g transform="translate(71,100)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#00d4ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="88" rx="24" ry="30" fill="#00d4ff"/>
+          <ellipse cx="37" cy="117" rx="9" ry="6" fill="#00d4ff"/>
+          <ellipse cx="63" cy="117" rx="9" ry="6" fill="#00d4ff"/>
           <polygon points="30,25 39,6 53,21" fill="#00d4ff"/>
           <polygon points="47,21 61,6 70,25" fill="#00d4ff"/>
           <circle cx="50" cy="36" r="22" fill="#00d4ff"/>
@@ -1745,10 +1751,10 @@ hobbyInit();
       <div class="tc" style="animation-delay:2s;filter:drop-shadow(0 0 10px rgba(181,102,255,.9)) drop-shadow(0 0 24px rgba(255,95,176,.5)) drop-shadow(0 0 36px rgba(0,212,255,.3))">
         <svg width="108" height="151" viewBox="0 0 100 140">
           <defs><linearGradient id="tg5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ff5fb0"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient></defs>
-          <g transform="translate(71,109)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#b566ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.3s" repeatCount="indefinite" additive="sum"/></g>
-          <ellipse cx="50" cy="97" rx="24" ry="30" fill="url(#tg5)"/>
-          <ellipse cx="37" cy="126" rx="9" ry="6" fill="url(#tg5)"/>
-          <ellipse cx="63" cy="126" rx="9" ry="6" fill="url(#tg5)"/>
+          <g transform="translate(71,100)"><path d="M0,0 C22,-18 26,-46 8,-62" stroke="#b566ff" stroke-width="7" stroke-linecap="round" fill="none"/><animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.3s" repeatCount="indefinite" additive="sum"/></g>
+          <ellipse cx="50" cy="88" rx="24" ry="30" fill="url(#tg5)"/>
+          <ellipse cx="37" cy="117" rx="9" ry="6" fill="url(#tg5)"/>
+          <ellipse cx="63" cy="117" rx="9" ry="6" fill="url(#tg5)"/>
           <polygon points="30,25 39,6 53,21" fill="#b566ff"/>
           <polygon points="47,21 61,6 70,25" fill="#00d4ff"/>
           <circle cx="50" cy="36" r="22" fill="url(#tg5)"/>
@@ -1771,6 +1777,18 @@ hobbyInit();
   </div>
 </div>
 </div>
+<script>
+  function tamaCopyUrl() {
+    const btn = document.getElementById('tama-share-btn');
+    const orig = btn.innerHTML;
+    navigator.clipboard.writeText(location.origin + location.pathname + '#roulette').then(() => {
+      btn.innerHTML = '✓ 복사됨';
+      btn.style.color = '#5ee0a8';
+      btn.style.borderColor = 'rgba(94,224,168,0.6)';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.color = '#9b94b3'; btn.style.borderColor = 'rgba(140,110,200,0.35)'; }, 2000);
+    });
+  }
+</script>
 
 <script>
   const sb = window.supabase.createClient(
