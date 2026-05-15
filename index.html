@@ -1751,6 +1751,12 @@ hobbyInit();
 <!-- 다마고찌 메인 -->
 <div style="max-width:480px;margin:0 auto;padding:0 16px 60px">
   <hr style="border:none;border-top:1px solid rgba(140,110,200,.18);margin:0 0 28px"/>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    <button id="tama-share-btn" onclick="tamaCopyUrl()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      URL 공유
+    </button>
+  </div>
 
   <div id="tama-loading" style="text-align:center;padding:32px 0;color:#6b6480;font-size:13px">불러오는 중…</div>
 
