@@ -1806,7 +1806,7 @@ hobbyInit();
         <span class="tama-cd" id="cd-pet"></span>
       </button>
     </div>
-    <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">밥주기: 1시간 1회 · 놀아주기: 6시간 2회 · 쓰다듬기: 1시간 2회</p>
+    <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">밥주기: 6시간 1회 · 놀아주기: 3시간 1회 · 쓰다듬기: 1시간 1회</p>
   </div>
 
   <!-- 최근 활동 -->
@@ -2462,8 +2462,8 @@ wcInit();
 // ===== TAMAGOTCHI =====
 let tamaData = null, tamaLogs = [], tamaRankData = [], tamaLastMonthData = [], tamaTick = null, tamaChannel = null, tamaReady = false, tamaPrevStage = 0;
 
-const T_WINDOW = { feed: 3600000, play: 6 * 3600000, pet: 3600000 }; // 윈도우 기간
-const T_MAX   = { feed: 1,       play: 2,            pet: 2        }; // 윈도우당 최대 횟수
+const T_WINDOW = { feed: 6 * 3600000, play: 3 * 3600000, pet: 3600000 }; // 윈도우 기간
+const T_MAX   = { feed: 1,           play: 1,           pet: 1      }; // 윈도우당 최대 횟수
 const HUNGER_DECAY = 8, HAPPY_DECAY = 5; // per hour
 
 function tamaDecay(val, rate, since) {
