@@ -1826,16 +1826,6 @@ hobbyInit();
   </div>
 </div>
 
-  <!-- 🧪 임시 테스트 버튼 (테스트 후 삭제 예정) -->
-  <div style="max-width:480px;margin:0 auto;padding:0 16px 40px">
-    <div style="border:1px dashed rgba(255,95,109,.3);border-radius:12px;padding:14px;background:rgba(255,95,109,.05)">
-      <div style="font-size:11px;color:#ff5f6d;font-weight:600;margin-bottom:10px">🧪 테스트용 (삭제 예정)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button onclick="tamaTestReset()" style="padding:10px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">쿨다운 초기화</button>
-        <button onclick="tamaDeleteNickData()" style="padding:10px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">내 기록 삭제</button>
-      </div>
-    </div>
-  </div>
 
 </div>
 <script>
@@ -2843,30 +2833,6 @@ function tamaCelebrate(type) {
   setTimeout(() => { if (el.parentNode) el.remove(); }, 6000);
 }
 
-function tamaTestReset() {
-  const nick = document.getElementById('tama-nick')?.value.trim();
-  if (!nick) { alert('닉네임을 먼저 입력해 주세요'); return; }
-  ['feed','play','pet'].forEach(t => localStorage.removeItem(`tama_${t}_${nick}`));
-  tamaRenderCd();
-  alert(`${nick}의 쿨다운이 초기화됐어요! 모두 사용 가능합니다.`);
-}
-
-async function tamaDeleteNickData() {
-  const nick = document.getElementById('tama-nick')?.value.trim();
-  if (!nick) { alert('닉네임을 먼저 입력해 주세요'); return; }
-  if (!confirm(`${nick}의 모든 활동 기록을 삭제할까요?`)) return;
-  await sb.from('tamagotchi_actions').delete().eq('actor_nickname', nick);
-  ['feed','play','pet'].forEach(t => localStorage.removeItem(`tama_${t}_${nick}`));
-  // 애정도 재계산해서 업데이트
-  const { data: all } = await sb.from('tamagotchi_actions').select('id').eq('action_type','pet');
-  await sb.from('tamagotchi').update({ affection: (all||[]).length }).eq('id', 1);
-  await tamaLoadAllRanks();
-  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(8);
-  tamaLogs = logs || [];
-  tamaRenderLog();
-  tamaRenderCd();
-  alert(`${nick}의 기록이 삭제됐어요!`);
-}
 
 async function tamaCheckCycleEnd() {
   if (!tamaData) return;
