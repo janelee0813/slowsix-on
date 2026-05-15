@@ -1675,7 +1675,7 @@ hobbyInit();
           <line x1="57" y1="49" x2="74" y2="49" stroke="white" stroke-width=".8" opacity=".45"/>
         </svg>
       </div>
-      <div class="tp-lbl">청소년</div>
+      <div class="tp-lbl">아깽이</div>
       <div class="tp-day">Day 1–10</div>
     </div>
 
@@ -1702,7 +1702,7 @@ hobbyInit();
           <line x1="57" y1="49" x2="74" y2="49" stroke="white" stroke-width=".8" opacity=".45"/>
         </svg>
       </div>
-      <div class="tp-lbl">청년</div>
+      <div class="tp-lbl">캣춘기</div>
       <div class="tp-day">Day 11–20</div>
     </div>
 
@@ -1730,7 +1730,7 @@ hobbyInit();
           <line x1="57" y1="49" x2="74" y2="49" stroke="white" stroke-width=".8" opacity=".45"/>
         </svg>
       </div>
-      <div class="tp-lbl">어른 ✨</div>
+      <div class="tp-lbl">성묘기 ✨</div>
       <div class="tp-day">Day 21–30</div>
     </div>
 
@@ -2443,7 +2443,7 @@ function tamaHunger() { return Math.round(tamaDecay(tamaData.hunger, HUNGER_DECA
 function tamaHappy()  { return Math.round(tamaDecay(tamaData.happiness, HAPPY_DECAY, tamaData.last_updated)); }
 function tamaDay()    { return Math.max(1, Math.min(30, Math.floor((Date.now() - new Date(tamaData.born_at)) / 86400000) + 1)); }
 function tamaStageNum() { const d = tamaDay(); return d <= 10 ? 1 : d <= 20 ? 2 : 3; }
-function tamaStageName() { return ['','청소년','청년','어른'][tamaStageNum()]; }
+function tamaStageName() { return ['','아깽이','캣춘기','성묘기'][tamaStageNum()]; }
 
 function tamaCatSVG(stage, mood) {
   const C = [null,
