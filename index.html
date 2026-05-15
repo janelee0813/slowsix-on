@@ -1649,7 +1649,7 @@ hobbyInit();
   .tama-overlay-box{animation:tama-overlay-in .4s cubic-bezier(.34,1.56,.64,1) both}
   .tama-star{position:absolute;font-size:22px;animation:tama-float-star 1.4s ease-out forwards}
 </style>
-<div class="tp-wrap">
+<div class="tp-wrap" style="display:none">
   <div style="position:relative;margin-bottom:6px">
     <div class="tp-title">🌱 성장 단계 프리뷰</div>
     <button id="tama-share-btn" onclick="tamaCopyUrl()" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
@@ -1819,6 +1819,19 @@ hobbyInit();
     </div>
   </div>
 </div>
+
+  <!-- 🧪 임시 테스트 버튼 (테스트 후 삭제 예정) -->
+  <div style="max-width:480px;margin:0 auto;padding:0 16px 40px">
+    <div style="border:1px dashed rgba(255,95,109,.3);border-radius:12px;padding:14px;background:rgba(255,95,109,.05)">
+      <div style="font-size:11px;color:#ff5f6d;font-weight:600;margin-bottom:10px">🧪 테스트용 (삭제 예정)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="tamaTestReset(0)"  style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">아깽이로 리셋</button>
+        <button onclick="tamaTestReset(9)"  style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">캣춘기로 리셋</button>
+        <button onclick="tamaTestReset(19)" style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">성묘기로 리셋</button>
+        <button onclick="tamaTestReset(30)" style="padding:8px;border:1px solid rgba(255,95,109,.3);border-radius:8px;background:transparent;color:#ff5f6d;font-size:12px;cursor:pointer;font-family:inherit">Day 30 리셋</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 <script>
@@ -2770,6 +2783,14 @@ function tamaCelebrate(type) {
   document.body.appendChild(el);
   el.addEventListener('click', () => el.remove());
   setTimeout(() => { if (el.parentNode) el.remove(); }, 6000);
+}
+
+async function tamaTestReset(daysAgo) {
+  const bornAt = new Date(Date.now() - daysAgo * 86400000).toISOString();
+  const { data } = await sb.from('tamagotchi')
+    .update({ born_at: bornAt, hunger: 80, happiness: 80, last_updated: new Date().toISOString() })
+    .eq('id', 1).select().maybeSingle();
+  if (data) { tamaData = data; tamaPrevStage = 0; tamaRender(); }
 }
 
 async function tamaCheckCycleEnd() {
