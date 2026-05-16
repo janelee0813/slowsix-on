@@ -1144,132 +1144,165 @@ function copyResult(){
 </div>
 
 <div id="page-fortune" class="hidden">
-<style>
-  .ev-wrap{max-width:480px;margin:0 auto;padding:28px 16px 60px}
-  .ev-hero{text-align:center;padding:32px 0 24px;position:relative}
-  .ev-dragon{font-size:48px;margin-bottom:8px;animation:ev-float 3s ease-in-out infinite}
-  @keyframes ev-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-  .ev-title{font-size:22px;font-weight:800;background:linear-gradient(100deg,#f97316,#ef4444,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;line-height:1.3}
-  .ev-subtitle{font-size:13px;color:#9b94b3;line-height:1.6;margin-bottom:4px}
-  .ev-period{display:inline-block;margin-top:12px;padding:6px 16px;border-radius:20px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.35);font-size:12px;color:#f97316;font-weight:600}
-  .ev-card{background:rgba(34,26,58,.65);border:1px solid rgba(140,110,200,.28);border-radius:14px;padding:18px;margin-bottom:12px}
-  .ev-card-title{font-size:11px;font-weight:700;color:#9b94b3;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-  .ev-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(140,110,200,.1)}
-  .ev-row:last-child{border-bottom:none;padding-bottom:0}
-  .ev-row:first-of-type{padding-top:0}
-  .ev-orb{font-size:16px;flex-shrink:0;min-width:52px}
-  .ev-desc{font-size:13px;color:#f5f1ff;line-height:1.5}
-  .ev-desc small{color:#6b6480;font-size:11px;display:block;margin-top:2px}
-  .ev-prize-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(140,110,200,.1)}
-  .ev-prize-row:last-child{border-bottom:none}
-  .ev-prize-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
-  .ev-prize-text{font-size:13px;color:#f5f1ff}
-  .ev-prize-name{font-size:11px;color:#9b94b3;margin-top:1px}
-  .ev-wish-box{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:10px;padding:14px;margin-bottom:10px;text-align:center}
-  .ev-wish-count{font-size:28px;margin-bottom:4px}
-  .ev-wish-label{font-size:13px;color:#f97316;font-weight:700}
-  .ev-wish-sub{font-size:11px;color:#9b94b3;margin-top:4px;line-height:1.6}
-  .ev-notice{padding:6px 0;font-size:12px;color:#9b94b3;display:flex;gap:8px;align-items:flex-start;border-bottom:1px solid rgba(140,110,200,.08);line-height:1.6}
-  .ev-notice:last-child{border-bottom:none}
-  .ev-notice-num{color:#6b6480;flex-shrink:0;font-weight:600}
-  .ev-footer{text-align:center;margin-top:20px;font-size:13px;color:#6b6480;line-height:1.8}
-  .ev-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3)}
-</style>
 
-<div class="ev-wrap">
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="grid-bg absolute inset-0 -z-10"></div>
+  <div class="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-neon-purple/60 to-transparent"></div>
+  <div class="mx-auto max-w-screen-md px-5 pt-11 pb-12 sm:pt-16 sm:pb-20">
+    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur animate-fade-up">
+      <span style="font-size:14px">🐉</span>
+      <span>드래곤볼 이벤트</span>
+      <span class="mx-1 h-1 w-1 rounded-full bg-border"></span>
+      <span class="text-neon-blue">26.05.17 ~ 06.17</span>
+    </div>
+    <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl animate-fade-up" style="animation-delay:60ms">
+      찾아라~<br/>
+      <span class="text-gradient-neon">드래곤볼 !!</span>
+    </h1>
+    <p class="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg animate-fade-up" style="animation-delay:140ms">
+      "드래곤볼 7개를 모으면 어떤 소원이든 들어준다고 했지..."<br/>
+      한 달간 우리 방에서 드래곤볼 모으기를 시작합니다!!
+    </p>
 
-  <!-- 히어로 -->
-  <div class="ev-hero">
-    <div class="ev-dragon">🐉</div>
-    <div class="ev-title">[이벤트] 찾아라~ 드래곤볼 !!</div>
-    <div class="ev-subtitle">"드래곤볼 7개를 모으면<br>어떤 소원이든 들어준다고 했지..."</div>
-    <div class="ev-subtitle" style="margin-top:6px">한 달간 우리 방에서<br>드래곤볼 모으기를 시작합니다!!</div>
-    <div class="ev-period">📅 26년 5월 17일 ~ 6월 17일</div>
-  </div>
-
-  <!-- 구슬 획득 -->
-  <div class="ev-card">
-    <div class="ev-card-title">🔮 구슬 획득 방법</div>
-    <div class="ev-row">
-      <div class="ev-orb">🔮 ×1</div>
-      <div class="ev-desc">벙 참석</div>
-    </div>
-    <div class="ev-row">
-      <div class="ev-orb">🔮 ×2</div>
-      <div class="ev-desc">신입 본인 첫 벙<small>환영 보너스 🎉</small></div>
-    </div>
-    <div class="ev-row">
-      <div class="ev-orb">🔮 ×2</div>
-      <div class="ev-desc">벙 주최 (3명 이상)<small>실제 진행된 벙에 한함</small></div>
-    </div>
-    <div class="ev-row">
-      <div class="ev-orb">🔮 ×1</div>
-      <div class="ev-desc">신입이 참석한 벙의 전원<small>해당 벙 인원 기준 (2차·3차 적용 ✕)</small></div>
+    <div class="neon-card neon-card-glow mt-8 p-5 sm:p-6 animate-fade-up animate-glow-pulse" style="animation-delay:220ms,1.2s">
+      <div class="mb-4 flex items-center justify-between">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">🔮 구슬 7개 → 소원권 1장</span>
+        <span class="rounded-full bg-neon-purple/15 px-2.5 py-0.5 text-[10px] font-medium text-neon-purple">한 달에 2~3장도 가능!</span>
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">1</span><span class="text-sm leading-relaxed text-foreground/90">벙 참석 → 구슬 1개</span></li>
+        <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">2</span><span class="text-sm leading-relaxed text-foreground/90">신입 첫 벙 참석 → 구슬 2개 (환영 보너스)</span></li>
+        <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">3</span><span class="text-sm leading-relaxed text-foreground/90">7개 모으면 신룡 소환 → 소원권 즉시 지급 후 리셋</span></li>
+      </ul>
     </div>
   </div>
+  <div class="divider-neon mx-auto max-w-screen-md"></div>
+</section>
 
-  <!-- 소원 빌기 -->
-  <div class="ev-card">
-    <div class="ev-card-title">✨ 소원 빌기</div>
-    <div class="ev-wish-box">
-      <div class="ev-wish-count">🔮×7</div>
-      <div class="ev-wish-label">신룡 소환 = 소원권 1장 🐉</div>
-      <div class="ev-wish-sub">7개 모은 즉시 리셋, 또 모을 수 있어요<br>부지런히 모으면 한 달에 소원권 2~3장도 가능!</div>
-    </div>
-  </div>
-
-  <!-- 상품 룰렛 -->
-  <div class="ev-card">
-    <div class="ev-card-title">🎰 신룡의 소원 룰렛 상품</div>
-    <div class="ev-prize-row">
-      <div class="ev-prize-icon">🐉</div>
-      <div>
-        <div class="ev-prize-text">"좋다, 그 소원을 들어주마"</div>
-        <div class="ev-prize-name">와인 or 위스키</div>
+<!-- 구슬 획득 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          구슬 획득
+        </span>
       </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:text-4xl">이럴 때 구슬이 생겨요</h2>
+      <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">열심히 모을수록 소원을 더 많이 빌 수 있어요.</p>
     </div>
-    <div class="ev-prize-row">
-      <div class="ev-prize-icon">⚡</div>
-      <div>
-        <div class="ev-prize-text">"제법 큰 소원이군"</div>
-        <div class="ev-prize-name">스타벅스 상품권</div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="neon-card neon-card-glow p-5 sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 text-neon-purple ring-1 ring-neon-purple/30 text-xl">🔮</div>
+          <h3 class="text-base font-semibold text-foreground sm:text-lg">벙 참석</h3>
+        </div>
+        <p class="text-[13.5px] leading-relaxed text-foreground/85"><span class="font-bold text-neon-purple">+1개</span> — 벙에 참석할 때마다</p>
+        <p class="mt-2 text-xs text-muted-foreground">참석 버튼 클릭 필수 · 미클릭 시 무효</p>
       </div>
-    </div>
-    <div class="ev-prize-row">
-      <div class="ev-prize-icon">🔥</div>
-      <div>
-        <div class="ev-prize-text">"흠, 들어주지"</div>
-        <div class="ev-prize-name">아메리카노</div>
+      <div class="neon-card neon-card-glow p-5 sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 text-neon-purple ring-1 ring-neon-purple/30 text-xl">🔮🔮</div>
+          <h3 class="text-base font-semibold text-foreground sm:text-lg">신입 첫 벙</h3>
+        </div>
+        <p class="text-[13.5px] leading-relaxed text-foreground/85"><span class="font-bold text-neon-purple">+2개</span> — 신입 본인 첫 벙 참석 시</p>
+        <p class="mt-2 text-xs text-muted-foreground">환영 보너스 🎉</p>
       </div>
-    </div>
-    <div class="ev-prize-row">
-      <div class="ev-prize-icon">🌧️</div>
-      <div>
-        <div class="ev-prize-text">"그건 좀 작은 소원이군"</div>
-        <div class="ev-prize-name">마이쮸</div>
+      <div class="neon-card neon-card-glow p-5 sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 text-neon-purple ring-1 ring-neon-purple/30 text-xl">🔮🔮</div>
+          <h3 class="text-base font-semibold text-foreground sm:text-lg">벙 주최</h3>
+        </div>
+        <p class="text-[13.5px] leading-relaxed text-foreground/85"><span class="font-bold text-neon-purple">+2개</span> — 3명 이상 벙 주최 시</p>
+        <p class="mt-2 text-xs text-muted-foreground">실제 진행된 벙에 한함</p>
+      </div>
+      <div class="neon-card neon-card-glow p-5 sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 text-neon-purple ring-1 ring-neon-purple/30 text-xl">🔮</div>
+          <h3 class="text-base font-semibold text-foreground sm:text-lg">신입과 함께</h3>
+        </div>
+        <p class="text-[13.5px] leading-relaxed text-foreground/85"><span class="font-bold text-neon-purple">+1개</span> — 신입 참석 벙의 전원</p>
+        <p class="mt-2 text-xs text-muted-foreground">해당 벙 인원 기준 · 2차·3차 적용 ✕</p>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- 참고사항 -->
-  <div class="ev-card">
-    <div class="ev-card-title">📋 참고 사항</div>
-    <div class="ev-notice"><span class="ev-notice-num">1.</span><span>벙 참석 시 <strong style="color:#f5f1ff">참석 버튼을 꼭 눌러주세요</strong> — 미클릭 시 무효 처리</span></div>
-    <div class="ev-notice"><span class="ev-notice-num">2.</span><span>벙 주최 보너스는 실제 진행된 벙에 한함</span></div>
-    <div class="ev-notice"><span class="ev-notice-num">3.</span><span>신입 참석 전원 지급은 해당 벙 인원 기준 (2차·3차 적용 ✕)</span></div>
-    <div class="ev-notice"><span class="ev-notice-num">4.</span><span>벙 주최·참석 구슬 획득은 하루 1회 (자정 기준 초기화)</span></div>
-    <div class="ev-notice"><span class="ev-notice-num">5.</span><span>6/17 종료 시점 미사용 구슬은 <strong style="color:#ef4444">자동 소멸</strong></span></div>
-    <div class="ev-notice"><span class="ev-notice-num">6.</span><span>소원권 1개당 핀볼 룰렛 1개 참여, 상품 중복 당첨 불가<br><small style="color:#6b6480">ex) 소원권 3개 보유 → 한 상품당 핀볼 3개로 게임 참여</small></span></div>
-    <div class="ev-notice"><span class="ev-notice-num">7.</span><span>이 외 케이스는 운영진 판단으로 조치</span></div>
+<div class="divider-neon mx-auto max-w-screen-md"></div>
+
+<!-- 소원 & 상품 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          신룡 소환
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:text-4xl">🐉 소원 빌기</h2>
+      <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">구슬 7개 = 소원권 1장. 7개 모은 즉시 리셋되고 또 모을 수 있어요.</p>
+    </div>
+    <div class="neon-card neon-card-glow p-5 sm:p-6 mb-4">
+      <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">🎰 신룡의 소원 룰렛 상품</div>
+      <ul class="mt-4 space-y-4">
+        <li class="flex items-center gap-4">
+          <span class="text-2xl w-8 text-center">🐉</span>
+          <div><p class="text-sm font-semibold text-foreground">"좋다, 그 소원을 들어주마"</p><p class="text-xs text-muted-foreground mt-0.5">와인 or 위스키</p></div>
+        </li>
+        <li class="flex items-center gap-4">
+          <span class="text-2xl w-8 text-center">⚡</span>
+          <div><p class="text-sm font-semibold text-foreground">"제법 큰 소원이군"</p><p class="text-xs text-muted-foreground mt-0.5">스타벅스 상품권</p></div>
+        </li>
+        <li class="flex items-center gap-4">
+          <span class="text-2xl w-8 text-center">🔥</span>
+          <div><p class="text-sm font-semibold text-foreground">"흠, 들어주지"</p><p class="text-xs text-muted-foreground mt-0.5">아메리카노</p></div>
+        </li>
+        <li class="flex items-center gap-4">
+          <span class="text-2xl w-8 text-center">🌧️</span>
+          <div><p class="text-sm font-semibold text-foreground">"그건 좀 작은 소원이군"</p><p class="text-xs text-muted-foreground mt-0.5">마이쮸</p></div>
+        </li>
+      </ul>
+    </div>
   </div>
+</section>
 
-  <div class="ev-footer">
-    신입분들은 합류 즉시 구슬 2개 들고 시작!<br>
-    다 같이 구슬 모으러 갑시다 🔮🔮🔮<br><br>
-    <span style="font-size:20px">피콜로 어디갔어!! 🐲</span>
+<div class="divider-neon mx-auto max-w-screen-md"></div>
+
+<!-- 참고사항 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          참고 사항
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">꼭 읽어주세요</h2>
+    </div>
+    <div class="neon-card p-5 sm:p-6">
+      <ul class="space-y-4">
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">1</span><span>벙 참석 시 <strong class="text-foreground">참석 버튼을 꼭 눌러주세요</strong> — 미클릭 시 무효 처리</span></li>
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">2</span><span>벙 주최 보너스는 실제 진행된 벙에 한함</span></li>
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">3</span><span>신입 참석 전원 지급은 해당 벙 인원 기준 (2차·3차 적용 ✕)</span></li>
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">4</span><span>벙 주최·참석 구슬 획득은 하루 1회 (자정 기준 초기화)</span></li>
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">5</span><span>6/17 종료 시점 미사용 구슬은 <strong class="text-destructive">자동 소멸</strong></span></li>
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">6</span><span>소원권 1개당 핀볼 1개 참여, 상품 중복 당첨 불가<br><span class="text-xs text-muted-foreground">ex) 소원권 3개 보유 → 한 상품당 핀볼 3개로 참여</span></span></li>
+        <li class="flex items-start gap-3 text-sm leading-relaxed text-foreground/85"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">7</span><span>이 외 케이스는 운영진 판단으로 조치</span></li>
+      </ul>
+    </div>
+
+    <div class="mt-10 text-center text-muted-foreground text-sm leading-relaxed">
+      <p>신입분들은 합류 즉시 구슬 2개 들고 시작!</p>
+      <p class="mt-1">다 같이 구슬 모으러 갑시다 🔮🔮🔮</p>
+      <p class="mt-4 text-2xl">피콜로 어디갔어!! 🐲</p>
+    </div>
   </div>
+</section>
 
-</div>
 </div>
 
 <!-- ROULETTE PAGE -->
