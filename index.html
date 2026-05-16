@@ -1144,6 +1144,132 @@ function copyResult(){
 </div>
 
 <div id="page-fortune" class="hidden">
+<style>
+  .ev-wrap{max-width:480px;margin:0 auto;padding:28px 16px 60px}
+  .ev-hero{text-align:center;padding:32px 0 24px;position:relative}
+  .ev-dragon{font-size:48px;margin-bottom:8px;animation:ev-float 3s ease-in-out infinite}
+  @keyframes ev-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .ev-title{font-size:22px;font-weight:800;background:linear-gradient(100deg,#f97316,#ef4444,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;line-height:1.3}
+  .ev-subtitle{font-size:13px;color:#9b94b3;line-height:1.6;margin-bottom:4px}
+  .ev-period{display:inline-block;margin-top:12px;padding:6px 16px;border-radius:20px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.35);font-size:12px;color:#f97316;font-weight:600}
+  .ev-card{background:rgba(34,26,58,.65);border:1px solid rgba(140,110,200,.28);border-radius:14px;padding:18px;margin-bottom:12px}
+  .ev-card-title{font-size:11px;font-weight:700;color:#9b94b3;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+  .ev-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(140,110,200,.1)}
+  .ev-row:last-child{border-bottom:none;padding-bottom:0}
+  .ev-row:first-of-type{padding-top:0}
+  .ev-orb{font-size:16px;flex-shrink:0;min-width:52px}
+  .ev-desc{font-size:13px;color:#f5f1ff;line-height:1.5}
+  .ev-desc small{color:#6b6480;font-size:11px;display:block;margin-top:2px}
+  .ev-prize-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(140,110,200,.1)}
+  .ev-prize-row:last-child{border-bottom:none}
+  .ev-prize-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
+  .ev-prize-text{font-size:13px;color:#f5f1ff}
+  .ev-prize-name{font-size:11px;color:#9b94b3;margin-top:1px}
+  .ev-wish-box{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:10px;padding:14px;margin-bottom:10px;text-align:center}
+  .ev-wish-count{font-size:28px;margin-bottom:4px}
+  .ev-wish-label{font-size:13px;color:#f97316;font-weight:700}
+  .ev-wish-sub{font-size:11px;color:#9b94b3;margin-top:4px;line-height:1.6}
+  .ev-notice{padding:6px 0;font-size:12px;color:#9b94b3;display:flex;gap:8px;align-items:flex-start;border-bottom:1px solid rgba(140,110,200,.08);line-height:1.6}
+  .ev-notice:last-child{border-bottom:none}
+  .ev-notice-num{color:#6b6480;flex-shrink:0;font-weight:600}
+  .ev-footer{text-align:center;margin-top:20px;font-size:13px;color:#6b6480;line-height:1.8}
+  .ev-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3)}
+</style>
+
+<div class="ev-wrap">
+
+  <!-- 히어로 -->
+  <div class="ev-hero">
+    <div class="ev-dragon">🐉</div>
+    <div class="ev-title">[이벤트] 찾아라~ 드래곤볼 !!</div>
+    <div class="ev-subtitle">"드래곤볼 7개를 모으면<br>어떤 소원이든 들어준다고 했지..."</div>
+    <div class="ev-subtitle" style="margin-top:6px">한 달간 우리 방에서<br>드래곤볼 모으기를 시작합니다!!</div>
+    <div class="ev-period">📅 26년 5월 17일 ~ 6월 17일</div>
+  </div>
+
+  <!-- 구슬 획득 -->
+  <div class="ev-card">
+    <div class="ev-card-title">🔮 구슬 획득 방법</div>
+    <div class="ev-row">
+      <div class="ev-orb">🔮 ×1</div>
+      <div class="ev-desc">벙 참석</div>
+    </div>
+    <div class="ev-row">
+      <div class="ev-orb">🔮 ×2</div>
+      <div class="ev-desc">신입 본인 첫 벙<small>환영 보너스 🎉</small></div>
+    </div>
+    <div class="ev-row">
+      <div class="ev-orb">🔮 ×2</div>
+      <div class="ev-desc">벙 주최 (3명 이상)<small>실제 진행된 벙에 한함</small></div>
+    </div>
+    <div class="ev-row">
+      <div class="ev-orb">🔮 ×1</div>
+      <div class="ev-desc">신입이 참석한 벙의 전원<small>해당 벙 인원 기준 (2차·3차 적용 ✕)</small></div>
+    </div>
+  </div>
+
+  <!-- 소원 빌기 -->
+  <div class="ev-card">
+    <div class="ev-card-title">✨ 소원 빌기</div>
+    <div class="ev-wish-box">
+      <div class="ev-wish-count">🔮×7</div>
+      <div class="ev-wish-label">신룡 소환 = 소원권 1장 🐉</div>
+      <div class="ev-wish-sub">7개 모은 즉시 리셋, 또 모을 수 있어요<br>부지런히 모으면 한 달에 소원권 2~3장도 가능!</div>
+    </div>
+  </div>
+
+  <!-- 상품 룰렛 -->
+  <div class="ev-card">
+    <div class="ev-card-title">🎰 신룡의 소원 룰렛 상품</div>
+    <div class="ev-prize-row">
+      <div class="ev-prize-icon">🐉</div>
+      <div>
+        <div class="ev-prize-text">"좋다, 그 소원을 들어주마"</div>
+        <div class="ev-prize-name">와인 or 위스키</div>
+      </div>
+    </div>
+    <div class="ev-prize-row">
+      <div class="ev-prize-icon">⚡</div>
+      <div>
+        <div class="ev-prize-text">"제법 큰 소원이군"</div>
+        <div class="ev-prize-name">스타벅스 상품권</div>
+      </div>
+    </div>
+    <div class="ev-prize-row">
+      <div class="ev-prize-icon">🔥</div>
+      <div>
+        <div class="ev-prize-text">"흠, 들어주지"</div>
+        <div class="ev-prize-name">아메리카노</div>
+      </div>
+    </div>
+    <div class="ev-prize-row">
+      <div class="ev-prize-icon">🌧️</div>
+      <div>
+        <div class="ev-prize-text">"그건 좀 작은 소원이군"</div>
+        <div class="ev-prize-name">마이쮸</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 참고사항 -->
+  <div class="ev-card">
+    <div class="ev-card-title">📋 참고 사항</div>
+    <div class="ev-notice"><span class="ev-notice-num">1.</span><span>벙 참석 시 <strong style="color:#f5f1ff">참석 버튼을 꼭 눌러주세요</strong> — 미클릭 시 무효 처리</span></div>
+    <div class="ev-notice"><span class="ev-notice-num">2.</span><span>벙 주최 보너스는 실제 진행된 벙에 한함</span></div>
+    <div class="ev-notice"><span class="ev-notice-num">3.</span><span>신입 참석 전원 지급은 해당 벙 인원 기준 (2차·3차 적용 ✕)</span></div>
+    <div class="ev-notice"><span class="ev-notice-num">4.</span><span>벙 주최·참석 구슬 획득은 하루 1회 (자정 기준 초기화)</span></div>
+    <div class="ev-notice"><span class="ev-notice-num">5.</span><span>6/17 종료 시점 미사용 구슬은 <strong style="color:#ef4444">자동 소멸</strong></span></div>
+    <div class="ev-notice"><span class="ev-notice-num">6.</span><span>소원권 1개당 핀볼 룰렛 1개 참여, 상품 중복 당첨 불가<br><small style="color:#6b6480">ex) 소원권 3개 보유 → 한 상품당 핀볼 3개로 게임 참여</small></span></div>
+    <div class="ev-notice"><span class="ev-notice-num">7.</span><span>이 외 케이스는 운영진 판단으로 조치</span></div>
+  </div>
+
+  <div class="ev-footer">
+    신입분들은 합류 즉시 구슬 2개 들고 시작!<br>
+    다 같이 구슬 모으러 갑시다 🔮🔮🔮<br><br>
+    <span style="font-size:20px">피콜로 어디갔어!! 🐲</span>
+  </div>
+
+</div>
 </div>
 
 <!-- ROULETTE PAGE -->
