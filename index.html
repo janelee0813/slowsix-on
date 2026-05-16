@@ -2565,9 +2565,6 @@ function tamaRender() {
   // 캐릭터
   document.getElementById('tama-char-wrap').innerHTML = tamaCatSVG(stage, mood);
   tamaUpdateStageBar();
-  document.getElementById('tama-mood-text').textContent =
-    mood === 'happy' ? '행복해요! 😻' : mood === 'sad' ? '돌봄이 필요해요 😿' : '평온해요 🐱';
-
   // 눈 애니메이션 재시작
   document.querySelectorAll('#tama-char-wrap .te').forEach(el => {
     el.style.animationName = 'none'; void el.offsetHeight; el.style.animationName = '';
