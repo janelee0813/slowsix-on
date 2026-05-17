@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/event", "destination": "/index.html" }
-  ],
-  "redirects": [
-    { "source": "/", "permanent": false, "destination": "/event" }
-  ]
-}
