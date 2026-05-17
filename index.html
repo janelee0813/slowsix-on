@@ -1352,6 +1352,14 @@ function copyResult(){
       if(!error){const i=dbReqs.findIndex(r=>r.id===id);if(i>=0)dbReqs[i]=data;dbRenderAdmin();}
     }
 
+    function dbToggleForm(){
+      const body=document.getElementById('db-form-body');
+      const arrow=document.getElementById('db-form-arrow');
+      const open=body.style.display==='none';
+      body.style.display=open?'block':'none';
+      arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+    }
+
     function dbCheckPin(){
       const v=document.getElementById('db-pin-inp').value;
       const err=document.getElementById('db-pin-err');
@@ -1390,10 +1398,13 @@ function copyResult(){
 
     <!-- ── 적립 신청 폼 ── -->
     <div class="mt-6">
-      <div class="mb-3 flex items-center gap-2">
-        <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">✉️ 드래곤볼 적립 신청</span>
-      </div>
-      <div class="neon-card p-4 space-y-3">
+      <button onclick="dbToggleForm()" class="w-full neon-card p-4 flex items-center justify-between text-left transition-all hover:border-neon-purple/50">
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">✉️ 드래곤볼 적립 신청</span>
+        </div>
+        <span id="db-form-arrow" class="text-muted-foreground text-sm transition-transform duration-300">▼</span>
+      </button>
+      <div id="db-form-body" style="display:none" class="neon-card border-t-0 rounded-t-none p-4 space-y-3">
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div class="flex flex-col gap-1">
             <label class="text-[10px] text-muted-foreground">날짜</label>
