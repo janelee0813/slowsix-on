@@ -624,14 +624,13 @@
 </script>
 
 <script>
-  fetch('https://api.counterapi.dev/v1/janelee0813/opentalk-guide/up')
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.count != null) {
-        document.getElementById('visit-count').textContent = data.count.toLocaleString();
-      }
-    })
-    .catch(() => {});
+  (async()=>{
+    try{
+      const{data,error}=await sbP.rpc('increment_page_view');
+      if(!error&&data!=null)
+        document.getElementById('visit-count').textContent=Number(data).toLocaleString();
+    }catch(e){}
+  })();
 </script>
 
 <!-- 댓글 섹션 -->
