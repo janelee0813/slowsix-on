@@ -2514,9 +2514,9 @@ wcInit();
   function spinWheel() {
     if (isSpinning) return;
     isSpinning = true;
-    const btn = document.getElementById('spin-btn');
+    const pinWrap = document.getElementById('spin-pin-wrap');
     const result = document.getElementById('spin-result');
-    btn.disabled = true;
+    if(pinWrap) pinWrap.style.pointerEvents = 'none';
     result.style.display = 'none';
 
     const extraSpins = (5 + Math.floor(Math.random() * 5)) * 360;
@@ -2540,7 +2540,7 @@ wcInit();
       } else {
         spinAngle = targetAngle % 360;
         isSpinning = false;
-        btn.disabled = false;
+        if(pinWrap) pinWrap.style.pointerEvents = '';
         // 결과 계산: 포인터는 위(0도), 섹터는 45도 단위
         const normalized = (360 - (spinAngle % 360)) % 360;
         const idx = Math.floor(normalized / 90) % 4;
