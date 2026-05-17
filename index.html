@@ -1273,54 +1273,28 @@ function copyResult(){
         <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">🔮 드래곤볼 현황</span>
         <span class="rounded-full bg-neon-purple/15 px-2 py-0.5 text-[10px] text-neon-purple">실시간</span>
       </div>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <!-- 멤버 카드: 엘라 -->
-        <div class="neon-card p-4 flex items-center gap-3">
-          <div class="flex flex-col items-center justify-center w-10 shrink-0">
-            <span class="text-2xl">👸</span>
+      <div class="neon-card p-3 space-y-2">
+        <!-- 행: 이름 / 구슬 개수 / 프로그레스 -->
+        <div class="flex items-center gap-2">
+          <span class="w-14 shrink-0 text-xs font-semibold text-foreground">제인</span>
+          <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+            <div style="width:100%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-foreground">엘라</p>
-            <div class="mt-1.5 flex items-center gap-1 flex-wrap">
-              <span class="text-base">🔮🔮🔮🔮🔮</span>
-              <span class="text-muted-foreground text-xs">5 / 7</span>
-            </div>
-            <div class="mt-1.5 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <div style="width:71%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div>
-            </div>
-          </div>
+          <span class="w-16 shrink-0 text-right text-xs text-neon-purple font-bold">7 / 7 🎉</span>
         </div>
-        <!-- 멤버 카드: 하늘 -->
-        <div class="neon-card p-4 flex items-center gap-3">
-          <div class="flex flex-col items-center justify-center w-10 shrink-0">
-            <span class="text-2xl">🧚</span>
+        <div class="flex items-center gap-2">
+          <span class="w-14 shrink-0 text-xs font-semibold text-foreground">엘라</span>
+          <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+            <div style="width:71%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-foreground">하늘</p>
-            <div class="mt-1.5 flex items-center gap-1 flex-wrap">
-              <span class="text-base">🔮🔮🔮</span>
-              <span class="text-muted-foreground text-xs">3 / 7</span>
-            </div>
-            <div class="mt-1.5 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <div style="width:43%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div>
-            </div>
-          </div>
+          <span class="w-16 shrink-0 text-right text-xs text-muted-foreground">5 / 7</span>
         </div>
-        <!-- 멤버 카드: 제인 -->
-        <div class="neon-card p-4 flex items-center gap-3">
-          <div class="flex flex-col items-center justify-center w-10 shrink-0">
-            <span class="text-2xl">🌙</span>
+        <div class="flex items-center gap-2">
+          <span class="w-14 shrink-0 text-xs font-semibold text-foreground">하늘</span>
+          <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+            <div style="width:43%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-foreground">제인</p>
-            <div class="mt-1.5 flex items-center gap-1 flex-wrap">
-              <span class="text-base">🔮🔮🔮🔮🔮🔮🔮</span>
-              <span class="rounded-full bg-neon-purple/20 px-1.5 py-0.5 text-[10px] font-bold text-neon-purple ml-1">달성! 🎉</span>
-            </div>
-            <div class="mt-1.5 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <div style="width:100%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div>
-            </div>
-          </div>
+          <span class="w-16 shrink-0 text-right text-xs text-muted-foreground">3 / 7</span>
         </div>
       </div>
     </div>
