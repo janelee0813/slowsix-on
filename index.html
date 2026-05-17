@@ -1289,7 +1289,7 @@ function copyResult(){
       const el=document.getElementById('db-status-list');
       if(!el)return;
       const counts=dbGetCounts();
-      const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+      const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ko'));
       if(!sorted.length){el.innerHTML='<p class="text-xs text-muted-foreground text-center py-2">아직 적립된 드래곤볼이 없어요</p>';return;}
       el.innerHTML=sorted.map(([nick,cnt])=>{
         const pct=Math.min(100,Math.round((cnt/7)*100));
