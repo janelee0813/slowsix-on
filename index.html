@@ -1183,6 +1183,59 @@ function copyResult(){
         <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">3</span><span class="text-sm leading-relaxed text-foreground/90">드래곤볼을 많이 모으는 방법과 세부규칙은 아래 내용을 참고!</span></li>
       </ul>
     </div>
+
+    <!-- 룰렛 애니메이션 -->
+    <div class="mt-8 flex items-center justify-center gap-6 select-none" style="min-height:180px">
+      <!-- 용 SVG -->
+      <div style="animation:dragonFloat 2.8s ease-in-out infinite">
+        <svg width="72" height="110" viewBox="0 0 72 110" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="36" cy="72" rx="18" ry="26" fill="#7c3aed" opacity="0.85"/>
+          <ellipse cx="36" cy="36" rx="16" ry="14" fill="#8b5cf6"/>
+          <circle cx="30" cy="33" r="3" fill="white"/><circle cx="30" cy="33" r="1.5" fill="#1a0a2e"/>
+          <circle cx="42" cy="33" r="3" fill="white"/><circle cx="42" cy="33" r="1.5" fill="#1a0a2e"/>
+          <path d="M28 24 L24 12 L30 22" fill="#a78bfa"/>
+          <path d="M44 24 L48 12 L42 22" fill="#a78bfa"/>
+          <path d="M18 60 Q2 40 8 68 Z" fill="#a78bfa" opacity="0.7">
+            <animateTransform attributeName="transform" type="rotate" values="-8 18 60;8 18 60;-8 18 60" dur="1.4s" repeatCount="indefinite"/>
+          </path>
+          <path d="M54 60 Q70 40 64 68 Z" fill="#a78bfa" opacity="0.7">
+            <animateTransform attributeName="transform" type="rotate" values="8 54 60;-8 54 60;8 54 60" dur="1.4s" repeatCount="indefinite"/>
+          </path>
+          <path d="M36 96 Q20 108 28 100 Q16 118 24 108" stroke="#8b5cf6" stroke-width="5" fill="none" stroke-linecap="round">
+            <animateTransform attributeName="transform" type="rotate" values="-6 36 96;6 36 96;-6 36 96" dur="1.8s" repeatCount="indefinite"/>
+          </path>
+          <circle cx="56" cy="28" r="2" fill="#e879f9" opacity="0"><animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/></circle>
+          <circle cx="14" cy="50" r="1.5" fill="#c084fc" opacity="0"><animate attributeName="opacity" values="0;0.8;0" dur="1.5s" begin="0.7s" repeatCount="indefinite"/></circle>
+        </svg>
+      </div>
+      <!-- 룰렛 -->
+      <div style="position:relative;width:150px;height:150px">
+        <svg width="150" height="150" viewBox="0 0 140 140" style="filter:drop-shadow(0 0 14px rgba(181,102,255,0.55))">
+          <path d="M70 70 L70 5 A65 65 0 0 1 135 70 Z" fill="#7c3aed"/>
+          <path d="M70 70 L135 70 A65 65 0 0 1 70 135 Z" fill="#9333ea"/>
+          <path d="M70 70 L70 135 A65 65 0 0 1 5 70 Z" fill="#6d28d9"/>
+          <path d="M70 70 L5 70 A65 65 0 0 1 70 5 Z" fill="#a855f7"/>
+          <line x1="70" y1="5" x2="70" y2="135" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+          <line x1="5" y1="70" x2="135" y2="70" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+          <text x="97" y="46" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍷 와인</text>
+          <text x="97" y="57" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">or 위스키</text>
+          <text x="108" y="93" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">☕ 스벅</text>
+          <text x="108" y="104" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">상품권</text>
+          <text x="43" y="102" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🥤 아메리</text>
+          <text x="43" y="113" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">카노</text>
+          <text x="34" y="50" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍬 마이쮸</text>
+          <circle cx="70" cy="70" r="12" fill="#1a0a2e" stroke="rgba(181,102,255,0.6)" stroke-width="2"/>
+          <circle cx="70" cy="70" r="5" fill="#b566ff"/>
+          <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(181,102,255,0.5)" stroke-width="3"/>
+          <animateTransform attributeName="transform" type="rotate" from="0 70 70" to="360 70 70" dur="5s" repeatCount="indefinite"/>
+        </svg>
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:#e879f9;font-size:20px;filter:drop-shadow(0 0 6px #e879f9)">▼</div>
+      </div>
+    </div>
+    <style>
+      @keyframes dragonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    </style>
+
   </div>
   <div class="divider-neon mx-auto max-w-screen-md"></div>
 </section>
