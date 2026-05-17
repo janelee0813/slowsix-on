@@ -1212,7 +1212,7 @@ function copyResult(){
         </svg>
       </div>
       <!-- 룰렛 -->
-      <div style="position:relative;width:150px;height:150px">
+      <div onclick="showPage('spin')" style="position:relative;width:150px;height:150px;cursor:pointer" title="클릭하면 룰렛 페이지로 이동">
         <svg width="150" height="150" viewBox="0 0 140 140" style="filter:drop-shadow(0 0 14px rgba(181,102,255,0.55))">
           <!-- 회전하는 원판 -->
           <g id="roulette-disc">
@@ -2429,16 +2429,117 @@ wcInit();
 </script>
 </div>
 
+<!-- 비밀 룰렛 페이지 -->
+<div id="page-spin" class="hidden">
+  <div class="mx-auto max-w-screen-md px-5 py-12">
+    <div class="flex items-center justify-between mb-8">
+      <button onclick="showPage('fortune')" class="flex items-center gap-2 text-sm text-muted-foreground hover:text-neon-purple transition-colors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        돌아가기
+      </button>
+      <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">🎰 소원룰렛</span>
+    </div>
+
+    <!-- 큰 룰렛 -->
+    <div class="flex flex-col items-center gap-8">
+      <div style="position:relative;width:300px;height:300px">
+        <!-- 포인터 -->
+        <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:32px;filter:drop-shadow(0 0 8px #e879f9);z-index:10">▼</div>
+        <svg id="spin-wheel" width="300" height="300" viewBox="0 0 200 200" style="filter:drop-shadow(0 0 20px rgba(181,102,255,0.5))">
+          <!-- 섹터 그룹 (회전 대상) -->
+          <g id="spin-disc">
+            <path d="M100 100 L100 5 A95 95 0 0 1 195 100 Z" fill="#7c3aed"/>
+            <path d="M100 100 L195 100 A95 95 0 0 1 100 195 Z" fill="#9333ea"/>
+            <path d="M100 100 L100 195 A95 95 0 0 1 5 100 Z" fill="#6d28d9"/>
+            <path d="M100 100 L5 100 A95 95 0 0 1 100 5 Z" fill="#a855f7"/>
+            <!-- 구분선 -->
+            <line x1="100" y1="5" x2="100" y2="195" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <line x1="5" y1="100" x2="195" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <!-- 텍스트 -->
+            <text x="140" y="62" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">🍷 와인</text>
+            <text x="140" y="76" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif">or 위스키</text>
+            <text x="152" y="132" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">☕ 스벅</text>
+            <text x="152" y="146" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif">상품권</text>
+            <text x="60" y="145" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">🥤 아메리</text>
+            <text x="60" y="159" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif">카노</text>
+            <text x="52" y="68" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">🍬 마이쮸</text>
+          </g>
+          <!-- 고정 테두리 + 중앙 -->
+          <circle cx="100" cy="100" r="95" fill="none" stroke="rgba(181,102,255,0.6)" stroke-width="3"/>
+          <circle cx="100" cy="100" r="16" fill="#1a0a2e" stroke="rgba(181,102,255,0.7)" stroke-width="2.5"/>
+          <circle cx="100" cy="100" r="7" fill="#b566ff"/>
+        </svg>
+      </div>
+
+      <!-- 결과 표시 -->
+      <div id="spin-result" style="display:none" class="neon-card px-8 py-4 text-center">
+        <p class="text-xs text-muted-foreground mb-1">결과</p>
+        <p id="spin-result-text" class="text-xl font-bold text-foreground"></p>
+      </div>
+
+      <!-- 스핀 버튼 -->
+      <button id="spin-btn" onclick="spinWheel()" class="rounded-full px-10 py-3 text-sm font-bold text-white transition-all active:scale-95" style="background:linear-gradient(90deg,#7c3aed,#db2777);box-shadow:0 0 20px rgba(181,102,255,0.4)">
+        🎰 룰렛 돌리기
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
+  // 룰렛 스핀 로직
+  let spinAngle = 0;
+  let isSpinning = false;
+  const PRIZES = ['🍷 와인 or 위스키', '☕ 스벅 상품권', '🥤 아메리카노', '🍬 마이쮸'];
+
+  function spinWheel() {
+    if (isSpinning) return;
+    isSpinning = true;
+    const btn = document.getElementById('spin-btn');
+    const result = document.getElementById('spin-result');
+    btn.disabled = true;
+    result.style.display = 'none';
+
+    const extraSpins = (5 + Math.floor(Math.random() * 5)) * 360;
+    const targetOffset = Math.floor(Math.random() * 360);
+    const targetAngle = spinAngle + extraSpins + targetOffset;
+
+    const disc = document.getElementById('spin-disc');
+    const duration = 4000 + Math.random() * 1500;
+    const start = performance.now();
+    const startAngle = spinAngle;
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+    function frame(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      spinAngle = startAngle + (targetAngle - startAngle) * easeOut(progress);
+      disc.setAttribute('transform', `rotate(${spinAngle} 100 100)`);
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        spinAngle = targetAngle % 360;
+        isSpinning = false;
+        btn.disabled = false;
+        // 결과 계산: 포인터는 위(0도), 섹터는 45도 단위
+        const normalized = (360 - (spinAngle % 360)) % 360;
+        const idx = Math.floor(normalized / 90) % 4;
+        document.getElementById('spin-result-text').textContent = PRIZES[idx];
+        result.style.display = 'block';
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette', 'diet'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
-      btn.className = p === page
+      if (btn) btn.className = p === page
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : '#' + page;
+    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
     if (page === 'roulette') {
@@ -2479,6 +2580,7 @@ wcInit();
     else if (hash === 'event' || hash === 'hobby-map' || hash === 'fortune') showPage('fortune');
     else if (hash === 'tamagotchi') showPage('roulette');
     else if (hash === 'diet') showPage('diet');
+    else if (hash === 'spin') showPage('spin');
   })();
 </script>
 
