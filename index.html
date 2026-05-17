@@ -2519,16 +2519,16 @@ wcInit();
     if(pinWrap) pinWrap.style.pointerEvents = 'none';
     result.style.display = 'none';
 
-    const extraSpins = (5 + Math.floor(Math.random() * 5)) * 360;
+    const extraSpins = (12 + Math.floor(Math.random() * 8)) * 360;
     const targetOffset = Math.floor(Math.random() * 360);
     const targetAngle = spinAngle + extraSpins + targetOffset;
 
     const disc = document.getElementById('spin-disc');
-    const duration = 4000 + Math.random() * 1500;
+    const duration = 10000 + Math.random() * 4000;
     const start = performance.now();
     const startAngle = spinAngle;
 
-    function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+    function easeOut(t) { return 1 - Math.pow(1 - t, 5); }
 
     function frame(now) {
       const elapsed = now - start;
