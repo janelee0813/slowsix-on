@@ -1212,7 +1212,7 @@ function copyResult(){
       <div style="position:relative;width:150px;height:150px">
         <svg width="150" height="150" viewBox="0 0 140 140" style="filter:drop-shadow(0 0 14px rgba(181,102,255,0.55))">
           <!-- 회전하는 원판 -->
-          <g>
+          <g id="roulette-disc">
             <path d="M70 70 L70 5 A65 65 0 0 1 135 70 Z" fill="#7c3aed"/>
             <path d="M70 70 L135 70 A65 65 0 0 1 70 135 Z" fill="#9333ea"/>
             <path d="M70 70 L70 135 A65 65 0 0 1 5 70 Z" fill="#6d28d9"/>
@@ -1226,7 +1226,6 @@ function copyResult(){
             <text x="43" y="102" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🥤 아메리</text>
             <text x="43" y="113" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">카노</text>
             <text x="34" y="50" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍬 마이쮸</text>
-            <animateTransform attributeName="transform" type="rotate" from="0 70 70" to="360 70 70" dur="5s" repeatCount="indefinite"/>
           </g>
           <!-- 고정: 테두리 + 중앙 축 -->
           <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(181,102,255,0.5)" stroke-width="3"/>
@@ -1239,6 +1238,34 @@ function copyResult(){
     <style>
       @keyframes dragonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
     </style>
+    <script>
+    (function(){
+      function startRoulette(){
+        const disc=document.getElementById('roulette-disc');
+        if(!disc)return;
+        let angle=0,speed=0,phase='pause',pauseTimer=0;
+        const MAX_SPEED=14,ACCEL=0.35,DECEL=0.07,PAUSE_FRAMES=55;
+        function tick(){
+          if(phase==='accel'){
+            speed+=ACCEL;
+            if(speed>=MAX_SPEED){speed=MAX_SPEED;phase='decel';}
+          } else if(phase==='decel'){
+            speed*=(1-DECEL);
+            if(speed<0.08){speed=0;phase='pause';pauseTimer=0;}
+          } else {
+            pauseTimer++;
+            if(pauseTimer>=PAUSE_FRAMES)phase='accel';
+          }
+          angle+=speed;
+          disc.setAttribute('transform',`rotate(${angle} 70 70)`);
+          requestAnimationFrame(tick);
+        }
+        tick();
+      }
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startRoulette);
+      else startRoulette();
+    })();
+    </script>
 
   </div>
   <div class="divider-neon mx-auto max-w-screen-md"></div>
