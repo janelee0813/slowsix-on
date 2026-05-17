@@ -1211,23 +1211,27 @@ function copyResult(){
       <!-- 룰렛 -->
       <div style="position:relative;width:150px;height:150px">
         <svg width="150" height="150" viewBox="0 0 140 140" style="filter:drop-shadow(0 0 14px rgba(181,102,255,0.55))">
-          <path d="M70 70 L70 5 A65 65 0 0 1 135 70 Z" fill="#7c3aed"/>
-          <path d="M70 70 L135 70 A65 65 0 0 1 70 135 Z" fill="#9333ea"/>
-          <path d="M70 70 L70 135 A65 65 0 0 1 5 70 Z" fill="#6d28d9"/>
-          <path d="M70 70 L5 70 A65 65 0 0 1 70 5 Z" fill="#a855f7"/>
-          <line x1="70" y1="5" x2="70" y2="135" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
-          <line x1="5" y1="70" x2="135" y2="70" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
-          <text x="97" y="46" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍷 와인</text>
-          <text x="97" y="57" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">or 위스키</text>
-          <text x="108" y="93" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">☕ 스벅</text>
-          <text x="108" y="104" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">상품권</text>
-          <text x="43" y="102" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🥤 아메리</text>
-          <text x="43" y="113" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">카노</text>
-          <text x="34" y="50" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍬 마이쮸</text>
+          <!-- 회전하는 원판 -->
+          <g>
+            <path d="M70 70 L70 5 A65 65 0 0 1 135 70 Z" fill="#7c3aed"/>
+            <path d="M70 70 L135 70 A65 65 0 0 1 70 135 Z" fill="#9333ea"/>
+            <path d="M70 70 L70 135 A65 65 0 0 1 5 70 Z" fill="#6d28d9"/>
+            <path d="M70 70 L5 70 A65 65 0 0 1 70 5 Z" fill="#a855f7"/>
+            <line x1="70" y1="5" x2="70" y2="135" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+            <line x1="5" y1="70" x2="135" y2="70" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+            <text x="97" y="46" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍷 와인</text>
+            <text x="97" y="57" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">or 위스키</text>
+            <text x="108" y="93" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">☕ 스벅</text>
+            <text x="108" y="104" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">상품권</text>
+            <text x="43" y="102" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🥤 아메리</text>
+            <text x="43" y="113" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">카노</text>
+            <text x="34" y="50" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍬 마이쮸</text>
+            <animateTransform attributeName="transform" type="rotate" from="0 70 70" to="360 70 70" dur="5s" repeatCount="indefinite"/>
+          </g>
+          <!-- 고정: 테두리 + 중앙 축 -->
+          <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(181,102,255,0.5)" stroke-width="3"/>
           <circle cx="70" cy="70" r="12" fill="#1a0a2e" stroke="rgba(181,102,255,0.6)" stroke-width="2"/>
           <circle cx="70" cy="70" r="5" fill="#b566ff"/>
-          <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(181,102,255,0.5)" stroke-width="3"/>
-          <animateTransform attributeName="transform" type="rotate" from="0 70 70" to="360 70 70" dur="5s" repeatCount="indefinite"/>
         </svg>
         <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:#e879f9;font-size:20px;filter:drop-shadow(0 0 6px #e879f9)">▼</div>
       </div>
