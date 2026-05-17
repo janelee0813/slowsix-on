@@ -2477,10 +2477,18 @@ wcInit();
         <p id="spin-result-text" class="text-xl font-bold text-foreground"></p>
       </div>
 
-      <!-- 스핀 버튼 -->
-      <button id="spin-btn" onclick="spinWheel()" class="rounded-full px-10 py-3 text-sm font-bold text-white transition-all active:scale-95" style="background:linear-gradient(90deg,#7c3aed,#db2777);box-shadow:0 0 20px rgba(181,102,255,0.4)">
-        🎰 룰렛 돌리기
-      </button>
+      <!-- PIN 입력 -->
+      <div id="spin-pin-wrap" class="w-full max-w-xs">
+        <div class="flex gap-2">
+          <input id="spin-pin-inp" type="password" placeholder="관리자 PIN 입력" maxlength="6"
+            class="flex-1 rounded-full border border-border bg-surface/60 px-4 py-2.5 text-sm text-center text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60 tracking-widest"
+            style="color-scheme:dark" onkeydown="if(event.key==='Enter')spinCheckPin()"/>
+          <button onclick="spinCheckPin()" class="rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all active:scale-95" style="background:linear-gradient(90deg,#7c3aed,#db2777);box-shadow:0 0 16px rgba(181,102,255,0.4)">
+            🎰 돌리기
+          </button>
+        </div>
+        <p id="spin-pin-err" class="mt-2 text-center text-xs text-red-400" style="display:none">PIN이 올바르지 않아요</p>
+      </div>
     </div>
   </div>
 </div>
@@ -2490,6 +2498,18 @@ wcInit();
   let spinAngle = 0;
   let isSpinning = false;
   const PRIZES = ['🍷 와인 or 위스키', '☕ 스벅 상품권', '🥤 아메리카노', '🍬 마이쮸'];
+
+  function spinCheckPin(){
+    const val = document.getElementById('spin-pin-inp').value;
+    const err = document.getElementById('spin-pin-err');
+    if(val === DB_PIN){
+      err.style.display = 'none';
+      document.getElementById('spin-pin-inp').value = '';
+      spinWheel();
+    } else {
+      err.style.display = 'block';
+    }
+  }
 
   function spinWheel() {
     if (isSpinning) return;
