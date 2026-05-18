@@ -139,6 +139,7 @@
       <div class="w-full sm:hidden"></div>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
+      <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">Beta 개발중</button>
     </div>
   </div>
 </nav>
@@ -2459,6 +2460,15 @@ wcInit();
 </script>
 </div>
 
+<!-- Beta 개발중 페이지 -->
+<div id="page-beta" class="hidden">
+  <div class="mx-auto max-w-screen-md px-5 py-24 text-center">
+    <p class="text-4xl mb-4">🚧</p>
+    <p class="text-lg font-semibold text-foreground">개발 중인 페이지예요</p>
+    <p class="mt-2 text-sm text-muted-foreground">조금만 기다려주세요!</p>
+  </div>
+</div>
+
 <!-- 비밀 룰렛 페이지 -->
 <div id="page-spin" class="hidden">
   <div class="mx-auto max-w-screen-md px-5 py-12">
@@ -2585,7 +2595,7 @@ wcInit();
   }
 
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin', 'beta'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       if (btn) btn.className = p === page
@@ -2634,6 +2644,7 @@ wcInit();
     else if (hash === 'tamagotchi') showPage('roulette');
     else if (hash === 'diet') showPage('diet');
     else if (hash === 'spin') showPage('spin');
+    else if (hash === 'beta') showPage('beta');
   })();
 </script>
 
