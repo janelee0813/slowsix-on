@@ -2588,31 +2588,89 @@ wcInit();
   let betaComments = [];
   let betaDeleteTargetId = null;
   let betaPinAttempt = 0;
+  let betaReplyTargetId = null;
 
   async function betaInit() {
-    const { data, error } = await sb.from('beta_comments').select('*').order('created_at', { ascending: false });
+    const { data, error } = await sb.from('beta_comments').select('*').order('created_at', { ascending: true });
     if (!error) betaComments = data || [];
     betaRender();
   }
 
+  function betaFmt(ts) {
+    const d = new Date(ts);
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function betaEsc(s) { return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   function betaRender() {
     const el = document.getElementById('beta-comment-list');
     if (!el) return;
-    if (!betaComments.length) {
+    const parents = betaComments.filter(c => !c.parent_id);
+    const replies = betaComments.filter(c => c.parent_id);
+    if (!parents.length) {
       el.innerHTML = '<p class="text-xs text-muted-foreground text-center py-4">아직 댓글이 없어요. 첫 번째로 남겨보세요!</p>';
       return;
     }
-    el.innerHTML = betaComments.map(c => {
-      const date = new Date(c.created_at);
-      const fmt = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+    el.innerHTML = parents.map(c => {
+      const childList = replies.filter(r => r.parent_id === c.id);
+      const childHTML = childList.map(r => `
+        <div class="mt-2 pl-3 border-l-2 border-neon-purple/30" id="beta-c-${r.id}">
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-xs text-foreground/85 leading-relaxed flex-1" style="white-space:pre-wrap">${betaEsc(r.content)}</p>
+            <button onclick="betaAskDelete('${r.id}')" class="shrink-0 text-[10px] text-muted-foreground/30 hover:text-red-400 transition-colors">삭제</button>
+          </div>
+          <p class="mt-1 text-[10px] text-muted-foreground/40">ㄴ 익명 · ${betaFmt(r.created_at)}</p>
+        </div>`).join('');
+
+      const replyFormHTML = `
+        <div id="beta-reply-form-${c.id}" style="display:none" class="mt-2 pl-3 border-l-2 border-neon-purple/20">
+          <textarea id="beta-reply-inp-${c.id}" placeholder="대댓글을 남겨주세요" rows="2"
+            class="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60 resize-none"
+            style="font-family:inherit"></textarea>
+          <div class="mt-1 flex gap-2 justify-end">
+            <button onclick="betaCancelReply('${c.id}')" class="text-[10px] text-muted-foreground hover:text-foreground">취소</button>
+            <button onclick="betaSubmitReply('${c.id}')" class="rounded-md px-3 py-1 text-[10px] font-semibold text-white" style="background:linear-gradient(90deg,#7c3aed,#db2777)">등록</button>
+          </div>
+        </div>`;
+
       return `<div class="neon-card p-4" id="beta-c-${c.id}">
         <div class="flex items-start justify-between gap-2">
-          <p class="text-sm text-foreground/90 leading-relaxed flex-1" style="white-space:pre-wrap">${c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+          <p class="text-sm text-foreground/90 leading-relaxed flex-1" style="white-space:pre-wrap">${betaEsc(c.content)}</p>
           <button onclick="betaAskDelete('${c.id}')" class="shrink-0 text-[10px] text-muted-foreground/40 hover:text-red-400 transition-colors mt-0.5">삭제</button>
         </div>
-        <p class="mt-2 text-[10px] text-muted-foreground/50">익명 · ${fmt}</p>
+        <div class="mt-1 flex items-center gap-3">
+          <p class="text-[10px] text-muted-foreground/50">익명 · ${betaFmt(c.created_at)}</p>
+          <button onclick="betaToggleReply('${c.id}')" class="text-[10px] text-neon-purple/60 hover:text-neon-purple transition-colors">↩ 답글</button>
+        </div>
+        ${childHTML}
+        ${replyFormHTML}
       </div>`;
     }).join('');
+  }
+
+  function betaToggleReply(parentId) {
+    const form = document.getElementById(`beta-reply-form-${parentId}`);
+    if (!form) return;
+    const isOpen = form.style.display !== 'none';
+    form.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) document.getElementById(`beta-reply-inp-${parentId}`)?.focus();
+  }
+
+  function betaCancelReply(parentId) {
+    const form = document.getElementById(`beta-reply-form-${parentId}`);
+    if (form) form.style.display = 'none';
+  }
+
+  async function betaSubmitReply(parentId) {
+    const inp = document.getElementById(`beta-reply-inp-${parentId}`);
+    const content = inp?.value.trim();
+    if (!content) return;
+    const { data, error } = await sb.from('beta_comments').insert({ content, parent_id: parentId }).select().single();
+    if (!error) {
+      betaComments.push(data);
+      betaRender();
+    }
   }
 
   async function betaSubmitComment() {
@@ -2625,7 +2683,7 @@ wcInit();
     const { data, error } = await sb.from('beta_comments').insert({ content }).select().single();
     if (error) { msg.textContent = '저장 실패. 다시 시도해주세요'; msg.style.color='#f87171'; }
     else {
-      betaComments.unshift(data);
+      betaComments.push(data);
       betaRender();
       inp.value = '';
       msg.textContent = '익명으로 남겼어요 ✅'; msg.style.color='#a78bfa';
