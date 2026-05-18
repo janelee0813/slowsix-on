@@ -3214,7 +3214,7 @@ async function tamaLoadAllRanks() {
   tamaLastMonthData = tamaCountPets(lastPets);
 
   const titleEl = document.getElementById('tama-rank-title');
-  if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹`;
+  if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹 (쓰다듬기 횟수)`;
   const lastTitleEl = document.getElementById('tama-lastmonth-title');
   if (lastTitleEl) lastTitleEl.textContent = `${lastLabel} 애정 랭킹`;
 
@@ -3227,7 +3227,7 @@ async function tamaRefreshRank() {
   const { data: thisPets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', thisStart);
   tamaRankData = tamaCountPets(thisPets);
   const titleEl = document.getElementById('tama-rank-title');
-  if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹`;
+  if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹 (쓰다듬기 횟수)`;
   tamaRenderRank();
 }
 
