@@ -122,6 +122,13 @@
 </div>
 
 <!-- Navigation -->
+<style>
+  @keyframes eventGlow{
+    0%,100%{box-shadow:0 0 4px 1px rgba(181,102,255,0.3);border-color:rgba(181,102,255,0.4)}
+    50%{box-shadow:0 0 12px 3px rgba(255,95,176,0.6);border-color:rgba(255,95,176,0.8)}
+  }
+  #btn-fortune{animation:eventGlow 1.4s ease-in-out infinite}
+</style>
 <nav class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
   <div class="mx-auto max-w-screen-md px-3 sm:px-5">
     <!-- 모바일: 2줄 / 데스크탑: 1줄 -->
