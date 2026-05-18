@@ -2651,7 +2651,7 @@ function tamaDecay(val, rate, since) {
 function tamaHunger() { return Math.round(tamaDecay(tamaData.hunger, HUNGER_DECAY, tamaData.last_updated)); }
 function tamaHappy()  { return Math.round(tamaDecay(tamaData.happiness, HAPPY_DECAY, tamaData.last_updated)); }
 function tamaDay()    { return Math.max(1, Math.min(30, Math.floor((Date.now() - new Date(tamaData.born_at)) / 86400000) + 1)); }
-function tamaStageNum() { const d = tamaDay(); return d <= 10 ? 1 : d <= 20 ? 2 : 3; }
+function tamaStageNum() { const d = tamaDay(); return d <= 20 ? 2 : 3; }
 function tamaStageName() { return ['','아깽이','캣춘기','성묘기'][tamaStageNum()]; }
 
 function tamaUpdateStageBar() {
