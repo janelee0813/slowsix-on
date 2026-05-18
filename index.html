@@ -2462,10 +2462,54 @@ wcInit();
 
 <!-- Beta 개발중 페이지 -->
 <div id="page-beta" class="hidden">
-  <div class="mx-auto max-w-screen-md px-5 py-24 text-center">
-    <p class="text-4xl mb-4">🚧</p>
-    <p class="text-lg font-semibold text-foreground">이곳은 테스트 페이지예요</p>
-    <p class="mt-2 text-sm text-muted-foreground">신기한 기능이 생길 수도 있어요 )</p>
+  <div class="mx-auto max-w-screen-md px-5 py-16">
+    <div class="text-center mb-10">
+      <p class="text-4xl mb-4">🚧</p>
+      <p class="text-lg font-semibold text-foreground">이곳은 테스트 페이지예요</p>
+      <p class="mt-2 text-sm text-muted-foreground">신기한 기능이 생길 수도 있어요 )</p>
+    </div>
+
+    <!-- 익명 댓글 게시판 -->
+    <div>
+      <div class="mb-3 flex items-center gap-2">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">💬 익명 게시판</span>
+      </div>
+
+      <!-- 작성 폼 -->
+      <div class="neon-card p-4 mb-4">
+        <textarea id="beta-comment-inp" placeholder="익명으로 자유롭게 남겨주세요 :)" rows="3"
+          class="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60 resize-none"
+          style="font-family:inherit"></textarea>
+        <div class="mt-2 flex justify-end">
+          <button onclick="betaSubmitComment()" id="beta-submit-btn"
+            class="rounded-lg px-5 py-2 text-xs font-semibold text-white transition-all"
+            style="background:linear-gradient(90deg,#7c3aed,#db2777)">
+            익명으로 남기기
+          </button>
+        </div>
+        <p id="beta-submit-msg" class="mt-1 text-xs text-center" style="display:none"></p>
+      </div>
+
+      <!-- 댓글 목록 -->
+      <div id="beta-comment-list" class="space-y-3">
+        <p class="text-xs text-muted-foreground text-center py-4">불러오는 중...</p>
+      </div>
+
+      <!-- 관리자 삭제 PIN 입력 (숨김) -->
+      <div id="beta-delete-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center">
+        <div class="neon-card p-6 w-80 mx-4">
+          <p class="text-sm font-semibold text-foreground mb-3">관리자 PIN 입력</p>
+          <input id="beta-del-pin" type="password" placeholder="PIN" maxlength="6"
+            class="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm text-foreground outline-none focus:border-neon-purple/60 mb-2"
+            style="color-scheme:dark" onkeydown="if(event.key==='Enter')betaConfirmDelete()"/>
+          <p id="beta-del-err" class="text-xs text-red-400 mb-2" style="display:none"></p>
+          <div class="flex gap-2">
+            <button onclick="betaConfirmDelete()" class="flex-1 rounded-lg py-2 text-xs font-semibold text-white" style="background:linear-gradient(90deg,#7c3aed,#db2777)">삭제</button>
+            <button onclick="betaCancelDelete()" class="flex-1 rounded-lg border border-border py-2 text-xs text-muted-foreground hover:text-foreground">취소</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2538,6 +2582,89 @@ wcInit();
   let spinAngle = 0;
   let isSpinning = false;
   const PRIZES = ['🍷 와인 or 위스키', '☕ 스벅 상품권', '🥤 아메리카노', '🍬 마이쮸'];
+
+  // ── 익명 게시판 ──
+  let betaComments = [];
+  let betaDeleteTargetId = null;
+  let betaPinAttempt = 0;
+
+  async function betaInit() {
+    const { data, error } = await sb.from('beta_comments').select('*').order('created_at', { ascending: false });
+    if (!error) betaComments = data || [];
+    betaRender();
+  }
+
+  function betaRender() {
+    const el = document.getElementById('beta-comment-list');
+    if (!el) return;
+    if (!betaComments.length) {
+      el.innerHTML = '<p class="text-xs text-muted-foreground text-center py-4">아직 댓글이 없어요. 첫 번째로 남겨보세요!</p>';
+      return;
+    }
+    el.innerHTML = betaComments.map(c => {
+      const date = new Date(c.created_at);
+      const fmt = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+      return `<div class="neon-card p-4" id="beta-c-${c.id}">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm text-foreground/90 leading-relaxed flex-1" style="white-space:pre-wrap">${c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+          <button onclick="betaAskDelete('${c.id}')" class="shrink-0 text-[10px] text-muted-foreground/40 hover:text-red-400 transition-colors mt-0.5">삭제</button>
+        </div>
+        <p class="mt-2 text-[10px] text-muted-foreground/50">익명 · ${fmt}</p>
+      </div>`;
+    }).join('');
+  }
+
+  async function betaSubmitComment() {
+    const inp = document.getElementById('beta-comment-inp');
+    const msg = document.getElementById('beta-submit-msg');
+    const btn = document.getElementById('beta-submit-btn');
+    const content = inp.value.trim();
+    if (!content) { msg.textContent = '내용을 입력해주세요'; msg.style.color='#f87171'; msg.style.display='block'; return; }
+    btn.disabled = true; btn.textContent = '저장 중...';
+    const { data, error } = await sb.from('beta_comments').insert({ content }).select().single();
+    if (error) { msg.textContent = '저장 실패. 다시 시도해주세요'; msg.style.color='#f87171'; }
+    else {
+      betaComments.unshift(data);
+      betaRender();
+      inp.value = '';
+      msg.textContent = '익명으로 남겼어요 ✅'; msg.style.color='#a78bfa';
+    }
+    msg.style.display = 'block';
+    btn.disabled = false; btn.textContent = '익명으로 남기기';
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  }
+
+  function betaAskDelete(id) {
+    betaDeleteTargetId = id;
+    betaPinAttempt = 0;
+    const modal = document.getElementById('beta-delete-modal');
+    modal.style.display = 'flex';
+    document.getElementById('beta-del-pin').value = '';
+    document.getElementById('beta-del-err').style.display = 'none';
+    setTimeout(() => document.getElementById('beta-del-pin').focus(), 50);
+  }
+
+  async function betaConfirmDelete() {
+    const pin = document.getElementById('beta-del-pin').value;
+    const err = document.getElementById('beta-del-err');
+    if (pin !== DB_PIN) {
+      err.textContent = PIN_MSGS[betaPinAttempt % PIN_MSGS.length];
+      err.style.display = 'block';
+      betaPinAttempt++;
+      return;
+    }
+    const { error } = await sb.from('beta_comments').delete().eq('id', betaDeleteTargetId);
+    if (!error) {
+      betaComments = betaComments.filter(c => c.id !== betaDeleteTargetId);
+      betaRender();
+    }
+    betaCancelDelete();
+  }
+
+  function betaCancelDelete() {
+    document.getElementById('beta-delete-modal').style.display = 'none';
+    betaDeleteTargetId = null;
+  }
 
   function spinCheckPin(){
     const val = document.getElementById('spin-pin-inp').value;
@@ -2620,6 +2747,9 @@ wcInit();
       requestAnimationFrame(() => {
         if (!qzInitialized) { qzInitialized = true; qzInit(); }
       });
+    }
+    if (page === 'beta') {
+      betaInit();
     }
   }
 
