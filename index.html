@@ -1166,7 +1166,79 @@ function copyResult(){
 <section class="relative overflow-hidden">
   <div class="grid-bg absolute inset-0 -z-10"></div>
   <div class="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-neon-purple/60 to-transparent"></div>
-  <div class="mx-auto max-w-screen-md px-5 pt-11 pb-12 sm:pt-16 sm:pb-20">
+  <div class="mx-auto max-w-screen-md px-5 pt-11 pb-12 sm:pt-16 sm:pb-20" style="position:relative">
+
+    <!-- 손오공 애니메이션 -->
+    <div style="position:absolute;right:-10px;top:0;bottom:0;width:200px;pointer-events:none;display:none" class="sm:flex items-center justify-center">
+      <svg width="200" height="320" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <defs>
+          <radialGradient id="gokuAura1" cx="50%" cy="60%" r="55%">
+            <stop offset="0%" stop-color="#fff7a0" stop-opacity="0.95"/>
+            <stop offset="40%" stop-color="#ffd700" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#ff8c00" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gokuAura2" cx="50%" cy="60%" r="55%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+            <stop offset="50%" stop-color="#ffe066" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="gokuGlowGold"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="gokuGlowWhite"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <ellipse cx="100" cy="200" rx="90" ry="110" fill="url(#gokuAura1)" opacity="0.5">
+          <animate attributeName="opacity" values="0.4;0.75;0.4" dur="1.6s" repeatCount="indefinite"/>
+          <animate attributeName="rx" values="85;100;85" dur="1.6s" repeatCount="indefinite"/>
+        </ellipse>
+        <g filter="url(#gokuGlowGold)">
+          <path d="M100 180 L75 40 L90 170 Z" fill="#ffd700"><animate attributeName="opacity" values="0.6;1;0.6" dur="0.8s" repeatCount="indefinite"/></path>
+          <path d="M100 180 L125 35 L110 170 Z" fill="#ffd700"><animate attributeName="opacity" values="1;0.5;1" dur="0.9s" repeatCount="indefinite"/></path>
+          <path d="M100 180 L55 60 L85 165 Z" fill="#ffb700"><animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.1s" repeatCount="indefinite"/></path>
+          <path d="M100 180 L148 55 L115 165 Z" fill="#ffb700"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.0s" repeatCount="indefinite"/></path>
+          <path d="M100 180 L35 100 L80 172 Z" fill="#ff8c00"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="1.3s" repeatCount="indefinite"/></path>
+          <path d="M100 180 L168 95 L120 172 Z" fill="#ff8c00"><animate attributeName="opacity" values="0.7;0.3;0.7" dur="1.2s" repeatCount="indefinite"/></path>
+        </g>
+        <g filter="url(#gokuGlowWhite)">
+          <path d="M45 120 L55 140 L48 145 L62 160" stroke="#aad4ff" stroke-width="2" fill="none" stroke-linecap="round"><animate attributeName="opacity" values="0;1;0;0;1;0" dur="1.5s" repeatCount="indefinite"/></path>
+          <path d="M155 115 L145 138 L152 143 L138 162" stroke="#aad4ff" stroke-width="2" fill="none" stroke-linecap="round"><animate attributeName="opacity" values="0;0;1;0;0;1" dur="1.5s" repeatCount="indefinite"/></path>
+          <path d="M60 90 L68 108 L62 112 L72 128" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"><animate attributeName="opacity" values="1;0;0;1;0;0" dur="2s" repeatCount="indefinite"/></path>
+        </g>
+        <path d="M72 230 Q72 210 80 205 L100 200 L120 205 Q128 210 128 230 L125 280 L75 280 Z" fill="#1a5fa8"/>
+        <path d="M60 240 Q65 215 75 208 L100 202 L125 208 Q135 215 140 240 L138 285 L62 285 Z" fill="#d46a00"/>
+        <path d="M60 240 Q55 235 50 245 L55 280 L75 280 Z" fill="#c05a00"/>
+        <path d="M140 240 Q145 235 150 245 L145 280 L125 280 Z" fill="#c05a00"/>
+        <line x1="100" y1="202" x2="100" y2="285" stroke="#b05000" stroke-width="2"/>
+        <path d="M65 255 Q100 260 135 255 L135 265 Q100 270 65 265 Z" fill="#1a5fa8"/>
+        <rect x="91" y="195" width="18" height="14" rx="4" fill="#d4a876"/>
+        <ellipse cx="100" cy="180" rx="26" ry="28" fill="#d4a876"/>
+        <path d="M83 168 Q88 164 93 167" stroke="#4a3000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M107 167 Q112 164 117 168" stroke="#4a3000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="89" cy="174" rx="5" ry="5" fill="white"/>
+        <ellipse cx="111" cy="174" rx="5" ry="5" fill="white"/>
+        <ellipse cx="89" cy="175" rx="3" ry="3.5" fill="#4a9eff"/>
+        <ellipse cx="111" cy="175" rx="3" ry="3.5" fill="#4a9eff"/>
+        <circle cx="90" cy="174" r="1" fill="black"/>
+        <circle cx="112" cy="174" r="1" fill="black"/>
+        <path d="M97 181 Q100 184 103 181" stroke="#b08060" stroke-width="1.5" fill="none"/>
+        <path d="M92 189 Q100 191 108 189" stroke="#9a6040" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <g fill="#ffd700" filter="url(#gokuGlowGold)">
+          <path d="M82 162 Q78 140 74 120 Q80 138 84 155 Z"/>
+          <path d="M90 158 Q88 130 86 105 Q92 128 94 152 Z"/>
+          <path d="M100 156 Q100 125 100 98 Q104 125 104 152 Z"/>
+          <path d="M110 158 Q112 130 114 105 Q108 128 106 152 Z"/>
+          <path d="M118 162 Q122 140 126 120 Q120 138 116 155 Z"/>
+          <path d="M88 160 Q82 135 76 112 Q84 134 90 155 Z"/>
+          <path d="M112 160 Q118 135 124 112 Q116 134 110 155 Z"/>
+          <path d="M76 168 Q68 160 62 148 Q70 158 78 165 Z"/>
+          <path d="M124 168 Q132 160 138 148 Q130 158 122 165 Z"/>
+          <animate attributeName="opacity" values="0.85;1;0.85" dur="0.7s" repeatCount="indefinite"/>
+        </g>
+        <path d="M74 166 Q78 155 100 152 Q122 155 126 166" fill="#e6b800" stroke="#c9a000" stroke-width="1"/>
+        <ellipse cx="100" cy="190" rx="35" ry="45" fill="url(#gokuAura2)" opacity="0.3">
+          <animate attributeName="opacity" values="0.2;0.5;0.2" dur="1s" repeatCount="indefinite"/>
+        </ellipse>
+      </svg>
+    </div>
+
     <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur animate-fade-up">
       <span style="font-size:14px">🐉</span>
       <span>드래곤볼 이벤트</span>
