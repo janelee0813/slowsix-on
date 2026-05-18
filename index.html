@@ -111,25 +111,26 @@
   <div id="scrollbar" class="h-full w-0 bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue shadow-[0_0_10px_#b566ff] transition-[width] duration-150"></div>
 </div>
 
-<!-- 방문자 카운터 -->
-<div class="fixed top-3 right-4 z-50 hidden sm:flex items-center gap-1.5 rounded-full border border-neon-purple/20 bg-surface/80 px-3 py-1 backdrop-blur-sm">
-  <svg class="h-3 w-3 text-neon-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-  <span class="text-[10px] text-muted-foreground">View</span>
-  <span id="visit-count" class="text-[10px] font-semibold text-neon-purple">—</span>
-  <span style="width:1px;height:10px;background:rgba(140,110,200,0.25);flex-shrink:0"></span>
+<!-- 방문자 카운터 (모바일 포함 항상 표시) -->
+<div class="fixed top-2 right-3 z-50 flex items-center gap-1.5 rounded-full border border-neon-purple/20 bg-surface/80 px-2.5 py-1 backdrop-blur-sm">
+  <svg class="h-2.5 w-2.5 text-neon-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  <span class="text-[9px] text-muted-foreground">View</span>
+  <span id="visit-count" class="text-[9px] font-semibold text-neon-purple">—</span>
+  <span style="width:1px;height:9px;background:rgba(140,110,200,0.25);flex-shrink:0"></span>
   <span style="width:5px;height:5px;border-radius:50%;background:#5ee0a8;box-shadow:0 0 5px #5ee0a8;animation:onlinePulse 2s ease-in-out infinite;flex-shrink:0"></span>
-  <span id="online-num" style="font-size:10px;font-weight:600;color:#5ee0a8">-</span>
+  <span id="online-num" style="font-size:9px;font-weight:600;color:#5ee0a8">-</span>
 </div>
 
 <!-- Navigation -->
 <nav class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
-  <div class="mx-auto max-w-screen-md px-5">
-    <div class="flex items-center gap-1.5 py-2.5">
-      <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all">필독</button>
-      <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">정산기</button>
-      <button onclick="showPage('fortune')" id="btn-fortune" class="rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">이벤트</button>
-      <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
-      <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
+  <div class="mx-auto max-w-screen-md px-3 sm:px-5">
+    <!-- 모바일: 2줄 / 데스크탑: 1줄 -->
+    <div class="flex flex-wrap gap-1.5 py-2 sm:flex-nowrap sm:py-2.5">
+      <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-3.5 py-1.5 text-[11px] sm:text-[13px] font-semibold text-background transition-all">필독</button>
+      <button onclick="showPage('test1')" id="btn-test1" class="rounded-full border border-border px-3.5 py-1.5 text-[11px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">정산기</button>
+      <button onclick="showPage('fortune')" id="btn-fortune" class="rounded-full border border-border px-3.5 py-1.5 text-[11px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">이벤트</button>
+      <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-3.5 py-1.5 text-[11px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
+      <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[11px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
     </div>
   </div>
 </nav>
