@@ -3061,13 +3061,20 @@ function tamaRenderRank() {
   if (!el) return;
   if (!tamaRankData.length) { el.innerHTML = '<p style="font-size:13px;color:#6b6480;text-align:center;margin:8px 0">아직 기록이 없어요</p>'; return; }
   const TAMA_ADMIN = ['제인','엑서'];
-  const medals = ['🥇','🥈','🥉'];
+  const rankLabels = ['1위','2위','3위'];
   let rankIdx = 0;
   el.innerHTML = tamaRankData.map(([nick, cnt]) => {
     const isAdmin = TAMA_ADMIN.includes(nick);
-    const badge = isAdmin ? '<span style="font-size:11px;color:#6b6480">👑</span>' : (rankIdx < medals.length ? medals[rankIdx] : `${rankIdx+1}위`);
+    let badge;
+    if (isAdmin) {
+      badge = '<span style="font-size:11px;color:#6b6480">👑</span>';
+    } else if (rankIdx < 3) {
+      badge = `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);font-size:10px;font-weight:700;color:white;box-shadow:0 0 8px rgba(181,102,255,0.6);flex-shrink:0">${rankLabels[rankIdx]}</span>`;
+    } else {
+      badge = `<span style="font-size:11px;color:#6b6480">${rankIdx+1}위</span>`;
+    }
     if (!isAdmin) rankIdx++;
-    return `<div class="tama-log-row"><span>${badge} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`;
+    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`;
   }).join('');
   tamaRenderLastMonth();
 }
@@ -3231,13 +3238,20 @@ function tamaRenderLastMonth() {
   if (!tamaLastMonthData.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
   const TAMA_ADMIN2 = ['제인','엑서'];
-  const medals2 = ['🥇','🥈','🥉'];
+  const rankLabels2 = ['1위','2위','3위'];
   let rankIdx2 = 0;
   el.innerHTML = tamaLastMonthData.map(([nick, cnt]) => {
     const isAdmin = TAMA_ADMIN2.includes(nick);
-    const badge = isAdmin ? '<span style="font-size:11px;color:#6b6480">👑</span>' : (rankIdx2 < medals2.length ? medals2[rankIdx2] : `${rankIdx2+1}위`);
+    let badge2;
+    if (isAdmin) {
+      badge2 = '<span style="font-size:11px;color:#6b6480">👑</span>';
+    } else if (rankIdx2 < 3) {
+      badge2 = `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);font-size:10px;font-weight:700;color:white;box-shadow:0 0 8px rgba(181,102,255,0.6);flex-shrink:0">${rankLabels2[rankIdx2]}</span>`;
+    } else {
+      badge2 = `<span style="font-size:11px;color:#6b6480">${rankIdx2+1}위</span>`;
+    }
     if (!isAdmin) rankIdx2++;
-    return `<div class="tama-log-row"><span>${badge} <span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#9b94b3;font-weight:700">${cnt}회 🤍</span></div>`;
+    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge2}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#9b94b3;font-weight:700">${cnt}회 🤍</span></div>`;
   }).join('');
 }
 
