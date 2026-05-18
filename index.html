@@ -1283,6 +1283,21 @@ function copyResult(){
     // ── 드래곤볼 적립 시스템 ──
     const DB_PIN='505050';
     let dbReqs=[];
+    const PIN_MSGS=[
+      '땡! 비번 그거 아닌데요 맞겠나고ㅋㅋㅋ',
+      '또 틀림',
+      '너님은 못맞춤',
+      '겠냐고ㅋㅋㅋ',
+      '힌트줄까?',
+      '4자리 숫자임 ㅋㅋㅋㅋㅋㅋㅋㅋ',
+      '4자리인걸 믿어?ㅋㅋㅋㅋ',
+      '사실 너의 생일이 비번임',
+      '아닌건 알고 있긴 했지? 계속 해볼라고?ㅋㅋㅋ',
+      '그럼 진짜 힌트 줄게 한번만 더 시도해봐',
+      '관리자의 생년월일은? 답 다줬다  맞추면 혼자 셀프적립 가능',
+      '그걸 못맞추냐… ㅉㅉㅉ',
+    ];
+    let pinAttempt=0;
 
     async function dbInit(){
       const{data,error}=await sb.from('db_requests').select('*').order('created_at',{ascending:false});
@@ -1379,9 +1394,12 @@ function copyResult(){
         document.getElementById('db-admin-lock').style.display='none';
         document.getElementById('db-admin-panel').style.display='block';
         err.style.display='none';
+        pinAttempt=0;
         dbRenderAdmin();
       } else {
+        err.textContent=PIN_MSGS[pinAttempt%PIN_MSGS.length];
         err.style.display='block';
+        pinAttempt++;
       }
     }
 
@@ -2515,9 +2533,12 @@ wcInit();
     if(val === DB_PIN){
       err.style.display = 'none';
       document.getElementById('spin-pin-inp').value = '';
+      pinAttempt = 0;
       spinWheel();
     } else {
+      err.textContent = PIN_MSGS[pinAttempt % PIN_MSGS.length];
       err.style.display = 'block';
+      pinAttempt++;
     }
   }
 
