@@ -2270,6 +2270,45 @@ function wcRender(){
             </tbody>
           </table></div>`}
     </div>
+
+    <div class="wc-card" style="margin-top:12px">
+      <div class="wc-card-title">📅 개인별 주간 운동 현황</div>
+      ${wcParts.length===0
+        ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
+        :`<div style="display:flex;flex-direction:column;gap:10px">
+          ${(()=>{
+            const{mon}=wcWeekRange();
+            const days=['월','화','수','목','금','토','일'];
+            const dates=days.map((_,i)=>{const d=new Date(mon);d.setDate(d.getDate()+i);return d.toISOString().slice(0,10);});
+            const today=wcToday();
+            return wcSorted.map(p=>{
+              const cells=dates.map((date,i)=>{
+                const rec=wcRecs.find(r=>r.nickname===p.nickname&&r.date===date);
+                const isFuture=date>today;
+                let bg,title;
+                if(isFuture){bg='rgba(255,255,255,0.04)';title='';}
+                else if(rec&&rec.is_completed){bg='linear-gradient(135deg,#7c3aed,#db2777)';title='✅ 운동 완료';}
+                else if(rec&&!rec.is_completed){bg='rgba(255,95,176,0.15)';title='🎫 패스 사용';}
+                else{bg='rgba(255,255,255,0.07)';title='미기록';}
+                const dot=rec&&rec.is_completed?`<div style="width:6px;height:6px;border-radius:50%;background:white;opacity:0.9;margin:0 auto"></div>`:'';
+                return `<div style="flex:1;min-width:0;text-align:center">
+                  <div style="font-size:9px;color:#6b6480;margin-bottom:3px">${days[i]}</div>
+                  <div title="${title}" style="height:28px;border-radius:6px;background:${bg};display:flex;align-items:center;justify-content:center;transition:all .2s">${dot}</div>
+                </div>`;
+              }).join('');
+              return `<div style="display:flex;align-items:center;gap:8px">
+                <span style="min-width:42px;font-size:12px;font-weight:600;color:#f5f1ff">${p.nickname}</span>
+                <div style="display:flex;gap:4px;flex:1">${cells}</div>
+              </div>`;
+            }).join('');
+          })()}
+        </div>
+        <div style="display:flex;gap:12px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(140,110,200,0.12)">
+          <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#7c3aed,#db2777)"></div><span style="font-size:10px;color:#9b94b3">운동 완료</span></div>
+          <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:rgba(255,95,176,0.15)"></div><span style="font-size:10px;color:#9b94b3">패스</span></div>
+          <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:rgba(255,255,255,0.07)"></div><span style="font-size:10px;color:#9b94b3">미기록</span></div>
+        </div>`}
+    </div>
   `;
   setTimeout(wcInitPlayerDrag,20);
 }
