@@ -1338,7 +1338,7 @@ function copyResult(){
         ).join('');
         return`${divider}<div style="display:flex;align-items:center;gap:8px">
           <span style="min-width:48px;font-size:12px;font-weight:600;color:#f5f1ff">${nick}</span>
-          <div style="display:flex;gap:4px;flex:1">${orbs}</div>
+          <div style="display:flex;justify-content:space-between;flex:1">${orbs}</div>
           <span style="font-size:11px;${done?'color:#b566ff;font-weight:700':'color:#6b6480'}">${done?'🎉':'　'}</span>
         </div>`;
       }).join('');
