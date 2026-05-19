@@ -1333,8 +1333,8 @@ function copyResult(){
         const divider=(i>0&&arr[i-1][1]!==cnt)?'<div style="height:1px;background:rgba(140,110,200,0.15);margin:8px 0"></div>':'';
         const orbs=Array.from({length:7},(_,j)=>
           j<cnt
-            ?`<div style="width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#b566ff,#ff5fb0);box-shadow:0 0 6px rgba(181,102,255,0.6);flex-shrink:0"></div>`
-            :`<div style="width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(140,110,200,0.2);flex-shrink:0"></div>`
+            ?`<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#b566ff,#ff5fb0);box-shadow:0 0 10px rgba(181,102,255,0.7);flex-shrink:0"></div>`
+            :`<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(140,110,200,0.2);flex-shrink:0"></div>`
         ).join('');
         return`${divider}<div style="display:flex;align-items:center;gap:8px">
           <span style="min-width:48px;font-size:12px;font-weight:600;color:#f5f1ff">${nick}</span>
