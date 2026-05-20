@@ -1349,14 +1349,25 @@ function copyResult(){
       const counts=dbGetCounts();
       const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ko'));
       if(!sorted.length){el.innerHTML='<p class="text-xs text-muted-foreground text-center py-2">아직 적립된 드래곤볼이 없어요</p>';return;}
-      el.innerHTML=sorted.map(([nick,cnt],i,arr)=>{
-        const pct=Math.min(100,Math.round((cnt/7)*100));
-        const done=cnt>=7;
+      const header=`<div class="flex items-center gap-2 mb-2 pb-2" style="border-bottom:1px solid rgba(140,110,200,0.2)">
+        <span class="w-14 shrink-0"></span>
+        <div class="flex-1 text-[10px] text-muted-foreground font-semibold">🔮 드래곤볼</div>
+        <div class="w-20 shrink-0 text-[10px] text-muted-foreground font-semibold text-right">🫧 소원구슬</div>
+      </div>`;
+      el.innerHTML=header+sorted.map(([nick,cnt],i,arr)=>{
+        const pct=Math.min(100,Math.round((cnt%7)/7*100));
+        const marbles=Math.floor(cnt/7);
         const divider=(i>0&&arr[i-1][1]!==cnt)?'<div style="height:1px;background:rgba(140,110,200,0.15);margin:8px 0"></div>':'';
+        const marbleDisplay=marbles>0
+          ?`<span style="color:#b566ff;font-weight:700;font-size:13px">${marbles}</span><span style="font-size:10px;color:#9b94b3"> 개</span>`
+          :`<span style="color:#6b6480;font-size:11px">-</span>`;
         return`${divider}<div class="flex items-center gap-2">
           <span class="w-14 shrink-0 text-xs font-semibold text-foreground">${nick}</span>
-          <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden"><div style="width:${pct}%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div></div>
-          <span class="w-20 shrink-0 text-right text-xs ${done?'text-neon-purple font-bold':'text-muted-foreground'}">${cnt} / 7${done?' 🎉':''}</span>
+          <div class="flex-1 flex items-center gap-1.5">
+            <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden"><div style="width:${pct}%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div></div>
+            <span class="text-xs text-muted-foreground shrink-0" style="min-width:28px">${cnt%7}/7</span>
+          </div>
+          <div class="w-20 shrink-0 text-right">${marbleDisplay}</div>
         </div>`;
       }).join('');
     }
