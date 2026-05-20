@@ -2606,18 +2606,6 @@ wcInit();
         <p class="text-xs text-muted-foreground text-center py-4">불러오는 중...</p>
       </div>
 
-      <!-- 추정 접속자 -->
-      <div class="mt-8">
-        <div class="mb-3 flex items-center gap-2">
-          <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">👀 추정 접속자</span>
-          <span class="rounded-full bg-neon-purple/15 px-2 py-0.5 text-[10px] text-neon-purple">실시간</span>
-          <span class="text-[10px] text-muted-foreground">※ 최근 10분 내 활동 기반 추정</span>
-        </div>
-        <div class="neon-card p-4" id="beta-online-list">
-          <p class="text-xs text-muted-foreground text-center py-2">불러오는 중...</p>
-        </div>
-      </div>
-
       <!-- 관리자 삭제 PIN 입력 (숨김) -->
       <div id="beta-delete-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center">
         <div class="neon-card p-6 w-80 mx-4">
@@ -2716,58 +2704,6 @@ wcInit();
     const { data, error } = await sb.from('beta_comments').select('*').order('created_at', { ascending: true });
     if (!error) betaComments = data || [];
     betaRender();
-    betaRenderOnline();
-  }
-
-  async function betaRenderOnline() {
-    const el = document.getElementById('beta-online-list');
-    if (!el) return;
-
-    // 현재 접속자 수 (Presence)
-    const onlineCount = parseInt(document.getElementById('online-num')?.textContent || '0') || 0;
-
-    // 최근 10분 내 다마고찌 활동자
-    const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    const { data } = await sb.from('tamagotchi_actions')
-      .select('actor_nickname, created_at')
-      .gte('created_at', since)
-      .order('created_at', { ascending: false });
-
-    // 중복 제거, 최근 활동자 목록
-    const seen = new Set();
-    const recentUsers = [];
-    (data || []).forEach(r => {
-      if (!seen.has(r.actor_nickname)) {
-        seen.add(r.actor_nickname);
-        recentUsers.push(r.actor_nickname);
-      }
-    });
-
-    // 접속자 수에 맞게 조정
-    let displayList = recentUsers.slice(0, onlineCount);
-    const anonymousCount = Math.max(0, onlineCount - displayList.length);
-    for (let i = 0; i < anonymousCount; i++) displayList.push('익명');
-
-    if (onlineCount === 0) {
-      el.innerHTML = '<p class="text-xs text-muted-foreground text-center py-2">현재 접속자가 없어요</p>';
-      return;
-    }
-
-    el.innerHTML = `
-      <div class="flex flex-wrap gap-2">
-        ${displayList.map(nick => {
-          const isAnon = nick === '익명';
-          return `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;
-            background:${isAnon ? 'rgba(255,255,255,0.05)' : 'rgba(181,102,255,0.15)'};
-            color:${isAnon ? '#6b6480' : '#b566ff'};
-            border:1px solid ${isAnon ? 'rgba(255,255,255,0.08)' : 'rgba(181,102,255,0.3)'}">
-            <span style="width:6px;height:6px;border-radius:50%;background:${isAnon ? '#6b6480' : '#5ee0a8'};box-shadow:${isAnon ? 'none' : '0 0 5px #5ee0a8'}"></span>
-            ${nick}
-          </span>`;
-        }).join('')}
-      </div>
-      <p class="mt-3 text-[10px] text-muted-foreground">총 ${onlineCount}명 접속 중 · 최근 10분 내 활동으로 추정</p>
-    `;
   }
 
   function betaFmt(ts) {
