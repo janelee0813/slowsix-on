@@ -1206,10 +1206,10 @@ function copyResult(){
       </ul>
     </div>
 
-    <!-- 룰렛 애니메이션 -->
-    <div class="mt-8 flex items-center justify-center gap-6 select-none" style="min-height:180px">
+    <!-- 핀볼 애니메이션 -->
+    <div class="mt-8 flex items-center justify-center gap-4 select-none" style="min-height:200px">
       <!-- 용 SVG -->
-      <div style="animation:dragonFloat 2.8s ease-in-out infinite">
+      <div style="animation:dragonFloat 2.8s ease-in-out infinite;flex-shrink:0">
         <svg width="72" height="110" viewBox="0 0 72 110" xmlns="http://www.w3.org/2000/svg">
           <ellipse cx="36" cy="72" rx="18" ry="26" fill="#7c3aed" opacity="0.85"/>
           <ellipse cx="36" cy="36" rx="16" ry="14" fill="#8b5cf6"/>
@@ -1230,64 +1230,84 @@ function copyResult(){
           <circle cx="14" cy="50" r="1.5" fill="#c084fc" opacity="0"><animate attributeName="opacity" values="0;0.8;0" dur="1.5s" begin="0.7s" repeatCount="indefinite"/></circle>
         </svg>
       </div>
-      <!-- 룰렛 -->
-      <div onclick="showPage('spin')" style="position:relative;width:150px;height:150px;cursor:pointer" title="클릭하면 룰렛 페이지로 이동">
-        <svg width="150" height="150" viewBox="0 0 140 140" style="filter:drop-shadow(0 0 14px rgba(181,102,255,0.55))">
-          <!-- 회전하는 원판 -->
-          <g id="roulette-disc">
-            <path d="M70 70 L70 5 A65 65 0 0 1 135 70 Z" fill="#7c3aed"/>
-            <path d="M70 70 L135 70 A65 65 0 0 1 70 135 Z" fill="#9333ea"/>
-            <path d="M70 70 L70 135 A65 65 0 0 1 5 70 Z" fill="#6d28d9"/>
-            <path d="M70 70 L5 70 A65 65 0 0 1 70 5 Z" fill="#a855f7"/>
-            <line x1="70" y1="5" x2="70" y2="135" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
-            <line x1="5" y1="70" x2="135" y2="70" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
-            <text x="97" y="46" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍷 와인</text>
-            <text x="97" y="57" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">or 위스키</text>
-            <text x="108" y="93" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">☕ 스벅</text>
-            <text x="108" y="104" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">상품권</text>
-            <text x="43" y="102" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🥤 아메리</text>
-            <text x="43" y="113" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">카노</text>
-            <text x="34" y="50" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="sans-serif">🍬 마이쮸</text>
+
+      <!-- 핀볼 보드 -->
+      <div style="position:relative;flex-shrink:0">
+        <svg width="190" height="200" viewBox="0 0 190 200" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 10px rgba(181,102,255,0.3))">
+          <!-- 보드 외곽 -->
+          <rect x="2" y="2" width="186" height="196" rx="10" fill="rgba(20,10,40,0.85)" stroke="rgba(181,102,255,0.4)" stroke-width="1.5"/>
+
+          <!-- 핀들 (삼각 배열) -->
+          <g fill="#a78bfa" opacity="0.8">
+            <!-- 1행 -->
+            <circle cx="55" cy="52" r="4"/><circle cx="95" cy="52" r="4"/><circle cx="135" cy="52" r="4"/>
+            <!-- 2행 -->
+            <circle cx="35" cy="78" r="4"/><circle cx="75" cy="78" r="4"/><circle cx="115" cy="78" r="4"/><circle cx="155" cy="78" r="4"/>
+            <!-- 3행 -->
+            <circle cx="55" cy="104" r="4"/><circle cx="95" cy="104" r="4"/><circle cx="135" cy="104" r="4"/>
+            <!-- 4행 -->
+            <circle cx="35" cy="130" r="4"/><circle cx="75" cy="130" r="4"/><circle cx="115" cy="130" r="4"/><circle cx="155" cy="130" r="4"/>
           </g>
-          <!-- 고정: 테두리 + 중앙 축 -->
-          <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(181,102,255,0.5)" stroke-width="3"/>
-          <circle cx="70" cy="70" r="12" fill="#1a0a2e" stroke="rgba(181,102,255,0.6)" stroke-width="2"/>
-          <circle cx="70" cy="70" r="5" fill="#b566ff"/>
+
+          <!-- 슬롯 구분선 -->
+          <g stroke="rgba(181,102,255,0.3)" stroke-width="1">
+            <line x1="47" y1="152" x2="47" y2="195"/>
+            <line x1="95" y1="152" x2="95" y2="195"/>
+            <line x1="143" y1="152" x2="143" y2="195"/>
+          </g>
+
+          <!-- 당첨 슬롯 4개 (강조) -->
+          <rect x="3" y="175" width="43" height="22" rx="4" fill="rgba(181,102,255,0.2)" stroke="rgba(181,102,255,0.5)" stroke-width="1"/>
+          <rect x="48" y="175" width="46" height="22" rx="4" fill="rgba(255,95,176,0.2)" stroke="rgba(255,95,176,0.5)" stroke-width="1"/>
+          <rect x="96" y="175" width="46" height="22" rx="4" fill="rgba(181,102,255,0.2)" stroke="rgba(181,102,255,0.5)" stroke-width="1"/>
+          <rect x="144" y="175" width="43" height="22" rx="4" fill="rgba(255,95,176,0.2)" stroke="rgba(255,95,176,0.5)" stroke-width="1"/>
+          <text x="24" y="190" text-anchor="middle" fill="#b566ff" font-size="9" font-weight="bold" font-family="sans-serif">당첨</text>
+          <text x="71" y="190" text-anchor="middle" fill="#ff5fb0" font-size="9" font-weight="bold" font-family="sans-serif">당첨</text>
+          <text x="119" y="190" text-anchor="middle" fill="#b566ff" font-size="9" font-weight="bold" font-family="sans-serif">당첨</text>
+          <text x="165" y="190" text-anchor="middle" fill="#ff5fb0" font-size="9" font-weight="bold" font-family="sans-serif">당첨</text>
+
+          <!-- 구슬들 (낙하 애니메이션) -->
+          <!-- 구슬1 -->
+          <circle r="7" fill="url(#ballGrad1)" filter="url(#ballGlow)">
+            <animateMotion dur="2.2s" repeatCount="indefinite" begin="0s"
+              path="M95,8 L85,52 L55,78 L75,104 L47,130 L24,175"/>
+          </circle>
+          <!-- 구슬2 -->
+          <circle r="7" fill="url(#ballGrad2)" filter="url(#ballGlow)">
+            <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.7s"
+              path="M95,8 L105,52 L135,78 L115,104 L155,130 L165,175"/>
+          </circle>
+          <!-- 구슬3 -->
+          <circle r="7" fill="url(#ballGrad1)" filter="url(#ballGlow)">
+            <animateMotion dur="2.4s" repeatCount="indefinite" begin="1.4s"
+              path="M95,8 L95,52 L75,78 L95,104 L75,130 L71,175"/>
+          </circle>
+          <!-- 구슬4 -->
+          <circle r="7" fill="url(#ballGrad2)" filter="url(#ballGlow)">
+            <animateMotion dur="2.8s" repeatCount="indefinite" begin="2.1s"
+              path="M95,8 L105,52 L115,78 L95,104 L115,130 L119,175"/>
+          </circle>
+
+          <defs>
+            <radialGradient id="ballGrad1" cx="35%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#e0c0ff"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </radialGradient>
+            <radialGradient id="ballGrad2" cx="35%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#ffb8e0"/>
+              <stop offset="100%" stop-color="#db2777"/>
+            </radialGradient>
+            <filter id="ballGlow">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
         </svg>
-        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:#e879f9;font-size:20px;filter:drop-shadow(0 0 6px #e879f9)">▼</div>
       </div>
     </div>
     <style>
       @keyframes dragonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
     </style>
-    <script>
-    (function(){
-      function startRoulette(){
-        const disc=document.getElementById('roulette-disc');
-        if(!disc)return;
-        let angle=0,speed=0,phase='pause',pauseTimer=0;
-        const MAX_SPEED=14,ACCEL=0.35,DECEL=0.07,PAUSE_FRAMES=55;
-        function tick(){
-          if(phase==='accel'){
-            speed+=ACCEL;
-            if(speed>=MAX_SPEED){speed=MAX_SPEED;phase='decel';}
-          } else if(phase==='decel'){
-            speed*=(1-DECEL);
-            if(speed<0.08){speed=0;phase='pause';pauseTimer=0;}
-          } else {
-            pauseTimer++;
-            if(pauseTimer>=PAUSE_FRAMES)phase='accel';
-          }
-          angle+=speed;
-          disc.setAttribute('transform',`rotate(${angle} 70 70)`);
-          requestAnimationFrame(tick);
-        }
-        tick();
-      }
-      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startRoulette);
-      else startRoulette();
-    })();
-    </script>
     <script>
     // ── 드래곤볼 적립 시스템 ──
     const DB_PIN='505050';
