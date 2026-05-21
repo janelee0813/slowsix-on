@@ -3080,7 +3080,7 @@ CREATE TABLE tamagotchi_actions (
     return;
   }
 
-  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(20);
+  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(10);
   tamaLogs = logs || [];
 
   await tamaLoadAllRanks();
