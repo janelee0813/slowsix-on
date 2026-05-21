@@ -1862,6 +1862,27 @@ function copyResult(){
           <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
         </div>
       </div>
+      <!-- 세로 스탯 (오른쪽 끝) -->
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:10px;flex-shrink:0;padding:4px 0;min-width:52px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:9px;color:#9b94b3">🍚</span>
+          <div style="width:8px;height:80px;background:rgba(140,110,200,.15);border-radius:99px;overflow:hidden;position:relative">
+            <div id="bar-hunger-v" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#ff5fb0,#ffb347);border-radius:99px;transition:height .8s ease;height:0%"></div>
+          </div>
+          <span id="num-hunger-v" style="font-size:9px;color:#9b94b3">0</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:9px;color:#9b94b3">😊</span>
+          <div style="width:8px;height:80px;background:rgba(140,110,200,.15);border-radius:99px;overflow:hidden;position:relative">
+            <div id="bar-happy-v" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#b566ff,#5ec8ff);border-radius:99px;transition:height .8s ease;height:0%"></div>
+          </div>
+          <span id="num-happy-v" style="font-size:9px;color:#9b94b3">0</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:9px;color:#9b94b3">🤍</span>
+          <div id="num-affection-v" style="font-size:13px;font-weight:800;color:#b566ff">0</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3158,6 +3179,17 @@ function tamaRenderStat() {
   document.getElementById('num-hunger').textContent = hunger;
   document.getElementById('num-happy').textContent  = happy;
   document.getElementById('num-affection').textContent = tamaData.affection;
+  // 세로 스탯 바 동기화
+  const bHv = document.getElementById('bar-hunger-v');
+  const bAv = document.getElementById('bar-happy-v');
+  if (bHv) bHv.style.height = hunger + '%';
+  if (bAv) bAv.style.height = happy + '%';
+  const nHv = document.getElementById('num-hunger-v');
+  const nAv = document.getElementById('num-happy-v');
+  const nAff = document.getElementById('num-affection-v');
+  if (nHv) nHv.textContent = hunger;
+  if (nAv) nAv.textContent = happy;
+  if (nAff) nAff.textContent = tamaData.affection;
   tamaRenderCd();
 }
 
