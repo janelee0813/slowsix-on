@@ -2983,9 +2983,12 @@ function tamaCatSVG(stage, mood) {
   const h = Math.round(C.w * 165 / 100);
   const mouth = mood === 'happy' ? 'M46,50 Q50,56 54,50' : mood === 'sad' ? 'M46,54 Q50,49 54,54' : 'M47,50 Q50,54 53,50';
   return `<svg width="${C.w}" height="${h}" viewBox="0 0 100 165" style="overflow:visible">
-    ${stage===3?'<defs><linearGradient id="tg-m" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ff5fb0"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient></defs>':''}
-    <g transform="translate(${C.tx},${C.ty})">
-      <path d="M0,0 C20,-16 24,-42 8,-56" stroke="${C.ec}" stroke-width="7" stroke-linecap="round" fill="none"/>
+    ${stage===3?`<defs>
+      <linearGradient id="tg-m" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ff5fb0"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient>
+      <linearGradient id="tg-tail" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#b566ff"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient>
+    </defs>`:''}
+    <g transform="translate(${stage===3?72:C.tx},${C.ty})">
+      <path d="M0,0 C20,-16 24,-42 8,-56" stroke="${stage===3?'url(#tg-tail)':C.ec}" stroke-width="7" stroke-linecap="round" fill="none"/>
       <animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="1.5s" repeatCount="indefinite" additive="sum"/>
     </g>
     <ellipse cx="50" cy="${C.bc}" rx="${C.brx}" ry="${C.bry}" fill="${C.col}"/>
