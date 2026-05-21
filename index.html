@@ -1931,10 +1931,6 @@ function copyResult(){
       <div style="font-size:11px;color:#6b6480;font-weight:600;letter-spacing:.8px;margin-bottom:8px">📅 <span id="tama-lastmonth-title">지난달 애정 랭킹</span></div>
       <div id="tama-lastmonth-list"></div>
     </div>
-    <div id="tama-interval-wrap" style="margin-top:14px;display:none">
-      <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:8px">⏱ 평균 쓰다듬기 주기 (1~3위)</div>
-      <div id="tama-interval-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
-    </div>
     <div style="margin-top:16px;padding:12px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(181,102,255,.15),rgba(255,95,176,.1));border:1px solid rgba(181,102,255,.35);display:flex;align-items:center;gap:10px">
       <span style="font-size:20px;flex-shrink:0">☕</span>
       <span style="font-size:13px;font-weight:700;color:#d4a8ff;line-height:1.8">랭킹 1~3위까지 커피쿠폰 증정! (5/31까지, 6/1 시상)<br><span style="font-size:11px;font-weight:400;color:#9b94b3">운영진은 시상에서 제외 · 실적이 같을 경우 먼저 한 사람이 랭킹이 높음</span></span>
@@ -3190,48 +3186,6 @@ function tamaRenderRank() {
     return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`;
   }).join('');
   tamaRenderLastMonth();
-  tamaRenderInterval();
-}
-
-async function tamaRenderInterval() {
-  const wrap = document.getElementById('tama-interval-wrap');
-  const el = document.getElementById('tama-interval-list');
-  if (!wrap || !el) return;
-
-  const TAMA_ADMIN = ['제인','엑서'];
-  const top3 = tamaRankData.filter(([nick]) => !TAMA_ADMIN.includes(nick)).slice(0, 3);
-  if (!top3.length) return;
-
-  const labels = ['1위','2위','3위'];
-  const results = await Promise.all(top3.map(async ([nick]) => {
-    const { data } = await sb.from('tamagotchi_actions')
-      .select('created_at')
-      .eq('actor_nickname', nick)
-      .eq('action_type', 'pet')
-      .order('created_at', { ascending: true });
-    if (!data || data.length < 2) return { nick, interval: null };
-    const times = data.map(r => new Date(r.created_at).getTime());
-    const diffs = times.slice(1).map((t, i) => t - times[i]);
-    const avg = diffs.reduce((s, d) => s + d, 0) / diffs.length;
-    return { nick, interval: avg };
-  }));
-
-  wrap.style.display = 'block';
-  el.innerHTML = results.map(({ nick, interval }, i) => {
-    let intervalText;
-    if (interval === null) {
-      intervalText = '데이터 부족';
-    } else {
-      const mins = Math.round(interval / 60000);
-      if (mins < 60) intervalText = `${mins}분마다`;
-      else intervalText = `${Math.floor(mins/60)}시간 ${mins%60}분마다`;
-    }
-    return `<div style="background:rgba(181,102,255,0.08);border:1px solid rgba(181,102,255,0.2);border-radius:10px;padding:10px;text-align:center">
-      <div style="font-size:10px;color:#9b94b3;margin-bottom:4px">${labels[i]}</div>
-      <div style="font-size:12px;font-weight:700;color:#f5f1ff;margin-bottom:4px">${nick}</div>
-      <div style="font-size:13px;font-weight:700;color:#b566ff">${intervalText}</div>
-    </div>`;
-  }).join('');
 }
 
 function tamaRenderCd() {
