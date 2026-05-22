@@ -2639,54 +2639,78 @@ wcInit();
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 7px rgba(94,234,212,.9)) drop-shadow(0 0 20px rgba(94,234,212,.45))">
             <svg width="198" height="327" viewBox="0 0 100 165" style="max-width:100%;height:auto">
-              <!-- 왼쪽 박쥐 날개
-                   M29,85 : 몸통 왼쪽 하단 연결점
-                   C14,82 1,70 1,56 : 아래 막 곡선 (외곽으로 sweep)
-                   L1,26 : 외곽 직선 상단으로
-                   Q1,14 4,8 : 외측 손가락 끝
-                   Q9,18 13,8 : 스캘럽 (ctrl y=18 아래로 당김) → 중간 손가락
-                   Q17,18 22,8 : 스캘럽 → 내측 손가락
-                   Q26,4 28,18 : 내측 손가락 → 어깨
-              -->
+
+              <!-- ① 박쥐 날개 (가장 뒤) -->
               <path d="M29,85 C14,82 1,70 1,56 L1,26 Q1,14 4,8 Q9,18 13,8 Q17,18 22,8 Q26,4 28,18 L28,85 Z" fill="#5eead4"/>
-              <!-- 오른쪽 박쥐 날개 (좌우 대칭, x → 100-x) -->
               <path d="M71,85 C86,82 99,70 99,56 L99,26 Q99,14 96,8 Q91,18 87,8 Q83,18 78,8 Q74,4 72,18 L72,85 Z" fill="#5eead4"/>
-              <!-- 날개 줄기 (어깨→손가락 3가닥씩) -->
+              <!-- 날개 줄기 -->
               <line x1="28" y1="76" x2="3"  y2="10" stroke="#2dd4bf" stroke-width="2"   opacity=".55" stroke-linecap="round"/>
               <line x1="28" y1="76" x2="12" y2="10" stroke="#2dd4bf" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>
               <line x1="28" y1="76" x2="22" y2="10" stroke="#2dd4bf" stroke-width="1"   opacity=".35" stroke-linecap="round"/>
               <line x1="72" y1="76" x2="97" y2="10" stroke="#2dd4bf" stroke-width="2"   opacity=".55" stroke-linecap="round"/>
               <line x1="72" y1="76" x2="88" y2="10" stroke="#2dd4bf" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>
               <line x1="72" y1="76" x2="78" y2="10" stroke="#2dd4bf" stroke-width="1"   opacity=".35" stroke-linecap="round"/>
-              <!-- 몸통 (cy=85 → 상단 y=59 = 머리 하단과 딱 맞닿음) -->
+
+              <!-- ② 몸통 -->
               <ellipse cx="50" cy="85" rx="22" ry="26" fill="#5eead4"/>
-              <!-- 배 (밝은 색) -->
+              <!-- 배 (밝은 색 유지) -->
               <ellipse cx="50" cy="88" rx="13" ry="18" fill="#ccfbf1" opacity=".65"/>
-              <!-- 발 -->
-              <ellipse cx="37" cy="113" rx="9" ry="5.5" fill="#5eead4"/>
-              <ellipse cx="63" cy="113" rx="9" ry="5.5" fill="#5eead4"/>
-              <!-- 발톱 -->
-              <path d="M31,115 L29,120 M36,117 L35,121 M41,115 L43,120" stroke="#2dd4bf" stroke-width="1.2" stroke-linecap="round"/>
-              <path d="M59,115 L57,120 M64,117 L63,121 M69,115 L71,120" stroke="#2dd4bf" stroke-width="1.2" stroke-linecap="round"/>
-              <!-- 머리 -->
-              <circle cx="50" cy="36" r="23" fill="#5eead4"/>
-              <!-- 뿔 -->
-              <polygon points="31,22 36,4 44,20" fill="#2dd4bf"/>
-              <polygon points="56,20 64,4 69,22" fill="#2dd4bf"/>
-              <polygon points="33,21 36,11 43,20" fill="rgba(255,255,255,.3)"/>
-              <polygon points="57,20 63,11 67,21" fill="rgba(255,255,255,.3)"/>
-              <!-- 눈 (왼쪽) -->
-              <g transform="translate(41,34)"><g class="dr-te" style="animation-delay:.15s"><circle r="5.5" fill="white"/><circle r="3.5" fill="#134e4a"/><circle cx="1.5" cy="-1.5" r="1.5" fill="white"/></g></g>
-              <!-- 눈 (오른쪽) -->
-              <g transform="translate(59,34)"><g class="dr-te" style="animation-delay:.23s"><circle r="5.5" fill="white"/><circle r="3.5" fill="#134e4a"/><circle cx="1.5" cy="-1.5" r="1.5" fill="white"/></g></g>
-              <!-- 주둥이 -->
-              <ellipse cx="50" cy="46" rx="7" ry="5" fill="#2dd4bf" opacity=".55"/>
-              <circle cx="47" cy="45" r="1.5" fill="#134e4a" opacity=".4"/>
-              <circle cx="53" cy="45" r="1.5" fill="#134e4a" opacity=".4"/>
-              <path d="M45,51 Q50,56 55,51" stroke="#134e4a" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".45"/>
-              <!-- 볼터치 -->
-              <ellipse cx="31" cy="42" rx="5" ry="3" fill="#f472b6" opacity=".2"/>
-              <ellipse cx="69" cy="42" rx="5" ry="3" fill="#f472b6" opacity=".2"/>
+
+              <!-- ③ 팔 (Toothless 짧은 팔) -->
+              <ellipse cx="25" cy="97" rx="10" ry="5.5" fill="#5eead4" transform="rotate(-22,25,97)"/>
+              <ellipse cx="75" cy="97" rx="10" ry="5.5" fill="#5eead4" transform="rotate(22,75,97)"/>
+
+              <!-- ④ 다리/발 -->
+              <ellipse cx="37" cy="113" rx="11" ry="7" fill="#5eead4"/>
+              <ellipse cx="63" cy="113" rx="11" ry="7" fill="#5eead4"/>
+              <!-- 발톱 (3개씩) -->
+              <path d="M29,117 L27,122 M36,119 L35,124 M43,117 L45,122" stroke="#2dd4bf" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M57,117 L55,122 M64,119 L63,124 M71,117 L73,122" stroke="#2dd4bf" stroke-width="1.4" stroke-linecap="round"/>
+
+              <!-- ⑤ 귀 nub (머리보다 먼저 → 머리가 하단을 가림) -->
+              <!-- 왼쪽 귀: 안쪽·바깥쪽 두 개 -->
+              <ellipse cx="38" cy="14" rx="6" ry="7" fill="#5eead4"/>
+              <ellipse cx="30" cy="18" rx="6" ry="7" fill="#5eead4"/>
+              <!-- 오른쪽 귀 -->
+              <ellipse cx="62" cy="14" rx="6" ry="7" fill="#5eead4"/>
+              <ellipse cx="70" cy="18" rx="6" ry="7" fill="#5eead4"/>
+
+              <!-- ⑥ 머리 (Toothless: 가로로 넓은 납작 타원) -->
+              <!-- head bottom y=37+22=59, body top y=85-26=59 → 딱 맞닿음 -->
+              <ellipse cx="50" cy="37" rx="27" ry="22" fill="#5eead4"/>
+
+              <!-- ⑦ 눈 (Toothless 스타일: 크고 동그란 눈 + 라임 홍채) -->
+              <!-- 왼쪽 눈 -->
+              <g transform="translate(37,34)">
+                <g class="dr-te" style="animation-delay:.15s">
+                  <circle r="11" fill="#173a08"/>
+                  <circle r="9"  fill="#a3e635"/>
+                  <circle r="5"  fill="#0f1a06"/>
+                  <circle cx="-3.5" cy="-3.5" r="2.5" fill="white"/>
+                  <circle cx="2"    cy="2.5"   r="1.2" fill="white"/>
+                </g>
+              </g>
+              <!-- 오른쪽 눈 -->
+              <g transform="translate(63,34)">
+                <g class="dr-te" style="animation-delay:.23s">
+                  <circle r="11" fill="#173a08"/>
+                  <circle r="9"  fill="#a3e635"/>
+                  <circle r="5"  fill="#0f1a06"/>
+                  <circle cx="-3.5" cy="-3.5" r="2.5" fill="white"/>
+                  <circle cx="2"    cy="2.5"   r="1.2" fill="white"/>
+                </g>
+              </g>
+
+              <!-- ⑧ 주둥이 -->
+              <ellipse cx="50" cy="50" rx="9" ry="5" fill="#2dd4bf" opacity=".5"/>
+              <circle cx="46" cy="49" r="1.8" fill="#134e4a" opacity=".45"/>
+              <circle cx="54" cy="49" r="1.8" fill="#134e4a" opacity=".45"/>
+              <!-- 웃는 입 -->
+              <path d="M44,54 Q50,60 56,54" stroke="#134e4a" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".5"/>
+
+              <!-- ⑨ 볼터치 -->
+              <ellipse cx="28" cy="44" rx="5.5" ry="3.5" fill="#f472b6" opacity=".22"/>
+              <ellipse cx="72" cy="44" rx="5.5" ry="3.5" fill="#f472b6" opacity=".22"/>
             </svg>
           </div>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">아기 드래곤</div>
