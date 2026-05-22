@@ -2640,16 +2640,16 @@ wcInit();
           <div class="dr-tc" style="filter:drop-shadow(0 0 7px rgba(94,234,212,.9)) drop-shadow(0 0 20px rgba(94,234,212,.45))">
             <svg width="198" height="327" viewBox="0 0 100 165" style="max-width:100%;height:auto">
 
-              <!-- ① 박쥐 날개 (가장 뒤) -->
-              <path d="M29,85 C14,82 1,70 1,56 L1,26 Q1,14 4,8 Q9,18 13,8 Q17,18 22,8 Q26,4 28,18 L28,85 Z" fill="#5eead4"/>
-              <path d="M71,85 C86,82 99,70 99,56 L99,26 Q99,14 96,8 Q91,18 87,8 Q83,18 78,8 Q74,4 72,18 L72,85 Z" fill="#5eead4"/>
+              <!-- ① 박쥐 날개 (작게 조정) -->
+              <path d="M29,85 C20,82 14,74 14,62 L14,38 Q14,28 16,23 Q19,31 21,31 L20,25 Q23,19 26,22 Q25,30 27,30 L27,24 Q28,20 29,28 L29,85 Z" fill="#5eead4"/>
+              <path d="M71,85 C80,82 86,74 86,62 L86,38 Q86,28 84,23 Q81,31 79,31 L80,25 Q77,19 74,22 Q75,30 73,30 L73,24 Q72,20 71,28 L71,85 Z" fill="#5eead4"/>
               <!-- 날개 줄기 -->
-              <line x1="28" y1="76" x2="3"  y2="10" stroke="#2dd4bf" stroke-width="2"   opacity=".55" stroke-linecap="round"/>
-              <line x1="28" y1="76" x2="12" y2="10" stroke="#2dd4bf" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>
-              <line x1="28" y1="76" x2="22" y2="10" stroke="#2dd4bf" stroke-width="1"   opacity=".35" stroke-linecap="round"/>
-              <line x1="72" y1="76" x2="97" y2="10" stroke="#2dd4bf" stroke-width="2"   opacity=".55" stroke-linecap="round"/>
-              <line x1="72" y1="76" x2="88" y2="10" stroke="#2dd4bf" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>
-              <line x1="72" y1="76" x2="78" y2="10" stroke="#2dd4bf" stroke-width="1"   opacity=".35" stroke-linecap="round"/>
+              <line x1="28" y1="76" x2="15" y2="25" stroke="#2dd4bf" stroke-width="1.6" opacity=".55" stroke-linecap="round"/>
+              <line x1="28" y1="76" x2="20" y2="24" stroke="#2dd4bf" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>
+              <line x1="28" y1="76" x2="26" y2="24" stroke="#2dd4bf" stroke-width=".8"  opacity=".35" stroke-linecap="round"/>
+              <line x1="72" y1="76" x2="85" y2="25" stroke="#2dd4bf" stroke-width="1.6" opacity=".55" stroke-linecap="round"/>
+              <line x1="72" y1="76" x2="80" y2="24" stroke="#2dd4bf" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>
+              <line x1="72" y1="76" x2="74" y2="24" stroke="#2dd4bf" stroke-width=".8"  opacity=".35" stroke-linecap="round"/>
 
               <!-- ② 몸통 -->
               <ellipse cx="50" cy="85" rx="22" ry="26" fill="#5eead4"/>
@@ -2679,25 +2679,25 @@ wcInit();
               <!-- head bottom y=37+22=59, body top y=85-26=59 → 딱 맞닿음 -->
               <ellipse cx="50" cy="37" rx="27" ry="22" fill="#5eead4"/>
 
-              <!-- ⑦ 눈 (Toothless 스타일: 크고 동그란 눈 + 라임 홍채) -->
+              <!-- ⑦ 눈 (크기 축소) -->
               <!-- 왼쪽 눈 -->
-              <g transform="translate(37,34)">
+              <g transform="translate(38,35)">
                 <g class="dr-te" style="animation-delay:.15s">
-                  <circle r="11" fill="#173a08"/>
-                  <circle r="9"  fill="#a3e635"/>
-                  <circle r="5"  fill="#0f1a06"/>
-                  <circle cx="-3.5" cy="-3.5" r="2.5" fill="white"/>
-                  <circle cx="2"    cy="2.5"   r="1.2" fill="white"/>
+                  <circle r="7"   fill="#173a08"/>
+                  <circle r="5.5" fill="#a3e635"/>
+                  <circle r="3"   fill="#0f1a06"/>
+                  <circle cx="-2" cy="-2" r="1.5" fill="white"/>
+                  <circle cx="1.5" cy="1.5" r=".8" fill="white"/>
                 </g>
               </g>
               <!-- 오른쪽 눈 -->
-              <g transform="translate(63,34)">
+              <g transform="translate(62,35)">
                 <g class="dr-te" style="animation-delay:.23s">
-                  <circle r="11" fill="#173a08"/>
-                  <circle r="9"  fill="#a3e635"/>
-                  <circle r="5"  fill="#0f1a06"/>
-                  <circle cx="-3.5" cy="-3.5" r="2.5" fill="white"/>
-                  <circle cx="2"    cy="2.5"   r="1.2" fill="white"/>
+                  <circle r="7"   fill="#173a08"/>
+                  <circle r="5.5" fill="#a3e635"/>
+                  <circle r="3"   fill="#0f1a06"/>
+                  <circle cx="-2" cy="-2" r="1.5" fill="white"/>
+                  <circle cx="1.5" cy="1.5" r=".8" fill="white"/>
                 </g>
               </g>
 
