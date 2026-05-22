@@ -2650,35 +2650,36 @@ wcInit();
               </defs>
 
               <g filter="url(#guchi-ol)">
-                <!-- 팔 (몸통보다 먼저 → 몸통이 안쪽 가림) -->
-                <ellipse cx="12" cy="90" rx="12" ry="9" fill="#a3e635"/>
-                <ellipse cx="88" cy="90" rx="12" ry="9" fill="#a3e635"/>
+                <!-- 팔 (작고 둥근 bump) -->
+                <ellipse cx="11" cy="95" rx="11" ry="10" fill="#a3e635"/>
+                <ellipse cx="89" cy="95" rx="11" ry="10" fill="#a3e635"/>
 
-                <!-- 몸통 -->
-                <ellipse cx="50" cy="106" rx="37" ry="43" fill="#a3e635"/>
+                <!-- 몸통 (rx≈ry → 동글동글) -->
+                <ellipse cx="50" cy="108" rx="35" ry="40" fill="#a3e635"/>
 
-                <!-- 머리 (몸통과 겹쳐 seamless 연결) -->
-                <ellipse cx="50" cy="40" rx="36" ry="27" fill="#a3e635"/>
+                <!-- 머리 (몸통과 seamless 연결, 더 원형) -->
+                <!-- head bottom: 42+30=72, body top: 108-40=68 → 4px 겹침 -->
+                <ellipse cx="50" cy="42" rx="36" ry="30" fill="#a3e635"/>
 
-                <!-- 발 -->
-                <ellipse cx="35" cy="147" rx="16" ry="10" fill="#a3e635"/>
-                <ellipse cx="65" cy="147" rx="16" ry="10" fill="#a3e635"/>
+                <!-- 발 (작고 둥글게) -->
+                <ellipse cx="36" cy="150" rx="15" ry="10" fill="#a3e635"/>
+                <ellipse cx="64" cy="150" rx="15" ry="10" fill="#a3e635"/>
 
-                <!-- 볼 스팟 (라임 옐로우) -->
-                <ellipse cx="19" cy="54" rx="12" ry="11" fill="#d9f99d"/>
-                <ellipse cx="81" cy="54" rx="12" ry="11" fill="#d9f99d"/>
+                <!-- 볼 스팟 -->
+                <ellipse cx="17" cy="58" rx="13" ry="12" fill="#d9f99d"/>
+                <ellipse cx="83" cy="58" rx="13" ry="12" fill="#d9f99d"/>
 
-                <!-- 가슴 2단 패널 (구치파치 특유 장식, 별도 내부 외곽선) -->
-                <rect x="27" y="62" width="46" height="16" rx="8" fill="#a3e635" stroke="#365314" stroke-width="2.5"/>
-                <rect x="27" y="81" width="46" height="16" rx="8" fill="#a3e635" stroke="#365314" stroke-width="2.5"/>
+                <!-- 가슴 패널 (크기 대폭 축소: 34×13) -->
+                <rect x="33" y="63" width="34" height="13" rx="6" fill="#a3e635" stroke="#365314" stroke-width="2.5"/>
+                <rect x="33" y="79" width="34" height="13" rx="6" fill="#a3e635" stroke="#365314" stroke-width="2.5"/>
 
-                <!-- 눈 (깜빡임 포함) -->
-                <g transform="translate(34,33)">
+                <!-- 눈 -->
+                <g transform="translate(32,34)">
                   <g class="dr-te" style="animation-delay:.1s">
                     <ellipse rx="7" ry="8" fill="#1a2e05"/>
                   </g>
                 </g>
-                <g transform="translate(66,33)">
+                <g transform="translate(68,34)">
                   <g class="dr-te" style="animation-delay:.18s">
                     <ellipse rx="7" ry="8" fill="#1a2e05"/>
                   </g>
