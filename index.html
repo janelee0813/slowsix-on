@@ -2603,6 +2603,129 @@ wcInit();
       <p class="mt-2 text-sm text-muted-foreground">신기한 기능이 생길 수도 있어요 )</p>
     </div>
 
+    <!-- ── 다음달 드래곤 다마고찌 예고 ── -->
+    <style>
+      @keyframes dr-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+      @keyframes dr-blink{0%,88%,100%{transform:scaleY(1)}93%{transform:scaleY(0.08)}}
+      .dr-tc{display:inline-block;animation:dr-float 3.2s ease-in-out infinite}
+      .dr-te{transform-box:fill-box;transform-origin:50% 50%;animation:dr-blink 4s linear infinite}
+      @keyframes dr-egg-glow{0%,100%{opacity:.18}50%{opacity:.35}}
+    </style>
+    <div class="neon-card neon-card-glow mb-10 p-5 sm:p-6">
+      <div class="mb-6 text-center">
+        <div class="mb-3 inline-flex items-center gap-1.5 rounded-full border border-neon-blue/40 bg-neon-blue/10 px-3 py-1 text-[11px] font-semibold text-neon-blue">
+          🔜&nbsp; 6월 예고
+        </div>
+        <h2 class="text-xl font-bold text-foreground">다음달 다마고찌 · 드래곤 🐉</h2>
+        <p class="mt-1.5 text-xs text-muted-foreground">함께 키우면 이렇게 자라요</p>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:20px;flex-wrap:wrap">
+
+        <!-- ① 1단계 아기 드래곤 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div class="dr-tc" style="filter:drop-shadow(0 0 7px rgba(94,234,212,.9)) drop-shadow(0 0 20px rgba(94,234,212,.45))">
+            <svg width="66" height="109" viewBox="0 0 100 165">
+              <!-- 꼬리 (흔들림) -->
+              <g transform="translate(65,112)">
+                <path d="M0,0 C16,-6 20,-28 8,-42" stroke="#5eead4" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <animateTransform attributeName="transform" type="rotate" values="-12;12;-12" dur="1.8s" repeatCount="indefinite" additive="sum"/>
+              </g>
+              <!-- 왼쪽 날개 -->
+              <path d="M29,88 Q8,70 12,54 Q20,62 27,78 Z" fill="#5eead4"/>
+              <!-- 오른쪽 날개 -->
+              <path d="M71,88 Q92,70 88,54 Q80,62 73,78 Z" fill="#5eead4"/>
+              <!-- 날개 줄기 -->
+              <path d="M28,85 L13,57" stroke="#2dd4bf" stroke-width="1.2" opacity=".4" stroke-linecap="round"/>
+              <path d="M28,85 L20,56" stroke="#2dd4bf" stroke-width=".8" opacity=".3" stroke-linecap="round"/>
+              <path d="M72,85 L87,57" stroke="#2dd4bf" stroke-width="1.2" opacity=".4" stroke-linecap="round"/>
+              <path d="M72,85 L80,56" stroke="#2dd4bf" stroke-width=".8" opacity=".3" stroke-linecap="round"/>
+              <!-- 몸통 -->
+              <ellipse cx="50" cy="96" rx="22" ry="26" fill="#5eead4"/>
+              <!-- 배 (밝은 색) -->
+              <ellipse cx="50" cy="99" rx="13" ry="18" fill="#ccfbf1" opacity=".65"/>
+              <!-- 발 -->
+              <ellipse cx="37" cy="124" rx="9" ry="5.5" fill="#5eead4"/>
+              <ellipse cx="63" cy="124" rx="9" ry="5.5" fill="#5eead4"/>
+              <!-- 발톱 -->
+              <path d="M31,126 L29,131 M36,128 L35,132 M41,126 L43,131" stroke="#2dd4bf" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M59,126 L57,131 M64,128 L63,132 M69,126 L71,131" stroke="#2dd4bf" stroke-width="1.2" stroke-linecap="round"/>
+              <!-- 머리 -->
+              <circle cx="50" cy="36" r="23" fill="#5eead4"/>
+              <!-- 뿔 -->
+              <polygon points="31,22 36,4 44,20" fill="#2dd4bf"/>
+              <polygon points="56,20 64,4 69,22" fill="#2dd4bf"/>
+              <polygon points="33,21 36,11 43,20" fill="rgba(255,255,255,.3)"/>
+              <polygon points="57,20 63,11 67,21" fill="rgba(255,255,255,.3)"/>
+              <!-- 눈 (왼쪽) -->
+              <g transform="translate(41,34)"><g class="dr-te" style="animation-delay:.15s"><circle r="5.5" fill="white"/><circle r="3.5" fill="#134e4a"/><circle cx="1.5" cy="-1.5" r="1.5" fill="white"/></g></g>
+              <!-- 눈 (오른쪽) -->
+              <g transform="translate(59,34)"><g class="dr-te" style="animation-delay:.23s"><circle r="5.5" fill="white"/><circle r="3.5" fill="#134e4a"/><circle cx="1.5" cy="-1.5" r="1.5" fill="white"/></g></g>
+              <!-- 주둥이 -->
+              <ellipse cx="50" cy="46" rx="7" ry="5" fill="#2dd4bf" opacity=".55"/>
+              <circle cx="47" cy="45" r="1.5" fill="#134e4a" opacity=".4"/>
+              <circle cx="53" cy="45" r="1.5" fill="#134e4a" opacity=".4"/>
+              <path d="M45,51 Q50,56 55,51" stroke="#134e4a" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".45"/>
+              <!-- 볼터치 -->
+              <ellipse cx="31" cy="42" rx="5" ry="3" fill="#f472b6" opacity=".2"/>
+              <ellipse cx="69" cy="42" rx="5" ry="3" fill="#f472b6" opacity=".2"/>
+            </svg>
+          </div>
+          <div style="font-size:11px;color:#9b94b3;font-weight:600">아기 드래곤</div>
+          <div style="font-size:10px;color:#6b6480">Day 1–10</div>
+        </div>
+
+        <!-- ② 2단계 미공개 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.28">
+          <svg width="80" height="132" viewBox="0 0 100 165">
+            <defs>
+              <radialGradient id="dr-egg2" cx="50%" cy="42%" r="55%">
+                <stop offset="0%" stop-color="rgba(140,110,200,0.22)"/>
+                <stop offset="100%" stop-color="rgba(140,110,200,0)"/>
+              </radialGradient>
+            </defs>
+            <!-- 알 형태 -->
+            <ellipse cx="50" cy="92" rx="33" ry="46" fill="url(#dr-egg2)" stroke="rgba(140,110,200,.35)" stroke-width="1.8">
+              <animate attributeName="stroke-opacity" values=".35;.6;.35" dur="2.4s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- 균열 힌트 -->
+            <path d="M50,47 L46,60 L52,65 L47,78" stroke="rgba(181,102,255,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M55,52 L58,62 L53,67" stroke="rgba(181,102,255,.35)" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <circle cx="50" cy="47" r="2.5" fill="#b566ff" opacity=".6"/>
+          </svg>
+          <div style="font-size:11px;color:#9b94b3;font-weight:600">??? 🔒</div>
+          <div style="font-size:10px;color:#6b6480">Day 11–20</div>
+        </div>
+
+        <!-- ③ 3단계 미공개 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.18">
+          <svg width="96" height="158" viewBox="0 0 100 165">
+            <defs>
+              <radialGradient id="dr-egg3" cx="50%" cy="42%" r="55%">
+                <stop offset="0%" stop-color="rgba(181,102,255,0.2)"/>
+                <stop offset="100%" stop-color="rgba(181,102,255,0)"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="50" cy="92" rx="40" ry="56" fill="url(#dr-egg3)" stroke="rgba(181,102,255,.3)" stroke-width="2">
+              <animate attributeName="stroke-opacity" values=".3;.55;.3" dur="2.8s" repeatCount="indefinite"/>
+            </ellipse>
+            <path d="M50,37 L45,53 L52,59 L46,75" stroke="rgba(255,95,176,.45)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M56,44 L60,55 L54,61" stroke="rgba(255,95,176,.3)" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <circle cx="50" cy="37" r="3" fill="#ff5fb0" opacity=".55"/>
+          </svg>
+          <div style="font-size:11px;color:#9b94b3;font-weight:600">??? 🔒</div>
+          <div style="font-size:10px;color:#6b6480">Day 21–30</div>
+        </div>
+
+      </div>
+
+      <div class="mt-6 text-center">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-neon-purple/10 px-3 py-1 text-[10px] font-medium text-neon-purple">
+          ✨ 6월부터 함께 키워요
+        </span>
+      </div>
+    </div>
+
     <!-- 익명 댓글 게시판 -->
     <div>
       <div class="mb-3 flex items-center gap-2">
