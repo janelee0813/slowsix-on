@@ -2639,20 +2639,25 @@ wcInit();
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 7px rgba(94,234,212,.9)) drop-shadow(0 0 20px rgba(94,234,212,.45))">
             <svg width="198" height="327" viewBox="0 0 100 165" style="max-width:100%;height:auto">
-              <!-- 꼬리 (흔들림) -->
-              <g transform="translate(65,101)">
-                <path d="M0,0 C16,-6 20,-28 8,-42" stroke="#5eead4" stroke-width="7" stroke-linecap="round" fill="none"/>
-                <animateTransform attributeName="transform" type="rotate" values="-12;12;-12" dur="1.8s" repeatCount="indefinite" additive="sum"/>
-              </g>
-              <!-- 왼쪽 날개 -->
-              <path d="M29,77 Q8,59 12,43 Q20,51 27,67 Z" fill="#5eead4"/>
-              <!-- 오른쪽 날개 -->
-              <path d="M71,77 Q92,59 88,43 Q80,51 73,67 Z" fill="#5eead4"/>
-              <!-- 날개 줄기 -->
-              <path d="M28,74 L13,46" stroke="#2dd4bf" stroke-width="1.2" opacity=".4" stroke-linecap="round"/>
-              <path d="M28,74 L20,45" stroke="#2dd4bf" stroke-width=".8" opacity=".3" stroke-linecap="round"/>
-              <path d="M72,74 L87,46" stroke="#2dd4bf" stroke-width="1.2" opacity=".4" stroke-linecap="round"/>
-              <path d="M72,74 L80,45" stroke="#2dd4bf" stroke-width=".8" opacity=".3" stroke-linecap="round"/>
+              <!-- 왼쪽 박쥐 날개
+                   M29,85 : 몸통 왼쪽 하단 연결점
+                   C14,82 1,70 1,56 : 아래 막 곡선 (외곽으로 sweep)
+                   L1,26 : 외곽 직선 상단으로
+                   Q1,14 4,8 : 외측 손가락 끝
+                   Q9,18 13,8 : 스캘럽 (ctrl y=18 아래로 당김) → 중간 손가락
+                   Q17,18 22,8 : 스캘럽 → 내측 손가락
+                   Q26,4 28,18 : 내측 손가락 → 어깨
+              -->
+              <path d="M29,85 C14,82 1,70 1,56 L1,26 Q1,14 4,8 Q9,18 13,8 Q17,18 22,8 Q26,4 28,18 L28,85 Z" fill="#5eead4"/>
+              <!-- 오른쪽 박쥐 날개 (좌우 대칭, x → 100-x) -->
+              <path d="M71,85 C86,82 99,70 99,56 L99,26 Q99,14 96,8 Q91,18 87,8 Q83,18 78,8 Q74,4 72,18 L72,85 Z" fill="#5eead4"/>
+              <!-- 날개 줄기 (어깨→손가락 3가닥씩) -->
+              <line x1="28" y1="76" x2="3"  y2="10" stroke="#2dd4bf" stroke-width="2"   opacity=".55" stroke-linecap="round"/>
+              <line x1="28" y1="76" x2="12" y2="10" stroke="#2dd4bf" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>
+              <line x1="28" y1="76" x2="22" y2="10" stroke="#2dd4bf" stroke-width="1"   opacity=".35" stroke-linecap="round"/>
+              <line x1="72" y1="76" x2="97" y2="10" stroke="#2dd4bf" stroke-width="2"   opacity=".55" stroke-linecap="round"/>
+              <line x1="72" y1="76" x2="88" y2="10" stroke="#2dd4bf" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>
+              <line x1="72" y1="76" x2="78" y2="10" stroke="#2dd4bf" stroke-width="1"   opacity=".35" stroke-linecap="round"/>
               <!-- 몸통 (cy=85 → 상단 y=59 = 머리 하단과 딱 맞닿음) -->
               <ellipse cx="50" cy="85" rx="22" ry="26" fill="#5eead4"/>
               <!-- 배 (밝은 색) -->
