@@ -139,7 +139,7 @@
       <div class="w-full sm:hidden"></div>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
-      <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">Beta 개발중</button>
+      <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">Beta 실험실</button>
     </div>
   </div>
 </nav>
@@ -2395,6 +2395,18 @@ function wcRender(){
   setTimeout(wcInitPlayerDrag,20);
 }
 
+function betaCopyUrl(){
+  const url=location.origin+location.pathname+'#beta';
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('beta-share-btn');
+    if(!btn)return;
+    const orig=btn.innerHTML;
+    btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5ee0a8" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 복사됨!';
+    btn.style.borderColor='rgba(94,224,168,0.5)';btn.style.color='#5ee0a8';
+    setTimeout(()=>{btn.innerHTML=orig;btn.style.borderColor='rgba(140,110,200,0.35)';btn.style.color='#9b94b3';},2000);
+  });
+}
+
 function fortuneCopyUrl(){
   const url=location.origin+location.pathname+'#event';
   navigator.clipboard.writeText(url).then(()=>{
@@ -2594,13 +2606,14 @@ wcInit();
 </script>
 </div>
 
-<!-- Beta 개발중 페이지 -->
+<!-- Beta 실험실 페이지 -->
 <div id="page-beta" class="hidden">
   <div class="mx-auto max-w-screen-md px-5 py-16">
-    <div class="text-center mb-10">
-      <p class="text-4xl mb-4">🚧</p>
-      <p class="text-lg font-semibold text-foreground">이곳은 테스트 페이지예요</p>
-      <p class="mt-2 text-sm text-muted-foreground">신기한 기능이 생길 수도 있어요 )</p>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button id="beta-share-btn" onclick="betaCopyUrl()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        URL 공유
+      </button>
     </div>
 
     <!-- ── 다음달 드래곤 다마고찌 예고 ── -->
