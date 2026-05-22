@@ -1854,36 +1854,12 @@ function copyResult(){
         </div>
         <span id="stage-prog-label" style="font-size:9px;color:#6b6480;letter-spacing:.2px;white-space:nowrap;line-height:1.4;text-align:center"></span>
       </div>
-      <!-- 캐릭터 영역 (오른쪽) -->
-      <div style="flex:1;min-height:300px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding-bottom:12px;padding-left:8px">
+      <!-- 캐릭터 영역 (중앙 정렬) -->
+      <div style="flex:1;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:12px">
         <div id="tama-stage-badge" style="display:none"></div>
-        <div style="position:relative;display:inline-block;margin:6px 0 12px;transform:translate(90px,50px)">
+        <div style="position:relative;display:inline-block;margin:6px 0 12px;transform:translateY(50px)">
           <div id="tama-bubble" class="tama-bubble"></div>
           <div id="tama-char-wrap" style="display:inline-block;animation:cat-float 3s ease-in-out infinite"></div>
-        </div>
-      </div>
-      <!-- 세로 스탯 (오른쪽 끝) -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;padding:4px 0;min-width:60px">
-        <!-- 애정도 (상단) -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;background:rgba(181,102,255,0.1);border:1px solid rgba(181,102,255,0.25);border-radius:8px;width:100%;box-sizing:border-box">
-          <span style="font-size:9px;color:#9b94b3;font-weight:600">🤍 애정도</span>
-          <div id="num-affection-v" style="font-size:16px;font-weight:800;color:#b566ff;line-height:1">0</div>
-          <span style="font-size:8px;color:#6b6480">회</span>
-        </div>
-        <!-- 배고픔 + 행복도 세로 바 나란히 -->
-        <div style="display:flex;gap:8px;">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-            <div style="width:10px;height:90px;background:rgba(140,110,200,.15);border-radius:99px;overflow:hidden;position:relative">
-              <div id="bar-hunger-v" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#ff5fb0,#ffb347);border-radius:99px;transition:height .8s ease;height:0%"></div>
-            </div>
-            <span id="num-hunger-v" style="font-size:9px;color:#9b94b3">0</span>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-            <div style="width:10px;height:90px;background:rgba(140,110,200,.15);border-radius:99px;overflow:hidden;position:relative">
-              <div id="bar-happy-v" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#b566ff,#5ec8ff);border-radius:99px;transition:height .8s ease;height:0%"></div>
-            </div>
-            <span id="num-happy-v" style="font-size:9px;color:#9b94b3">0</span>
-          </div>
         </div>
       </div>
     </div>
