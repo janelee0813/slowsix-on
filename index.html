@@ -2868,7 +2868,7 @@ wcInit();
   let betaReplyTargetId = null;
 
   async function betaInit() {
-    const { data, error } = await sb.from('beta_comments').select('*').order('created_at', { ascending: true });
+    const { data, error } = await sb.from('beta_comments').select('*').order('created_at', { ascending: false });
     if (!error) betaComments = data || [];
     betaRender();
   }
