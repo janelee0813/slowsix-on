@@ -2162,14 +2162,20 @@ function wcStats(nick){
   const{mon,sun}=wcWeekRange();
   const wd=wcRecs.filter(r=>r.nickname===nick&&r.is_completed&&r.date>=mon&&r.date<=sun);
   const td=wcRecs.filter(r=>r.nickname===nick&&r.is_completed);
+  const dd=wcRecs.filter(r=>r.nickname===nick&&r.is_completed&&r.date===wcToday());
   return{
     weekCount:wd.length,
     weekCal:wd.reduce((s,r)=>s+(r.calories||0),0),
     weekDur:wd.reduce((s,r)=>s+(r.duration||0),0),
     totalCount:td.length,
     totalCal:td.reduce((s,r)=>s+(r.calories||0),0),
-    totalDur:td.reduce((s,r)=>s+(r.duration||0),0)
+    totalDur:td.reduce((s,r)=>s+(r.duration||0),0),
+    todayDur:dd.reduce((s,r)=>s+(r.duration||0),0)
   };
+}
+function wcFmtDur(min){
+  if(!min)return'-';
+  return min<60?min+'분':Math.floor(min/60)+'h'+(min%60?String(min%60).padStart(2,'0'):'');
 }
 function wcToast(msg,err=false){
   const t=document.getElementById('wc-toast');
@@ -2328,20 +2334,20 @@ function wcRender(){
         :`<div class="wc-stats-wrap"><table class="wc-table">
             <thead><tr>
               <th>닉네임</th>
-              <th style="text-align:right">이번 주</th>
+              <th style="text-align:right">이번주</th>
+              <th style="text-align:right">총횟수</th>
+              <th style="text-align:right">오늘 시간</th>
+              <th style="text-align:right">주간 시간</th>
               <th style="text-align:right">주간 kcal</th>
-              <th style="text-align:right">총 횟수</th>
-              <th style="text-align:right">총 kcal</th>
-              <th>미션</th>
             </tr></thead>
             <tbody>${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
               <tr>
                 <td><div style="display:flex;align-items:center;gap:7px"><span class="wc-avatar">${p.nickname.slice(0,1)}</span><span style="font-weight:600">${p.nickname}</span></div></td>
                 <td class="num" style="font-weight:600">${s.weekCount}회</td>
-                <td class="num">${wcFmt(s.weekCal)}</td>
                 <td class="num">${s.totalCount}회</td>
-                <td class="num">${wcFmt(s.totalCal)}</td>
-                <td><span class="${s.weekCount>=5?'wc-badge-ok':'wc-badge-prog'}">${s.weekCount>=5?'✅ 미션 성공':'⏳ 진행중'}</span></td>
+                <td class="num">${wcFmtDur(s.todayDur)}</td>
+                <td class="num">${wcFmtDur(s.weekDur)}</td>
+                <td class="num">${wcFmt(s.weekCal)}</td>
               </tr>`;}).join('')}
             </tbody>
           </table></div>`}
