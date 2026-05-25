@@ -2620,7 +2620,7 @@ wcInit();
         <div class="mb-3 inline-flex items-center gap-1.5 rounded-full border border-neon-blue/40 bg-neon-blue/10 px-3 py-1 text-[11px] font-semibold text-neon-blue">
           🔜&nbsp; 6월 예고
         </div>
-        <h2 class="text-xl font-bold text-foreground">다음달 다마고찌 · 후보</h2>
+        <h2 class="text-xl font-bold text-foreground">다음달 다마고찌 캐릭터 · '들이'</h2>
         <p class="mt-1.5 text-xs text-muted-foreground">함께 키울 다마고찌를 디자인하고 있는 중이예요!</p>
       </div>
 
@@ -2868,6 +2868,84 @@ wcInit();
         </div>
         <p id="spin-pin-err" class="mt-2 text-center text-xs text-red-400" style="display:none">PIN이 올바르지 않아요</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 보라 고양이 테스트 캐릭터 -->
+<div class="neon-card neon-card-glow mb-10 p-5 sm:p-6">
+  <style>
+    @keyframes cat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .cat-tc{display:inline-block;animation:cat-float 3.6s ease-in-out infinite}
+    .cat-te{transform-box:fill-box;transform-origin:50% 50%;animation:dr-blink 4.4s linear infinite}
+  </style>
+  <div class="mb-6 text-center">
+    <div class="mb-3 inline-flex items-center gap-1.5 rounded-full border border-neon-purple/40 bg-neon-purple/10 px-3 py-1 text-[11px] font-semibold text-neon-purple">
+      🎨 캐릭터 디자인 테스트
+    </div>
+    <h2 class="text-xl font-bold text-foreground">보라 고양이</h2>
+    <p class="mt-1.5 text-xs text-muted-foreground">들이 스타일로 만든 테스트 고양이예요!</p>
+  </div>
+  <div style="display:flex;justify-content:center">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div class="cat-tc" style="filter:drop-shadow(0 0 8px rgba(176,106,255,.85)) drop-shadow(0 0 24px rgba(176,106,255,.45))">
+        <svg width="198" height="356" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
+          <defs>
+            <filter id="cat-ol" x="-20%" y="-8%" width="140%" height="120%">
+              <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
+              <feFlood flood-color="#1a1a1a" result="col"/>
+              <feComposite in="col" in2="exp" operator="in" result="border"/>
+              <feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#cat-ol)">
+            <!-- 꼬리 (S자 곡선) -->
+            <path d="M68,128 Q96,108 88,84 Q80,60 96,50" stroke="#ddb8ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- 몸통 -->
+            <ellipse cx="50" cy="132" rx="22" ry="18" fill="#ddb8ff"/>
+            <!-- 왼쪽 귀 (뾰족) -->
+            <path d="M30,52 L18,18 L44,36 Z" fill="#ddb8ff"/>
+            <path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/>
+            <!-- 오른쪽 귀 (뾰족) -->
+            <path d="M70,52 L82,18 L56,36 Z" fill="#ddb8ff"/>
+            <path d="M70,48 L78,24 L60,36 Z" fill="#c49af5"/>
+            <!-- 얼굴 -->
+            <ellipse cx="50" cy="68" rx="26" ry="36" fill="#ddb8ff"/>
+            <!-- 눈 (깜빡임) -->
+            <g transform="translate(38,56)">
+              <g class="cat-te" style="animation-delay:.1s">
+                <circle r="9" fill="#1a1a1a"/>
+                <circle cx="-3" cy="-3" r="2.5" fill="white"/>
+              </g>
+            </g>
+            <g transform="translate(62,56)">
+              <g class="cat-te" style="animation-delay:.22s">
+                <circle r="9" fill="#1a1a1a"/>
+                <circle cx="-3" cy="-3" r="2.5" fill="white"/>
+              </g>
+            </g>
+            <!-- 코 (작은 분홍 역삼각형) -->
+            <path d="M47,81 L50,76 L53,81 Q50,85 47,81 Z" fill="#ff7eb3"/>
+            <!-- 다리 -->
+            <rect x="38" y="144" width="10" height="18" rx="5" fill="#ddb8ff"/>
+            <rect x="52" y="144" width="10" height="18" rx="5" fill="#ddb8ff"/>
+          </g>
+          <!-- 수염 -->
+          <line x1="42" y1="79" x2="8" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="42" y1="82" x2="8" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="42" y1="85" x2="10" y2="93" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="58" y1="79" x2="92" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="58" y1="82" x2="92" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="58" y1="85" x2="90" y2="93" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- 입 (고양이 W 입) -->
+          <path d="M44,88 Q47,92 50,89 Q53,92 56,88" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- 볼터치 -->
+          <ellipse cx="27" cy="74" rx="6" ry="4" fill="rgba(196,154,245,.45)"/>
+          <ellipse cx="73" cy="74" rx="6" ry="4" fill="rgba(196,154,245,.45)"/>
+        </svg>
+      </div>
+      <div style="font-size:11px;color:#9b94b3;font-weight:600">보라 고양이 🐱</div>
+      <div style="font-size:10px;color:#6b6480">테스트 중</div>
     </div>
   </div>
 </div>
