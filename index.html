@@ -3612,22 +3612,36 @@ async function tamaAction(type) {
   // 1. 로컬 쿨다운 체크 (빠름)
   if (tamaCdLeft(type) > 0) { alert(`아직 쿨다운 중이에요!\n${tamaFmtCd(tamaCdLeft(type))}`); return; }
 
-  // 2. 서버 쿨다운 체크 (다른 기기 방어) — 실패해도 진행
+  // 2. DB 원자적 체크+기록 (체크와 insert가 한 트랜잭션 — 다기기 우회 불가, 실패 시 차단)
+  let remaining;
   try {
-    const serverLeft = await tamaCheckServerCd(nick, type);
-    if (serverLeft > 0) {
-      alert(`다른 기기에서 이미 사용했어요!\n${tamaFmtCd(serverLeft)} 후 가능해요`);
-      tamaRenderCd();
-      return;
-    }
-  } catch(e) { console.warn('서버 쿨다운 체크 오류:', e); }
+    const { data, error } = await sb.rpc('insert_tama_action', { p_nick: nick, p_type: type });
+    if (error) throw error;
+    remaining = data;
+  } catch(e) {
+    console.warn('서버 액션 기록 실패:', e);
+    alert('서버 연결에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    return;
+  }
 
+  if (remaining > 0) {
+    // 다른 기기에서 이미 사용 → 로컬 상태 동기화 후 차단
+    const lastTs = Date.now() - (T_WINDOW[type] - remaining);
+    localStorage.setItem(`tama_${type}_${nick}`, JSON.stringify([lastTs]));
+    if (type === 'pet') setPetRndExp(nick, lastTs);
+    alert(`다른 기기에서 이미 사용했어요!\n${tamaFmtCd(remaining)} 후 가능해요`);
+    tamaRenderCd();
+    return;
+  }
+
+  // 3. 로컬 상태 업데이트
   const now = Date.now();
   const usages = tamaGetUsages(type, nick);
   usages.push(now);
   localStorage.setItem(`tama_${type}_${nick}`, JSON.stringify(usages));
   if (type === 'pet') setPetRndExp(nick, now);
 
+  // 4. 다마고찌 스탯 업데이트
   const hunger = tamaHunger(), happy = tamaHappy();
   const updates = { last_updated: new Date().toISOString(), hunger, happiness: happy };
   if (type === 'feed') updates.hunger = Math.min(100, hunger + 30);
@@ -3637,12 +3651,9 @@ async function tamaAction(type) {
   const { data } = await sb.from('tamagotchi').update(updates).eq('id', 1).select().maybeSingle();
   if (data) tamaData = data;
 
-  const { error: logErr } = await sb.from('tamagotchi_actions').insert({ actor_nickname: nick, action_type: type });
-  if (logErr) console.error('활동 기록 저장 실패:', logErr);
-
-  // 로그 즉시 반영 (실시간 구독 대기 없이)
+  // 로그 즉시 반영
   tamaLogs.unshift({ actor_nickname: nick, action_type: type, created_at: new Date().toISOString() });
-  if (tamaLogs.length > 6) tamaLogs.pop();
+  if (tamaLogs.length > 12) tamaLogs.pop();
 
   tamaPlayAnim(type);
   tamaRender();
