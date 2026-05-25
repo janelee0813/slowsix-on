@@ -2198,6 +2198,20 @@ function wcToast(msg,err=false){
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
+async function wcAutoMarkYesterday(){
+  if(!wcParts.length)return;
+  const d=new Date(wcToday());d.setDate(d.getDate()-1);
+  const yesterday=d.toISOString().slice(0,10);
+  const toInsert=wcParts
+    .filter(p=>!wcRecs.find(r=>r.nickname===p.nickname&&r.date===yesterday))
+    .map(p=>({date:yesterday,nickname:p.nickname,is_completed:false,calories:0,duration:0}));
+  if(!toInsert.length)return;
+  const{data,error}=await sb.from('wc_records')
+    .upsert(toInsert,{onConflict:'date,nickname',ignoreDuplicates:true})
+    .select();
+  if(!error&&data)wcRecs.push(...data);
+}
+
 async function wcInit(){
   const[p,r]=await Promise.all([
     sb.from('wc_participants').select('*').order('created_at'),
@@ -2205,6 +2219,7 @@ async function wcInit(){
   ]);
   if(!p.error)wcParts=p.data;
   if(!r.error)wcRecs=r.data;
+  await wcAutoMarkYesterday();
   wcRender();
 }
 
