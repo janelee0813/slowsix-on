@@ -1798,21 +1798,18 @@ function copyResult(){
     <div class="tp-stage">
       <div class="tc" style="animation-delay:1.5s;filter:drop-shadow(0 0 10px rgba(181,102,255,.9)) drop-shadow(0 0 24px rgba(255,95,176,.5)) drop-shadow(0 0 36px rgba(0,212,255,.3))">
         <svg width="100" height="162" viewBox="-8 0 116 188" style="overflow:visible">
-          <defs>
-            <filter id="cat-ol-tp3" x="-20%" y="-8%" width="140%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            <linearGradient id="cat-grad-tp3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ddb8ff"/><stop offset="100%" stop-color="#9ad4ff"/></linearGradient>
-          </defs>
+          <defs><filter id="cat-ol-tp3" x="-20%" y="-8%" width="140%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
           <g filter="url(#cat-ol-tp3)">
-            <g class="cat-tail-g"><path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="url(#cat-grad-tp3)" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-            <ellipse cx="50" cy="118" rx="22" ry="18" fill="url(#cat-grad-tp3)"/>
-            <g class="cat-ear-l"><path d="M30,52 L18,18 L44,36 Z" fill="#b566ff"/><path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/></g>
-            <g class="cat-ear-r"><path d="M70,52 L82,18 L56,36 Z" fill="#9ad4ff"/><path d="M70,48 L78,24 L60,36 Z" fill="#c8e8ff"/></g>
-            <ellipse cx="50" cy="68" rx="26" ry="36" fill="url(#cat-grad-tp3)"/>
-            <g transform="translate(38,56)"><g class="cat-te" style="animation-delay:1.5s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
-            <g transform="translate(62,56)"><g class="cat-te" style="animation-delay:1.58s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
+            <g class="cat-tail-g"><path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="#ddb8ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <ellipse cx="50" cy="118" rx="22" ry="18" fill="#ddb8ff"/>
+            <g class="cat-ear-l"><path d="M30,52 L18,18 L44,36 Z" fill="#ddb8ff"/><path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/></g>
+            <g class="cat-ear-r"><path d="M70,52 L82,18 L56,36 Z" fill="#ddb8ff"/><path d="M70,48 L78,24 L60,36 Z" fill="#c49af5"/></g>
+            <ellipse cx="50" cy="68" rx="26" ry="36" fill="#ddb8ff"/>
+            <g transform="translate(38,56)"><g class="cat-te" style="animation-delay:.1s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
+            <g transform="translate(62,56)"><g class="cat-te" style="animation-delay:.22s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
             <path d="M47,81 L50,76 L53,81 Q50,85 47,81 Z" fill="#ff7eb3"/>
-            <rect x="38" y="130" width="10" height="18" rx="5" fill="url(#cat-grad-tp3)"/>
-            <rect x="52" y="130" width="10" height="18" rx="5" fill="url(#cat-grad-tp3)"/>
+            <rect x="38" y="130" width="10" height="18" rx="5" fill="#ddb8ff"/>
+            <rect x="52" y="130" width="10" height="18" rx="5" fill="#ddb8ff"/>
           </g>
           <line x1="42" y1="79" x2="8" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="42" y1="82" x2="8" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
@@ -3278,26 +3275,19 @@ function tamaCatSVG(stage, mood) {
     : mood === 'sad'
     ? 'M44,92 Q47,87 50,90 Q53,87 56,92'
     : 'M44,88 Q47,92 50,89 Q53,92 56,88';
-  const isMax = stage === 3;
-  const fill = isMax ? 'url(#tg-cat-m)' : '#ddb8ff';
-  const earR = isMax ? '#9ad4ff' : '#ddb8ff';
-  const earRi = isMax ? '#c8e8ff' : '#c49af5';
-  const defs = isMax
-    ? `<defs><filter id="cat-ol-m" x="-20%" y="-8%" width="140%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="tg-cat-m" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b566ff"/><stop offset="50%" stop-color="#ddb8ff"/><stop offset="100%" stop-color="#9ad4ff"/></linearGradient></defs>`
-    : `<defs><filter id="cat-ol-m" x="-20%" y="-8%" width="140%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
   return `<svg width="${W}" height="${h}" viewBox="-8 0 116 188" style="overflow:visible">
-  ${defs}
+  <defs><filter id="cat-ol-m" x="-20%" y="-8%" width="140%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
   <g filter="url(#cat-ol-m)">
-    <g class="cat-tail-g"><path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="${fill}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-    <ellipse cx="50" cy="118" rx="22" ry="18" fill="${fill}"/>
-    <g class="cat-ear-l"><path d="M30,52 L18,18 L44,36 Z" fill="${isMax?'#b566ff':'#ddb8ff'}"/><path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/></g>
-    <g class="cat-ear-r"><path d="M70,52 L82,18 L56,36 Z" fill="${earR}"/><path d="M70,48 L78,24 L60,36 Z" fill="${earRi}"/></g>
-    <ellipse cx="50" cy="68" rx="26" ry="36" fill="${fill}"/>
-    <g transform="translate(38,56)"><g class="cat-te"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
+    <g class="cat-tail-g"><path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="#ddb8ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <ellipse cx="50" cy="118" rx="22" ry="18" fill="#ddb8ff"/>
+    <g class="cat-ear-l"><path d="M30,52 L18,18 L44,36 Z" fill="#ddb8ff"/><path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/></g>
+    <g class="cat-ear-r"><path d="M70,52 L82,18 L56,36 Z" fill="#ddb8ff"/><path d="M70,48 L78,24 L60,36 Z" fill="#c49af5"/></g>
+    <ellipse cx="50" cy="68" rx="26" ry="36" fill="#ddb8ff"/>
+    <g transform="translate(38,56)"><g class="cat-te" style="animation-delay:.1s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
     <g transform="translate(62,56)"><g class="cat-te" style="animation-delay:.22s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
     <path d="M47,81 L50,76 L53,81 Q50,85 47,81 Z" fill="#ff7eb3"/>
-    <rect x="38" y="130" width="10" height="18" rx="5" fill="${fill}"/>
-    <rect x="52" y="130" width="10" height="18" rx="5" fill="${fill}"/>
+    <rect x="38" y="130" width="10" height="18" rx="5" fill="#ddb8ff"/>
+    <rect x="52" y="130" width="10" height="18" rx="5" fill="#ddb8ff"/>
   </g>
   <line x1="42" y1="79" x2="8" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
   <line x1="42" y1="82" x2="8" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
@@ -3305,9 +3295,9 @@ function tamaCatSVG(stage, mood) {
   <line x1="58" y1="79" x2="92" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
   <line x1="58" y1="82" x2="92" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
   <line x1="58" y1="85" x2="90" y2="93" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <path id="tama-mouth" d="${mouth}" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <ellipse cx="27" cy="74" rx="6" ry="4" fill="rgba(196,154,245,.45)"/>
   <ellipse cx="73" cy="74" rx="6" ry="4" fill="rgba(196,154,245,.45)"/>
-  <path id="tama-mouth" d="${mouth}" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 }
 
@@ -3437,10 +3427,12 @@ function tamaRender() {
   const mood = avg >= 65 ? 'happy' : avg >= 35 ? 'normal' : 'sad';
 
   // 캐릭터
-  document.getElementById('tama-char-wrap').innerHTML = tamaCatSVG(stage, mood);
+  const wrap = document.getElementById('tama-char-wrap');
+  wrap.innerHTML = tamaCatSVG(stage, mood);
+  wrap.style.filter = 'drop-shadow(0 0 8px rgba(176,106,255,.85)) drop-shadow(0 0 24px rgba(176,106,255,.45))';
   tamaUpdateStageBar();
   // 눈 애니메이션 재시작
-  document.querySelectorAll('#tama-char-wrap .te').forEach(el => {
+  document.querySelectorAll('#tama-char-wrap .cat-te').forEach(el => {
     el.style.animationName = 'none'; void el.offsetHeight; el.style.animationName = '';
   });
 
