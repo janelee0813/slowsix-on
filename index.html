@@ -2120,12 +2120,11 @@ hr.wc-sep{border:none;border-top:1px solid rgba(140,110,200,0.15);margin:0.25rem
 .wc-disabled{opacity:0.38;pointer-events:none}
 @media(max-width:639px){
   .wc-avatar{display:none}
-  .wc-table th:last-child,.wc-table td:last-child{display:none}
-  .wc-table{min-width:0}
-  .wc-table th{padding:4px 3px;font-size:10px;letter-spacing:0}
-  .wc-table td{padding:6px 3px;font-size:11px}
+  .wc-table{min-width:480px}
+  .wc-table th{padding:4px 5px;font-size:10px;letter-spacing:0}
+  .wc-table td{padding:6px 5px;font-size:11px}
   .wc-table td:first-child>div{gap:0}
-  .wc-stats-wrap{overflow-x:visible}
+  .wc-stats-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
 @keyframes wcBarRise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 </style>
