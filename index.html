@@ -3520,7 +3520,7 @@ function tamaRenderRank() {
   const el = document.getElementById('tama-rank-list');
   if (!el) return;
   if (!tamaRankData.length) { el.innerHTML = '<p style="font-size:13px;color:#6b6480;text-align:center;margin:8px 0">아직 기록이 없어요</p>'; return; }
-  const TAMA_ADMIN = ['제인','엑서'];
+  const TAMA_ADMIN = ['제인','엑서','엘라'];
   const rankLabels = ['1위','2위','3위'];
   let rankIdx = 0;
   el.innerHTML = tamaRankData.map(([nick, cnt]) => {
@@ -3712,7 +3712,7 @@ function tamaRenderLastMonth() {
   if (!wrap || !el) return;
   if (!tamaLastMonthData.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  const TAMA_ADMIN2 = ['제인','엑서'];
+  const TAMA_ADMIN2 = ['제인','엑서','엘라'];
   const rankLabels2 = ['1위','2위','3위'];
   let rankIdx2 = 0;
   el.innerHTML = tamaLastMonthData.map(([nick, cnt]) => {
