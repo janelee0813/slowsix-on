@@ -3379,7 +3379,7 @@ CREATE TABLE tamagotchi_actions (
     return;
   }
 
-  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(10);
+  const { data: logs } = await sb.from('tamagotchi_actions').select('*').order('created_at',{ascending:false}).limit(20);
   tamaLogs = logs || [];
 
   await tamaLoadAllRanks();
@@ -3404,7 +3404,7 @@ CREATE TABLE tamagotchi_actions (
       );
       if (!alreadyExists) {
         tamaLogs.unshift(p.new);
-        if (tamaLogs.length > 6) tamaLogs.pop();
+        if (tamaLogs.length > 12) tamaLogs.pop();
         tamaRenderLog();
       }
       if (p.new.action_type === 'pet') await tamaRefreshRank();
