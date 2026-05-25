@@ -2871,80 +2871,21 @@ wcInit();
           <div style="font-size:10px;color:#6b6480">Day 21–30</div>
         </div>
 
-        <!-- ④ 4단계: 얼굴 더 슬림, 눈 더 작음, 머리 풍성, 눈썹 추가 -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="356" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
-              <defs>
-                <filter id="dog-ol4" x="-20%" y="-8%" width="140%" height="120%">
-                  <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
-                  <feFlood flood-color="#1a1a1a" result="col"/>
-                  <feComposite in="col" in2="exp" operator="in" result="border"/>
-                  <feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              </defs>
-              <g filter="url(#dog-ol4)">
-                <!-- 몸통 (2단계와 동일) -->
-                <ellipse cx="50" cy="132" rx="26" ry="22" fill="#f8f8f0"/>
-                <!-- 왼쪽 귀 -->
-                <path d="M36,34 Q18,22 14,32 Q14,46 28,46 Q34,42 36,34 Z" fill="#ffb3c6"/>
-                <!-- 오른쪽 귀 -->
-                <path d="M60,28 Q66,6 72,10 Q72,24 64,34 Q61,36 60,28 Z" fill="#ffb3c6"/>
-                <!-- 얼굴: 가장 갸름하고 긴 타원 -->
-                <ellipse cx="50" cy="62" rx="21" ry="44" fill="#f8f8f0"/>
-                <!-- 눈: 더 작아짐 r=7.5, 반달형 느낌으로 위치 조정 -->
-                <g transform="translate(38,50)">
-                  <g class="dr-te" style="animation-delay:.12s">
-                    <circle r="7.5" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-                <g transform="translate(62,50)">
-                  <g class="dr-te" style="animation-delay:.2s">
-                    <circle r="7.5" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-                <!-- 눈썹 (성체만 있음) -->
-                <path d="M31,40 Q38,36 45,40" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path d="M55,40 Q62,36 69,40" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <!-- 코: 더 작아짐 -->
-                <circle cx="50" cy="77" r="6.5" fill="#1a1a1a"/>
-                <ellipse cx="47" cy="74.5" rx="2" ry="1.6" fill="rgba(255,255,255,.5)"/>
-                <!-- 칼라 (2단계와 동일) -->
-                <rect x="28" y="100" width="44" height="22" rx="9" fill="#e8917a"/>
-                <!-- 앞발 2개 (2단계와 동일) -->
-                <rect x="40" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
-                <rect x="52" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
-                <!-- 꼬리 (2단계와 동일) -->
-                <path d="M74,130 Q94,118 88,102 Q82,88 92,76" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              </g>
-              <!-- 머리카락: 6가닥, 더 길고 풍성 -->
-              <path d="M38,22 C52,10 68,18 78,32" stroke="#1a1a1a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-              <path d="M40,24 C54,14 70,24 80,38" stroke="#1a1a1a" stroke-width="2.1" fill="none" stroke-linecap="round"/>
-              <path d="M42,26 C57,18 72,30 80,46" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-              <path d="M44,28 C59,24 74,36 76,52" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-              <path d="M46,30 C61,28 74,42 73,58" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-              <path d="M48,32 C63,32 73,48 70,64" stroke="#1a1a1a" stroke-width="0.9" fill="none" stroke-linecap="round"/>
-              <!-- 칼라 줄무늬 -->
-              <line x1="35" y1="103" x2="31" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="41" y1="103" x2="37" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="47" y1="103" x2="43" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="53" y1="103" x2="49" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="59" y1="103" x2="55" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="65" y1="103" x2="61" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="71" y1="103" x2="67" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <!-- 수염 -->
-              <line x1="40" y1="75" x2="10" y2="67" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="78" x2="10" y2="78" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="81" x2="12" y2="89" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="75" x2="90" y2="67" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="78" x2="90" y2="78" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="81" x2="88" y2="89" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <!-- 입술 -->
-              <ellipse cx="50" cy="91" rx="4" ry="2" fill="#ef4444"/>
-            </svg>
-          </div>
+        <!-- ④ 4단계 미공개 (알) -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.4">
+          <svg width="198" height="327" viewBox="0 0 100 165" style="max-width:100%;height:auto">
+            <defs>
+              <radialGradient id="dr-egg4" cx="40%" cy="35%" r="60%">
+                <stop offset="0%" stop-color="rgba(94,200,255,0.35)"/>
+                <stop offset="100%" stop-color="rgba(94,200,255,0)"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="50" cy="92" rx="36" ry="50" fill="url(#dr-egg4)" stroke="rgba(94,200,255,.5)" stroke-width="1.8">
+              <animate attributeName="stroke-opacity" values=".5;.9;.5" dur="3s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- 알 하이라이트 -->
+            <ellipse cx="38" cy="68" rx="10" ry="14" fill="rgba(255,255,255,.08)"/>
+          </svg>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">들이 4단계 🔒</div>
           <div style="font-size:10px;color:#6b6480">Day 31–40</div>
         </div>
