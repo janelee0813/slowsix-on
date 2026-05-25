@@ -139,7 +139,7 @@
       <div class="w-full sm:hidden"></div>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
-      <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">Beta 실험실</button>
+      <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">소식</button>
     </div>
   </div>
 </nav>
@@ -1842,7 +1842,8 @@ function copyResult(){
   <div id="tama-loading" style="text-align:center;padding:32px 0;color:#6b6480;font-size:13px">불러오는 중…</div>
 
   <!-- 캐릭터 -->
-  <div class="tama-crd" id="tama-char-card" style="display:none;padding:16px">
+  <div class="tama-crd" id="tama-char-card" style="display:none;padding:16px;position:relative">
+    <button onclick="tamaSaveImage()" title="이미지 저장" style="position:absolute;top:10px;right:10px;z-index:10;background:rgba(140,110,200,.15);border:1px solid rgba(140,110,200,.3);border-radius:8px;padding:5px 7px;cursor:pointer;line-height:1;font-size:15px;color:#9b7ecb;transition:background .2s" onmouseover="this.style.background='rgba(140,110,200,.28)'" onmouseout="this.style.background='rgba(140,110,200,.15)'">⬇️</button>
     <div style="display:flex;align-items:stretch;gap:12px">
       <!-- 스테이지 진행 바 (왼쪽) -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;padding:4px 0">
@@ -3417,6 +3418,45 @@ CREATE TABLE tamagotchi_actions (
   if (tamaIdleTick) clearInterval(tamaIdleTick);
   tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
   setInterval(tamaRenderCd, 10000);
+}
+
+function tamaSaveImage() {
+  const wrap = document.getElementById('tama-char-wrap');
+  const svg = wrap.querySelector('svg');
+  if (!svg) return;
+  const clone = svg.cloneNode(true);
+  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+  style.textContent = `
+    .cat-te{animation:none}
+    .cat-tail-g{animation:none}
+    .cat-ear-l{animation:none}
+    .cat-ear-r{animation:none}
+  `;
+  clone.insertBefore(style, clone.firstChild);
+  const W = parseInt(svg.getAttribute('width')) || 143;
+  const H = parseInt(svg.getAttribute('height')) || 232;
+  const scale = 3;
+  clone.setAttribute('width', W * scale);
+  clone.setAttribute('height', H * scale);
+  const xml = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([xml], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = W * scale;
+    canvas.height = H * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#13111a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.download = '들희_다마고찌.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  };
+  img.src = url;
 }
 
 function tamaRender() {
