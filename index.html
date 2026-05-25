@@ -3314,9 +3314,15 @@ function tamaGetUsages(type, nick) {
   const stored = JSON.parse(localStorage.getItem(`tama_${type}_${nick}`) || '[]');
   return stored.filter(ts => Date.now() - ts < win);
 }
+function petRndExp(nick) { return parseInt(localStorage.getItem(`tama_pet_rndexp_${nick}`) || '0'); }
+function setPetRndExp(nick, fromTs) {
+  const ms = (55 + Math.random() * 10) * 60000; // 55~65분 랜덤
+  localStorage.setItem(`tama_pet_rndexp_${nick}`, Math.round(fromTs + ms));
+}
 function tamaCdLeft(type) {
   const nick = document.getElementById('tama-nick')?.value.trim();
   if (!nick) return 0;
+  if (type === 'pet') return Math.max(0, petRndExp(nick) - Date.now());
   const usages = tamaGetUsages(type, nick);
   if (usages.length < T_MAX[type]) return 0;
   return Math.min(...usages) + T_WINDOW[type] - Date.now();
@@ -3544,7 +3550,9 @@ async function tamaCheckServerCd(nick, type) {
     const left = lastTime + T_WINDOW[type] - Date.now();
     if (left > 0) {
       localStorage.setItem(`tama_${type}_${nick}`, JSON.stringify([lastTime]));
+      if (type === 'pet' && petRndExp(nick) < Date.now()) setPetRndExp(nick, lastTime);
     }
+    if (type === 'pet') return Math.max(0, petRndExp(nick) - Date.now());
     return Math.max(0, left);
   } catch(e) {
     console.warn('서버 쿨다운 체크 실패 (로컬 기준 적용):', e);
@@ -3575,9 +3583,11 @@ async function tamaAction(type) {
     }
   } catch(e) { console.warn('서버 쿨다운 체크 오류:', e); }
 
+  const now = Date.now();
   const usages = tamaGetUsages(type, nick);
-  usages.push(Date.now());
+  usages.push(now);
   localStorage.setItem(`tama_${type}_${nick}`, JSON.stringify(usages));
+  if (type === 'pet') setPetRndExp(nick, now);
 
   const hunger = tamaHunger(), happy = tamaHappy();
   const updates = { last_updated: new Date().toISOString(), hunger, happiness: happy };
