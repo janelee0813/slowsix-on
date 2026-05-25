@@ -2876,8 +2876,14 @@ wcInit();
 <div class="neon-card neon-card-glow mb-10 p-5 sm:p-6">
   <style>
     @keyframes cat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes cat-tail-wave{0%,100%{transform:rotate(-13deg)}50%{transform:rotate(13deg)}}
+    @keyframes cat-ear-l{0%,76%,100%{transform:rotate(0deg)}81%{transform:rotate(-8deg)}87%{transform:rotate(4deg)}92%{transform:rotate(-3deg)}96%{transform:rotate(0deg)}}
+    @keyframes cat-ear-r{0%,76%,100%{transform:rotate(0deg)}81%{transform:rotate(8deg)}87%{transform:rotate(-4deg)}92%{transform:rotate(3deg)}96%{transform:rotate(0deg)}}
     .cat-tc{display:inline-block;animation:cat-float 3.6s ease-in-out infinite}
     .cat-te{transform-box:fill-box;transform-origin:50% 50%;animation:dr-blink 4.4s linear infinite}
+    .cat-tail-g{transform-box:fill-box;transform-origin:0% 100%;animation:cat-tail-wave 1.8s ease-in-out infinite}
+    .cat-ear-l{transform-box:fill-box;transform-origin:50% 100%;animation:cat-ear-l 3.5s ease-in-out infinite}
+    .cat-ear-r{transform-box:fill-box;transform-origin:50% 100%;animation:cat-ear-r 3.5s ease-in-out infinite;animation-delay:.5s}
   </style>
   <div class="mb-6 text-center">
     <div class="mb-3 inline-flex items-center gap-1.5 rounded-full border border-neon-purple/40 bg-neon-purple/10 px-3 py-1 text-[11px] font-semibold text-neon-purple">
@@ -2900,15 +2906,21 @@ wcInit();
           </defs>
           <g filter="url(#cat-ol)">
             <!-- 꼬리 (S자 곡선) -->
-            <path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="#ddb8ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <g class="cat-tail-g">
+              <path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="#ddb8ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
             <!-- 몸통 -->
             <ellipse cx="50" cy="118" rx="22" ry="18" fill="#ddb8ff"/>
             <!-- 왼쪽 귀 (뾰족) -->
-            <path d="M30,52 L18,18 L44,36 Z" fill="#ddb8ff"/>
-            <path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/>
+            <g class="cat-ear-l">
+              <path d="M30,52 L18,18 L44,36 Z" fill="#ddb8ff"/>
+              <path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/>
+            </g>
             <!-- 오른쪽 귀 (뾰족) -->
-            <path d="M70,52 L82,18 L56,36 Z" fill="#ddb8ff"/>
-            <path d="M70,48 L78,24 L60,36 Z" fill="#c49af5"/>
+            <g class="cat-ear-r">
+              <path d="M70,52 L82,18 L56,36 Z" fill="#ddb8ff"/>
+              <path d="M70,48 L78,24 L60,36 Z" fill="#c49af5"/>
+            </g>
             <!-- 얼굴 -->
             <ellipse cx="50" cy="68" rx="26" ry="36" fill="#ddb8ff"/>
             <!-- 눈 (깜빡임) -->
