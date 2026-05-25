@@ -2723,7 +2723,12 @@ wcInit();
 
               <!-- ── 외곽선 O: 채워진 도형 ── -->
               <g filter="url(#dog-ol2)">
-                <!-- 몸통 -->
+                <!-- 뒷다리 왼쪽 (앉은 엉덩이 - 몸통보다 먼저 그려서 뒤에 위치) -->
+                <ellipse cx="24" cy="150" rx="18" ry="13" fill="#f8f8f0"/>
+                <!-- 뒷다리 오른쪽 -->
+                <ellipse cx="76" cy="150" rx="18" ry="13" fill="#f8f8f0"/>
+
+                <!-- 몸통 (뒷다리 위에 덮여서 앉은 느낌) -->
                 <ellipse cx="50" cy="132" rx="26" ry="22" fill="#f8f8f0"/>
 
                 <!-- 왼쪽 귀 (옆으로 펼쳐진) -->
@@ -2756,10 +2761,10 @@ wcInit();
                 <!-- 터틀넥 칼라 -->
                 <rect x="28" y="96" width="44" height="22" rx="9" fill="#e8917a"/>
 
-                <!-- 앞발 -->
-                <rect x="40" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
-                <!-- 뒷발 -->
-                <rect x="52" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+                <!-- 앞발 왼쪽 (가운데에 나란히) -->
+                <rect x="41" y="150" width="9" height="20" rx="4.5" fill="#f8f8f0"/>
+                <!-- 앞발 오른쪽 -->
+                <rect x="52" y="150" width="9" height="20" rx="4.5" fill="#f8f8f0"/>
 
                 <!-- 꼬리 -->
                 <path d="M74,130 Q94,118 88,102 Q82,88 92,76" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
