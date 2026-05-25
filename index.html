@@ -2800,7 +2800,7 @@ wcInit();
         <!-- ③ 3단계: 얼굴 더 갸름해짐, 눈 작아짐, 머리카락 길어짐 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="356" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
+            <svg width="198" height="356" viewBox="-20 0 140 188" style="max-width:100%;height:auto;overflow:visible">
               <defs>
                 <filter id="dog-ol3" x="-20%" y="-8%" width="140%" height="120%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
@@ -2810,8 +2810,8 @@ wcInit();
                 </filter>
               </defs>
               <g filter="url(#dog-ol3)">
-                <!-- 몸통 (2단계와 동일) -->
-                <ellipse cx="50" cy="132" rx="26" ry="22" fill="#f8f8f0"/>
+                <!-- 몸통 (팔과 분리되도록 축소) -->
+                <ellipse cx="50" cy="132" rx="20" ry="20" fill="#f8f8f0"/>
                 <!-- 왼쪽 귀 -->
                 <path d="M36,34 Q18,22 14,32 Q14,46 28,46 Q34,42 36,34 Z" fill="#ffb3c6"/>
                 <!-- 오른쪽 귀 -->
