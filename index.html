@@ -2325,7 +2325,7 @@ function wcRender(){
     </div>
     ${wcParticipantCards()}
     ${wcProgressBar()}
-    ${wcOverallChart()}
+    ${wcOverallChart(wcSorted)}
     <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
       <div class="wc-row">
@@ -2554,8 +2554,8 @@ function wcInitPlayerDrag(){
   });
 }
 
-function wcOverallChart(){
-  if(!wcParts.length)return'';
+function wcOverallChart(wcSorted){
+  if(!wcSorted||!wcSorted.length)return'';
   return`<div class="wc-card">
     <div class="wc-card-title">🏆 전체 운동 현황</div>
     <div style="font-size:11px;color:#6b6480;margin-bottom:12px">챌린지 5/11~6/10 · 목표 23회 기준</div>
