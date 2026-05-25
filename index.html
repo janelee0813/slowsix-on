@@ -2624,7 +2624,7 @@ wcInit();
         <p class="mt-1.5 text-xs text-muted-foreground">함께 키울 다마고찌를 디자인하고 있는 중이예요!</p>
       </div>
 
-      <div style="display:flex;align-items:flex-end;justify-content:center;gap:20px;flex-wrap:wrap">
+      <div style="display:grid;grid-template-columns:1fr 1fr;justify-items:center;align-items:end;gap:24px 12px;max-width:480px;margin:0 auto">
 
         <!-- ① 1단계 아기 들이 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
@@ -2639,17 +2639,11 @@ wcInit();
                 </filter>
               </defs>
               <g filter="url(#dog-ol4)">
-                <!-- 꼬리 (뒤에 위치) -->
                 <path d="M68,112 Q76,107 74,101" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round"/>
-                <!-- 몸통 (얼굴에 밀착) -->
                 <ellipse cx="50" cy="116" rx="20" ry="18" fill="#f8f8f0"/>
-                <!-- 왼쪽 귀 (작고 둥글게) -->
                 <ellipse cx="24" cy="46" rx="10" ry="14" fill="#ffb3c6"/>
-                <!-- 오른쪽 귀 -->
                 <ellipse cx="76" cy="46" rx="10" ry="14" fill="#ffb3c6"/>
-                <!-- 얼굴 (크고 동그랗게) -->
                 <ellipse cx="50" cy="64" rx="28" ry="36" fill="#f8f8f0"/>
-                <!-- 눈 (아주 크게) -->
                 <g transform="translate(37,54)">
                   <g class="dr-te" style="animation-delay:.12s">
                     <circle r="11" fill="#1a1a1a"/>
@@ -2662,258 +2656,103 @@ wcInit();
                     <circle cx="-4" cy="-4" r="3" fill="white"/>
                   </g>
                 </g>
-                <!-- 코 (작고 아담하게) -->
                 <ellipse cx="50" cy="80" rx="5" ry="4" fill="#1a1a1a"/>
                 <ellipse cx="48" cy="78" rx="1.5" ry="1.2" fill="rgba(255,255,255,.5)"/>
-                <!-- 짧은 다리 -->
                 <rect x="40" y="128" width="9" height="12" rx="4" fill="#f8f8f0"/>
                 <rect x="51" y="128" width="9" height="12" rx="4" fill="#f8f8f0"/>
               </g>
-              <!-- 아기 머리카락 (삐죽 한 가닥) -->
               <path d="M48,28 C46,18 53,14 54,22" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
-              <!-- 짧은 수염 -->
               <line x1="44" y1="78" x2="28" y2="74" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
               <line x1="44" y1="80" x2="28" y2="80" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
               <line x1="44" y1="82" x2="28" y2="86" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
               <line x1="56" y1="78" x2="72" y2="74" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
               <line x1="56" y1="80" x2="72" y2="80" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
               <line x1="56" y1="82" x2="72" y2="86" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
-              <!-- 볼터치 -->
               <ellipse cx="28" cy="72" rx="5" ry="3" fill="rgba(255,182,193,.45)"/>
               <ellipse cx="72" cy="72" rx="5" ry="3" fill="rgba(255,182,193,.45)"/>
-              <!-- 입 (귀여운 웃음) -->
               <ellipse cx="50" cy="90" rx="4" ry="2" fill="#ef4444"/>
             </svg>
           </div>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">들이 1단계</div>
-          <div style="font-size:10px;color:#6b6480">Day 1–10</div>
+          <div style="font-size:10px;color:#6b6480">6/1 ~ 6/5</div>
         </div>
 
-        <!-- ② 2단계 -->
+        <!-- ② 2단계 알 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="327" viewBox="0 0 100 165" style="max-width:100%;height:auto">
+          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
+            <svg width="160" height="260" viewBox="0 0 100 162" style="max-width:100%;height:auto">
               <defs>
-                <!-- 채워진 도형에만 외곽선 적용 -->
-                <filter id="dog-ol" x="-15%" y="-8%" width="130%" height="118%">
+                <filter id="egg-ol-2" x="-15%" y="-8%" width="130%" height="116%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
                   <feFlood flood-color="#1a1a1a" result="col"/>
                   <feComposite in="col" in2="exp" operator="in" result="border"/>
                   <feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
-
-              <!-- ── 외곽선 O: 채워진 도형 ── -->
-              <g filter="url(#dog-ol)">
-                <!-- 꼬리 (뒤에 위치) -->
-                <path d="M65,112 Q84,108 80,98 Q76,88 84,82" stroke="#f8f8f0" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- 몸통 (세로로 길게) -->
-                <ellipse cx="50" cy="116" rx="18" ry="20" fill="#f8f8f0"/>
-
-                <!-- 왼쪽 귀 (옆으로 펼쳐진) -->
-                <path d="M36,34 Q18,22 14,32 Q14,46 28,46 Q34,42 36,34 Z" fill="#ffb3c6"/>
-
-                <!-- 오른쪽 귀 (위로 뾰족) -->
-                <path d="M60,28 Q66,6 72,10 Q72,24 64,34 Q61,36 60,28 Z" fill="#ffb3c6"/>
-
-                <!-- 얼굴 (길고 좁은 타원) -->
-                <ellipse cx="50" cy="64" rx="24" ry="40" fill="#f8f8f0"/>
-
-                <!-- 눈 (크고 어두운, 깜빡임) -->
-                <g transform="translate(38,52)">
-                  <g class="dr-te" style="animation-delay:.12s">
-                    <circle r="9" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-                <g transform="translate(62,52)">
-                  <g class="dr-te" style="animation-delay:.2s">
-                    <circle r="9" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-
-                <!-- 코 (크고 둥글게) -->
-                <circle cx="50" cy="78" r="8" fill="#1a1a1a"/>
-                <ellipse cx="47" cy="75" rx="2.5" ry="2" fill="rgba(255,255,255,.5)"/>
-
-                <!-- 짧은 다리 -->
-                <rect x="41" y="130" width="8" height="12" rx="4" fill="#f8f8f0"/>
-                <rect x="51" y="130" width="8" height="12" rx="4" fill="#f8f8f0"/>
+              <g filter="url(#egg-ol-2)">
+                <ellipse cx="50" cy="88" rx="36" ry="50" fill="rgba(255,182,193,.2)" style="animation:dr-egg-glow 2.4s ease-in-out infinite"/>
+                <ellipse cx="50" cy="86" rx="30" ry="44" fill="#fff0f8"/>
+                <circle cx="34" cy="66" r="4" fill="rgba(255,182,193,.65)"/>
+                <circle cx="67" cy="76" r="3" fill="rgba(255,182,193,.45)"/>
+                <circle cx="38" cy="104" r="3.5" fill="rgba(255,182,193,.55)"/>
               </g>
-
-              <!-- ── 외곽선 X: 디테일 라인 (얇게 위에 올림) ── -->
-              <!-- 머리카락 (오른쪽으로 흘러내리는 곡선) -->
-              <path d="M42,26 C55,18 68,24 76,36" stroke="#1a1a1a" stroke-width="2"   fill="none" stroke-linecap="round"/>
-              <path d="M44,28 C57,22 70,30 76,42" stroke="#1a1a1a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-              <path d="M46,30 C59,26 72,36 74,48" stroke="#1a1a1a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-              <path d="M48,32 C61,30 72,42 72,54" stroke="#1a1a1a" stroke-width="1.1" fill="none" stroke-linecap="round"/>
-
-              <!-- 수염 -->
-              <line x1="40" y1="76" x2="10" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="79" x2="10" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="82" x2="12" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="76" x2="90" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="79" x2="90" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="82" x2="88" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-
-              <!-- 빨간 입술 -->
-              <ellipse cx="50" cy="93" rx="4" ry="2" fill="#ef4444"/>
+              <ellipse cx="38" cy="62" rx="9" ry="6" fill="rgba(255,255,255,.7)" transform="rotate(-22,38,62)"/>
             </svg>
           </div>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">들이 2단계 🔒</div>
-          <div style="font-size:10px;color:#6b6480">Day 11–20</div>
+          <div style="font-size:10px;color:#6b6480">6/6 ~ 6/12</div>
         </div>
 
-        <!-- ③ 3단계 -->
+        <!-- ③ 3단계 알 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="356" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
+          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
+            <svg width="160" height="260" viewBox="0 0 100 162" style="max-width:100%;height:auto">
               <defs>
-                <filter id="dog-ol2" x="-20%" y="-8%" width="140%" height="120%">
+                <filter id="egg-ol-3" x="-15%" y="-8%" width="130%" height="116%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
                   <feFlood flood-color="#1a1a1a" result="col"/>
                   <feComposite in="col" in2="exp" operator="in" result="border"/>
                   <feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
-
-              <!-- ── 외곽선 O: 채워진 도형 ── -->
-              <g filter="url(#dog-ol2)">
-                <!-- 몸통 -->
-                <ellipse cx="50" cy="132" rx="18" ry="14" fill="#f8f8f0"/>
-
-                <!-- 왼쪽 귀 (35° 회전, 위로 길게) -->
-                <path d="M48,26 Q40,6 31,12 Q23,23 35,31 Q42,31 48,26 Z" fill="#ffb3c6"/>
-
-                <!-- 오른쪽 귀 (좌우 대칭) -->
-                <path d="M52,26 Q60,6 69,12 Q77,23 65,31 Q58,31 52,26 Z" fill="#ffb3c6"/>
-
-                <!-- 얼굴 (길고 좁은 타원) -->
-                <ellipse cx="50" cy="64" rx="24" ry="40" fill="#f8f8f0"/>
-
-                <!-- 눈 (크고 어두운, 깜빡임) -->
-                <g transform="translate(38,52)">
-                  <g class="dr-te" style="animation-delay:.12s">
-                    <circle r="9" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-                <g transform="translate(62,52)">
-                  <g class="dr-te" style="animation-delay:.2s">
-                    <circle r="9" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-
-                <!-- 코 (크고 둥글게) -->
-                <circle cx="50" cy="78" r="8" fill="#1a1a1a"/>
-                <ellipse cx="47" cy="75" rx="2.5" ry="2" fill="rgba(255,255,255,.5)"/>
-
-                <!-- 터틀넥 칼라 -->
-                <rect x="31" y="104" width="38" height="18" rx="8" fill="#e8917a"/>
-
-                <!-- 앞발 -->
-                <rect x="40" y="142" width="10" height="17" rx="5" fill="#f8f8f0"/>
-                <!-- 뒷발 -->
-                <rect x="52" y="142" width="10" height="17" rx="5" fill="#f8f8f0"/>
-
-                <!-- 꼬리 -->
-                <path d="M70,130 Q92,124 88,112 Q84,100 92,92" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <g filter="url(#egg-ol-3)">
+                <ellipse cx="50" cy="88" rx="36" ry="50" fill="rgba(255,182,193,.2)" style="animation:dr-egg-glow 2.8s ease-in-out infinite"/>
+                <ellipse cx="50" cy="86" rx="30" ry="44" fill="#fff0f8"/>
+                <circle cx="62" cy="64" r="4" fill="rgba(255,182,193,.65)"/>
+                <circle cx="36" cy="80" r="3" fill="rgba(255,182,193,.45)"/>
+                <circle cx="64" cy="102" r="3.5" fill="rgba(255,182,193,.55)"/>
               </g>
-
-              <!-- ── 외곽선 X: 디테일 라인 (얇게 위에 올림) ── -->
-              <!-- 머리카락 (오른쪽으로 흘러내리는 곡선) -->
-              <path d="M42,26 C55,18 68,24 76,36" stroke="#1a1a1a" stroke-width="2"   fill="none" stroke-linecap="round"/>
-              <path d="M44,28 C57,22 70,30 76,42" stroke="#1a1a1a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-              <path d="M46,30 C59,26 72,36 74,48" stroke="#1a1a1a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-              <path d="M48,32 C61,30 72,42 72,54" stroke="#1a1a1a" stroke-width="1.1" fill="none" stroke-linecap="round"/>
-
-              <!-- 칼라 줄무늬 -->
-              <line x1="36" y1="106" x2="32" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="41" y1="106" x2="37" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="46" y1="106" x2="42" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="51" y1="106" x2="47" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="56" y1="106" x2="52" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="61" y1="106" x2="57" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="66" y1="106" x2="62" y2="120" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-
-              <!-- 수염 -->
-              <line x1="40" y1="76" x2="10" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="79" x2="10" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="82" x2="12" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="76" x2="90" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="79" x2="90" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="82" x2="88" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-
-              <!-- 빨간 입술 -->
-              <ellipse cx="50" cy="93" rx="4" ry="2" fill="#ef4444"/>
+              <ellipse cx="38" cy="62" rx="9" ry="6" fill="rgba(255,255,255,.7)" transform="rotate(-22,38,62)"/>
             </svg>
           </div>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">들이 3단계 🔒</div>
-          <div style="font-size:10px;color:#6b6480">Day 21–30</div>
+          <div style="font-size:10px;color:#6b6480">6/13 ~ 6/20</div>
         </div>
 
-        <!-- ④ 4단계 -->
+        <!-- ④ 4단계 알 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="356" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
+          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
+            <svg width="160" height="260" viewBox="0 0 100 162" style="max-width:100%;height:auto">
               <defs>
-                <filter id="dog-ol3" x="-20%" y="-8%" width="140%" height="120%">
+                <filter id="egg-ol-4" x="-15%" y="-8%" width="130%" height="116%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
                   <feFlood flood-color="#1a1a1a" result="col"/>
                   <feComposite in="col" in2="exp" operator="in" result="border"/>
                   <feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
-              <g filter="url(#dog-ol3)">
-                <ellipse cx="50" cy="132" rx="20" ry="22" fill="#f8f8f0"/>
-                <!-- 왼쪽 귀 (머리 위, 크게) -->
-                <path d="M44,28 Q36,0 26,4 Q24,22 36,36 Q42,38 44,28 Z" fill="#ffb3c6"/>
-                <!-- 오른쪽 귀 (좌우 대칭) -->
-                <path d="M56,28 Q64,0 74,4 Q76,22 64,36 Q58,38 56,28 Z" fill="#ffb3c6"/>
-                <ellipse cx="50" cy="64" rx="24" ry="40" fill="#f8f8f0"/>
-                <g transform="translate(38,52)">
-                  <g class="dr-te" style="animation-delay:.12s">
-                    <circle r="9" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-                <g transform="translate(62,52)">
-                  <g class="dr-te" style="animation-delay:.2s">
-                    <circle r="9" fill="#1a1a1a"/>
-                    <circle cx="-3" cy="-3" r="2" fill="white"/>
-                  </g>
-                </g>
-                <circle cx="50" cy="78" r="8" fill="#1a1a1a"/>
-                <ellipse cx="47" cy="75" rx="2.5" ry="2" fill="rgba(255,255,255,.5)"/>
-                <rect x="28" y="96" width="44" height="22" rx="9" fill="#e8917a"/>
-                <rect x="40" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
-                <rect x="52" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
-                <path d="M68,130 Q94,118 88,102 Q82,88 92,76" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <g filter="url(#egg-ol-4)">
+                <ellipse cx="50" cy="88" rx="36" ry="50" fill="rgba(255,182,193,.2)" style="animation:dr-egg-glow 3.1s ease-in-out infinite"/>
+                <ellipse cx="50" cy="86" rx="30" ry="44" fill="#fff0f8"/>
+                <circle cx="40" cy="70" r="4" fill="rgba(255,182,193,.65)"/>
+                <circle cx="63" cy="88" r="3" fill="rgba(255,182,193,.45)"/>
+                <circle cx="42" cy="108" r="3.5" fill="rgba(255,182,193,.55)"/>
               </g>
-              <path d="M42,26 C55,18 68,24 76,36" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
-              <path d="M44,28 C57,22 70,30 76,42" stroke="#1a1a1a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-              <path d="M46,30 C59,26 72,36 74,48" stroke="#1a1a1a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-              <path d="M48,32 C61,30 72,42 72,54" stroke="#1a1a1a" stroke-width="1.1" fill="none" stroke-linecap="round"/>
-              <line x1="35" y1="99" x2="31" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="41" y1="99" x2="37" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="47" y1="99" x2="43" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="53" y1="99" x2="49" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="59" y1="99" x2="55" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="65" y1="99" x2="61" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="71" y1="99" x2="67" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
-              <line x1="40" y1="76" x2="10" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="79" x2="10" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="40" y1="82" x2="12" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="76" x2="90" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="79" x2="90" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="60" y1="82" x2="88" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M46,91 Q50,97 54,91" stroke="#ef4444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="38" cy="62" rx="9" ry="6" fill="rgba(255,255,255,.7)" transform="rotate(-22,38,62)"/>
             </svg>
           </div>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">들이 4단계 🔒</div>
-          <div style="font-size:10px;color:#6b6480">Day 31–40</div>
+          <div style="font-size:10px;color:#6b6480">6/21 ~ 6/30</div>
         </div>
 
       </div>
