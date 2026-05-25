@@ -2173,10 +2173,7 @@ function wcStats(nick){
     todayDur:dd.reduce((s,r)=>s+(r.duration||0),0)
   };
 }
-function wcFmtDur(min){
-  if(!min)return'-';
-  return min<60?min+'분':Math.floor(min/60)+'h'+(min%60?String(min%60).padStart(2,'0'):'');
-}
+function wcFmtDur(min){return min?min+'분':'-';}
 function wcToast(msg,err=false){
   const t=document.getElementById('wc-toast');
   t.textContent=msg;
