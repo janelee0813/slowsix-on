@@ -2709,11 +2709,11 @@ wcInit();
         </div>
 
         <!-- ② 2단계 -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.28">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="327" viewBox="0 0 100 165" style="max-width:100%;height:auto">
+            <svg width="198" height="356" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
               <defs>
-                <filter id="dog-ol2" x="-15%" y="-8%" width="130%" height="118%">
+                <filter id="dog-ol2" x="-20%" y="-8%" width="140%" height="120%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
                   <feFlood flood-color="#1a1a1a" result="col"/>
                   <feComposite in="col" in2="exp" operator="in" result="border"/>
@@ -2755,6 +2755,18 @@ wcInit();
 
                 <!-- 터틀넥 칼라 -->
                 <rect x="28" y="96" width="44" height="22" rx="9" fill="#e8917a"/>
+
+                <!-- 앞발 왼쪽 -->
+                <rect x="28" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+                <!-- 앞발 오른쪽 -->
+                <rect x="40" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+                <!-- 뒷발 왼쪽 -->
+                <rect x="52" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+                <!-- 뒷발 오른쪽 -->
+                <rect x="64" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+
+                <!-- 꼬리 -->
+                <path d="M74,130 Q94,118 88,102 Q82,88 92,76" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
 
               <!-- ── 외곽선 X: 디테일 라인 (얇게 위에 올림) ── -->
