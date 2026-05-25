@@ -3674,7 +3674,7 @@ function tamaMonthRange() {
 function tamaCountPets(rows) {
   const cnt = {};
   (rows||[]).forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
-  return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
 }
 
 async function tamaLoadAllRanks() {
