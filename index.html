@@ -1938,8 +1938,8 @@ function copyResult(){
   </div>
 
   <!-- 애정 랭킹 -->
-  <div class="tama-crd" id="tama-rank-card" style="display:none">
-    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">🏆 <span id="tama-rank-title">이번달 애정 랭킹</span></div>
+  <div class="tama-crd" id="tama-rank-card" style="display:none;padding:10px 12px">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:6px">🏆 <span id="tama-rank-title">이번달 애정 랭킹</span></div>
     <div id="tama-rank-list"></div>
     <div id="tama-lastmonth-wrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(140,110,200,.15)">
       <div style="font-size:11px;color:#6b6480;font-weight:600;letter-spacing:.8px;margin-bottom:8px">📅 <span id="tama-lastmonth-title">지난달 애정 랭킹</span></div>
@@ -3534,7 +3534,7 @@ function tamaRenderRank() {
       badge = `<span style="font-size:11px;color:#6b6480">${rankIdx+1}위</span>`;
     }
     if (!isAdmin) rankIdx++;
-    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt}회 🤍</span></div>`;
+    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt} 🤍</span></div>`;
   }).join('');
   tamaRenderLastMonth();
 }
@@ -3726,7 +3726,7 @@ function tamaRenderLastMonth() {
       badge2 = `<span style="font-size:11px;color:#6b6480">${rankIdx2+1}위</span>`;
     }
     if (!isAdmin) rankIdx2++;
-    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge2}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#9b94b3;font-weight:700">${cnt}회 🤍</span></div>`;
+    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge2}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#9b94b3;font-weight:700">${cnt} 🤍</span></div>`;
   }).join('');
 }
 
