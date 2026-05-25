@@ -2170,7 +2170,8 @@ function wcStats(nick){
     totalCount:td.length,
     totalCal:td.reduce((s,r)=>s+(r.calories||0),0),
     totalDur:td.reduce((s,r)=>s+(r.duration||0),0),
-    todayDur:dd.reduce((s,r)=>s+(r.duration||0),0)
+    todayDur:dd.reduce((s,r)=>s+(r.duration||0),0),
+    todayCal:dd.reduce((s,r)=>s+(r.calories||0),0)
   };
 }
 function wcFmtDur(min){return min?min+'분':'-';}
@@ -2352,6 +2353,7 @@ function wcRender(){
               <th style="text-align:right">총횟수</th>
               <th style="text-align:right">오늘 시간</th>
               <th style="text-align:right">주간 시간</th>
+              <th style="text-align:right">오늘 kcal</th>
               <th style="text-align:right">주간 kcal</th>
             </tr></thead>
             <tbody>${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
@@ -2361,6 +2363,7 @@ function wcRender(){
                 <td class="num">${s.totalCount}회</td>
                 <td class="num">${wcFmtDur(s.todayDur)}</td>
                 <td class="num">${wcFmtDur(s.weekDur)}</td>
+                <td class="num">${s.todayCal?wcFmt(s.todayCal):'-'}</td>
                 <td class="num">${wcFmt(s.weekCal)}</td>
               </tr>`;}).join('')}
             </tbody>
