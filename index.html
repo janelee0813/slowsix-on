@@ -1955,6 +1955,11 @@ function copyResult(){
     <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">📋 최근 활동</div>
     <div id="tama-log-list"></div>
   </div>
+
+  <div class="tama-crd" id="tama-chart-card" style="display:none;padding:12px 14px">
+    <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:10px">📊 이번달 애정도</div>
+    <div id="tama-bar-chart"></div>
+  </div>
 </div>
 
 
@@ -3385,7 +3390,7 @@ CREATE TABLE tamagotchi_actions (
   await tamaCheckCycleEnd();
 
   if (loadEl) loadEl.style.display = 'none';
-  ['tama-char-card','tama-stat-card','tama-action-card','tama-log-card','tama-rank-card'].forEach(id => {
+  ['tama-char-card','tama-stat-card','tama-action-card','tama-log-card','tama-rank-card','tama-chart-card'].forEach(id => {
     document.getElementById(id).style.display = 'block';
   });
 
@@ -3536,6 +3541,45 @@ function tamaRenderRank() {
     return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt} 🤍</span></div>`;
   }).join('');
   tamaRenderLastMonth();
+  tamaRenderBarChart();
+}
+
+function tamaRenderBarChart() {
+  const el = document.getElementById('tama-bar-chart');
+  if (!el) return;
+  if (!tamaRankData.length) { el.innerHTML = ''; return; }
+  const TAMA_ADMIN = ['제인','엑서','엘라'];
+  const data = tamaRankData.slice(0, 7);
+  const max = Math.max(...data.map(([,c]) => c), 1);
+  const BAR_MAX = 72;
+  let ri = 0;
+  const items = data.map(([nick, cnt]) => {
+    const isAdmin = TAMA_ADMIN.includes(nick);
+    const h = Math.max(4, Math.round(cnt / max * BAR_MAX));
+    const bg = isAdmin ? 'rgba(140,110,200,.22)' :
+      ri === 0 ? 'linear-gradient(to top,#7c3aed,#ff5fb0)' :
+      ri === 1 ? 'linear-gradient(to top,#6d28d9,#e040a0)' :
+      ri === 2 ? 'linear-gradient(to top,#5b21b6,#c026d3)' :
+                 'linear-gradient(to top,#4c1d95,#a21caf)';
+    if (!isAdmin) ri++;
+    const label = (nick.length > 3 ? nick.slice(0,3)+'…' : nick);
+    return { label, cnt, h, bg, isAdmin };
+  });
+  el.innerHTML = `
+    <div style="display:flex;align-items:flex-end;height:${BAR_MAX}px;gap:3px">
+      ${items.map((b,i) => `
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span style="font-size:9px;font-weight:700;color:${b.isAdmin?'#6b6480':'#c084fc'};margin-bottom:2px;line-height:1">${b.cnt}</span>
+          <div class="tama-bcbar" style="width:75%;height:0;background:${b.bg};border-radius:3px 3px 0 0;transition:height .5s cubic-bezier(.22,1,.36,1) ${i*0.05}s${b.isAdmin?'':';box-shadow:0 0 8px -2px rgba(181,102,255,.5)'}"></div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:3px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(140,110,200,.12)">
+      ${items.map(b => `
+        <div style="flex:1;text-align:center;font-size:9px;color:${b.isAdmin?'#6b6480':'#9b94b3'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${b.isAdmin?'👑':''}${b.label}</div>`).join('')}
+    </div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelectorAll('.tama-bcbar').forEach((bar, i) => { bar.style.height = items[i].h + 'px'; });
+  }));
 }
 
 function tamaRenderCd() {
