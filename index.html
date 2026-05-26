@@ -2338,7 +2338,7 @@ function wcRender(){
   const wcSorted=[...wcParts].sort((a,b)=>{const ai=_WC_ORDER.indexOf(a.nickname),bi=_WC_ORDER.indexOf(b.nickname);return(ai<0?99:ai)-(bi<0?99:bi);});
   app.innerHTML=`
     <div class="wc-header">
-      <h1>🏃 운동 인증 챌린지</h1>
+      <h1 style="font-size:1.7rem;font-weight:800;letter-spacing:-0.01em"><span style="background:linear-gradient(135deg,#b566ff,#db2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">운동 인증</span> 챌린지</h1>
       <p>주간 5회 달성을 목표로 함께 운동해요! (6/11 종료 예정)</p>
       <p style="font-size:12px;color:#9b94b3;margin-top:4px">* 다음 달에도 챌린지는 새롭게 모집할... 수도 있습니다!</p>
       <div style="text-align:right;margin-top:6px">
