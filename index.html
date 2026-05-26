@@ -1373,7 +1373,7 @@ function copyResult(){
           <animateTransform attributeName="transform" type="scale" values="1;1.12;1" dur="1.8s" repeatCount="indefinite" additive="sum" transformOrigin="9 9"/>
         </svg>`;
         const marbleDisplay=marbles>0
-          ?`<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px">${Array.from({length:marbles},(_,mi)=>marbleSVG.replace('id="mg"',`id="mg${mi}`).replace('url(#mg)','url(#mg'+mi+')')).join('')}</span>`
+          ?`<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px">${Array.from({length:marbles},(_,mi)=>marbleSVG.replace('id="mg"',`id="mg${mi}"`).replace('url(#mg)',`url(#mg${mi})`)).join('')}</span>`
           :`<span style="color:#6b6480;font-size:11px">-</span>`;
         return`${divider}<div class="flex items-center gap-2">
           <span class="w-14 shrink-0 text-xs font-semibold text-foreground">${nick}</span>
