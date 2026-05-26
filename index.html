@@ -2387,7 +2387,7 @@ function wcRender(){
     </div>
     ${wcOverallChart(wcSorted)}
     <div class="wc-card">
-      <div class="wc-card-title">⏱️ 개인별 주간 운동 시간</div>
+      <div class="wc-card-title">⏱️ 운동시간/kcal</div>
       ${wcParts.length===0
         ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
         :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
@@ -2419,7 +2419,7 @@ function wcRender(){
     </div>
 
     <div class="wc-card" style="margin-top:12px">
-      <div class="wc-card-title">📅 개인별 주간 운동 현황</div>
+      <div class="wc-card-title">📅 주간 운동 현황</div>
       ${wcParts.length===0
         ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
         :`<div style="display:flex;flex-direction:column;gap:10px">
@@ -2598,7 +2598,7 @@ function wcInitPlayerDrag(){
 function wcOverallChart(wcSorted){
   if(!wcSorted||!wcSorted.length)return'';
   return`<div class="wc-card">
-    <div class="wc-card-title">🏆 전체 운동 현황</div>
+    <div class="wc-card-title">🏆 미션 현황</div>
     <div style="font-size:11px;color:#6b6480;margin-bottom:12px">챌린지 5/11~6/10 · 목표 23회 기준</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       ${wcSorted.map(p=>{
