@@ -2384,10 +2384,16 @@ function wcRender(){
         ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
         :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
           ${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
-          <div style="background:rgba(181,102,255,0.08);border:1px solid rgba(181,102,255,0.18);border-radius:10px;padding:10px 6px;text-align:center">
-            <div style="font-size:10px;color:#9b94b3;font-weight:600;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nickname}</div>
-            <div style="font-size:22px;font-weight:700;color:#b566ff;line-height:1">${s.weekDur||0}</div>
-            <div style="font-size:9px;color:#6b6480;margin-top:2px">분</div>
+          <div style="background:rgba(181,102,255,0.08);border:1px solid rgba(181,102,255,0.18);border-radius:10px;overflow:hidden;text-align:center">
+            <div style="font-size:10px;color:#9b94b3;font-weight:600;padding:7px 4px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid rgba(181,102,255,0.15)">${p.nickname}</div>
+            <div style="padding:7px 4px;border-bottom:1px solid rgba(181,102,255,0.1)">
+              <div style="font-size:8px;color:#6b6480;margin-bottom:2px">오늘</div>
+              <div style="display:inline-flex;align-items:baseline;gap:2px"><span style="font-size:18px;font-weight:700;color:#b566ff;line-height:1">${s.todayDur||0}</span><span style="font-size:9px;color:#6b6480">분</span></div>
+            </div>
+            <div style="padding:7px 4px">
+              <div style="font-size:8px;color:#6b6480;margin-bottom:2px">주간</div>
+              <div style="display:inline-flex;align-items:baseline;gap:2px"><span style="font-size:18px;font-weight:700;color:#b566ff;line-height:1">${s.weekDur||0}</span><span style="font-size:9px;color:#6b6480">분</span></div>
+            </div>
           </div>`;}).join('')}
         </div>`}
     </div>
