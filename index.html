@@ -2379,31 +2379,34 @@ function wcRender(){
       </button>`}
     </div>
     <div class="wc-card">
-      <div class="wc-card-title">📊 참여자 실행현황</div>
+      <div class="wc-card-title">⏱️ 개인별 주간 운동 시간</div>
       ${wcParts.length===0
         ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
-        :`<div class="wc-stats-wrap"><table class="wc-table">
-            <thead><tr>
-              <th>닉네임</th>
-              <th style="text-align:right">이번주</th>
-              <th style="text-align:right">총횟수</th>
-              <th style="text-align:right">오늘 시간</th>
-              <th style="text-align:right">주간 시간</th>
-              <th style="text-align:right">오늘 kcal</th>
-              <th style="text-align:right">주간 kcal</th>
-            </tr></thead>
-            <tbody>${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
-              <tr>
-                <td><div style="display:flex;align-items:center;gap:7px"><span class="wc-avatar">${p.nickname.slice(0,1)}</span><span style="font-weight:600">${p.nickname}</span></div></td>
-                <td class="num" style="font-weight:600">${s.weekCount}회</td>
-                <td class="num">${s.totalCount}회</td>
-                <td class="num">${wcFmtDur(s.todayDur)}</td>
-                <td class="num">${wcFmtDur(s.weekDur)}</td>
-                <td class="num">${s.todayCal?wcFmt(s.todayCal):'-'}</td>
-                <td class="num">${wcFmt(s.weekCal)}</td>
-              </tr>`;}).join('')}
-            </tbody>
-          </table></div>`}
+        :`<div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid rgba(140,110,200,0.12)">
+            <span style="min-width:44px"></span>
+            <div style="display:flex;gap:6px;flex:1">
+              <div style="flex:1;text-align:center;font-size:9px;color:#6b6480;letter-spacing:.3px">오늘(분)</div>
+              <div style="flex:1;text-align:center;font-size:9px;color:#6b6480;letter-spacing:.3px">주간(분)</div>
+              <div style="flex:1;text-align:center;font-size:9px;color:#6b6480;letter-spacing:.3px">주간 kcal</div>
+            </div>
+          </div>
+          ${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="min-width:44px;font-size:12px;font-weight:600;color:#f5f1ff;flex-shrink:0">${p.nickname}</span>
+            <div style="display:flex;gap:6px;flex:1">
+              <div style="flex:1;background:rgba(181,102,255,0.1);border:1px solid rgba(181,102,255,0.18);border-radius:8px;padding:7px 4px;text-align:center">
+                <span style="font-size:16px;font-weight:700;color:#b566ff;line-height:1">${s.todayDur||0}</span>
+              </div>
+              <div style="flex:1;background:rgba(94,224,168,0.08);border:1px solid rgba(94,224,168,0.18);border-radius:8px;padding:7px 4px;text-align:center">
+                <span style="font-size:16px;font-weight:700;color:#5ee0a8;line-height:1">${s.weekDur||0}</span>
+              </div>
+              <div style="flex:1;background:rgba(255,198,0,0.08);border:1px solid rgba(255,198,0,0.18);border-radius:8px;padding:7px 4px;text-align:center">
+                <span style="font-size:16px;font-weight:700;color:#ffc600;line-height:1">${s.weekCal?wcFmt(s.weekCal):0}</span>
+              </div>
+            </div>
+          </div>`;}).join('')}
+        </div>`}
     </div>
 
     <div class="wc-card" style="margin-top:12px">
