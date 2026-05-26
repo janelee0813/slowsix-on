@@ -1355,6 +1355,7 @@ function copyResult(){
         <div class="flex-1 text-[10px] text-muted-foreground font-semibold">🔮 드래곤볼</div>
         <div class="w-20 shrink-0 text-[10px] text-muted-foreground font-semibold text-right">🫧 소원구슬</div>
       </div>`;
+      let marbleRank=0;
       el.innerHTML=header+sorted.map(([nick,cnt],i,arr)=>{
         const pct=Math.min(100,Math.round((cnt%7)/7*100));
         const marbles=Math.floor(cnt/7);
@@ -1375,8 +1376,16 @@ function copyResult(){
         const marbleDisplay=marbles>0
           ?`<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px">${Array.from({length:marbles},(_,mi)=>marbleSVG.replace('id="mg"',`id="mg${mi}"`).replace('url(#mg)',`url(#mg${mi})`)).join('')}<span style="color:#b566ff;font-weight:700;font-size:13px;margin-left:2px">${marbles}</span><span style="font-size:10px;color:#9b94b3">개</span></span>`
           :`<span style="color:#6b6480;font-size:11px">-</span>`;
+        let rankBadge='';
+        if(marbles>0){
+          marbleRank++;
+          const colors=['linear-gradient(135deg,#ffd700,#ffaa00)','linear-gradient(135deg,#c0c0c0,#a0a0a0)','linear-gradient(135deg,#cd7f32,#a05a20)'];
+          const bg=marbleRank<=3?colors[marbleRank-1]:'rgba(181,102,255,0.25)';
+          const color=marbleRank<=3?'#1a1a1a':'#b566ff';
+          rankBadge=`<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${bg};font-size:10px;font-weight:700;color:${color};flex-shrink:0;margin-right:2px">${marbleRank}</span>`;
+        }
         return`${divider}<div class="flex items-center gap-2">
-          <span class="w-14 shrink-0 text-xs font-semibold text-foreground">${nick}</span>
+          <span class="w-14 shrink-0 text-xs font-semibold text-foreground" style="display:inline-flex;align-items:center">${rankBadge}${nick}</span>
           <div class="flex-1 flex items-center gap-1.5">
             <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden"><div style="width:${pct}%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div></div>
             <span class="text-xs text-muted-foreground shrink-0" style="min-width:28px">${cnt%7}/7</span>
