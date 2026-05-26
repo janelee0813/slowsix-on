@@ -4007,11 +4007,13 @@ async function tamaAction(type) {
     tamaRenderCd(); return;
   }
 
-  // 성공 — 스탯 업데이트 (애정도 제외)
+  // 성공 — 스탯 업데이트 (애정도: 2026-05-26 23:59 KST 이후부터 반영)
+  const FEED_PLAY_AFFECT_START = new Date('2026-05-26T23:59:00+09:00').getTime();
   const hunger = tamaHunger(), happy = tamaHappy();
   const updates = { last_updated: new Date().toISOString() };
   if (type === 'feed') updates.hunger = Math.min(100, hunger + 30);
   else updates.happiness = Math.min(100, happy + 25);
+  if (Date.now() >= FEED_PLAY_AFFECT_START) updates.affection = (tamaData.affection || 0) + 1;
   const { data: updated } = await sb.from('tamagotchi').update(updates).eq('id',1).select().maybeSingle();
   if (updated) tamaData = updated;
 
