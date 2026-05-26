@@ -3058,6 +3058,7 @@ wcInit();
         <div class="mt-1 flex items-center gap-3">
           <p class="text-[10px] text-muted-foreground/50">운영자 · ${betaFmt(c.created_at)}</p>
           <button onclick="betaToggleReply('${c.id}')" class="text-[10px] text-neon-purple/60 hover:text-neon-purple transition-colors">💬 댓글 달기</button>
+          <button onclick="betaLike('${c.id}')" class="text-[10px] transition-colors ${localStorage.getItem('beta_liked_'+c.id)?'text-pink-400':'text-muted-foreground/40 hover:text-pink-400'}">❤️ ${c.like_count||0}</button>
         </div>
         ${childHTML}
         ${replyFormHTML}
@@ -3154,6 +3155,20 @@ wcInit();
   function betaCancelDelete() {
     document.getElementById('beta-delete-modal').style.display = 'none';
     betaDeleteTargetId = null;
+  }
+
+  async function betaLike(id) {
+    const key = 'beta_liked_' + id;
+    if (localStorage.getItem(key)) return;
+    const post = betaComments.find(c => c.id === id);
+    if (!post) return;
+    const newCount = (post.like_count || 0) + 1;
+    const { error } = await sb.from('beta_comments').update({ like_count: newCount }).eq('id', id);
+    if (!error) {
+      post.like_count = newCount;
+      localStorage.setItem(key, '1');
+      betaRender();
+    }
   }
 
   function spinCheckPin(){
@@ -3621,11 +3636,26 @@ function tamaBoardRender() {
       <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
         <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">운영자 · ${tamaBoardFmt(c.created_at)}</p>
         <button onclick="tamaBoardToggleReply('${c.id}')" style="font-size:10px;color:rgba(181,102,255,0.6);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(181,102,255,0.6)'">💬 댓글 달기</button>
+        <button onclick="tamaBoardLike('${c.id}')" style="font-size:10px;color:${localStorage.getItem('tama_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.4)'};background:none;border:none;cursor:pointer;padding:0;transition:color .15s" onmouseover="this.style.color='#f472b6'" onmouseout="this.style.color='${localStorage.getItem('tama_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.4)'}'">❤️ ${c.like_count||0}</button>
       </div>
       ${childHTML}
       ${replyFormHTML}
     </div>`;
   }).join('');
+}
+
+async function tamaBoardLike(id) {
+  const key = 'tama_liked_' + id;
+  if (localStorage.getItem(key)) return;
+  const post = tamaBoardPosts.find(c => c.id === id);
+  if (!post) return;
+  const newCount = (post.like_count || 0) + 1;
+  const { error } = await sb.from('tama_board').update({ like_count: newCount }).eq('id', id);
+  if (!error) {
+    post.like_count = newCount;
+    localStorage.setItem(key, '1');
+    tamaBoardRender();
+  }
 }
 
 function tamaBoardTogglePost() {
