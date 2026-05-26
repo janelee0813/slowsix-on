@@ -2861,19 +2861,30 @@ wcInit();
     <!-- 익명 댓글 게시판 -->
     <div>
       <div class="mb-3 flex items-center gap-2">
-        <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">💬 익명 게시판</span>
+        <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">📢 게시판</span>
       </div>
 
-      <!-- 작성 폼 -->
-      <div class="neon-card p-4 mb-4">
-        <textarea id="beta-comment-inp" placeholder="익명으로 자유롭게 남겨주세요 :)" rows="3"
+      <!-- 운영자 작성 폼 (PIN 필요) -->
+      <div class="mb-4 flex justify-end">
+        <button onclick="betaTogglePost()" id="beta-post-toggle-btn"
+          style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'"
+          onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
+          ✏️ 운영자 글쓰기
+        </button>
+      </div>
+      <div id="beta-post-form" style="display:none" class="neon-card p-4 mb-4">
+        <input id="beta-post-pin" type="password" placeholder="운영자 PIN" maxlength="6"
+          class="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm text-foreground outline-none focus:border-neon-purple/60 mb-2"
+          style="font-family:inherit;color-scheme:dark" onkeydown="if(event.key==='Enter')document.getElementById('beta-comment-inp').focus()"/>
+        <textarea id="beta-comment-inp" placeholder="공지 내용을 입력하세요" rows="3"
           class="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60 resize-none"
           style="font-family:inherit"></textarea>
         <div class="mt-2 flex justify-end">
           <button onclick="betaSubmitComment()" id="beta-submit-btn"
             class="rounded-lg px-5 py-2 text-xs font-semibold text-white transition-all"
             style="background:linear-gradient(90deg,#7c3aed,#db2777)">
-            익명으로 남기기
+            게시하기
           </button>
         </div>
         <p id="beta-submit-msg" class="mt-1 text-xs text-center" style="display:none"></p>
@@ -3086,7 +3097,7 @@ wcInit();
     const parents = betaComments.filter(c => !c.parent_id);
     const replies = betaComments.filter(c => c.parent_id);
     if (!parents.length) {
-      el.innerHTML = '<p class="text-xs text-muted-foreground text-center py-4">아직 댓글이 없어요. 첫 번째로 남겨보세요!</p>';
+      el.innerHTML = '<p class="text-xs text-muted-foreground text-center py-4">아직 게시물이 없어요.</p>';
       return;
     }
     el.innerHTML = parents.map(c => {
@@ -3102,7 +3113,7 @@ wcInit();
 
       const replyFormHTML = `
         <div id="beta-reply-form-${c.id}" style="display:none" class="mt-2 pl-3 border-l-2 border-neon-purple/20">
-          <textarea id="beta-reply-inp-${c.id}" placeholder="대댓글을 남겨주세요" rows="2"
+          <textarea id="beta-reply-inp-${c.id}" placeholder="댓글을 남겨주세요" rows="2"
             class="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60 resize-none"
             style="font-family:inherit"></textarea>
           <div class="mt-1 flex gap-2 justify-end">
@@ -3117,8 +3128,8 @@ wcInit();
           <button onclick="betaAskDelete('${c.id}')" class="shrink-0 text-[10px] text-muted-foreground/40 hover:text-red-400 transition-colors mt-0.5">삭제</button>
         </div>
         <div class="mt-1 flex items-center gap-3">
-          <p class="text-[10px] text-muted-foreground/50">익명 · ${betaFmt(c.created_at)}</p>
-          <button onclick="betaToggleReply('${c.id}')" class="text-[10px] text-neon-purple/60 hover:text-neon-purple transition-colors">↩ 답글</button>
+          <p class="text-[10px] text-muted-foreground/50">운영자 · ${betaFmt(c.created_at)}</p>
+          <button onclick="betaToggleReply('${c.id}')" class="text-[10px] text-neon-purple/60 hover:text-neon-purple transition-colors">💬 댓글 달기</button>
         </div>
         ${childHTML}
         ${replyFormHTML}
@@ -3150,23 +3161,38 @@ wcInit();
     }
   }
 
+  function betaTogglePost() {
+    const form = document.getElementById('beta-post-form');
+    const isOpen = form.style.display !== 'none';
+    form.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) setTimeout(() => document.getElementById('beta-post-pin').focus(), 50);
+  }
+
   async function betaSubmitComment() {
-    const inp = document.getElementById('beta-comment-inp');
+    const pin = document.getElementById('beta-post-pin').value;
     const msg = document.getElementById('beta-submit-msg');
+    if (pin !== DB_PIN) {
+      msg.textContent = 'PIN이 올바르지 않아요'; msg.style.color='#f87171'; msg.style.display='block';
+      setTimeout(() => { msg.style.display='none'; }, 2000);
+      return;
+    }
+    const inp = document.getElementById('beta-comment-inp');
     const btn = document.getElementById('beta-submit-btn');
     const content = inp.value.trim();
     if (!content) { msg.textContent = '내용을 입력해주세요'; msg.style.color='#f87171'; msg.style.display='block'; return; }
-    btn.disabled = true; btn.textContent = '저장 중...';
+    btn.disabled = true; btn.textContent = '게시 중...';
     const { data, error } = await sb.from('beta_comments').insert({ content }).select().single();
-    if (error) { msg.textContent = '저장 실패. 다시 시도해주세요'; msg.style.color='#f87171'; }
+    if (error) { msg.textContent = '게시 실패. 다시 시도해주세요'; msg.style.color='#f87171'; }
     else {
-      betaComments.push(data);
+      betaComments.unshift(data);
       betaRender();
       inp.value = '';
-      msg.textContent = '익명으로 남겼어요 ✅'; msg.style.color='#a78bfa';
+      document.getElementById('beta-post-pin').value = '';
+      document.getElementById('beta-post-form').style.display = 'none';
+      msg.textContent = '게시되었어요 ✅'; msg.style.color='#a78bfa';
     }
     msg.style.display = 'block';
-    btn.disabled = false; btn.textContent = '익명으로 남기기';
+    btn.disabled = false; btn.textContent = '게시하기';
     setTimeout(() => { msg.style.display = 'none'; }, 2500);
   }
 
