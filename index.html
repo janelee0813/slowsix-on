@@ -3746,7 +3746,7 @@ let tamaBoardPosts = [];
 let tamaBoardDeleteId = null;
 
 async function tamaBoardInit() {
-  const { data, error } = await sb.from('tama_board').select('*').order('created_at', { ascending: false });
+  const { data, error } = await sb.from('tama_board').select('*').order('created_at', { ascending: true });
   if (!error) tamaBoardPosts = data || [];
   tamaBoardRender();
 }
@@ -3837,7 +3837,7 @@ async function tamaBoardSubmitPost() {
   btn.disabled = true; btn.textContent = '게시 중...';
   const { data, error } = await sb.from('tama_board').insert({ content }).select().single();
   if (!error && data) {
-    tamaBoardPosts.unshift(data);
+    tamaBoardPosts.push(data);
     tamaBoardRender();
     inp.value = ''; document.getElementById('tama-board-pin').value = '';
     document.getElementById('tama-board-post-form').style.display = 'none';
