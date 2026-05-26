@@ -2350,7 +2350,7 @@ function wcRender(){
     </div>
     ${wcParticipantCards()}
     ${wcProgressBar()}
-    ${wcOverallChart(wcSorted)}
+
     <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
       <div class="wc-row">
@@ -2582,39 +2582,6 @@ function wcInitPlayerDrag(){
       card.style.boxShadow='';
     });
   });
-}
-
-function wcOverallChart(wcSorted){
-  if(!wcSorted||!wcSorted.length)return'';
-  return`<div class="wc-card">
-    <div class="wc-card-title">🏆 전체 운동 현황</div>
-    <div style="font-size:11px;color:#6b6480;margin-bottom:12px">챌린지 5/11~6/10 · 목표 23회 기준</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      ${wcSorted.map(p=>{
-        const{total,hasFailed}=wcChallengeStatus(p.nickname);
-        const pct=Math.min(100,total/WC_TARGET*100);
-        const success=!hasFailed&&total>=WC_TARGET;
-        const barColor=hasFailed
-          ?'linear-gradient(to right,#ff5f6d,#ff8c6d)'
-          :success
-            ?'linear-gradient(to right,#3dd68c,#5ee0a8)'
-            :'linear-gradient(to right,#7c3aed,#b566ff)';
-        const numColor=hasFailed?'#ff5f6d':success?'#5ee0a8':'#b566ff';
-        return`<div style="display:flex;align-items:center;gap:8px">
-          <span style="min-width:46px;font-size:12px;font-weight:600;color:#f5f1ff;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nickname}</span>
-          <div style="flex:1;height:13px;background:rgba(140,110,200,.15);border-radius:99px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:99px;transition:width .7s ease"></div>
-          </div>
-          <span style="font-size:12px;font-weight:700;color:${numColor};min-width:52px;text-align:right;flex-shrink:0">${total}/${WC_TARGET}${success?' ✅':''}</span>
-        </div>`;
-      }).join('')}
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;padding-top:8px;border-top:1px solid rgba(140,110,200,.12)">
-        <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:linear-gradient(to right,#7c3aed,#b566ff)"></div><span style="font-size:10px;color:#9b94b3">정상 진행중</span></div>
-        <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:linear-gradient(to right,#ff5f6d,#ff8c6d)"></div><span style="font-size:10px;color:#9b94b3">주간 미션 실패</span></div>
-        <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:linear-gradient(to right,#3dd68c,#5ee0a8)"></div><span style="font-size:10px;color:#9b94b3">목표 달성</span></div>
-      </div>
-    </div>
-  </div>`;
 }
 
 function wcProgressBar(){
