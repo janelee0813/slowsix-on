@@ -3983,7 +3983,7 @@ async function tamaAction(type) {
     if (data) tamaData = data;
     tamaLogs.unshift({ actor_nickname: nick, action_type: 'pet', created_at: new Date().toISOString() });
     if (tamaLogs.length > 12) tamaLogs.pop();
-    tamaPlayAnim('pet'); tamaRender(); return;
+    tamaPlayAnim('pet'); tamaRender(); await tamaRefreshRank(); return;
   }
 
   // ── 밥주기/놀아주기: 전체 공유 쿨다운 ──
