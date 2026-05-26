@@ -2159,6 +2159,8 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let wcParts=[];
 let wcRecs=[];
+let wcBoardPosts=[];
+let wcBoardDeleteId=null;
 let wcFormOpen=false;
 const wcForm={date:wcToday(),nickname:'',isCompleted:true,isPass:false,calories:'',duration:''};
 window.wcForm=wcForm;
@@ -2234,12 +2236,14 @@ async function wcAutoMarkYesterday(){
 }
 
 async function wcInit(){
-  const[p,r]=await Promise.all([
+  const[p,r,b]=await Promise.all([
     sb.from('wc_participants').select('*').order('created_at'),
-    sb.from('wc_records').select('*')
+    sb.from('wc_records').select('*'),
+    sb.from('wc_board').select('*').order('created_at',{ascending:false})
   ]);
   if(!p.error)wcParts=p.data;
   if(!r.error)wcRecs=r.data;
+  if(!b.error)wcBoardPosts=b.data;
   await wcAutoMarkYesterday();
   wcRender();
 }
@@ -2460,8 +2464,70 @@ function wcRender(){
           </div>`;}).join('')}
         </div>`}
     </div>
+    ${wcBoardSection()}
 
   `;
+}
+
+function wcBoardSection(){
+  const parents=wcBoardPosts.filter(c=>!c.parent_id);
+  const replies=wcBoardPosts.filter(c=>c.parent_id);
+  const postsHTML=parents.length===0
+    ?`<p class="wc-empty">아직 게시물이 없어요. 첫 글을 남겨보세요!</p>`
+    :parents.map(c=>{
+      const childList=replies.filter(r=>r.parent_id===c.id);
+      const childHTML=childList.map(r=>`
+        <div style="margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.25)">
+          <div style="display:flex;align-items:flex-start;gap:6px">
+            <p style="flex:1;font-size:12px;color:rgba(245,241,255,0.85);line-height:1.5;white-space:pre-wrap;margin:0">${wcBoardEsc(r.content)}</p>
+            <button onclick="wcBoardAskDelete('${r.id}')" style="flex-shrink:0;font-size:10px;color:rgba(155,148,179,0.3);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.3)'">삭제</button>
+          </div>
+          <p style="margin:3px 0 0;font-size:10px;color:rgba(155,148,179,0.45)">ㄴ ${wcBoardEsc(r.nickname)} · ${wcBoardFmt(r.created_at)}</p>
+        </div>`).join('');
+      const replyFormHTML=`
+        <div id="wcb-rf-${c.id}" style="display:none;margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.15)">
+          <input id="wcb-rn-${c.id}" placeholder="닉네임" maxlength="10"
+            style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:5px 9px;font-size:11px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:4px"/>
+          <textarea id="wcb-ri-${c.id}" placeholder="댓글을 남겨주세요" rows="2"
+            style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:6px 9px;font-size:11px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
+          <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">
+            <button onclick="wcBoardCancelReply('${c.id}')" style="font-size:10px;color:#9b94b3;background:none;border:none;cursor:pointer">취소</button>
+            <button onclick="wcBoardSubmitReply('${c.id}')" style="border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;color:#fff;background:linear-gradient(90deg,#7c3aed,#db2777);cursor:pointer">등록</button>
+          </div>
+        </div>`;
+      return `<div style="background:rgba(30,22,55,0.55);border:1px solid rgba(140,110,200,0.2);border-radius:10px;padding:12px">
+        <div style="display:flex;align-items:flex-start;gap:6px">
+          <p style="flex:1;font-size:13px;color:rgba(245,241,255,0.9);line-height:1.5;white-space:pre-wrap;margin:0">${wcBoardEsc(c.content)}</p>
+          <button onclick="wcBoardAskDelete('${c.id}')" style="flex-shrink:0;font-size:10px;color:rgba(155,148,179,0.3);background:none;border:none;cursor:pointer;padding:0;margin-top:2px" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.3)'">삭제</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
+          <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">${wcBoardEsc(c.nickname)} · ${wcBoardFmt(c.created_at)}</p>
+          <button onclick="wcBoardToggleReply('${c.id}')" style="font-size:10px;color:rgba(181,102,255,0.6);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(181,102,255,0.6)'">💬 댓글 달기</button>
+          <button onclick="wcBoardLike('${c.id}')" style="font-size:10px;color:${localStorage.getItem('wcb_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.35)'};background:none;border:none;cursor:pointer;padding:0;transition:color .15s" onmouseover="this.style.color='#f472b6'" onmouseout="this.style.color='${localStorage.getItem('wcb_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.35)'}'">❤️ ${c.like_count||0}</button>
+        </div>
+        ${childHTML}
+        ${replyFormHTML}
+      </div>`;
+    }).join('');
+
+  return `<div class="wc-card" style="margin-top:12px">
+    <div class="wc-card-title">💬 자유 게시판</div>
+    <div style="margin-bottom:12px">
+      <input id="wcb-nick" placeholder="닉네임" maxlength="10"
+        style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:6px"/>
+      <textarea id="wcb-inp" placeholder="자유롭게 글을 남겨보세요" rows="3"
+        style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:8px 10px;font-size:12px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
+      <button onclick="wcBoardSubmitPost()" style="width:100%;margin-top:4px;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${postsHTML}</div>
+    <div id="wcb-delete-modal" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:rgba(30,22,55,0.8);border:1px solid rgba(239,68,68,0.3);text-align:center">
+      <p style="font-size:12px;color:#f5f1ff;margin:0 0 8px">삭제할까요?</p>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button onclick="wcBoardConfirmDelete()" style="padding:5px 16px;border-radius:8px;border:none;background:#ef4444;color:#fff;font-size:12px;font-weight:600;cursor:pointer">삭제</button>
+        <button onclick="wcBoardCancelDelete()" style="padding:5px 16px;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:12px;cursor:pointer">취소</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function betaCopyUrl(){
@@ -2597,6 +2663,84 @@ function wcCloseForm(){
   wcRender();
 }
 
+function wcBoardEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function wcBoardFmt(ts){if(!ts)return'';const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+
+async function wcBoardSubmitPost(){
+  const nick=document.getElementById('wcb-nick')?.value.trim();
+  const content=document.getElementById('wcb-inp')?.value.trim();
+  if(!nick){wcToast('닉네임을 입력해주세요',true);return;}
+  if(!content){wcToast('내용을 입력해주세요',true);return;}
+  const{data,error}=await sb.from('wc_board').insert({nickname:nick,content}).select().single();
+  if(!error&&data){
+    wcBoardPosts.unshift(data);
+    document.getElementById('wcb-nick').value='';
+    document.getElementById('wcb-inp').value='';
+    wcRender();
+  }
+}
+
+function wcBoardToggleReply(id){
+  const form=document.getElementById('wcb-rf-'+id);
+  if(!form)return;
+  const isOpen=form.style.display!=='none';
+  form.style.display=isOpen?'none':'block';
+  if(!isOpen)document.getElementById('wcb-rn-'+id)?.focus();
+}
+
+function wcBoardCancelReply(id){
+  const form=document.getElementById('wcb-rf-'+id);
+  if(form)form.style.display='none';
+}
+
+async function wcBoardSubmitReply(parentId){
+  const nick=document.getElementById('wcb-rn-'+parentId)?.value.trim();
+  const content=document.getElementById('wcb-ri-'+parentId)?.value.trim();
+  if(!nick){wcToast('닉네임을 입력해주세요',true);return;}
+  if(!content){wcToast('내용을 입력해주세요',true);return;}
+  const{data,error}=await sb.from('wc_board').insert({nickname:nick,content,parent_id:parentId}).select().single();
+  if(!error&&data){
+    wcBoardPosts.push(data);
+    wcRender();
+  }
+}
+
+async function wcBoardLike(id){
+  const key='wcb_liked_'+id;
+  if(localStorage.getItem(key))return;
+  const post=wcBoardPosts.find(c=>c.id===id);
+  if(!post)return;
+  const newCount=(post.like_count||0)+1;
+  const{error}=await sb.from('wc_board').update({like_count:newCount}).eq('id',id);
+  if(!error){
+    post.like_count=newCount;
+    localStorage.setItem(key,'1');
+    wcRender();
+  }
+}
+
+function wcBoardAskDelete(id){
+  wcBoardDeleteId=id;
+  const modal=document.getElementById('wcb-delete-modal');
+  if(modal)modal.style.display='block';
+}
+
+function wcBoardCancelDelete(){
+  wcBoardDeleteId=null;
+  const modal=document.getElementById('wcb-delete-modal');
+  if(modal)modal.style.display='none';
+}
+
+async function wcBoardConfirmDelete(){
+  if(!wcBoardDeleteId)return;
+  const{error}=await sb.from('wc_board').delete().eq('id',wcBoardDeleteId);
+  if(!error){
+    wcBoardPosts=wcBoardPosts.filter(c=>c.id!==wcBoardDeleteId);
+    wcBoardDeleteId=null;
+    wcRender();
+  }
+}
+
 window.wcAddParticipant=wcAddParticipant;
 window.wcDeleteParticipant=wcDeleteParticipant;
 window.wcSetCompleted=wcSetCompleted;
@@ -2605,6 +2749,14 @@ window.wcSaveRecord=wcSaveRecord;
 window.wcCopyUrl=wcCopyUrl;
 window.wcOpenForm=wcOpenForm;
 window.wcCloseForm=wcCloseForm;
+window.wcBoardSubmitPost=wcBoardSubmitPost;
+window.wcBoardToggleReply=wcBoardToggleReply;
+window.wcBoardCancelReply=wcBoardCancelReply;
+window.wcBoardSubmitReply=wcBoardSubmitReply;
+window.wcBoardLike=wcBoardLike;
+window.wcBoardAskDelete=wcBoardAskDelete;
+window.wcBoardCancelDelete=wcBoardCancelDelete;
+window.wcBoardConfirmDelete=wcBoardConfirmDelete;
 
 wcInit();
 })();
