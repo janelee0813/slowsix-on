@@ -62,6 +62,9 @@
   body { background:#0a0612; color:#f5f1ff; font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif; -webkit-font-smoothing:antialiased; }
   ::selection { background: rgba(181,102,255,0.35); }
   @keyframes onlinePulse{0%,100%{opacity:1;box-shadow:0 0 6px #5ee0a8}50%{opacity:0.4;box-shadow:0 0 2px #5ee0a8}}
+  @keyframes dbShimmer1{0%{background-position:-200% center}100%{background-position:200% center}}
+  @keyframes dbGlow1{0%,100%{box-shadow:0 0 8px rgba(255,200,0,0.4),0 0 16px rgba(255,160,0,0.2)}50%{box-shadow:0 0 14px rgba(255,200,0,0.7),0 0 28px rgba(255,160,0,0.4)}}
+  @keyframes dbGlow2{0%,100%{box-shadow:0 0 8px rgba(181,102,255,0.35),0 0 16px rgba(219,40,119,0.2)}50%{box-shadow:0 0 14px rgba(181,102,255,0.6),0 0 28px rgba(219,40,119,0.35)}}
 
   .text-gradient-neon{
     background: linear-gradient(100deg,#b566ff 0%,#ff5fb0 50%,#5ec8ff 100%);
@@ -1355,9 +1358,12 @@ function copyResult(){
         <div class="flex-1 text-[10px] text-muted-foreground font-semibold">🔮 드래곤볼</div>
         <div class="w-20 shrink-0 text-[10px] text-muted-foreground font-semibold text-right">🫧 소원구슬</div>
       </div>`;
+      let dbMarbleRank=0;
       el.innerHTML=header+sorted.map(([nick,cnt],i,arr)=>{
         const pct=Math.min(100,Math.round((cnt%7)/7*100));
         const marbles=Math.floor(cnt/7);
+        if(marbles>0) dbMarbleRank++;
+        const rank=marbles>0?dbMarbleRank:0;
         const divider=(i>0&&arr[i-1][1]!==cnt)?'<div style="height:1px;background:rgba(140,110,200,0.15);margin:8px 0"></div>':'';
         const marbleSVG=`<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 4px rgba(181,102,255,0.9))">
           <defs>
@@ -1375,8 +1381,18 @@ function copyResult(){
         const marbleDisplay=marbles>0
           ?`<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px">${Array.from({length:marbles},(_,mi)=>marbleSVG.replace('id="mg"',`id="mg${mi}"`).replace('url(#mg)',`url(#mg${mi})`)).join('')}<span style="color:#b566ff;font-weight:700;font-size:13px;margin-left:2px">${marbles}</span><span style="font-size:10px;color:#9b94b3">개</span></span>`
           :`<span style="color:#6b6480;font-size:11px">-</span>`;
-        return`${divider}<div class="flex items-center gap-2">
-          <span class="w-14 shrink-0 text-xs font-semibold text-foreground">${nick}</span>
+        const rowStyle=rank===1
+          ?'border-radius:10px;padding:4px 6px;margin:-4px -6px;background:linear-gradient(90deg,rgba(255,200,0,0.08),rgba(255,140,0,0.05),rgba(255,200,0,0.08));animation:dbGlow1 2.4s ease-in-out infinite'
+          :rank===2
+          ?'border-radius:10px;padding:4px 6px;margin:-4px -6px;background:linear-gradient(90deg,rgba(181,102,255,0.08),rgba(219,40,119,0.05),rgba(181,102,255,0.08));animation:dbGlow2 2.8s ease-in-out infinite'
+          :'';
+        const nickStyle=rank===1
+          ?'background:linear-gradient(90deg,#ffd700,#ffb300,#ffe066,#ffb300,#ffd700);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:dbShimmer1 2.4s linear infinite'
+          :rank===2
+          ?'background:linear-gradient(90deg,#c084fc,#f472b6,#e0aaff,#f472b6,#c084fc);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:dbShimmer1 2.8s linear infinite'
+          :'';
+        return`${divider}<div class="flex items-center gap-2" style="${rowStyle}">
+          <span class="w-14 shrink-0 text-xs font-semibold text-foreground" style="${nickStyle}">${nick}</span>
           <div class="flex-1 flex items-center gap-1.5">
             <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden"><div style="width:${pct}%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div></div>
             <span class="text-xs text-muted-foreground shrink-0" style="min-width:28px">${cnt%7}/7</span>
