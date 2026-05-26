@@ -2294,17 +2294,21 @@ async function wcSaveRecord(){
   const calEl=document.getElementById('wc-inp-cal');
   const durEl=document.getElementById('wc-inp-dur');
   const isPass=wcForm.isPass;
-  const calVal=(wcForm.isCompleted&&!isPass)?(parseInt(calEl?calEl.value:0)||0):0;
-  const durVal=(wcForm.isCompleted&&!isPass)?(parseInt(durEl?durEl.value:0)||0):0;
+  const calVal=isPass?0:(parseInt(calEl?calEl.value:0)||0);
+  const durVal=isPass?0:(parseInt(durEl?durEl.value:0)||0);
   if(!dateVal){wcToast('날짜를 선택해주세요',true);return}
   if(!nickVal){wcToast('닉네임을 선택해주세요',true);return}
   if(isPass&&wcGetPassCount(nickVal)>=2){wcToast('패스는 최대 2번만 사용할 수 있어요',true);return}
+  if(!isPass&&!durVal){wcToast('운동 시간을 입력해주세요',true);return}
   const btn=document.getElementById('wc-save-btn');
   btn.disabled=true;btn.textContent='저장 중...';
   const existing=wcRecs.find(r=>r.date===dateVal&&r.nickname===nickVal);
   const newCal=existing?(existing.calories||0)+calVal:calVal;
   const newDur=existing?(existing.duration||0)+durVal:durVal;
-  const newCompleted=isPass?true:(wcForm.isCompleted||(existing?.is_completed??false));
+  const part=wcParts.find(p=>p.nickname===nickVal);
+  const minDur=part?.min_duration??60;
+  const minCal=part?.min_calories??0;
+  const newCompleted=isPass?true:(newDur>=minDur&&(minCal===0||newCal>=minCal));
   const{data,error}=await sb.from('wc_records')
     .upsert({date:dateVal,nickname:nickVal,is_completed:newCompleted,calories:newCal,duration:newDur},{onConflict:'date,nickname'})
     .select().single();
@@ -2316,9 +2320,9 @@ async function wcSaveRecord(){
     if(isPass){
       await wcIncrPassCount(nickVal);
       wcToast(`패스 사용! 남은 패스 ${2-wcGetPassCount(nickVal)}회`);
-    }else if(idx>=0){wcToast(`기록 추가! +${durVal}분 +${wcFmt(calVal)}kcal`);}
-    else{wcToast('인증 저장 완료! 🎉');}
-    wcForm.isCompleted=true;wcForm.isPass=false;wcForm.calories='';wcForm.duration='';wcForm.nickname='';
+    }else if(newCompleted){wcToast('운동 완료 인증! 🎉');}
+    else{wcToast(`기록 저장! +${durVal}분${calVal?` +${wcFmt(calVal)}kcal`:''}`);}
+    wcForm.isCompleted=false;wcForm.isPass=false;wcForm.calories='';wcForm.duration='';wcForm.nickname='';
     wcFormOpen=false;
     wcRender();
   }
@@ -2368,10 +2372,10 @@ function wcRender(){
       <div id="wc-form-rows">
         <div class="wc-row"><span class="wc-label">날짜</span><input type="date" id="wc-inp-date" value="${wcForm.date}" onchange="wcForm.date=this.value"/></div>
         <div class="wc-row"><span class="wc-label">닉네임</span><select id="wc-inp-person" onchange="wcForm.nickname=this.value;wcRender()"><option value="">선택하세요</option>${wcSorted.map(p=>`<option value="${p.nickname}"${wcForm.nickname===p.nickname?' selected':''}>${p.nickname}</option>`).join('')}</select></div>
-        <div class="wc-row"><span class="wc-label">실행 여부</span><div class="wc-toggle-row">${(()=>{const pc=wcForm.nickname?wcGetPassCount(wcForm.nickname):0;const pd=pc>=2;return`<button class="wc-toggle-btn${wcForm.isCompleted?' yes':''}" onclick="wcSetCompleted(true)">✅ 했다</button><button class="wc-toggle-btn wc-toggle-btn-pass${wcForm.isPass?' pass':''}" onclick="wcSetPass()" ${pd?'disabled title="패스 소진"':''}>${pd?'🚫 패스 소진':wcForm.isPass?`🎫 패스<br>(${2-pc}회 남음)`:'🎫 패스'}</button>`})()}</div></div>
-        <p style="font-size:11px;color:#6b6480;margin-top:4px;padding-left:84px">패스 2회 사용 가능. 패스 사용시 운동횟수만 1회 올라갑니다.</p>
-        <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}"><span class="wc-label" style="color:#b566ff;font-weight:700">운동 시간 <span style="font-size:10px;font-weight:400;color:#9b94b3">(분 단위)</span></span><div class="wc-cal-wrap"><input type="number" id="wc-inp-dur" placeholder="0" value="${wcForm.isCompleted?wcForm.duration:0}" min="0" max="999" oninput="wcForm.duration=this.value" style="width:100%"/><span class="wc-cal-unit">분</span></div></div>
-        <div class="wc-row${wcForm.isCompleted?'':' wc-disabled'}"><span class="wc-label">소모 칼로리</span><div class="wc-cal-wrap"><input type="number" id="wc-inp-cal" placeholder="0" value="${wcForm.isCompleted?wcForm.calories:0}" min="0" max="9999" oninput="wcForm.calories=this.value" style="width:100%"/><span class="wc-cal-unit">kcal</span></div></div>
+        <div class="wc-row"><span class="wc-label">패스</span><div class="wc-toggle-row">${(()=>{const pc=wcForm.nickname?wcGetPassCount(wcForm.nickname):0;const pd=pc>=2;return`<button class="wc-toggle-btn wc-toggle-btn-pass${wcForm.isPass?' pass':''}" onclick="wcSetPass()" ${pd?'disabled title="패스 소진"':''}>${pd?'🚫 패스 소진':wcForm.isPass?`🎫 패스 사용 (${2-pc}회 남음)`:'🎫 패스 사용하기'}</button>`})()}</div></div>
+        ${(()=>{const pt=wcParts.find(p=>p.nickname===wcForm.nickname);if(!pt||wcForm.isPass)return'';const parts=[];if(pt.min_duration)parts.push(pt.min_duration+'분');if(pt.min_calories)parts.push(pt.min_calories+'kcal');return parts.length?`<p style="font-size:11px;color:#9b94b3;margin-top:4px;padding-left:84px">완료 조건: <span style="color:#b566ff;font-weight:600">${parts.join(' + ')}</span> 이상 달성 시 자동 완료 처리</p>`:'';})()}
+        <div class="wc-row${wcForm.isPass?' wc-disabled':''}"><span class="wc-label" style="color:#b566ff;font-weight:700">운동 시간 <span style="font-size:10px;font-weight:400;color:#9b94b3">(분 단위)</span></span><div class="wc-cal-wrap"><input type="number" id="wc-inp-dur" placeholder="0" value="${wcForm.duration||''}" min="0" max="999" oninput="wcForm.duration=this.value" style="width:100%"/><span class="wc-cal-unit">분</span></div></div>
+        <div class="wc-row${wcForm.isPass?' wc-disabled':''}"><span class="wc-label">소모 칼로리</span><div class="wc-cal-wrap"><input type="number" id="wc-inp-cal" placeholder="0" value="${wcForm.calories||''}" min="0" max="9999" oninput="wcForm.calories=this.value" style="width:100%"/><span class="wc-cal-unit">kcal</span></div></div>
         <button class="wc-btn-primary" id="wc-save-btn" onclick="wcSaveRecord()">💾 인증 저장</button>
       </div>`:`
       <button onclick="wcOpenForm()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 6px 24px -6px rgba(181,102,255,0.5);margin-top:0.5rem">
