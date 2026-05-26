@@ -2419,19 +2419,20 @@ function wcRender(){
             return wcSorted.map(p=>{
               const cells=dates.map((date,i)=>{
                 const rec=wcRecs.find(r=>r.nickname===p.nickname&&r.date===date);
-                const isFuture=date>today;
+                const isPast=date<today;
+                const isCompleted=rec&&rec.is_completed;
                 let bg,title,inner='';
-                if(isFuture){
-                  bg='rgba(255,255,255,0.04)';title='';
-                }else if(rec&&rec.is_completed&&(rec.calories>0||rec.duration>0)){
+                if(isCompleted&&(rec.calories>0||rec.duration>0)){
                   bg='linear-gradient(135deg,#7c3aed,#db2777)';title='✅ 운동 완료';
                   inner=`<div style="width:6px;height:6px;border-radius:50%;background:white;opacity:0.9;margin:0 auto"></div>`;
-                }else if(rec&&rec.is_completed){
+                }else if(isCompleted){
                   bg='rgba(255,198,0,0.2)';title='🎫 패스';
                   inner=`<span style="font-size:10px;font-weight:700;color:#ffc600;line-height:1">P</span>`;
-                }else{
+                }else if(isPast){
                   bg='rgba(255,95,109,0.1)';title='안함';
                   inner=`<span style="font-size:13px;font-weight:700;color:rgba(255,95,109,0.55);line-height:1">✕</span>`;
+                }else{
+                  bg='rgba(255,255,255,0.04)';title='';
                 }
                 return `<div style="flex:1;min-width:0;text-align:center">
                   <div style="font-size:9px;color:#6b6480;margin-bottom:3px">${days[i]}</div>
