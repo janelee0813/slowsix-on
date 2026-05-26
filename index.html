@@ -2665,7 +2665,7 @@ function wcCompareSection(){
   }
   const divider=`<div style="width:1px;background:rgba(140,110,200,0.12);margin:0 4px;align-self:stretch"></div>`;
   return`<div class="wc-card">
-    <div class="wc-card-title" style="margin-bottom:12px">📈 참여자 누적 현황</div>
+    <div class="wc-card-title" style="margin-bottom:12px">📈 운동 누적 현황</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${legend}</div>
     <div style="display:flex;gap:4px;align-items:flex-end">
       ${group('누적 횟수',d=>d.count)}${divider}${group('누적 칼로리 (kcal)',d=>d.cal)}${divider}${group('누적 시간 (분)',d=>d.dur)}
@@ -2725,22 +2725,26 @@ wcInit();
       .dr-tc{display:inline-block;animation:dr-float 3.2s ease-in-out infinite}
       .dr-te{transform-box:fill-box;transform-origin:50% 50%;animation:dr-blink 4s linear infinite}
       @keyframes dr-egg-glow{0%,100%{opacity:.18}50%{opacity:.35}}
+      @keyframes dr-crack-m{0%,38%{stroke-dashoffset:40;opacity:0}55%,88%{stroke-dashoffset:0;opacity:1}97%,100%{stroke-dashoffset:40;opacity:0}}
+      @keyframes dr-crack-b{0%,55%{opacity:0}70%,88%{opacity:1}97%,100%{opacity:0}}
+      .dr-crack-m{animation:dr-crack-m 5.5s ease-in-out infinite}
+      .dr-crack-b{animation:dr-crack-b 5.5s ease-in-out infinite}
     </style>
-    <div class="neon-card neon-card-glow mb-10 p-5 sm:p-6">
-      <div class="mb-6 text-center">
-        <div class="mb-3 inline-flex items-center gap-1.5 rounded-full border border-neon-blue/40 bg-neon-blue/10 px-3 py-1 text-[11px] font-semibold text-neon-blue">
+    <div class="neon-card neon-card-glow mb-6 p-3 sm:p-4">
+      <div class="mb-3 text-center">
+        <div class="mb-2 inline-flex items-center gap-1.5 rounded-full border border-neon-blue/40 bg-neon-blue/10 px-2.5 py-0.5 text-[10px] font-semibold text-neon-blue">
           🔜&nbsp; 6월 예고
         </div>
-        <h2 class="text-xl font-bold text-foreground">다음달 다마고찌 캐릭터 · '들희'</h2>
-        <p class="mt-1.5 text-xs text-muted-foreground">함께 키울 다마고찌를 디자인하고 있는 중이예요!</p>
+        <h2 class="text-base font-bold text-foreground">다음달 다마고찌 캐릭터 · '들희'</h2>
+        <p class="mt-1 text-xs text-muted-foreground">6월에 함께 키울 다마고찌 '들희'예요!<br><span style="color:#9b94b3">6/2(화)에 오픈될 예정입니다</span></p>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;justify-items:center;align-items:end;gap:24px 12px;max-width:480px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:1fr 1fr;justify-items:center;align-items:end;gap:12px 8px;max-width:480px;margin:0 auto">
 
         <!-- ① 1단계 아기 들희 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
-            <svg width="198" height="356" viewBox="-8 3 116 145" style="max-width:100%;height:auto;overflow:visible">
+            <svg width="120" viewBox="-8 3 116 145" style="max-width:100%;height:auto;overflow:visible">
               <defs>
                 <filter id="dog-ol4" x="-20%" y="-10%" width="140%" height="125%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
@@ -2791,7 +2795,7 @@ wcInit();
         <!-- ② 2단계 알 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
-            <svg width="167" height="249" viewBox="14 30 72 108" style="max-width:100%;height:auto">
+            <svg width="100" viewBox="14 30 72 108" style="max-width:100%;height:auto">
               <defs>
                 <filter id="egg-ol-2" x="-15%" y="-8%" width="130%" height="116%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
@@ -2808,10 +2812,10 @@ wcInit();
                 <circle cx="38" cy="104" r="3.5" fill="rgba(255,182,193,.55)"/>
               </g>
               <ellipse cx="38" cy="62" rx="9" ry="6" fill="rgba(255,255,255,.7)" transform="rotate(-22,38,62)"/>
-              <!-- 금 -->
-              <path d="M52,48 L49,57 L54,63 L50,73 L55,80" stroke="rgba(185,115,145,.55)" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M49,57 L44,61" stroke="rgba(185,115,145,.38)" stroke-width="1" fill="none" stroke-linecap="round"/>
-              <path d="M54,63 L58,67" stroke="rgba(185,115,145,.38)" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <!-- 금 (애니메이션: 서서히 금이 감) -->
+              <path class="dr-crack-m" d="M52,48 L49,57 L54,63 L50,73 L55,80" stroke="rgba(185,115,145,.7)" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="40" stroke-dashoffset="40"/>
+              <path class="dr-crack-b" d="M49,57 L44,61" stroke="rgba(185,115,145,.5)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0"/>
+              <path class="dr-crack-b" d="M54,63 L58,67" stroke="rgba(185,115,145,.5)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0"/>
             </svg>
           </div>
           <div style="font-size:11px;color:#9b94b3;font-weight:600">들희 2단계 🔒</div>
@@ -2821,7 +2825,7 @@ wcInit();
         <!-- ③ 3단계 알 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
-            <svg width="167" height="249" viewBox="14 30 72 108" style="max-width:100%;height:auto">
+            <svg width="100" viewBox="14 30 72 108" style="max-width:100%;height:auto">
               <defs>
                 <filter id="egg-ol-3" x="-15%" y="-8%" width="130%" height="116%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
@@ -2847,7 +2851,7 @@ wcInit();
         <!-- ④ 4단계 알 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
           <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
-            <svg width="167" height="249" viewBox="14 30 72 108" style="max-width:100%;height:auto">
+            <svg width="100" viewBox="14 30 72 108" style="max-width:100%;height:auto">
               <defs>
                 <filter id="egg-ol-4" x="-15%" y="-8%" width="130%" height="116%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
@@ -2872,8 +2876,8 @@ wcInit();
 
       </div>
 
-      <div class="mt-6 text-center">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-neon-purple/10 px-3 py-1 text-[10px] font-medium text-neon-purple">
+      <div class="mt-2 text-center">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-neon-purple/10 px-2.5 py-0.5 text-[10px] font-medium text-neon-purple">
           ✨ 6월부터 함께 키워요
         </span>
       </div>
