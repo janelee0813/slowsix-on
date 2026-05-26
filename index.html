@@ -1202,7 +1202,7 @@ function copyResult(){
       </div>
       <ul class="space-y-3">
         <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">1</span><span class="text-sm leading-relaxed text-foreground/90">벙에 참여하면 드래곤볼을 모을 수 있어요!</span></li>
-        <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">2</span><span class="text-sm leading-relaxed text-foreground/90">벙참을 했다면 아래의 창에서 드래곤볼 적립을 신청해주세요</span></li>
+        <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">2</span><span class="text-sm leading-relaxed text-foreground/90">벙참 드래곤볼은 운영진이 직접 적립해드려요</span></li>
         <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">3</span><span class="text-sm leading-relaxed text-foreground/90">드래곤볼 7개를 모으면 소원구슬을 하나 제공해드려요</span></li>
         <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">4</span><span class="text-sm leading-relaxed text-foreground/90"><span style="color:#b566ff;font-weight:700">획득한 소원구슬을 모두 모아, 한번에 핀볼게임을 진행합니다</span><br/><span style="color:#ff5fb0;font-weight:700;font-size:0.8em">핀볼을 통과한 4개의 소원구슬 주인에게 상품 지급! (구슬 많을수록 유리함)</span></span></li>
         <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-purple to-neon-pink text-[10px] font-bold text-background">5</span><span class="text-sm leading-relaxed text-foreground/90">드래곤볼을 많이 모으는 방법과 세부규칙은 아래 내용을 참고!</span></li>
@@ -1313,31 +1313,12 @@ function copyResult(){
     </style>
     <script>
     // ── 드래곤볼 적립 시스템 ──
-    const DB_PIN='505050';
     let dbReqs=[];
-    const PIN_MSGS=[
-      '땡!',
-      '비번 그거 아닌데요',
-      '맞겠나고ㅋㅋㅋ',
-      '또 틀림',
-      '너님은 못맞춤',
-      '겠냐고ㅋㅋㅋ',
-      '힌트줄까?',
-      '4자리 숫자임 ㅋㅋㅋㅋㅋㅋㅋㅋ',
-      '4자리인걸 믿어?ㅋㅋㅋㅋ',
-      '사실 너의 생일이 비번임',
-      '아닌건 알고 있긴 했지? 계속 해볼라고?ㅋㅋㅋ',
-      '그럼 진짜 힌트 줄게 한번만 더 시도해봐',
-      '관리자의 생년월일은? 답 다줬다  맞추면 혼자 셀프적립 가능',
-      '그걸 못맞추냐… ㅉㅉㅉ',
-    ];
-    let pinAttempt=0;
 
     async function dbInit(){
       const{data,error}=await sb.from('db_requests').select('*').order('created_at',{ascending:false});
       if(!error)dbReqs=data||[];
       dbRenderStatus();
-      dbRenderAdmin();
     }
 
     function dbGetCounts(){
@@ -1402,86 +1383,6 @@ function copyResult(){
       }).join('');
     }
 
-    function dbRenderAdmin(){
-      const el=document.getElementById('db-admin-list');
-      if(!el)return;
-      const pending=dbReqs.filter(r=>r.status==='pending');
-      if(!pending.length){el.innerHTML='<p class="text-xs text-muted-foreground text-center py-2">대기 중인 요청이 없어요</p>';return;}
-      el.innerHTML=pending.map(r=>`
-        <div class="flex items-center gap-2 rounded-lg border border-border bg-surface/40 p-2.5">
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-foreground">${r.nickname}</p>
-            <p class="text-[10px] text-muted-foreground mt-0.5">${r.meeting_date} · ${r.meeting_name}</p>
-          </div>
-          <button onclick="dbApprove('${r.id}')" class="shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white transition-all" style="background:linear-gradient(90deg,#7c3aed,#db2777)">승인</button>
-          <button onclick="dbReject('${r.id}')" class="shrink-0 rounded-lg border border-border px-3 py-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-all">거절</button>
-        </div>`).join('');
-    }
-
-    async function dbSubmitRequest(){
-      const date=document.getElementById('db-inp-date').value;
-      const meeting=document.getElementById('db-inp-meeting').value.trim();
-      const nick=document.getElementById('db-inp-nick').value.trim();
-      const msg=document.getElementById('db-submit-msg');
-      const btn=document.getElementById('db-submit-btn');
-      if(!date||!meeting||!nick){
-        msg.textContent='날짜, 모임명, 닉네임을 모두 입력해주세요';msg.style.color='#f87171';msg.style.display='block';return;
-      }
-      btn.disabled=true;btn.textContent='요청 중...';
-      const{data,error}=await sb.from('db_requests').insert({meeting_date:date,meeting_name:meeting,nickname:nick,status:'pending'}).select().single();
-      if(error){msg.textContent='요청 실패. 다시 시도해주세요';msg.style.color='#f87171';}
-      else{
-        dbReqs.unshift(data);
-        msg.textContent='✅ 적립 요청이 완료됐어요! 관리자 승인 후 반영됩니다';msg.style.color='#a78bfa';
-        document.getElementById('db-inp-date').value='';
-        document.getElementById('db-inp-meeting').value='';
-        document.getElementById('db-inp-nick').value='';
-        dbRenderAdmin();
-      }
-      msg.style.display='block';
-      btn.disabled=false;btn.textContent='🔮 적립 요청하기';
-    }
-
-    async function dbApprove(id){
-      const{data,error}=await sb.from('db_requests').update({status:'approved',approved_at:new Date().toISOString()}).eq('id',id).select().single();
-      if(!error){const i=dbReqs.findIndex(r=>r.id===id);if(i>=0)dbReqs[i]=data;dbRenderStatus();dbRenderAdmin();}
-    }
-
-    async function dbReject(id){
-      const{data,error}=await sb.from('db_requests').update({status:'rejected'}).eq('id',id).select().single();
-      if(!error){const i=dbReqs.findIndex(r=>r.id===id);if(i>=0)dbReqs[i]=data;dbRenderAdmin();}
-    }
-
-    function dbToggleForm(){
-      const body=document.getElementById('db-form-body');
-      const arrow=document.getElementById('db-form-arrow');
-      const open=body.style.display==='none';
-      body.style.display=open?'block':'none';
-      arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';
-    }
-
-    function dbCheckPin(){
-      const v=document.getElementById('db-pin-inp').value;
-      const err=document.getElementById('db-pin-err');
-      if(v===DB_PIN){
-        document.getElementById('db-admin-lock').style.display='none';
-        document.getElementById('db-admin-panel').style.display='block';
-        err.style.display='none';
-        pinAttempt=0;
-        dbRenderAdmin();
-      } else {
-        err.textContent=PIN_MSGS[pinAttempt%PIN_MSGS.length];
-        err.style.display='block';
-        pinAttempt++;
-      }
-    }
-
-    function dbLock(){
-      document.getElementById('db-admin-lock').style.display='block';
-      document.getElementById('db-admin-panel').style.display='none';
-      document.getElementById('db-pin-inp').value='';
-    }
-
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',dbInit);
     else dbInit();
     </script>
@@ -1499,55 +1400,6 @@ function copyResult(){
       </div>
     </div>
 
-    <!-- ── 적립 신청 폼 ── -->
-    <div class="mt-6">
-      <button onclick="dbToggleForm()" class="w-full neon-card p-4 flex items-center justify-between text-left transition-all hover:border-neon-purple/50">
-        <div class="flex items-center gap-2">
-          <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">✉️ 드래곤볼 적립 신청</span>
-        </div>
-        <span id="db-form-arrow" class="text-muted-foreground text-sm transition-transform duration-300">▼</span>
-      </button>
-      <div id="db-form-body" style="display:none" class="neon-card border-t-0 rounded-t-none p-4 space-y-3">
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div class="flex flex-col gap-1">
-            <label class="text-[10px] text-muted-foreground">날짜</label>
-            <input id="db-inp-date" type="date" class="rounded-lg border border-border bg-surface/60 px-3 py-2 text-xs text-foreground outline-none focus:border-neon-purple/60" style="color-scheme:dark"/>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-[10px] text-muted-foreground">모임명</label>
-            <input id="db-inp-meeting" type="text" placeholder="예) 홍대 보드게임 벙" class="rounded-lg border border-border bg-surface/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60"/>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-[10px] text-muted-foreground">닉네임</label>
-            <input id="db-inp-nick" type="text" placeholder="내 닉네임" class="rounded-lg border border-border bg-surface/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60"/>
-          </div>
-        </div>
-        <button onclick="dbSubmitRequest()" id="db-submit-btn" class="w-full rounded-lg py-2 text-xs font-semibold text-white transition-all" style="background:linear-gradient(90deg,#7c3aed,#db2777)">
-          🔮 적립 요청하기
-        </button>
-        <p id="db-submit-msg" class="text-center text-xs" style="display:none"></p>
-      </div>
-    </div>
-
-    <!-- ── 관리자 패널 ── -->
-    <div class="mt-6">
-      <div id="db-admin-lock" class="neon-card p-4">
-        <div class="flex items-center gap-2">
-          <input id="db-pin-inp" type="password" placeholder="관리자 PIN" maxlength="6" class="flex-1 rounded-lg border border-border bg-surface/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-purple/60" style="color-scheme:dark" onkeydown="if(event.key==='Enter')dbCheckPin()"/>
-          <button onclick="dbCheckPin()" class="rounded-lg border border-neon-purple/40 px-3 py-2 text-xs text-neon-purple hover:bg-neon-purple/10 transition-all">적립관리</button>
-        </div>
-        <p id="db-pin-err" class="mt-1 text-xs text-red-400" style="display:none">PIN이 올바르지 않아요</p>
-      </div>
-      <div id="db-admin-panel" style="display:none" class="neon-card p-4">
-        <div class="mb-3 flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neon-purple">🛠 관리자 — 적립 요청 목록</span>
-          <button onclick="dbLock()" class="text-[10px] text-muted-foreground hover:text-foreground">잠금</button>
-        </div>
-        <div id="db-admin-list" class="space-y-2">
-          <p class="text-xs text-muted-foreground text-center py-2">요청 없음</p>
-        </div>
-      </div>
-    </div>
 
     <!-- ── B. 소원룰렛 당첨 기록 ── -->
     <div class="mt-8" style="display:none">
