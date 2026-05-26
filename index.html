@@ -2350,7 +2350,6 @@ function wcRender(){
     </div>
     ${wcParticipantCards()}
     ${wcProgressBar()}
-    ${wcOverallChart(wcSorted)}
     <div class="wc-card" style="display:none"><!-- 참여자 등록 숨김 — 복구 시 style="display:none" 제거 -->
       <div class="wc-card-title">👥 참여자 등록</div>
       <div class="wc-row">
@@ -2361,7 +2360,6 @@ function wcRender(){
         ?`<div class="wc-chips">${wcSorted.map(p=>`<span class="wc-chip">${p.nickname}<button class="wc-chip-del" onclick="wcDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}')">×</button></span>`).join('')}</div>`
         :`<p style="font-size:13px;color:#6b6480;margin-top:8px">참여자를 등록하면 이곳에 표시됩니다</p>`}
     </div>
-
     <hr class="wc-sep"/>
     <div class="wc-card">
       <div class="wc-card-title" style="margin-bottom:${wcFormOpen?'0.875rem':'0'};display:flex;justify-content:space-between;align-items:center;${wcFormOpen?'cursor:pointer':''}" ${wcFormOpen?'onclick="wcCloseForm()"':''}>
@@ -2387,6 +2385,7 @@ function wcRender(){
         인증 입력하기
       </button>`}
     </div>
+    ${wcOverallChart(wcSorted)}
     <div class="wc-card">
       <div class="wc-card-title">⏱️ 개인별 주간 운동 시간</div>
       ${wcParts.length===0
