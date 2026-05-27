@@ -2659,7 +2659,7 @@ function travelRender(){
             <button onclick="travelBoardAskEdit('${r.id}')" style="font-size:10px;color:rgba(155,148,179,0.35);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(155,148,179,0.35)'">수정</button>
             <button onclick="travelBoardAskDelete('${r.id}')" style="font-size:10px;color:rgba(155,148,179,0.25);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.25)'">삭제</button>
           </div>
-          <div id="trb-edit-${r.id}" style="display:none;margin-top:6px">
+          <div id="trb-editw-${r.id}" style="display:none;margin-top:6px">
             <textarea id="trb-edit-inp-${r.id}" rows="2" style="width:100%;box-sizing:border-box;border-radius:6px;border:1px solid rgba(181,102,255,0.4);background:rgba(30,22,55,0.7);padding:6px 8px;font-size:11px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
             <div style="display:flex;gap:6px;margin-top:4px">
               <button onclick="travelBoardSaveEdit('${r.id}')" style="padding:4px 12px;border-radius:6px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">저장</button>
@@ -2692,7 +2692,7 @@ function travelRender(){
           <button onclick="travelBoardAskEdit('${c.id}')" style="font-size:10px;color:rgba(155,148,179,0.35);background:none;border:none;cursor:pointer;padding:0;margin-left:auto" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(155,148,179,0.35)'">수정</button>
           <button onclick="travelBoardAskDelete('${c.id}')" style="font-size:10px;color:rgba(155,148,179,0.25);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.25)'">삭제</button>
         </div>
-        <div id="trb-edit-${c.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(181,102,255,0.15)">
+        <div id="trb-editw-${c.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(181,102,255,0.15)">
           <textarea id="trb-edit-inp-${c.id}" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(181,102,255,0.4);background:rgba(30,22,55,0.7);padding:8px 10px;font-size:12px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
           <div style="display:flex;gap:6px;margin-top:6px">
             <button onclick="travelBoardSaveEdit('${c.id}')" style="padding:5px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">저장</button>
@@ -2827,8 +2827,8 @@ async function travelBoardLike(id){
 }
 
 function travelBoardAskEdit(id){
-  document.querySelectorAll('[id^="trb-edit-"]').forEach(el=>el.style.display='none');
-  const wrap=document.getElementById('trb-edit-'+id);
+  document.querySelectorAll('[id^="trb-editw-"]').forEach(el=>el.style.display='none');
+  const wrap=document.getElementById('trb-editw-'+id);
   const post=travelPosts.find(c=>c.id===id);
   if(!wrap||!post)return;
   const ta=document.getElementById('trb-edit-inp-'+id);
@@ -2838,7 +2838,7 @@ function travelBoardAskEdit(id){
 }
 
 function travelBoardCancelEdit(id){
-  const wrap=document.getElementById('trb-edit-'+id);
+  const wrap=document.getElementById('trb-editw-'+id);
   if(wrap)wrap.style.display='none';
 }
 
