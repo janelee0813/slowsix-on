@@ -2657,6 +2657,11 @@ function travelRender(){
             <button onclick="travelBoardLike('${r.id}')" style="font-size:10px;color:${localStorage.getItem('trb_liked_'+r.id)?'#f472b6':'rgba(155,148,179,0.35)'};background:none;border:none;cursor:pointer;padding:0">❤️ ${r.like_count||0}</button>
             <button onclick="travelBoardAskDelete('${r.id}')" style="font-size:10px;color:rgba(155,148,179,0.25);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.25)'">삭제</button>
           </div>
+          <div id="trb-del-${r.id}" style="display:none;margin-top:6px;display:none;align-items:center;gap:6px">
+            <span style="font-size:11px;color:#f5f1ff">삭제할까요?</span>
+            <button onclick="travelBoardConfirmDelete('${r.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#ef4444;color:#fff;font-size:11px;font-weight:600;cursor:pointer">삭제</button>
+            <button onclick="travelBoardCancelDelete('${r.id}')" style="padding:3px 8px;border-radius:6px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:11px;cursor:pointer">취소</button>
+          </div>
         </div>`).join('');
       const replyFormHTML=`
         <div id="trb-rf-${c.id}" style="display:none;margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.15)">
@@ -2676,6 +2681,11 @@ function travelRender(){
           <button onclick="travelBoardLike('${c.id}')" style="font-size:10px;color:${localStorage.getItem('trb_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.35)'};background:none;border:none;cursor:pointer;padding:0">❤️ ${c.like_count||0}</button>
           <button onclick="travelBoardAskDelete('${c.id}')" style="font-size:10px;color:rgba(155,148,179,0.25);background:none;border:none;cursor:pointer;padding:0;margin-left:auto" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.25)'">삭제</button>
         </div>
+        <div id="trb-del-${c.id}" style="display:none;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(239,68,68,0.2)">
+          <span style="font-size:11px;color:#f5f1ff;flex:1">정말 삭제할까요?</span>
+          <button onclick="travelBoardConfirmDelete('${c.id}')" style="padding:4px 12px;border-radius:6px;border:none;background:#ef4444;color:#fff;font-size:11px;font-weight:600;cursor:pointer">삭제</button>
+          <button onclick="travelBoardCancelDelete('${c.id}')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:11px;cursor:pointer">취소</button>
+        </div>
         ${childHTML}
         ${replyFormHTML}
       </div>`;
@@ -2691,14 +2701,7 @@ function travelRender(){
       </label>
       <button onclick="travelBoardSubmitPost()" style="width:100%;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px">${postsHTML}</div>
-    <div id="trb-delete-modal" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:rgba(30,22,55,0.8);border:1px solid rgba(239,68,68,0.3);text-align:center">
-      <p style="font-size:12px;color:#f5f1ff;margin:0 0 8px">삭제할까요?</p>
-      <div style="display:flex;gap:8px;justify-content:center">
-        <button onclick="travelBoardConfirmDelete()" style="padding:5px 16px;border-radius:8px;border:none;background:#ef4444;color:#fff;font-size:12px;font-weight:600;cursor:pointer">삭제</button>
-        <button onclick="travelBoardCancelDelete()" style="padding:5px 16px;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:12px;cursor:pointer">취소</button>
-      </div>
-    </div>`;
+    <div style="display:flex;flex-direction:column;gap:8px">${postsHTML}</div>`;
 }
 
 function travelCopyUrl(){
@@ -2762,23 +2765,20 @@ async function travelBoardLike(id){
 }
 
 function travelBoardAskDelete(id){
-  travelDeleteId=id;
-  const modal=document.getElementById('trb-delete-modal');
-  if(modal)modal.style.display='block';
+  document.querySelectorAll('[id^="trb-del-"]').forEach(el=>el.style.display='none');
+  const el=document.getElementById('trb-del-'+id);
+  if(el)el.style.display='flex';
 }
 
-function travelBoardCancelDelete(){
-  travelDeleteId=null;
-  const modal=document.getElementById('trb-delete-modal');
-  if(modal)modal.style.display='none';
+function travelBoardCancelDelete(id){
+  const el=document.getElementById('trb-del-'+id);
+  if(el)el.style.display='none';
 }
 
-async function travelBoardConfirmDelete(){
-  if(!travelDeleteId)return;
-  const{error}=await sb.from('travel_board').delete().eq('id',travelDeleteId);
+async function travelBoardConfirmDelete(id){
+  const{error}=await sb.from('travel_board').delete().eq('id',id);
   if(!error){
-    travelPosts=travelPosts.filter(c=>c.id!==travelDeleteId);
-    travelDeleteId=null;
+    travelPosts=travelPosts.filter(c=>c.id!==id);
     travelRender();
   }
 }
