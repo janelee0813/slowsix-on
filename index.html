@@ -3129,6 +3129,8 @@ window.travelRender=travelRender;
     const cv=document.getElementById('pb-cv');
     if(!cv)return;
     const ctx=cv.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    ctx.setTransform(dpr,0,0,dpr,0,0); // 레티나 대응: 논리 좌표계 유지
 
     // 배경 (캔버스 좌표)
     const bg=ctx.createLinearGradient(0,0,0,CVH);
@@ -3324,8 +3326,16 @@ window.travelRender=travelRender;
       </div>
       <button id="pb-reset-btn" onclick="pbReset()" style="display:none;padding:10px 28px;border-radius:20px;border:1px solid rgba(140,110,200,.4);background:none;color:#9b94b3;font-size:13px;cursor:pointer;font-family:inherit">다시 하기</button>
     </div>`;
-    pbRenderInputs();draw();
-    document.getElementById('pb-cv')?.addEventListener('click',window.pbDismissOverlay);
+    pbRenderInputs();
+    // 레티나(고DPR) 디스플레이 대응: 물리 픽셀로 캔버스 크기 확대 후 CSS로 논리 크기 고정
+    const cv=document.getElementById('pb-cv');
+    if(cv){
+      const dpr=window.devicePixelRatio||1;
+      cv.width=W*dpr; cv.height=CVH*dpr;
+      cv.style.width=W+'px'; cv.style.height=CVH+'px';
+      cv.addEventListener('click',window.pbDismissOverlay);
+    }
+    draw();
   }
 
   window.pbStart=pbStart;
