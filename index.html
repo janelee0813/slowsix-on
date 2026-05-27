@@ -2676,6 +2676,7 @@ function travelRender(){
       return`<div style="border:1px solid ${isNotice?'rgba(251,191,36,0.45)':'rgba(140,110,200,0.2)'};border-radius:10px;padding:12px;background:${isNotice?'rgba(40,32,10,0.7)':'rgba(22,15,42,0.6)'}">
         ${isNotice?'<span style="display:inline-block;font-size:10px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:4px;padding:1px 7px;margin-bottom:6px">📌 공지</span>':''}
         <p style="margin:0 0 4px;font-size:13px;color:#f5f1ff;white-space:pre-wrap">${travelLinkify(c.content)}</p>
+        ${c.image_url?`<img src="${travelEsc(c.image_url)}" style="margin-top:8px;max-width:100%;max-height:260px;border-radius:8px;object-fit:cover;border:1px solid rgba(140,110,200,0.2);display:block" loading="lazy"/>`:''}
         <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
           <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">${travelEsc(c.nickname)} · ${travelFmt(c.created_at)}</p>
           <button onclick="travelBoardToggleReply('${c.id}')" style="font-size:10px;color:rgba(181,102,255,0.6);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(181,102,255,0.6)'">💬 댓글 달기</button>
@@ -2696,11 +2697,21 @@ function travelRender(){
     <div style="margin-bottom:14px">
       <input id="trb-nick" placeholder="닉네임" maxlength="10" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:6px"/>
       <textarea id="trb-inp" placeholder="준비물, 일정, 공유하고 싶은 내용을 자유롭게 남겨보세요" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:8px 10px;font-size:12px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
-      <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 0 8px;cursor:pointer;user-select:none">
-        <input type="checkbox" id="trb-notice" style="width:14px;height:14px;accent-color:#b566ff;cursor:pointer"/>
-        <span style="font-size:12px;color:#9b94b3">📌 공지로 등록 (최상단 고정)</span>
-      </label>
-      <button onclick="travelBoardSubmitPost()" style="width:100%;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
+      <div style="display:flex;align-items:center;gap:8px;margin:6px 0 8px;flex-wrap:wrap">
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none">
+          <input type="checkbox" id="trb-notice" style="width:14px;height:14px;accent-color:#b566ff;cursor:pointer"/>
+          <span style="font-size:12px;color:#9b94b3">📌 공지로 등록 (최상단 고정)</span>
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:4px 10px;border:1px solid rgba(140,110,200,0.3);border-radius:8px;background:rgba(30,22,55,0.5);transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.5)'" onmouseout="this.style.borderColor='rgba(140,110,200,0.3)'">
+          <input type="file" id="trb-img" accept="image/*" style="display:none" onchange="travelPreviewImg()"/>
+          <span style="font-size:12px;color:#9b94b3">🖼 이미지 첨부</span>
+        </label>
+      </div>
+      <div id="trb-img-preview" style="display:none;margin-bottom:8px;position:relative;display:none">
+        <img id="trb-img-thumb" src="" style="max-width:100%;max-height:160px;border-radius:8px;object-fit:cover;border:1px solid rgba(140,110,200,0.3)"/>
+        <button onclick="travelClearImg()" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;font-size:13px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <button onclick="travelBoardSubmitPost()" id="trb-submit-btn" style="width:100%;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">${postsHTML}</div>`;
 }
@@ -2717,20 +2728,54 @@ function travelCopyUrl(){
   });
 }
 
+function travelPreviewImg(){
+  const file=document.getElementById('trb-img')?.files[0];
+  const preview=document.getElementById('trb-img-preview');
+  const thumb=document.getElementById('trb-img-thumb');
+  if(!file||!preview||!thumb)return;
+  thumb.src=URL.createObjectURL(file);
+  preview.style.display='block';
+}
+
+function travelClearImg(){
+  const inp=document.getElementById('trb-img');
+  const preview=document.getElementById('trb-img-preview');
+  const thumb=document.getElementById('trb-img-thumb');
+  if(inp)inp.value='';
+  if(thumb)URL.revokeObjectURL(thumb.src);
+  if(preview)preview.style.display='none';
+}
+
 async function travelBoardSubmitPost(){
   const nick=document.getElementById('trb-nick')?.value.trim();
   const content=document.getElementById('trb-inp')?.value.trim();
   const isNotice=document.getElementById('trb-notice')?.checked||false;
+  const file=document.getElementById('trb-img')?.files[0];
   if(!nick){alert('닉네임을 입력해주세요');return;}
   if(!content){alert('내용을 입력해주세요');return;}
-  const{data,error}=await sb.from('travel_board').insert({nickname:nick,content,is_notice:isNotice}).select().single();
+  const btn=document.getElementById('trb-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='등록 중...';}
+  let imageUrl=null;
+  if(file){
+    const ext=file.name.split('.').pop().toLowerCase();
+    const filename=`${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const{error:upErr}=await sb.storage.from('travel-images').upload(filename,file,{contentType:file.type});
+    if(upErr){alert('이미지 업로드 실패: '+upErr.message);if(btn){btn.disabled=false;btn.textContent='등록';}return;}
+    const{data:urlData}=sb.storage.from('travel-images').getPublicUrl(filename);
+    imageUrl=urlData.publicUrl;
+  }
+  const payload={nickname:nick,content,is_notice:isNotice};
+  if(imageUrl)payload.image_url=imageUrl;
+  const{data,error}=await sb.from('travel_board').insert(payload).select().single();
   if(!error&&data){
     travelPosts.unshift(data);
     document.getElementById('trb-nick').value='';
     document.getElementById('trb-inp').value='';
     document.getElementById('trb-notice').checked=false;
+    travelClearImg();
     travelRender();
   }
+  if(btn){btn.disabled=false;btn.textContent='등록';}
 }
 
 function travelBoardToggleReply(id){
@@ -2785,6 +2830,8 @@ async function travelBoardConfirmDelete(id){
 }
 
 window.travelCopyUrl=travelCopyUrl;
+window.travelPreviewImg=travelPreviewImg;
+window.travelClearImg=travelClearImg;
 window.travelBoardSubmitPost=travelBoardSubmitPost;
 window.travelBoardToggleReply=travelBoardToggleReply;
 window.travelBoardCancelReply=travelBoardCancelReply;
