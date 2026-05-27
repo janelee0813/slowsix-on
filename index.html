@@ -2626,6 +2626,7 @@ wcInit();
 let travelPosts=[];
 let travelDeleteId=null;
 function travelEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function travelLinkify(s){return travelEsc(s).replace(/(https?:\/\/[^\s<>"]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#a78bfa;text-decoration:underline;word-break:break-all">$1</a>');}
 function travelFmt(ts){if(!ts)return'';const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 
 async function travelInit(){
@@ -2651,7 +2652,7 @@ function travelRender(){
       const childList=replies.filter(r=>r.parent_id===c.id);
       const childHTML=childList.map(r=>`
         <div style="margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.3)">
-          <p style="margin:0;font-size:12px;color:#e5e0f0;white-space:pre-wrap">${travelEsc(r.content)}</p>
+          <p style="margin:0;font-size:12px;color:#e5e0f0;white-space:pre-wrap">${travelLinkify(r.content)}</p>
           <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
             <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">ㄴ ${travelEsc(r.nickname)} · ${travelFmt(r.created_at)}</p>
             <button onclick="travelBoardLike('${r.id}')" style="font-size:10px;color:${localStorage.getItem('trb_liked_'+r.id)?'#f472b6':'rgba(155,148,179,0.35)'};background:none;border:none;cursor:pointer;padding:0">❤️ ${r.like_count||0}</button>
@@ -2674,7 +2675,7 @@ function travelRender(){
         </div>`;
       return`<div style="border:1px solid ${isNotice?'rgba(251,191,36,0.45)':'rgba(140,110,200,0.2)'};border-radius:10px;padding:12px;background:${isNotice?'rgba(40,32,10,0.7)':'rgba(22,15,42,0.6)'}">
         ${isNotice?'<span style="display:inline-block;font-size:10px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:4px;padding:1px 7px;margin-bottom:6px">📌 공지</span>':''}
-        <p style="margin:0 0 4px;font-size:13px;color:#f5f1ff;white-space:pre-wrap">${travelEsc(c.content)}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#f5f1ff;white-space:pre-wrap">${travelLinkify(c.content)}</p>
         <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
           <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">${travelEsc(c.nickname)} · ${travelFmt(c.created_at)}</p>
           <button onclick="travelBoardToggleReply('${c.id}')" style="font-size:10px;color:rgba(181,102,255,0.6);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(181,102,255,0.6)'">💬 댓글 달기</button>
