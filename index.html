@@ -3178,14 +3178,16 @@ window.travelRender=travelRender;
 
       if(b.y+BALL_R>=FLOOR_Y){
         const inHole=b.x>=HOLE_X-HOLE_W/2&&b.x<=HOLE_X+HOLE_W/2;
-        if(inHole&&!gameOver){
-          b.dead=true;b.won=true;b.flash=65;
-          gameOver=true;winnerName=b.name;winnerHue=b.hue;overlayActive=true;
-          balls.forEach(o=>{if(o!==b){o.dead=true;o.flash=0;}});
-        } else if(!inHole){
+        if(inHole){
+          // 구멍 안: 공이 완전히 통과할 때까지 자유낙하
+          if(b.y-BALL_R>=FLOOR_Y&&!gameOver){
+            b.dead=true;b.won=true;b.flash=65;
+            gameOver=true;winnerName=b.name;winnerHue=b.hue;overlayActive=true;
+            balls.forEach(o=>{if(o!==b){o.dead=true;o.flash=0;}});
+          }
+        } else {
           b.y=FLOOR_Y-BALL_R;
           b.vy=-Math.abs(b.vy)*DAMP;
-          // 구멍 방향으로 적극 유도
           b.vx+=(HOLE_X-b.x)*0.012+(Math.random()-.5)*.5;
         }
       }
