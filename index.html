@@ -144,6 +144,7 @@
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
       <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">소식</button>
       <button onclick="showPage('travel')" id="btn-travel" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">여행</button>
+      <button onclick="showPage('pinball')" id="btn-pinball" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">Beta</button>
     </div>
   </div>
 </nav>
@@ -2920,6 +2921,207 @@ window.travelRender=travelRender;
 })();
 </script>
 
+<script>
+// ===== 소원구슬 핀볼 =====
+(function(){
+  const W=360,H=560,PEG_R=5,BALL_R=9,GRAV=0.28,DAMP=0.54,SP=34;
+
+  // 8행 삼각 배열 (행 i → i+3개 핀)
+  const pegs=[];
+  for(let row=0;row<8;row++){
+    const n=row+3,span=(n-1)*SP,sx=(W-span)/2;
+    for(let i=0;i<n;i++) pegs.push({x:sx+i*SP,y:85+row*52});
+  }
+
+  // 마지막 행(10핀) → 슬롯 경계 11개 → 10개 슬롯
+  const last=pegs.slice(-10);
+  const walls=[0];
+  for(let i=0;i<last.length-1;i++) walls.push((last[i].x+last[i+1].x)/2);
+  walls.push(W);
+
+  const LABELS=['꽝','꽝','꽝','★★','🎉 당첨','🎉 당첨','★★','꽝','꽝','꽝'];
+  const WIN_COLOR=['#1a0e30','#1a0e30','#1a0e30','#3b1d8a','#7a0d4a','#7a0d4a','#3b1d8a','#1a0e30','#1a0e30','#1a0e30'];
+
+  let balls=[],results=[],raf=null,busy=false;
+
+  function mkBall(){
+    const hue=285+Math.random()*70;
+    return{x:W/2+(Math.random()-.5)*28,y:18,vx:(Math.random()-.5)*1.4,vy:2.5,hue,trail:[],done:false,slot:-1,flash:0};
+  }
+
+  function tick(){
+    balls.forEach(b=>{
+      if(b.done){if(b.flash>0)b.flash--;return;}
+      b.trail.push({x:b.x,y:b.y});
+      if(b.trail.length>9)b.trail.shift();
+
+      b.vy+=GRAV;
+      b.x+=b.vx;
+      b.y+=b.vy;
+
+      // 속도 상한 (터널링 방지)
+      const spd=Math.hypot(b.vx,b.vy);
+      if(spd>11){b.vx*=11/spd;b.vy*=11/spd;}
+
+      // 좌우 벽
+      if(b.x<BALL_R){b.x=BALL_R;b.vx=Math.abs(b.vx)*.65+(Math.random()-.5)*.3;}
+      if(b.x>W-BALL_R){b.x=W-BALL_R;b.vx=-Math.abs(b.vx)*.65+(Math.random()-.5)*.3;}
+
+      // 핀 충돌
+      for(const p of pegs){
+        const dx=b.x-p.x,dy=b.y-p.y,d=Math.hypot(dx,dy),md=BALL_R+PEG_R+0.5;
+        if(d<md&&d>.05){
+          const nx=dx/d,ny=dy/d;
+          b.x=p.x+nx*md; b.y=p.y+ny*md;
+          const dot=b.vx*nx+b.vy*ny;
+          b.vx=(b.vx-2*dot*nx)*DAMP+(Math.random()-.5)*.9;
+          b.vy=Math.max((b.vy-2*dot*ny)*DAMP,.7);
+        }
+      }
+
+      // 바닥 도달
+      if(b.y>H-55){
+        b.done=true; b.flash=40;
+        b.slot=walls.findIndex((w,i)=>i<walls.length-1&&b.x>=w&&b.x<walls[i+1]);
+        if(b.slot<0)b.slot=4;
+        results.push({slot:b.slot,label:LABELS[b.slot]||'꽝'});
+        pbUpdResults();
+        setTimeout(()=>{document.getElementById('pb-drop')?.removeAttribute('disabled');busy=false;},600);
+      }
+    });
+  }
+
+  function draw(){
+    const cv=document.getElementById('pb-cv');
+    if(!cv)return;
+    const ctx=cv.getContext('2d');
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#0c0618');bg.addColorStop(1,'#060210');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+    // 슬롯 영역
+    const sY=H-60;
+    for(let i=0;i<LABELS.length;i++){
+      const x0=walls[i],x1=walls[i+1],cx=(x0+x1)/2;
+      const isWin=LABELS[i].includes('🎉'),isStar=LABELS[i].includes('★');
+      const hit=balls.some(b=>b.done&&b.slot===i);
+      ctx.fillStyle=hit?WIN_COLOR[i]+'ee':WIN_COLOR[i]+'77';
+      ctx.fillRect(x0+1,sY,x1-x0-2,H-sY);
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=isWin?'#ff5fb0':isStar?'#b566ff':'#3d2d55';
+      ctx.shadowBlur=hit&&(isWin||isStar)?14:0;
+      ctx.shadowColor=isWin?'#ff5fb0':'#b566ff';
+      ctx.font=`bold ${isWin?'10':'11'}px sans-serif`;
+      ctx.fillText(LABELS[i],cx,sY+20);
+      ctx.shadowBlur=0;
+    }
+
+    // 슬롯 구분선
+    ctx.strokeStyle='rgba(181,102,255,0.2)';ctx.lineWidth=1;
+    walls.slice(1,-1).forEach(w=>{ctx.beginPath();ctx.moveTo(w,sY);ctx.lineTo(w,H);ctx.stroke();});
+
+    // 테두리
+    ctx.strokeStyle='rgba(181,102,255,0.3)';ctx.lineWidth=1.5;
+    ctx.strokeRect(.75,.75,W-1.5,H-1.5);
+
+    // 투하 가이드
+    ctx.strokeStyle='rgba(181,102,255,0.12)';ctx.setLineDash([3,6]);
+    ctx.beginPath();ctx.moveTo(W/2-22,6);ctx.lineTo(W/2-22,32);
+    ctx.moveTo(W/2+22,6);ctx.lineTo(W/2+22,32);ctx.stroke();ctx.setLineDash([]);
+
+    // 핀
+    for(const p of pegs){
+      ctx.beginPath();ctx.arc(p.x,p.y,PEG_R,0,Math.PI*2);
+      ctx.fillStyle='#c084fc';ctx.shadowBlur=10;ctx.shadowColor='rgba(192,132,252,.7)';
+      ctx.fill();
+    }
+    ctx.shadowBlur=0;
+
+    // 공 + 잔상
+    for(const b of balls){
+      if(b.done&&!b.flash)continue;
+      b.trail.forEach((t,i)=>{
+        const a=(i/b.trail.length)*.22;
+        ctx.beginPath();ctx.arc(t.x,t.y,BALL_R*(i/b.trail.length)*.7,0,Math.PI*2);
+        ctx.fillStyle=`hsla(${b.hue},100%,68%,${a})`;ctx.fill();
+      });
+      ctx.shadowBlur=b.flash>0?28:16;ctx.shadowColor=`hsl(${b.hue},100%,68%)`;
+      const gr=ctx.createRadialGradient(b.x-2,b.y-3,1,b.x,b.y,BALL_R+(b.flash>0?2:0));
+      gr.addColorStop(0,'rgba(255,255,255,.55)');
+      gr.addColorStop(1,`hsl(${b.hue},100%,68%)`);
+      ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+(b.flash>0?2:0),0,Math.PI*2);
+      ctx.fillStyle=gr;ctx.fill();ctx.shadowBlur=0;
+    }
+  }
+
+  function loop(){
+    tick();draw();
+    if(balls.some(b=>!b.done||b.flash>0))raf=requestAnimationFrame(loop);
+    else raf=null;
+  }
+
+  function pbDrop(){
+    if(busy)return;busy=true;
+    document.getElementById('pb-drop')?.setAttribute('disabled','');
+    balls.push(mkBall());
+    if(!raf)raf=requestAnimationFrame(loop);
+  }
+
+  function pbReset(){
+    if(raf){cancelAnimationFrame(raf);raf=null;}
+    balls=[];results=[];busy=false;
+    document.getElementById('pb-drop')?.removeAttribute('disabled');
+    pbUpdResults();draw();
+  }
+
+  function pbUpdResults(){
+    const el=document.getElementById('pb-results');
+    if(!el)return;
+    if(!results.length){el.innerHTML='';return;}
+    el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px">`+
+      results.map((r,i)=>`<span style="padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;
+        background:${r.label.includes('🎉')?'rgba(219,39,119,.2)':r.label.includes('★')?'rgba(181,102,255,.15)':'rgba(40,28,70,.5)'};
+        color:${r.label.includes('🎉')?'#ff5fb0':r.label.includes('★')?'#b566ff':'#4a3a6a'};
+        border:1px solid ${r.label.includes('🎉')?'rgba(219,39,119,.35)':r.label.includes('★')?'rgba(181,102,255,.25)':'rgba(74,58,106,.3)'}"
+      >${i+1}차 ${r.label}</span>`).join('')+`</div>`;
+  }
+
+  function pbCopyUrl(){
+    navigator.clipboard.writeText(location.origin+'/#pinball').then(()=>{
+      const btn=document.getElementById('pb-share');
+      if(!btn)return;
+      const orig=btn.innerHTML;
+      btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5ee0a8" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 복사됨!';
+      btn.style.color='#5ee0a8';
+      setTimeout(()=>{btn.innerHTML=orig;btn.style.color='';},2000);
+    });
+  }
+
+  function pinballInit(){
+    const wrap=document.getElementById('pinball-wrap');
+    if(!wrap)return;
+    if(raf){cancelAnimationFrame(raf);raf=null;}
+    balls=[];results=[];busy=false;
+    wrap.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+      <canvas id="pb-cv" width="${W}" height="${H}" style="max-width:100%;border-radius:16px;cursor:pointer" onclick="pbDrop()"></canvas>
+      <div style="display:flex;gap:10px">
+        <button id="pb-drop" onclick="pbDrop()" style="padding:10px 28px;border-radius:20px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(181,102,255,.35)">🔮 공 던지기</button>
+        <button onclick="pbReset()" style="padding:10px 18px;border-radius:20px;border:1px solid rgba(140,110,200,.4);background:none;color:#9b94b3;font-size:13px;cursor:pointer;font-family:inherit">초기화</button>
+      </div>
+      <p style="font-size:11px;color:#3d2d5a;margin:0">캔버스를 클릭해도 공을 던질 수 있어요</p>
+      <div id="pb-results"></div>
+    </div>`;
+    draw();
+  }
+
+  window.pbDrop=pbDrop;
+  window.pbReset=pbReset;
+  window.pbCopyUrl=pbCopyUrl;
+  window.pinballInit=pinballInit;
+  window.pinballReady=false;
+})();
+</script>
+
 <!-- Beta 실험실 페이지 -->
 <div id="page-beta" class="hidden">
   <div class="mx-auto max-w-screen-md px-5 pb-16 pt-4">
@@ -3268,6 +3470,20 @@ Oh my Blue Moon</div>
     </div>
 
     <div id="travel-board-wrap"></div>
+  </div>
+</div>
+
+<!-- 소원구슬 핀볼 페이지 -->
+<div id="page-pinball" class="hidden">
+  <div class="mx-auto max-w-screen-md px-5 py-10">
+    <div style="position:relative;margin-bottom:20px">
+      <button id="pb-share" onclick="pbCopyUrl()" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        URL 공유</button>
+      <h1 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.01em;padding-right:90px"><span style="background:linear-gradient(135deg,#b566ff,#db2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">소원구슬</span> 추첨 핀볼</h1>
+      <p style="font-size:12px;color:#6b6480;margin-top:6px">공을 던져 당첨자를 결정하세요 🔮</p>
+    </div>
+    <div id="pinball-wrap"></div>
   </div>
 </div>
 
@@ -3657,14 +3873,14 @@ Oh my Blue Moon</div>
   }
 
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin', 'beta', 'travel'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin', 'beta', 'travel', 'pinball'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       if (btn) btn.className = p === page
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : '#' + page;
+    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : page === 'pinball' ? '#pinball' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
     if (page === 'roulette') {
@@ -3689,6 +3905,9 @@ Oh my Blue Moon</div>
     if (page === 'travel') {
       if (!window.travelReady) { window.travelReady = true; window.travelInit(); }
       else window.travelRender();
+    }
+    if (page === 'pinball') {
+      if (!window.pinballReady) { window.pinballReady = true; window.pinballInit(); }
     }
   }
 
@@ -3715,6 +3934,7 @@ Oh my Blue Moon</div>
     else if (hash === 'spin') showPage('spin');
     else if (hash === 'beta') showPage('beta');
     else if (hash === 'travel') { showPage('travel'); }
+    else if (hash === 'pinball') { showPage('pinball'); }
   })();
 </script>
 
