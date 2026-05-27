@@ -143,6 +143,7 @@
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
       <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">소식</button>
+      <button onclick="showPage('travel')" id="btn-travel" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">여행</button>
     </div>
   </div>
 </nav>
@@ -2022,6 +2023,9 @@ let wcParts=[];
 let wcRecs=[];
 let wcBoardPosts=[];
 let wcBoardDeleteId=null;
+let travelPosts=[];
+let travelDeleteId=null;
+let travelReady=false;
 let wcFormOpen=false;
 const wcForm={date:wcToday(),nickname:'',isCompleted:true,isPass:false,calories:'',duration:''};
 window.wcForm=wcForm;
@@ -2620,6 +2624,167 @@ wcInit();
 </script>
 </div>
 
+<script>
+(function(){
+function travelEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function travelFmt(ts){if(!ts)return'';const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+
+async function travelInit(){
+  const{data,error}=await sb.from('travel_board').select('*').order('created_at',{ascending:true});
+  if(!error)travelPosts=data||[];
+  travelRender();
+}
+
+function travelRender(){
+  const wrap=document.getElementById('travel-board-wrap');
+  if(!wrap)return;
+  const parents=travelPosts.filter(c=>!c.parent_id);
+  const replies=travelPosts.filter(c=>c.parent_id);
+  const postsHTML=parents.length===0
+    ?'<p style="text-align:center;font-size:12px;color:#6b6480;padding:20px 0">아직 게시물이 없어요. 첫 글을 남겨보세요!</p>'
+    :parents.map(c=>{
+      const childList=replies.filter(r=>r.parent_id===c.id);
+      const childHTML=childList.map(r=>`
+        <div style="margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.3)">
+          <p style="margin:0;font-size:12px;color:#e5e0f0;white-space:pre-wrap">${travelEsc(r.content)}</p>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+            <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">ㄴ ${travelEsc(r.nickname)} · ${travelFmt(r.created_at)}</p>
+            <button onclick="travelBoardLike('${r.id}')" style="font-size:10px;color:${localStorage.getItem('trb_liked_'+r.id)?'#f472b6':'rgba(155,148,179,0.35)'};background:none;border:none;cursor:pointer;padding:0">❤️ ${r.like_count||0}</button>
+            <button onclick="travelBoardAskDelete('${r.id}')" style="font-size:10px;color:rgba(155,148,179,0.25);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.25)'">삭제</button>
+          </div>
+        </div>`).join('');
+      const replyFormHTML=`
+        <div id="trb-rf-${c.id}" style="display:none;margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.15)">
+          <input id="trb-rn-${c.id}" placeholder="닉네임" maxlength="10" style="width:100%;box-sizing:border-box;border-radius:6px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:5px 8px;font-size:11px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:4px"/>
+          <textarea id="trb-ri-${c.id}" placeholder="댓글을 남겨주세요" rows="2" style="width:100%;box-sizing:border-box;border-radius:6px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:5px 8px;font-size:11px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
+          <div style="display:flex;gap:6px;margin-top:4px">
+            <button onclick="travelBoardSubmitReply('${c.id}')" style="padding:5px 12px;border-radius:6px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
+            <button onclick="travelBoardCancelReply('${c.id}')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit">취소</button>
+          </div>
+        </div>`;
+      return`<div style="border:1px solid rgba(140,110,200,0.2);border-radius:10px;padding:12px;background:rgba(22,15,42,0.6)">
+        <p style="margin:0 0 4px;font-size:13px;color:#f5f1ff;white-space:pre-wrap">${travelEsc(c.content)}</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
+          <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">${travelEsc(c.nickname)} · ${travelFmt(c.created_at)}</p>
+          <button onclick="travelBoardToggleReply('${c.id}')" style="font-size:10px;color:rgba(181,102,255,0.6);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(181,102,255,0.6)'">💬 댓글 달기</button>
+          <button onclick="travelBoardLike('${c.id}')" style="font-size:10px;color:${localStorage.getItem('trb_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.35)'};background:none;border:none;cursor:pointer;padding:0">❤️ ${c.like_count||0}</button>
+          <button onclick="travelBoardAskDelete('${c.id}')" style="font-size:10px;color:rgba(155,148,179,0.25);background:none;border:none;cursor:pointer;padding:0;margin-left:auto" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.25)'">삭제</button>
+        </div>
+        ${childHTML}
+        ${replyFormHTML}
+      </div>`;
+    }).join('');
+
+  wrap.innerHTML=`
+    <div style="margin-bottom:14px">
+      <input id="trb-nick" placeholder="닉네임" maxlength="10" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:6px"/>
+      <textarea id="trb-inp" placeholder="준비물, 일정, 공유하고 싶은 내용을 자유롭게 남겨보세요" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:8px 10px;font-size:12px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
+      <button onclick="travelBoardSubmitPost()" style="width:100%;margin-top:4px;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${postsHTML}</div>
+    <div id="trb-delete-modal" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:rgba(30,22,55,0.8);border:1px solid rgba(239,68,68,0.3);text-align:center">
+      <p style="font-size:12px;color:#f5f1ff;margin:0 0 8px">삭제할까요?</p>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button onclick="travelBoardConfirmDelete()" style="padding:5px 16px;border-radius:8px;border:none;background:#ef4444;color:#fff;font-size:12px;font-weight:600;cursor:pointer">삭제</button>
+        <button onclick="travelBoardCancelDelete()" style="padding:5px 16px;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:12px;cursor:pointer">취소</button>
+      </div>
+    </div>`;
+}
+
+function travelCopyUrl(){
+  const url=location.origin+location.pathname+'#travel';
+  const btn=document.getElementById('travel-share-btn');
+  navigator.clipboard.writeText(url).then(()=>{
+    if(!btn)return;
+    const orig=btn.innerHTML;
+    btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5ee0a8" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 복사됨!';
+    btn.style.borderColor='rgba(94,224,168,0.5)';btn.style.color='#5ee0a8';
+    setTimeout(()=>{btn.innerHTML=orig;btn.style.borderColor='rgba(140,110,200,0.35)';btn.style.color='#9b94b3';},2000);
+  });
+}
+
+async function travelBoardSubmitPost(){
+  const nick=document.getElementById('trb-nick')?.value.trim();
+  const content=document.getElementById('trb-inp')?.value.trim();
+  if(!nick){alert('닉네임을 입력해주세요');return;}
+  if(!content){alert('내용을 입력해주세요');return;}
+  const{data,error}=await sb.from('travel_board').insert({nickname:nick,content}).select().single();
+  if(!error&&data){
+    travelPosts.push(data);
+    document.getElementById('trb-nick').value='';
+    document.getElementById('trb-inp').value='';
+    travelRender();
+  }
+}
+
+function travelBoardToggleReply(id){
+  const form=document.getElementById('trb-rf-'+id);
+  if(!form)return;
+  const isOpen=form.style.display!=='none';
+  form.style.display=isOpen?'none':'block';
+  if(!isOpen)document.getElementById('trb-rn-'+id)?.focus();
+}
+
+function travelBoardCancelReply(id){
+  const form=document.getElementById('trb-rf-'+id);
+  if(form)form.style.display='none';
+}
+
+async function travelBoardSubmitReply(parentId){
+  const nick=document.getElementById('trb-rn-'+parentId)?.value.trim();
+  const content=document.getElementById('trb-ri-'+parentId)?.value.trim();
+  if(!nick){alert('닉네임을 입력해주세요');return;}
+  if(!content){alert('내용을 입력해주세요');return;}
+  const{data,error}=await sb.from('travel_board').insert({nickname:nick,content,parent_id:parentId}).select().single();
+  if(!error&&data){travelPosts.push(data);travelRender();}
+}
+
+async function travelBoardLike(id){
+  const key='trb_liked_'+id;
+  if(localStorage.getItem(key))return;
+  const post=travelPosts.find(c=>c.id===id);
+  if(!post)return;
+  const newCount=(post.like_count||0)+1;
+  const{error}=await sb.from('travel_board').update({like_count:newCount}).eq('id',id);
+  if(!error){post.like_count=newCount;localStorage.setItem(key,'1');travelRender();}
+}
+
+function travelBoardAskDelete(id){
+  travelDeleteId=id;
+  const modal=document.getElementById('trb-delete-modal');
+  if(modal)modal.style.display='block';
+}
+
+function travelBoardCancelDelete(){
+  travelDeleteId=null;
+  const modal=document.getElementById('trb-delete-modal');
+  if(modal)modal.style.display='none';
+}
+
+async function travelBoardConfirmDelete(){
+  if(!travelDeleteId)return;
+  const{error}=await sb.from('travel_board').delete().eq('id',travelDeleteId);
+  if(!error){
+    travelPosts=travelPosts.filter(c=>c.id!==travelDeleteId);
+    travelDeleteId=null;
+    travelRender();
+  }
+}
+
+window.travelCopyUrl=travelCopyUrl;
+window.travelBoardSubmitPost=travelBoardSubmitPost;
+window.travelBoardToggleReply=travelBoardToggleReply;
+window.travelBoardCancelReply=travelBoardCancelReply;
+window.travelBoardSubmitReply=travelBoardSubmitReply;
+window.travelBoardLike=travelBoardLike;
+window.travelBoardAskDelete=travelBoardAskDelete;
+window.travelBoardCancelDelete=travelBoardCancelDelete;
+window.travelBoardConfirmDelete=travelBoardConfirmDelete;
+window.travelInit=travelInit;
+window.travelRender=travelRender;
+})();
+</script>
+
 <!-- Beta 실험실 페이지 -->
 <div id="page-beta" class="hidden">
   <div class="mx-auto max-w-screen-md px-5 pb-16 pt-4">
@@ -2847,6 +3012,21 @@ wcInit();
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 여행 페이지 -->
+<div id="page-travel" class="hidden">
+  <div class="mx-auto max-w-screen-md px-5 py-10">
+    <div style="position:relative;margin-bottom:20px">
+      <button onclick="travelCopyUrl()" id="travel-share-btn" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        URL 공유
+      </button>
+      <h1 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.01em;padding-right:90px"><span style="background:linear-gradient(135deg,#b566ff,#db2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">가평 비밀계곡</span> 준비 게시판</h1>
+      <p style="font-size:12px;color:#6b6480;margin-top:6px">누구나 닉네임으로 자유롭게 작성할 수 있어요</p>
+    </div>
+    <div id="travel-board-wrap"></div>
   </div>
 </div>
 
@@ -3236,14 +3416,14 @@ wcInit();
   }
 
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin', 'beta'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin', 'beta', 'travel'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       if (btn) btn.className = p === page
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : '#' + page;
+    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
     if (page === 'roulette') {
@@ -3264,6 +3444,10 @@ wcInit();
     }
     if (page === 'beta') {
       betaInit();
+    }
+    if (page === 'travel') {
+      if (!travelReady) { travelReady = true; travelInit(); }
+      else travelRender();
     }
   }
 
@@ -3289,6 +3473,7 @@ wcInit();
     else if (hash === 'diet') showPage('diet');
     else if (hash === 'spin') showPage('spin');
     else if (hash === 'beta') showPage('beta');
+    else if (hash === 'travel') { showPage('travel'); setTimeout(()=>{ if(!travelReady){travelReady=true;travelInit();} },300); }
   })();
 </script>
 
