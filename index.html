@@ -2995,10 +2995,11 @@ window.travelRender=travelRender;
 
   // 풍차 장애물: angle은 매 tick마다 spd씩 회전
   const windmills=[
-    {x:100, y:720,  len:44, angle:0,           spd:0.022},
-    {x:260, y:1040, len:44, angle:Math.PI/3,   spd:-0.019},
-    {x:168, y:1290, len:48, angle:Math.PI/6,   spd:0.016},
-    {x:180, y:2100, len:52, angle:Math.PI/4,   spd:-0.014},
+    {x:100,    y:720,        len:44, angle:0,         spd:0.022},
+    {x:260,    y:1040,       len:44, angle:Math.PI/3, spd:-0.019},
+    {x:168,    y:1290,       len:48, angle:Math.PI/6, spd:0.016},
+    {x:180,    y:2100,       len:52, angle:Math.PI/4, spd:-0.014},
+    {x:HOLE_X, y:FLOOR_Y-52, len:34, angle:0,         spd:0.042, gate:true},
   ];
 
   // 무빙 범퍼: 좌우로 이동하는 범퍼
@@ -3323,15 +3324,18 @@ window.travelRender=travelRender;
       const sy=wm.y-camY;
       if(sy<-wm.len-20||sy>CVH+wm.len+20)continue;
       const ca=Math.cos(wm.angle),sa=Math.sin(wm.angle);
+      const isGate=!!wm.gate;
       ctx.save();
-      ctx.strokeStyle='#ff9030';ctx.lineWidth=7;ctx.lineCap='round';
-      ctx.shadowBlur=20;ctx.shadowColor='rgba(255,140,0,.75)';
+      ctx.strokeStyle=isGate?'#ffd700':'#ff9030';
+      ctx.lineWidth=isGate?8:7;ctx.lineCap='round';
+      ctx.shadowBlur=isGate?28:20;
+      ctx.shadowColor=isGate?'rgba(255,215,0,.9)':'rgba(255,140,0,.75)';
       ctx.beginPath();
       ctx.moveTo(wm.x-ca*wm.len,wm.y-sa*wm.len);
       ctx.lineTo(wm.x+ca*wm.len,wm.y+sa*wm.len);
       ctx.stroke();
-      ctx.beginPath();ctx.arc(wm.x,wm.y,5,0,Math.PI*2);
-      ctx.fillStyle='#ffd700';ctx.shadowBlur=14;ctx.shadowColor='rgba(255,215,0,.9)';
+      ctx.beginPath();ctx.arc(wm.x,wm.y,isGate?7:5,0,Math.PI*2);
+      ctx.fillStyle='#fff';ctx.shadowBlur=14;ctx.shadowColor='rgba(255,215,0,.9)';
       ctx.fill();ctx.shadowBlur=0;
       ctx.restore();
     }
