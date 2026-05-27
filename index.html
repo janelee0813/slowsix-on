@@ -2855,80 +2855,77 @@ window.travelBoardConfirmDelete=travelBoardConfirmDelete;
 let travelMusicOn=false;
 let travelLyricPrev='';
 const TRAVEL_LYRICS=[
-  {time:0,   text:''},
-  {time:5,   text:'푸르른 달에 맘을 도둑맞듯'},
-  {time:10,  text:'세상에 너와 나 단둘만 같았어'},
-  {time:16,  text:'이 순간이 잠시라면'},
-  {time:20,  text:'영원히 멈춰 버리자'},
-  {time:24,  text:'지겨워져도 괜찮아'},
-  {time:28,  text:'들어 줘 나의 Blue Moon'},
-  {time:33,  text:'Oh my Blue Moon'},
-  {time:38,  text:''},
-  {time:42,  text:'희미한 말들로'},
-  {time:46,  text:'너에게 닿을 수만 있다면'},
-  {time:51,  text:'시시한 일상 밖에'},
-  {time:55,  text:'날 밀어둔 채로'},
-  {time:60,  text:'신비한 꿈처럼'},
-  {time:64,  text:'너만을 바라보아서'},
-  {time:69,  text:'하루 종일 너에게 전하고 싶은 맘'},
-  {time:76,  text:'괜시리 기대하죠'},
-  {time:80,  text:'이 문 뒤에선 왠지'},
-  {time:84,  text:'숨죽이며 날 기다리겠죠'},
-  {time:90,  text:'푸르른 날의 눈부신'},
-  {time:94,  text:'밤 향기에 빠져서'},
-  {time:98,  text:'아리따운 너의 맘과'},
-  {time:102, text:'영원을 보고 싶어'},
-  {time:107, text:'이 풍경 속에 홀리듯'},
-  {time:111, text:'내 몸이 잠겨 버리게'},
-  {time:115, text:'푸르른 달아'},
-  {time:119, text:'텅 빈 그대 맘을 가득 채워 줘'},
-  {time:124, text:'Oh my Blue Moon'},
-  {time:130, text:''},
-  {time:134, text:'우리가 얼마나 많은 길을'},
-  {time:139, text:'걸어왔냔 말이야'},
-  {time:143, text:'내 청춘은 너였고'},
-  {time:147, text:'믿기 힘든 말은 말아'},
-  {time:152, text:'Shape of my heart'},
-  {time:156, text:'우린 모양이 참 알맞아'},
-  {time:160, text:'자꾸 두려워지기에'},
-  {time:164, text:'예쁜 척 포장을 하네'},
-  {time:169, text:'이해 못 해'},
-  {time:173, text:'이별도 우리를 못 피해'},
-  {time:177, text:'짜증 섞지 말자'},
-  {time:181, text:'이제 말해 그냥 행복해'},
-  {time:186, text:'No more than 며칠'},
-  {time:190, text:'미친 듯이 그리워질 Someday'},
-  {time:194, text:'아직도 기다리니'},
-  {time:198, text:'내가 있던 그 자리를'},
-  {time:204, text:'괜시리 기대하죠'},
-  {time:208, text:'이 문 뒤에 숨어서'},
-  {time:212, text:'숨죽이며 날 기다리겠죠'},
-  {time:218, text:'푸르른 날의 눈부신'},
-  {time:222, text:'밤 향기에 빠져서'},
-  {time:226, text:'아리따운 너의 맘과'},
-  {time:230, text:'영원을 보고 싶어'},
-  {time:235, text:'이 풍경 속에 홀리듯'},
-  {time:239, text:'내 몸이 잠겨 버리게'},
-  {time:243, text:'푸르른 달아'},
-  {time:247, text:'텅 빈 그대 맘을 가득 채워 줘'},
-  {time:252, text:'Oh my Blue Moon'},
-  {time:258, text:''},
-  {time:263, text:'You know why'},
-  {time:267, text:'For a long time'},
-  {time:272, text:'널 정말 많이 사랑한'},
-  {time:277, text:'그게 나의 영원일 거야'},
-  {time:283, text:'한순간 꿈처럼'},
-  {time:287, text:'저 달빛이 사라져도'},
-  {time:292, text:'내 마음속에 남는걸'},
-  {time:298, text:'푸르른 날의 눈부신'},
-  {time:302, text:'밤 향기에 빠져서'},
-  {time:306, text:'아리따운 너의 맘과'},
-  {time:310, text:'영원을 보고 싶어'},
-  {time:315, text:'이 풍경 속에 홀리듯'},
-  {time:319, text:'내 몸이 잠겨 버리게'},
-  {time:323, text:'푸르른 달아'},
-  {time:327, text:'텅 빈 그대 맘을 가득 채워 줘'},
-  {time:332, text:'Oh my Blue Moon'},
+  {time:0,     text:''},
+  {time:5.3,   text:'푸르른 달에 맘을 도둑맞듯'},
+  {time:9.8,   text:'세상에 너와 나 단둘만 같았어'},
+  {time:12.2,  text:'이 순간이 잠시라면'},
+  {time:14.6,  text:'영원히 멈춰 버리자'},
+  {time:16.6,  text:'지겨워져도 괜찮아'},
+  {time:22,    text:'들어 줘 나의 Blue Moon'},
+  {time:28.5,  text:'Oh my Blue Moon'},
+  {time:30.3,  text:'희미한 말들로'},
+  {time:33.3,  text:'너에게 닿을 수만 있다면'},
+  {time:35.5,  text:'시시한 일상 밖에'},
+  {time:37.5,  text:'날 밀어둔 채로'},
+  {time:39.5,  text:'신비한 꿈처럼'},
+  {time:41.9,  text:'너만을 바라보아서'},
+  {time:46.2,  text:'하루 종일 너에게 전하고 싶은 맘'},
+  {time:50.1,  text:'괜시리 기대하죠'},
+  {time:52.3,  text:'이 문 뒤에선 왠지'},
+  {time:55.7,  text:'숨죽이며 날 기다리겠죠'},
+  {time:57.7,  text:'푸르른 날의 눈부신'},
+  {time:60.3,  text:'밤 향기에 빠져서'},
+  {time:62.5,  text:'아리따운 너의 맘과'},
+  {time:65.1,  text:'영원을 보고 싶어'},
+  {time:67.1,  text:'이 풍경 속에 홀리듯'},
+  {time:69.6,  text:'내 몸이 잠겨 버리게'},
+  {time:70.8,  text:'푸르른 달아'},
+  {time:79.2,  text:'텅 빈 그대 맘을 가득 채워 줘'},
+  {time:84.2,  text:'Oh my Blue Moon'},
+  {time:85.4,  text:'우리가 얼마나 많은 길을'},
+  {time:86.3,  text:'걸어왔냔 말이야'},
+  {time:87.4,  text:'내 청춘은 너였고'},
+  {time:88.2,  text:'믿기 힘든 말은 말아'},
+  {time:89.4,  text:'Shape of my heart'},
+  {time:90.7,  text:'우린 모양이 참 알맞아'},
+  {time:92,    text:'자꾸 두려워지기에'},
+  {time:92.9,  text:'예쁜 척 포장을 하네'},
+  {time:93.6,  text:'이해 못 해'},
+  {time:94.9,  text:'이별도 우리를 못 피해'},
+  {time:95.9,  text:'짜증 섞지 말자'},
+  {time:97.1,  text:'이제 말해 그냥 행복해'},
+  {time:97.9,  text:'No more than 며칠'},
+  {time:100,   text:'미친 듯이 그리워질 Someday'},
+  {time:101.1, text:'아직도 기다리니'},
+  {time:102.1, text:'내가 있던 그 자리를'},
+  {time:105.1, text:'괜시리 기대하죠'},
+  {time:107.3, text:'이 문 뒤에 숨어서'},
+  {time:110.7, text:'숨죽이며 날 기다리겠죠'},
+  {time:112.6, text:'푸르른 날의 눈부신'},
+  {time:115.2, text:'밤 향기에 빠져서'},
+  {time:117.1, text:'아리따운 너의 맘과'},
+  {time:119.7, text:'영원을 보고 싶어'},
+  {time:121.7, text:'이 풍경 속에 홀리듯'},
+  {time:124,   text:'내 몸이 잠겨 버리게'},
+  {time:125.5, text:'푸르른 달아'},
+  {time:134.6, text:'텅 빈 그대 맘을 가득 채워 줘'},
+  {time:139,   text:'Oh my Blue Moon'},
+  {time:148.7, text:'You know why'},
+  {time:149.9, text:'For a long time'},
+  {time:152.4, text:'널 정말 많이 사랑한'},
+  {time:155.3, text:'그게 나의 영원일 거야'},
+  {time:159,   text:'한순간 꿈처럼'},
+  {time:161.5, text:'저 달빛이 사라져도'},
+  {time:163.7, text:'내 마음속에 남는걸'},
+  {time:167.5, text:'푸르른 날의 눈부신'},
+  {time:170.1, text:'밤 향기에 빠져서'},
+  {time:172.2, text:'아리따운 너의 맘과'},
+  {time:174.7, text:'영원을 보고 싶어'},
+  {time:176.7, text:'이 풍경 속에 홀리듯'},
+  {time:179.2, text:'내 몸이 잠겨 버리게'},
+  {time:180.5, text:'푸르른 달아'},
+  {time:187.5, text:'텅 빈 그대 맘을 가득 채워 줘'},
+  {time:202.7, text:'Oh my Blue Moon'},
 ];
 
 function travelUpdateLyric(){
@@ -2963,65 +2960,6 @@ function travelToggleMusic(){
 }
 window.travelToggleMusic=travelToggleMusic;
 
-const TIMING_LINES=['푸르른 달에 맘을 도둑맞듯','세상에 너와 나 단둘만 같았어','이 순간이 잠시라면','영원히 멈춰 버리자','지겨워져도 괜찮아','들어 줘 나의 Blue Moon','Oh my Blue Moon','희미한 말들로','너에게 닿을 수만 있다면','시시한 일상 밖에','날 밀어둔 채로','신비한 꿈처럼','너만을 바라보아서','하루 종일 너에게 전하고 싶은 맘','괜시리 기대하죠','이 문 뒤에선 왠지','숨죽이며 날 기다리겠죠','푸르른 날의 눈부신','밤 향기에 빠져서','아리따운 너의 맘과','영원을 보고 싶어','이 풍경 속에 홀리듯','내 몸이 잠겨 버리게','푸르른 달아','텅 빈 그대 맘을 가득 채워 줘','Oh my Blue Moon','우리가 얼마나 많은 길을','걸어왔냔 말이야','내 청춘은 너였고','믿기 힘든 말은 말아','Shape of my heart','우린 모양이 참 알맞아','자꾸 두려워지기에','예쁜 척 포장을 하네','이해 못 해','이별도 우리를 못 피해','짜증 섞지 말자','이제 말해 그냥 행복해','No more than 며칠','미친 듯이 그리워질 Someday','아직도 기다리니','내가 있던 그 자리를','괜시리 기대하죠','이 문 뒤에 숨어서','숨죽이며 날 기다리겠죠','푸르른 날의 눈부신','밤 향기에 빠져서','아리따운 너의 맘과','영원을 보고 싶어','이 풍경 속에 홀리듯','내 몸이 잠겨 버리게','푸르른 달아','텅 빈 그대 맘을 가득 채워 줘','Oh my Blue Moon','You know why','For a long time','널 정말 많이 사랑한','그게 나의 영원일 거야','한순간 꿈처럼','저 달빛이 사라져도','내 마음속에 남는걸','푸르른 날의 눈부신','밤 향기에 빠져서','아리따운 너의 맘과','영원을 보고 싶어','이 풍경 속에 홀리듯','내 몸이 잠겨 버리게','푸르른 달아','텅 빈 그대 맘을 가득 채워 줘','Oh my Blue Moon'];
-let timingIdx=0;
-let timingResults=[];
-let timingTick=null;
-
-function travelTimingStart(){
-  const audio=document.getElementById('travel-audio');
-  if(!audio||audio.paused){alert('먼저 ▶ 버튼으로 음악을 재생해주세요!');return;}
-  timingIdx=0;timingResults=[];
-  document.getElementById('ttool-start-view').style.display='none';
-  document.getElementById('ttool-active-view').style.display='block';
-  travelTimingUpdateUI();
-  timingTick=setInterval(()=>{
-    const audio=document.getElementById('travel-audio');
-    const el=document.getElementById('ttool-time');
-    if(audio&&el)el.textContent=audio.currentTime.toFixed(1)+'초';
-  },100);
-}
-
-function travelTimingUpdateUI(){
-  const cur=document.getElementById('ttool-current');
-  const nxt=document.getElementById('ttool-next');
-  const prog=document.getElementById('ttool-progress');
-  const bar=document.getElementById('ttool-progress-bar');
-  if(cur)cur.textContent=TIMING_LINES[timingIdx]||'';
-  if(nxt)nxt.textContent=TIMING_LINES[timingIdx+1]||'(끝)';
-  if(prog)prog.textContent=(timingIdx+1)+' / '+TIMING_LINES.length;
-  if(bar)bar.style.width=((timingIdx)/TIMING_LINES.length*100)+'%';
-}
-
-function travelTimingMark(){
-  const audio=document.getElementById('travel-audio');
-  if(!audio)return;
-  timingResults.push({time:Math.round(audio.currentTime*10)/10,text:TIMING_LINES[timingIdx]});
-  timingIdx++;
-  if(timingIdx>=TIMING_LINES.length){
-    clearInterval(timingTick);
-    const bar=document.getElementById('ttool-progress-bar');
-    if(bar)bar.style.width='100%';
-    document.getElementById('ttool-active-view').style.display='none';
-    document.getElementById('ttool-result-view').style.display='block';
-    const out=document.getElementById('ttool-output');
-    if(out)out.value=timingResults.map(r=>`{time:${r.time}, text:'${r.text}'}`).join('\n');
-    return;
-  }
-  travelTimingUpdateUI();
-}
-
-function travelTimingCopy(){
-  const out=document.getElementById('ttool-output');
-  if(!out)return;
-  navigator.clipboard.writeText(out.value).then(()=>{
-    const btn=document.getElementById('ttool-copy-btn');
-    if(btn){btn.textContent='✅ 복사됨!';setTimeout(()=>{btn.textContent='복사하기';},2000);}
-  });
-}
-window.travelTimingStart=travelTimingStart;
-window.travelTimingMark=travelTimingMark;
-window.travelTimingCopy=travelTimingCopy;
 window.travelReady=false;
 window.travelInit=travelInit;
 window.travelRender=travelRender;
@@ -3282,39 +3220,6 @@ window.travelRender=travelRender;
         </div>
       </div>
       <audio id="travel-audio" src="https://teugnaahpcpzejbdayyy.supabase.co/storage/v1/object/public/travel-audio/N.Flying%20Blue%20Moon.m4a" preload="none" loop style="display:none"></audio>
-    </div>
-
-    <!-- 타이밍 기록 도구 (1회성) -->
-    <div id="travel-timing-tool" style="margin-bottom:18px;border:1px solid rgba(251,191,36,0.3);border-radius:14px;padding:14px;background:rgba(40,32,10,0.6)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="font-size:13px;font-weight:700;color:#fbbf24">🎯 가사 타이밍 기록 도구</span>
-        <span id="ttool-time" style="font-size:13px;font-weight:700;color:#f5f1ff;font-variant-numeric:tabular-nums">0.0초</span>
-      </div>
-      <div id="ttool-start-view">
-        <p style="font-size:12px;color:#9b94b3;margin:0 0 10px">음악 재생 후 각 가사 시작 시점에 <b style="color:#fbbf24">지금!</b> 버튼을 눌러주세요.</p>
-        <button onclick="travelTimingStart()" style="width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">기록 시작</button>
-      </div>
-      <div id="ttool-active-view" style="display:none">
-        <div style="margin-bottom:10px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.3)">
-          <div style="font-size:10px;color:#6b6480;margin-bottom:4px">현재 기록할 가사</div>
-          <div id="ttool-current" style="font-size:15px;font-weight:700;color:#f5f1ff"></div>
-          <div style="font-size:10px;color:#6b6480;margin-top:6px">다음 → <span id="ttool-next" style="color:#9b94b3"></span></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <button onclick="travelTimingMark()" style="flex:1;padding:14px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent">지금! ✓</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;height:6px;background:rgba(140,110,200,0.2);border-radius:99px;overflow:hidden">
-            <div id="ttool-progress-bar" style="height:100%;background:linear-gradient(90deg,#b566ff,#ff5fb0);border-radius:99px;transition:width .3s;width:0%"></div>
-          </div>
-          <span id="ttool-progress" style="font-size:11px;color:#9b94b3;white-space:nowrap"></span>
-        </div>
-      </div>
-      <div id="ttool-result-view" style="display:none">
-        <p style="font-size:12px;color:#5ee0a8;margin:0 0 8px;font-weight:600">✅ 기록 완료! 아래를 복사해서 전달해주세요.</p>
-        <textarea id="ttool-output" readonly style="width:100%;box-sizing:border-box;height:120px;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(10,6,20,0.8);padding:8px;font-size:10px;color:#e5e0f0;outline:none;resize:none;font-family:monospace"></textarea>
-        <button onclick="travelTimingCopy()" id="ttool-copy-btn" style="width:100%;margin-top:6px;padding:9px;border-radius:10px;border:none;background:rgba(94,224,168,0.15);border:1px solid rgba(94,224,168,0.3);color:#5ee0a8;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">복사하기</button>
-      </div>
     </div>
 
     <div id="travel-board-wrap"></div>
