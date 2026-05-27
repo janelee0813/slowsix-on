@@ -2924,7 +2924,7 @@ window.travelRender=travelRender;
 <script>
 // ===== 소원구슬 핀볼 =====
 (function(){
-  const W=360, CVH=620, WH=2400; // 캔버스높이 620, 게임월드 2400
+  const W=360, CVH=620, WH=3200; // 캔버스높이 620, 게임월드 3200
   const PEG_R=5, BUMP_R=19, BALL_R=11;
   const GRAV=0.065, DAMP=0.51, SP=42;
   const FLOOR_Y=WH-110, HOLE_W=56, HOLE_X=W/2;
@@ -2981,7 +2981,17 @@ window.travelRender=travelRender;
     for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:2210+r*50,r:PEG_R,t:'p',lit:0});
   });
 
-  // 수평 장벽 (bottleneck 3개) — V자 대각선으로 공이 갭으로 유도
+  // § 10구역: 핀 (3행, 교대) — 슬라이더 아래
+  for(let r=0;r<3;r++){
+    const n=r%2?7:6,sp=44,span=(n-1)*sp,sx=(W-span)/2;
+    for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:2780+r*64,r:PEG_R,t:'p',lit:0});
+  }
+
+  // § 11구역: 범퍼 (슬라이더 + §10 사이)
+  [[90,2960],[180,2930],[270,2960],[135,3010],[225,3010]].forEach(([x,y])=>
+    obs.push({x,y,r:BUMP_R,t:'b',lit:0}));
+
+  // 수평 장벽 (bottleneck 4개) — V자 대각선으로 공이 갭으로 유도
   const walls=[
     {x1:0,   y1:468,  x2:142, y2:502},  // 1번 좌
     {x1:218, y1:502,  x2:360, y2:468},  // 1번 우
@@ -2989,6 +2999,8 @@ window.travelRender=travelRender;
     {x1:252, y1:1282, x2:360, y2:1244}, // 2번 우
     {x1:0,   y1:1570, x2:118, y2:1612}, // 3번 좌
     {x1:242, y1:1612, x2:360, y2:1570}, // 3번 우
+    {x1:0,   y1:2360, x2:128, y2:2400}, // 4번 좌
+    {x1:232, y1:2400, x2:360, y2:2360}, // 4번 우
     {x1:0,           y1:FLOOR_Y-40, x2:HOLE_X-HOLE_W/2, y2:FLOOR_Y},
     {x1:HOLE_X+HOLE_W/2, y1:FLOOR_Y, x2:W, y2:FLOOR_Y-40},
   ];
@@ -2999,7 +3011,17 @@ window.travelRender=travelRender;
     {x:260,    y:1040,       len:44, angle:Math.PI/3, spd:-0.019},
     {x:168,    y:1290,       len:48, angle:Math.PI/6, spd:0.016},
     {x:180,    y:2100,       len:52, angle:Math.PI/4, spd:-0.014},
+    {x:100,    y:2700,       len:44, angle:Math.PI/5, spd:0.020},
+    {x:260,    y:2850,       len:44, angle:0,         spd:-0.018},
     {x:HOLE_X, y:FLOOR_Y-28, len:34, angle:0,         spd:0.024, gate:true},
+  ];
+
+  // 슬라이더: 좌우 왕복하며 공을 튕겨내는 수평 막대
+  const sliders=[
+    {x:30,  y:2450, len:72, dx: 2.1, xMin:15,  xMax:205, lit:0},
+    {x:200, y:2530, len:72, dx:-1.9, xMin:155, xMax:345, lit:0},
+    {x:40,  y:2610, len:80, dx: 2.4, xMin:15,  xMax:230, lit:0},
+    {x:170, y:2690, len:72, dx:-2.0, xMin:130, xMax:345, lit:0},
   ];
 
   // 무빙 범퍼: 좌우로 이동하는 범퍼
@@ -3142,10 +3164,35 @@ window.travelRender=travelRender;
     }
   }
 
+  function collideSliders(b){
+    for(const sl of sliders){
+      const x1=sl.x,y1=sl.y,x2=sl.x+sl.len,y2=sl.y;
+      const t=Math.max(0,Math.min(1,(b.x-x1)/sl.len));
+      const cx=x1+t*(x2-x1),cy=y1;
+      const bx=b.x-cx,by=b.y-cy,dist=Math.hypot(bx,by);
+      if(dist<BALL_R+5&&dist>.01){
+        const inx=bx/dist,iny=by/dist;
+        b.x=cx+inx*(BALL_R+5.5);b.y=cy+iny*(BALL_R+5.5);
+        const dot=b.vx*inx+b.vy*iny;
+        if(dot<0){
+          b.vx=(b.vx-2*dot*inx)*DAMP+sl.dx*0.5+(Math.random()-.5)*.4;
+          b.vy=(b.vy-2*dot*iny)*DAMP*1.1;
+          sl.lit=22;
+        }
+      }
+    }
+  }
+
   function tick(){
     obs.forEach(o=>{if(o.lit>0)o.lit--;});
     slings.forEach(s=>{if(s.lit>0)s.lit--;});
     magnets.forEach(mg=>{if(mg.lit>0)mg.lit--;});
+    sliders.forEach(sl=>{
+      if(sl.lit>0)sl.lit--;
+      sl.x+=sl.dx;
+      if(sl.x<=sl.xMin){sl.x=sl.xMin;sl.dx=Math.abs(sl.dx);}
+      if(sl.x+sl.len>=sl.xMax){sl.x=sl.xMax-sl.len;sl.dx=-Math.abs(sl.dx);}
+    });
     windmills.forEach(wm=>{wm.angle+=wm.spd;});
     movingBumpers.forEach(mb=>{
       if(mb.lit>0)mb.lit--;
@@ -3175,6 +3222,7 @@ window.travelRender=travelRender;
       collideMovingBumpers(b);
       collideSlings(b);
       applyMagnets(b);
+      collideSliders(b);
 
       if(b.y+BALL_R>=FLOOR_Y){
         const inHole=b.x>=HOLE_X-HOLE_W/2&&b.x<=HOLE_X+HOLE_W/2;
@@ -3271,6 +3319,24 @@ window.travelRender=travelRender;
         ctx.fillStyle='#c084fc';ctx.shadowBlur=8;ctx.shadowColor='rgba(192,132,252,.65)';
         ctx.fill();ctx.shadowBlur=0;
       }
+    }
+
+    // 슬라이더 (좌우 왕복 막대)
+    for(const sl of sliders){
+      const sy=sl.y-camY;
+      if(sy<-20||sy>CVH+20)continue;
+      const lit=sl.lit>0;
+      ctx.save();
+      ctx.strokeStyle=lit?'#f472b6':'rgba(236,72,153,0.75)';
+      ctx.lineWidth=7;ctx.lineCap='round';
+      ctx.shadowBlur=lit?26:12;ctx.shadowColor=lit?'rgba(244,114,182,.9)':'rgba(236,72,153,.4)';
+      ctx.beginPath();ctx.moveTo(sl.x,sl.y);ctx.lineTo(sl.x+sl.len,sl.y);ctx.stroke();
+      // 이동 방향 표시 (끝 화살표)
+      ctx.strokeStyle=lit?'rgba(255,255,255,.7)':'rgba(255,255,255,.3)';
+      ctx.lineWidth=2;ctx.shadowBlur=0;
+      const ax=sl.dx>0?sl.x+sl.len:sl.x, ad=sl.dx>0?1:-1;
+      ctx.beginPath();ctx.moveTo(ax,sl.y-5);ctx.lineTo(ax+ad*7,sl.y);ctx.lineTo(ax,sl.y+5);ctx.stroke();
+      ctx.restore();
     }
 
     // 슬링샷
