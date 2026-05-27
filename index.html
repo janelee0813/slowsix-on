@@ -2846,12 +2846,11 @@ async function travelBoardSaveEdit(id){
   const ta=document.getElementById('trb-edit-inp-'+id);
   const content=ta?.value.trim();
   if(!content){alert('내용을 입력해주세요');return;}
-  const{error}=await sb.from('travel_board').update({content}).eq('id',id);
-  if(!error){
-    const post=travelPosts.find(c=>c.id===id);
-    if(post)post.content=content;
-    travelRender();
-  }
+  const{data,error}=await sb.from('travel_board').update({content}).eq('id',id).select();
+  if(error){alert('수정 실패: '+error.message);return;}
+  const post=travelPosts.find(c=>c.id===id);
+  if(post)post.content=content;
+  travelRender();
 }
 
 function travelBoardAskDelete(id){
