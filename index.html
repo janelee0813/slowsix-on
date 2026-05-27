@@ -2629,7 +2629,7 @@ function travelEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&
 function travelFmt(ts){if(!ts)return'';const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 
 async function travelInit(){
-  const{data,error}=await sb.from('travel_board').select('*').order('created_at',{ascending:true});
+  const{data,error}=await sb.from('travel_board').select('*').order('created_at',{ascending:false});
   if(!error)travelPosts=data||[];
   travelRender();
 }
@@ -2639,9 +2639,15 @@ function travelRender(){
   if(!wrap)return;
   const parents=travelPosts.filter(c=>!c.parent_id);
   const replies=travelPosts.filter(c=>c.parent_id);
-  const postsHTML=parents.length===0
+  const sorted=[...parents].sort((a,b)=>{
+    if(a.is_notice&&!b.is_notice)return -1;
+    if(!a.is_notice&&b.is_notice)return 1;
+    return new Date(b.created_at)-new Date(a.created_at);
+  });
+  const postsHTML=sorted.length===0
     ?'<p style="text-align:center;font-size:12px;color:#6b6480;padding:20px 0">아직 게시물이 없어요. 첫 글을 남겨보세요!</p>'
-    :parents.map(c=>{
+    :sorted.map(c=>{
+      const isNotice=!!c.is_notice;
       const childList=replies.filter(r=>r.parent_id===c.id);
       const childHTML=childList.map(r=>`
         <div style="margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.3)">
@@ -2661,7 +2667,8 @@ function travelRender(){
             <button onclick="travelBoardCancelReply('${c.id}')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(140,110,200,0.3);background:none;color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit">취소</button>
           </div>
         </div>`;
-      return`<div style="border:1px solid rgba(140,110,200,0.2);border-radius:10px;padding:12px;background:rgba(22,15,42,0.6)">
+      return`<div style="border:1px solid ${isNotice?'rgba(251,191,36,0.45)':'rgba(140,110,200,0.2)'};border-radius:10px;padding:12px;background:${isNotice?'rgba(40,32,10,0.7)':'rgba(22,15,42,0.6)'}">
+        ${isNotice?'<span style="display:inline-block;font-size:10px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:4px;padding:1px 7px;margin-bottom:6px">📌 공지</span>':''}
         <p style="margin:0 0 4px;font-size:13px;color:#f5f1ff;white-space:pre-wrap">${travelEsc(c.content)}</p>
         <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
           <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">${travelEsc(c.nickname)} · ${travelFmt(c.created_at)}</p>
@@ -2678,7 +2685,11 @@ function travelRender(){
     <div style="margin-bottom:14px">
       <input id="trb-nick" placeholder="닉네임" maxlength="10" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:6px"/>
       <textarea id="trb-inp" placeholder="준비물, 일정, 공유하고 싶은 내용을 자유롭게 남겨보세요" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:8px 10px;font-size:12px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
-      <button onclick="travelBoardSubmitPost()" style="width:100%;margin-top:4px;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 0 8px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="trb-notice" style="width:14px;height:14px;accent-color:#b566ff;cursor:pointer"/>
+        <span style="font-size:12px;color:#9b94b3">📌 공지로 등록 (최상단 고정)</span>
+      </label>
+      <button onclick="travelBoardSubmitPost()" style="width:100%;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">등록</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">${postsHTML}</div>
     <div id="trb-delete-modal" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:rgba(30,22,55,0.8);border:1px solid rgba(239,68,68,0.3);text-align:center">
@@ -2705,13 +2716,15 @@ function travelCopyUrl(){
 async function travelBoardSubmitPost(){
   const nick=document.getElementById('trb-nick')?.value.trim();
   const content=document.getElementById('trb-inp')?.value.trim();
+  const isNotice=document.getElementById('trb-notice')?.checked||false;
   if(!nick){alert('닉네임을 입력해주세요');return;}
   if(!content){alert('내용을 입력해주세요');return;}
-  const{data,error}=await sb.from('travel_board').insert({nickname:nick,content}).select().single();
+  const{data,error}=await sb.from('travel_board').insert({nickname:nick,content,is_notice:isNotice}).select().single();
   if(!error&&data){
-    travelPosts.push(data);
+    travelPosts.unshift(data);
     document.getElementById('trb-nick').value='';
     document.getElementById('trb-inp').value='';
+    document.getElementById('trb-notice').checked=false;
     travelRender();
   }
 }
