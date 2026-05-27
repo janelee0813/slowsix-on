@@ -2926,26 +2926,26 @@ window.travelRender=travelRender;
 (function(){
   const W=360, CVH=620, WH=1600; // 캔버스높이 620, 게임월드 1600
   const PEG_R=5, BUMP_R=19, BALL_R=11;
-  const GRAV=0.1, DAMP=0.51, SP=36;
+  const GRAV=0.065, DAMP=0.51, SP=42;
   const FLOOR_Y=WH-110, HOLE_W=56, HOLE_X=W/2;
 
   // ── 장애물 생성 ──────────────────────────────────
   const obs=[];
 
-  // § 1구역: 삼각 핀 (6행)
-  for(let r=0;r<6;r++){
+  // § 1구역: 삼각 핀 (3행)
+  for(let r=0;r<3;r++){
     const n=r+3,span=(n-1)*SP,sx=(W-span)/2;
-    for(let i=0;i<n;i++) obs.push({x:sx+i*SP,y:82+r*54,r:PEG_R,t:'p',lit:0});
+    for(let i=0;i<n;i++) obs.push({x:sx+i*SP,y:82+r*64,r:PEG_R,t:'p',lit:0});
   }
 
   // § 2구역: 범퍼 (1열)
   [[88,360],[180,332],[272,360],[132,418],[228,418]].forEach(([x,y])=>
     obs.push({x,y,r:BUMP_R,t:'b',lit:0}));
 
-  // § 3구역: 교대 배열 핀 (6행, spacing=34)
-  for(let r=0;r<6;r++){
-    const n=8,sp=34,span=(n-1)*sp,sx=(W-span)/2+( r%2?sp/2:0);
-    for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:535+r*52,r:PEG_R,t:'p',lit:0});
+  // § 3구역: 교대 배열 핀 (3행, spacing=44)
+  for(let r=0;r<3;r++){
+    const n=6,sp=44,span=(n-1)*sp,sx=(W-span)/2+(r%2?sp/2:0);
+    for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:535+r*64,r:PEG_R,t:'p',lit:0});
   }
 
   // § 4구역: 대각선 산포 핀
@@ -2957,10 +2957,10 @@ window.travelRender=travelRender;
   [[76,950],[180,920],[284,950],[128,1010],[232,1010]].forEach(([x,y])=>
     obs.push({x,y,r:BUMP_R,t:'b',lit:0}));
 
-  // § 6구역: 밀집 핀 (6행, 교대)
-  for(let r=0;r<6;r++){
-    const n=r%2?9:8,sp=35,span=(n-1)*sp,sx=(W-span)/2;
-    for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:1080+r*52,r:PEG_R,t:'p',lit:0});
+  // § 6구역: 밀집 핀 (3행, 교대)
+  for(let r=0;r<3;r++){
+    const n=r%2?7:6,sp=44,span=(n-1)*sp,sx=(W-span)/2;
+    for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:1080+r*64,r:PEG_R,t:'p',lit:0});
   }
 
   // § 7구역: 수렴 핀 (5→3행, 점점 좁아짐)
@@ -2981,8 +2981,15 @@ window.travelRender=travelRender;
     {x1:HOLE_X+HOLE_W/2, y1:FLOOR_Y, x2:W,              y2:FLOOR_Y-40},
   ];
 
+  // 풍차 장애물: angle은 매 tick마다 spd씩 회전
+  const windmills=[
+    {x:100, y:720,  len:44, angle:0,              spd:0.022},
+    {x:260, y:1040, len:44, angle:Math.PI/3,       spd:-0.019},
+    {x:168, y:1290, len:48, angle:Math.PI/6,       spd:0.016},
+  ];
+
   const HUES=[300,195,140,50,18,260,170,345,80,225];
-  let balls=[],raf=null,gameOver=false,winnerName='',winnerHue=0,camY=0;
+  let balls=[],raf=null,gameOver=false,winnerName='',winnerHue=0,camY=0,overlayActive=false;
   let pbNames=['','',''];
 
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -2992,7 +2999,7 @@ window.travelRender=travelRender;
     const hue=HUES[idx%HUES.length];
     const sx=total===1?W/2:W/2-spread/2+(idx/(total-1))*spread+(Math.random()-.5)*8;
     return{x:Math.max(BALL_R+5,Math.min(W-BALL_R-5,sx)),y:14,
-      vx:(Math.random()-.5)*.7, vy:.4+Math.random()*.5,
+      vx:(Math.random()-.5)*.7, vy:.2+Math.random()*.3,
       hue,name,trail:[],dead:false,won:false,flash:0};
   }
 
@@ -3031,8 +3038,34 @@ window.travelRender=travelRender;
     }
   }
 
+  function collideWindmills(b){
+    for(const wm of windmills){
+      const ca=Math.cos(wm.angle),sa=Math.sin(wm.angle);
+      const x1=wm.x-ca*wm.len,y1=wm.y-sa*wm.len;
+      const x2=wm.x+ca*wm.len,y2=wm.y+sa*wm.len;
+      const ddx=x2-x1,ddy=y2-y1,len2=ddx*ddx+ddy*ddy;
+      const t=Math.max(0,Math.min(1,((b.x-x1)*ddx+(b.y-y1)*ddy)/len2));
+      const cx=x1+t*ddx,cy=y1+t*ddy;
+      const bx=b.x-cx,by=b.y-cy,dist=Math.hypot(bx,by);
+      if(dist<BALL_R+5&&dist>.01){
+        const inx=bx/dist,iny=by/dist;
+        b.x=cx+inx*(BALL_R+5.5);b.y=cy+iny*(BALL_R+5.5);
+        // 접촉점에서 막대의 선속도 (회전반경 × 각속도)
+        const rx=cx-wm.x,ry=cy-wm.y;
+        const bvx=-wm.spd*ry,bvy=wm.spd*rx;
+        const rvx=b.vx-bvx,rvy=b.vy-bvy;
+        const dot=rvx*inx+rvy*iny;
+        if(dot<0){
+          b.vx=(b.vx-2*dot*inx)*DAMP+bvx*.45;
+          b.vy=(b.vy-2*dot*iny)*DAMP+bvy*.45;
+        }
+      }
+    }
+  }
+
   function tick(){
     obs.forEach(o=>{if(o.lit>0)o.lit--;});
+    windmills.forEach(wm=>{wm.angle+=wm.spd;});
     balls.forEach(b=>{
       if(b.dead){if(b.flash>0)b.flash--;return;}
       b.trail.push({x:b.x,y:b.y});
@@ -3041,7 +3074,7 @@ window.travelRender=travelRender;
       b.vy+=GRAV;b.x+=b.vx;b.y+=b.vy;
 
       const spd=Math.hypot(b.vx,b.vy);
-      if(spd>11){b.vx*=11/spd;b.vy*=11/spd;}
+      if(spd>7){b.vx*=7/spd;b.vy*=7/spd;}
       if(spd<0.5){b.vx+=(Math.random()-.5)*2.4;b.vy+=.4+Math.random()*.9;}
       // 장기 정체 방지: 일정 y 이하에서 계속 아래로 밀어줌
       if(b.vy<0.15) b.vy+=0.18;
@@ -3051,12 +3084,13 @@ window.travelRender=travelRender;
 
       collideObs(b);
       collideWalls(b);
+      collideWindmills(b);
 
       if(b.y+BALL_R>=FLOOR_Y){
         const inHole=b.x>=HOLE_X-HOLE_W/2&&b.x<=HOLE_X+HOLE_W/2;
         if(inHole&&!gameOver){
           b.dead=true;b.won=true;b.flash=65;
-          gameOver=true;winnerName=b.name;winnerHue=b.hue;
+          gameOver=true;winnerName=b.name;winnerHue=b.hue;overlayActive=true;
           balls.forEach(o=>{if(o!==b){o.dead=true;o.flash=0;}});
         } else if(!inHole){
           b.y=FLOOR_Y-BALL_R;
@@ -3145,6 +3179,24 @@ window.travelRender=travelRender;
       }
     }
 
+    // 풍차 장애물
+    for(const wm of windmills){
+      const sy=wm.y-camY;
+      if(sy<-wm.len-20||sy>CVH+wm.len+20)continue;
+      const ca=Math.cos(wm.angle),sa=Math.sin(wm.angle);
+      ctx.save();
+      ctx.strokeStyle='#ff9030';ctx.lineWidth=7;ctx.lineCap='round';
+      ctx.shadowBlur=20;ctx.shadowColor='rgba(255,140,0,.75)';
+      ctx.beginPath();
+      ctx.moveTo(wm.x-ca*wm.len,wm.y-sa*wm.len);
+      ctx.lineTo(wm.x+ca*wm.len,wm.y+sa*wm.len);
+      ctx.stroke();
+      ctx.beginPath();ctx.arc(wm.x,wm.y,5,0,Math.PI*2);
+      ctx.fillStyle='#ffd700';ctx.shadowBlur=14;ctx.shadowColor='rgba(255,215,0,.9)';
+      ctx.fill();ctx.shadowBlur=0;
+      ctx.restore();
+    }
+
     // 테두리
     ctx.strokeStyle='rgba(181,102,255,0.28)';ctx.lineWidth=1.5;
     ctx.strokeRect(.75,.75,W-1.5,WH-1.5);
@@ -3174,9 +3226,9 @@ window.travelRender=travelRender;
     ctx.restore();
 
     // 당첨 오버레이 (캔버스 좌표)
-    if(gameOver&&winnerName){
+    if(gameOver&&winnerName&&overlayActive){
       ctx.fillStyle='rgba(5,2,15,.76)';ctx.fillRect(0,0,W,CVH);
-      const bw=230,bh=118,bx=W/2-bw/2,by=CVH/2-bh/2;
+      const bw=230,bh=128,bx=W/2-bw/2,by=CVH/2-bh/2;
       ctx.shadowBlur=34;ctx.shadowColor='rgba(255,215,0,.7)';
       ctx.fillStyle='rgba(16,10,2,.97)';
       ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,15);else ctx.rect(bx,by,bw,bh);
@@ -3186,11 +3238,13 @@ window.travelRender=travelRender;
       ctx.stroke();
       ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.font='13px sans-serif';ctx.fillStyle='rgba(255,215,0,.88)';
-      ctx.fillText('🎉 당첨자',W/2,by+32);
+      ctx.fillText('🎉 당첨자',W/2,by+30);
       const fs=Math.min(26,Math.floor(200/Math.max(winnerName.length,1))+8);
       ctx.font=`bold ${fs}px sans-serif`;ctx.fillStyle='#fff';
       ctx.shadowBlur=10;ctx.shadowColor=`hsl(${winnerHue},100%,65%)`;
-      ctx.fillText(winnerName,W/2,by+76);ctx.shadowBlur=0;
+      ctx.fillText(winnerName,W/2,by+72);ctx.shadowBlur=0;
+      ctx.font='11px sans-serif';ctx.fillStyle='rgba(255,255,255,.38)';
+      ctx.fillText('화면을 탭하여 닫기',W/2,by+108);
     }
   }
 
@@ -3213,9 +3267,16 @@ window.travelRender=travelRender;
     raf=requestAnimationFrame(loop);
   }
 
+  function pbDismissOverlay(){
+    if(!overlayActive)return;
+    overlayActive=false;
+    draw();
+    document.getElementById('pb-reset-btn')?.style.setProperty('display','block');
+  }
+
   function pbReset(){
     if(raf){cancelAnimationFrame(raf);raf=null;}
-    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;
+    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;
     document.getElementById('pb-setup')?.style.setProperty('display','block');
     document.getElementById('pb-reset-btn')?.style.setProperty('display','none');
     draw();
@@ -3264,10 +3325,12 @@ window.travelRender=travelRender;
       <button id="pb-reset-btn" onclick="pbReset()" style="display:none;padding:10px 28px;border-radius:20px;border:1px solid rgba(140,110,200,.4);background:none;color:#9b94b3;font-size:13px;cursor:pointer;font-family:inherit">다시 하기</button>
     </div>`;
     pbRenderInputs();draw();
+    document.getElementById('pb-cv')?.addEventListener('click',window.pbDismissOverlay);
   }
 
   window.pbStart=pbStart;
   window.pbReset=pbReset;
+  window.pbDismissOverlay=pbDismissOverlay;
   window.pbAddName=pbAddName;
   window.pbRemoveName=pbRemoveName;
   window.pbSaveName=pbSaveName;
