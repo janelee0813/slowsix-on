@@ -2023,9 +2023,6 @@ let wcParts=[];
 let wcRecs=[];
 let wcBoardPosts=[];
 let wcBoardDeleteId=null;
-let travelPosts=[];
-let travelDeleteId=null;
-let travelReady=false;
 let wcFormOpen=false;
 const wcForm={date:wcToday(),nickname:'',isCompleted:true,isPass:false,calories:'',duration:''};
 window.wcForm=wcForm;
@@ -2626,6 +2623,8 @@ wcInit();
 
 <script>
 (function(){
+let travelPosts=[];
+let travelDeleteId=null;
 function travelEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function travelFmt(ts){if(!ts)return'';const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 
@@ -2780,6 +2779,7 @@ window.travelBoardLike=travelBoardLike;
 window.travelBoardAskDelete=travelBoardAskDelete;
 window.travelBoardCancelDelete=travelBoardCancelDelete;
 window.travelBoardConfirmDelete=travelBoardConfirmDelete;
+window.travelReady=false;
 window.travelInit=travelInit;
 window.travelRender=travelRender;
 })();
@@ -3446,8 +3446,8 @@ window.travelRender=travelRender;
       betaInit();
     }
     if (page === 'travel') {
-      if (!travelReady) { travelReady = true; travelInit(); }
-      else travelRender();
+      if (!window.travelReady) { window.travelReady = true; window.travelInit(); }
+      else window.travelRender();
     }
   }
 
@@ -3473,7 +3473,7 @@ window.travelRender=travelRender;
     else if (hash === 'diet') showPage('diet');
     else if (hash === 'spin') showPage('spin');
     else if (hash === 'beta') showPage('beta');
-    else if (hash === 'travel') { showPage('travel'); setTimeout(()=>{ if(!travelReady){travelReady=true;travelInit();} },300); }
+    else if (hash === 'travel') { showPage('travel'); }
   })();
 </script>
 
