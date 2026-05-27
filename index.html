@@ -2975,8 +2975,8 @@ window.travelRender=travelRender;
     for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:1960+r*64,r:PEG_R,t:'p',lit:0});
   }
 
-  // § 9구역: 수렴 핀 → 구멍 유도
-  [[4,52],[3,46],[2,38]].forEach(([n,sp],r)=>{
+  // § 9구역: 수렴 핀 → 구멍 유도 (상단 1행만)
+  [[4,52]].forEach(([n,sp],r)=>{
     const span=(n-1)*sp,sx=(W-span)/2;
     for(let i=0;i<n;i++) obs.push({x:sx+i*sp,y:2210+r*50,r:PEG_R,t:'p',lit:0});
   });
