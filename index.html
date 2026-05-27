@@ -2970,11 +2970,15 @@ window.travelRender=travelRender;
   });
 
   // 수평 장벽 (bottleneck 2개)
+  // 장벽: V자 대각선 → 공이 갭으로 자연스럽게 굴러들어오도록
   const walls=[
-    {x1:0,  y1:498,x2:142,y2:498}, // 좌
-    {x1:218,y1:498,x2:360,y2:498}, // 우 (76px 갭)
-    {x1:0,  y1:1278,x2:108,y2:1278},
-    {x1:252,y1:1278,x2:360,y2:1278}, // 144px 갭
+    {x1:0,  y1:468, x2:142, y2:502}, // 1번 장벽 좌 (우하향)
+    {x1:218,y1:502, x2:360, y2:468}, // 1번 장벽 우 (좌하향)
+    {x1:0,  y1:1244,x2:108, y2:1282},// 2번 장벽 좌 (우하향)
+    {x1:252,y1:1282,x2:360, y2:1244},// 2번 장벽 우 (좌하향)
+    // 바닥 V자 경사 → 구멍으로 유도
+    {x1:0,           y1:FLOOR_Y-40, x2:HOLE_X-HOLE_W/2, y2:FLOOR_Y},
+    {x1:HOLE_X+HOLE_W/2, y1:FLOOR_Y, x2:W,              y2:FLOOR_Y-40},
   ];
 
   const HUES=[300,195,140,50,18,260,170,345,80,225];
@@ -3038,7 +3042,9 @@ window.travelRender=travelRender;
 
       const spd=Math.hypot(b.vx,b.vy);
       if(spd>11){b.vx*=11/spd;b.vy*=11/spd;}
-      if(spd<0.3){b.vx+=(Math.random()-.5)*1.4;b.vy+=Math.random()*.7+.2;}
+      if(spd<0.5){b.vx+=(Math.random()-.5)*2.4;b.vy+=.4+Math.random()*.9;}
+      // 장기 정체 방지: 일정 y 이하에서 계속 아래로 밀어줌
+      if(b.vy<0.15) b.vy+=0.18;
 
       if(b.x<BALL_R){b.x=BALL_R;b.vx=Math.abs(b.vx)*.6+(Math.random()-.5)*.2;}
       if(b.x>W-BALL_R){b.x=W-BALL_R;b.vx=-Math.abs(b.vx)*.6+(Math.random()-.5)*.2;}
@@ -3055,7 +3061,8 @@ window.travelRender=travelRender;
         } else if(!inHole){
           b.y=FLOOR_Y-BALL_R;
           b.vy=-Math.abs(b.vy)*DAMP;
-          b.vx+=(Math.random()-.5)*.8;
+          // 구멍 방향으로 적극 유도
+          b.vx+=(HOLE_X-b.x)*0.012+(Math.random()-.5)*.5;
         }
       }
     });
