@@ -2842,6 +2842,16 @@ window.travelBoardCancelDelete=travelBoardCancelDelete;
 window.travelBoardConfirmDelete=travelBoardConfirmDelete;
 let travelMusicOn=false;
 
+function travelToggleLyrics(){
+  const wrap=document.getElementById('travel-lyrics-wrap');
+  const btn=document.getElementById('travel-lyrics-btn');
+  if(!wrap||!btn)return;
+  const open=wrap.style.display==='none';
+  wrap.style.display=open?'block':'none';
+  btn.innerHTML=open?'가사 닫기 ▴':'가사 보기 ▾';
+}
+window.travelToggleLyrics=travelToggleLyrics;
+
 function travelToggleMusic(){
   const btn=document.getElementById('travel-play-btn');
   const audio=document.getElementById('travel-audio');
@@ -3114,10 +3124,101 @@ window.travelRender=travelRender;
           onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">▶</button>
         <div>
           <div style="font-size:13px;font-weight:600;color:#f5f1ff">🎵 Blue Moon — N.Flying</div>
-          <div style="font-size:11px;color:#6b6480;margin-top:2px">재생 버튼을 눌러보세요</div>
+          <button onclick="travelToggleLyrics()" id="travel-lyrics-btn" style="margin-top:4px;padding:2px 10px;border-radius:20px;border:1px solid rgba(181,102,255,0.4);background:none;color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.color='#b566ff';this.style.borderColor='rgba(181,102,255,0.7)'" onmouseout="this.style.color='#9b94b3';this.style.borderColor='rgba(181,102,255,0.4)'">가사 보기 ▾</button>
         </div>
       </div>
       <audio id="travel-audio" src="https://teugnaahpcpzejbdayyy.supabase.co/storage/v1/object/public/travel-audio/N.Flying%20Blue%20Moon.m4a" preload="none" loop style="display:none"></audio>
+      <div id="travel-lyrics-wrap" style="display:none;padding:14px 16px;border-top:1px solid rgba(140,110,200,0.15);white-space:pre-line;font-size:13px;line-height:2;color:#c4bfdc">푸르른 달에 맘을 도둑맞듯
+세상에 너와 나 단둘만 같았어
+
+이 순간이 잠시라면
+영원히 멈춰 버리자
+지겨워져도 괜찮아
+들어 줘 나의 Blue Moon
+
+Oh my Blue Moon
+
+희미한 말들로
+너에게 닿을 수만 있다면
+시시한 일상 밖에
+날 밀어둔 채로
+
+신비한 꿈처럼
+너만을 바라보아서
+하루 종일 너에게 전하고 싶은 맘
+
+괜시리 기대하죠
+이 문 뒤에선 왠지
+숨죽이며 날 기다리겠죠
+
+푸르른 날의 눈부신
+밤 향기에 빠져서
+아리따운 너의 맘과
+영원을 보고 싶어
+
+이 풍경 속에 홀리듯
+내 몸이 잠겨 버리게
+푸르른 달아
+텅 빈 그대 맘을 가득 채워 줘
+
+Oh my Blue Moon
+
+우리가 얼마나 많은 길을
+걸어왔냔 말이야
+내 청춘은 너였고
+믿기 힘든 말은 말아
+
+Shape of my heart
+우린 모양이 참 알맞아
+자꾸 두려워지기에
+예쁜 척 포장을 하네
+
+이해 못 해
+이별도 우리를 못 피해
+짜증 섞지 말자
+이제 말해 그냥 행복해
+
+No more than 며칠
+미친 듯이 그리워질 Someday
+아직도 기다리니
+내가 있던 그 자리를
+
+괜시리 기대하죠
+이 문 뒤에 숨어서
+숨죽이며 날 기다리겠죠
+
+푸르른 날의 눈부신
+밤 향기에 빠져서
+아리따운 너의 맘과
+영원을 보고 싶어
+
+이 풍경 속에 홀리듯
+내 몸이 잠겨 버리게
+푸르른 달아
+텅 빈 그대 맘을 가득 채워 줘
+
+Oh my Blue Moon
+
+You know why
+For a long time
+널 정말 많이 사랑한
+그게 나의 영원일 거야
+
+한순간 꿈처럼
+저 달빛이 사라져도
+내 마음속에 남는걸
+
+푸르른 날의 눈부신
+밤 향기에 빠져서
+아리따운 너의 맘과
+영원을 보고 싶어
+
+이 풍경 속에 홀리듯
+내 몸이 잠겨 버리게
+푸르른 달아
+텅 빈 그대 맘을 가득 채워 줘
+
+Oh my Blue Moon</div>
     </div>
 
     <div id="travel-board-wrap"></div>
