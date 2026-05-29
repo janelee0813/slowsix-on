@@ -1349,7 +1349,22 @@ function copyResult(){
         if(marbles>0) dbMarbleRank++;
         const rank=marbles>0?dbMarbleRank:0;
         const divider=(i>0&&arr[i-1][1]!==cnt)?'<div style="height:1px;background:rgba(140,110,200,0.15);margin:8px 0"></div>':'';
-        const marbleSVG=`<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 4px rgba(181,102,255,0.9))">
+        const isAdmin=DB_ADMIN.includes(nick);
+        const marbleSVG=isAdmin
+          ?`<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 4px rgba(255,200,0,0.9))">
+          <defs>
+            <radialGradient id="mg" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#fff4b0"/>
+              <stop offset="40%" stop-color="#ffd700"/>
+              <stop offset="100%" stop-color="#b8860b"/>
+            </radialGradient>
+          </defs>
+          <circle cx="9" cy="9" r="8" fill="url(#mg)"/>
+          <ellipse cx="6.5" cy="6" rx="2.5" ry="1.5" fill="white" opacity="0.6"/>
+          <circle cx="11" cy="12" r="1" fill="white" opacity="0.25"/>
+          <animateTransform attributeName="transform" type="scale" values="1;1.12;1" dur="1.8s" repeatCount="indefinite" additive="sum" transformOrigin="9 9"/>
+        </svg>`
+          :`<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 4px rgba(181,102,255,0.9))">
           <defs>
             <radialGradient id="mg" cx="35%" cy="30%" r="65%">
               <stop offset="0%" stop-color="#f0d0ff"/>
@@ -1362,8 +1377,9 @@ function copyResult(){
           <circle cx="11" cy="12" r="1" fill="white" opacity="0.25"/>
           <animateTransform attributeName="transform" type="scale" values="1;1.12;1" dur="1.8s" repeatCount="indefinite" additive="sum" transformOrigin="9 9"/>
         </svg>`;
+        const marbleCountColor=isAdmin?'#ffd700':'#b566ff';
         const marbleDisplay=marbles>0
-          ?`<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px">${Array.from({length:marbles},(_,mi)=>marbleSVG.replace('id="mg"',`id="mg${mi}"`).replace('url(#mg)',`url(#mg${mi})`)).join('')}<span style="color:#b566ff;font-weight:700;font-size:13px;margin-left:2px">${marbles}</span><span style="font-size:10px;color:#9b94b3">개</span></span>`
+          ?`<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px">${Array.from({length:marbles},(_,mi)=>marbleSVG.replace('id="mg"',`id="mg${mi}"`).replace('url(#mg)',`url(#mg${mi})`)).join('')}<span style="color:${marbleCountColor};font-weight:700;font-size:13px;margin-left:2px">${marbles}</span><span style="font-size:10px;color:#9b94b3">개</span></span>`
           :`<span style="color:#6b6480;font-size:11px">-</span>`;
         const rowStyle=rank===1
           ?'border-radius:10px;padding:4px 6px;margin:-4px -6px;background:linear-gradient(90deg,rgba(255,200,0,0.08),rgba(255,140,0,0.05),rgba(255,200,0,0.08));animation:dbGlow1 2.4s ease-in-out infinite'
