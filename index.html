@@ -3044,7 +3044,9 @@ window.travelRender=travelRender;
   ];
 
   const HUES=[300,195,140,50,18,260,170,345,80,225];
+  const PB_CODE='505050';
   let balls=[],raf=null,gameOver=false,winnerName='',winnerHue=0,camY=0,overlayActive=false;
+  let isHost=false,isViewer=false,pbChannel=null,pbBcastFrame=0;
   let pbNames=['','',''];
 
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -3459,11 +3461,38 @@ window.travelRender=travelRender;
     }
   }
 
+  // 방장이 관람자에게 보낼 게임 상태 스냅샷
+  function pbStatePayload(){
+    return{
+      b:balls.map(b=>({x:b.x,y:b.y,hue:b.hue,name:b.name,dead:b.dead,won:b.won,flash:b.flash})),
+      c:camY,go:gameOver,wn:winnerName,wh:winnerHue,oa:overlayActive,
+      wm:windmills.map(w=>w.angle),
+      mb:movingBumpers.map(m=>m.x),
+      sl:sliders.map(s=>s.x),
+    };
+  }
+
+  function pbBroadcast(event,payload){
+    if(!pbChannel)return;
+    pbChannel.send({type:'broadcast',event,payload});
+  }
+
   function loop(){
     if(!gameOver)tick();
     draw();
+    // 방장: 3프레임마다 상태 전송
+    if(isHost&&++pbBcastFrame%3===0) pbBroadcast('state',pbStatePayload());
     if(balls.some(b=>!b.dead||b.flash>0))raf=requestAnimationFrame(loop);
-    else{raf=null;if(gameOver){draw();document.getElementById('pb-reset-btn')?.style.setProperty('display','block');}}
+    else{
+      raf=null;
+      if(gameOver){
+        draw();
+        if(isHost){
+          document.getElementById('pb-reset-btn')?.style.setProperty('display','block');
+          pbBroadcast('state',pbStatePayload()); // 최종 상태 전송
+        }
+      }
+    }
   }
 
   function pbStart(){
@@ -3471,7 +3500,7 @@ window.travelRender=travelRender;
     const names=[...inputs].map(el=>el.value.trim()).filter(n=>n);
     if(names.length<2){alert('참여자를 2명 이상 입력해주세요');return;}
     if(raf){cancelAnimationFrame(raf);raf=null;}
-    gameOver=false;winnerName='';winnerHue=0;camY=0;
+    gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;pbBcastFrame=0;
     balls=names.map((n,i)=>mkBall(n,i,names.length));
     document.getElementById('pb-setup')?.style.setProperty('display','none');
     document.getElementById('pb-reset-btn')?.style.setProperty('display','none');
@@ -3482,15 +3511,86 @@ window.travelRender=travelRender;
     if(!overlayActive)return;
     overlayActive=false;
     draw();
-    document.getElementById('pb-reset-btn')?.style.setProperty('display','block');
+    if(isHost){
+      document.getElementById('pb-reset-btn')?.style.setProperty('display','block');
+      pbBroadcast('state',pbStatePayload());
+    }
   }
 
   function pbReset(){
     if(raf){cancelAnimationFrame(raf);raf=null;}
     balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;
-    document.getElementById('pb-setup')?.style.setProperty('display','block');
-    document.getElementById('pb-reset-btn')?.style.setProperty('display','none');
+    if(isHost){
+      document.getElementById('pb-setup')?.style.setProperty('display','block');
+      document.getElementById('pb-reset-btn')?.style.setProperty('display','none');
+      pbBroadcast('reset',{});
+    }
     draw();
+  }
+
+  // ── Supabase Realtime 채널 설정 ──────────────────────
+  function pbChannelSetup(){
+    if(pbChannel){try{sbP.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
+    pbChannel=sbP.channel('pinball-live',{config:{broadcast:{self:false}}});
+
+    if(isViewer){
+      pbChannel.on('broadcast',{event:'state'},({payload:p})=>{
+        // 공 상태 동기화
+        while(balls.length<(p.b||[]).length)
+          balls.push({x:0,y:0,vx:0,vy:0,hue:0,name:'',trail:[],dead:true,won:false,flash:0});
+        while(balls.length>(p.b||[]).length) balls.pop();
+        (p.b||[]).forEach((s,i)=>{Object.assign(balls[i],s);balls[i].trail=balls[i].trail||[];});
+        camY=p.c||0; gameOver=!!p.go; winnerName=p.wn||''; winnerHue=p.wh||0; overlayActive=!!p.oa;
+        if(p.wm) p.wm.forEach((a,i)=>{if(windmills[i])windmills[i].angle=a;});
+        if(p.mb) p.mb.forEach((x,i)=>{if(movingBumpers[i])movingBumpers[i].x=x;});
+        if(p.sl) p.sl.forEach((x,i)=>{if(sliders[i])sliders[i].x=x;});
+        document.getElementById('pb-viewer-msg')?.style.setProperty('display','none');
+        draw();
+      });
+      pbChannel.on('broadcast',{event:'reset'},()=>{
+        balls=[];gameOver=false;winnerName='';overlayActive=false;camY=0;
+        document.getElementById('pb-viewer-msg')?.style.setProperty('display','flex');
+        draw();
+      });
+    }
+    pbChannel.subscribe();
+  }
+
+  // ── 이용코드 입장 / 관람 ────────────────────────────
+  function pbEnterCode(){
+    const val=(document.getElementById('pb-code-inp')?.value||'').trim();
+    const err=document.getElementById('pb-code-err');
+    if(val!==PB_CODE){
+      if(err){err.textContent='코드가 올바르지 않아요';err.style.display='block';
+        setTimeout(()=>{err.style.display='none';},2000);}
+      return;
+    }
+    isHost=true; isViewer=false;
+    document.getElementById('pb-gate')?.style.setProperty('display','none');
+    pbInitCanvas();
+    document.getElementById('pb-setup')?.style.setProperty('display','block');
+    pbRenderInputs();
+    pbChannelSetup();
+    draw();
+  }
+
+  function pbWatchOnly(){
+    isHost=false; isViewer=true;
+    document.getElementById('pb-gate')?.style.setProperty('display','none');
+    pbInitCanvas(false); // 클릭 리스너 없이
+    document.getElementById('pb-viewer-msg')?.style.setProperty('display','flex');
+    pbChannelSetup();
+    draw();
+  }
+
+  function pbInitCanvas(addClick=true){
+    const cv=document.getElementById('pb-cv');
+    if(!cv)return;
+    cv.style.display='block';
+    const dpr=window.devicePixelRatio||1;
+    cv.width=W*dpr; cv.height=CVH*dpr;
+    cv.style.width=W+'px'; cv.style.height=CVH+'px';
+    if(addClick) cv.addEventListener('click',window.pbDismissOverlay);
   }
 
   function pbAddName(){pbNames.push('');pbRenderInputs();}
@@ -3524,32 +3624,58 @@ window.travelRender=travelRender;
     const wrap=document.getElementById('pinball-wrap');
     if(!wrap)return;
     if(raf){cancelAnimationFrame(raf);raf=null;}
-    balls=[];gameOver=false;winnerName='';winnerHue=0;pbNames=['','',''];
+    if(pbChannel){try{sbP.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
+    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;
+    isHost=false;isViewer=false;pbBcastFrame=0;
+    pbNames=['','',''];
     wrap.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
-      <canvas id="pb-cv" width="${W}" height="${CVH}" style="max-width:100%;border-radius:16px"></canvas>
-      <div id="pb-setup" style="width:100%;max-width:${W}px">
+
+      <!-- ① 입장 게이트 -->
+      <div id="pb-gate" style="width:100%;max-width:${W}px;padding:24px 20px;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:18px;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">🔮</div>
+        <p style="font-size:14px;font-weight:700;color:#e5e0f0;margin:0 0 4px">소원구슬 핀볼 추첨</p>
+        <p style="font-size:12px;color:#6b6480;margin:0 0 20px">진행자는 이용코드를 입력하고, 관람자는 아래 버튼을 눌러주세요.</p>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input id="pb-code-inp" type="password" placeholder="이용 코드" maxlength="10"
+            style="flex:1;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:10px 14px;font-size:15px;color:#e5e0f0;outline:none;font-family:inherit;text-align:center;letter-spacing:6px"
+            onkeydown="if(event.key==='Enter')pbEnterCode()"/>
+          <button onclick="pbEnterCode()" style="padding:10px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">입장</button>
+        </div>
+        <div id="pb-code-err" style="display:none;font-size:11px;color:#f87171;margin-bottom:8px;height:16px"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0">
+          <div style="flex:1;height:1px;background:rgba(140,110,200,0.18)"></div>
+          <span style="font-size:11px;color:#4a3a6a">또는</span>
+          <div style="flex:1;height:1px;background:rgba(140,110,200,0.18)"></div>
+        </div>
+        <button onclick="pbWatchOnly()" style="width:100%;padding:11px;border-radius:12px;border:1px solid rgba(140,110,200,.28);background:rgba(30,22,55,.4);color:#9b94b3;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,.5)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,.28)';this.style.color='#9b94b3'">🔭 관람하기</button>
+      </div>
+
+      <!-- ② 캔버스 (입장 후 표시) -->
+      <canvas id="pb-cv" width="${W}" height="${CVH}" style="display:none;max-width:100%;border-radius:16px"></canvas>
+
+      <!-- ③ 진행자: 참여자 설정 -->
+      <div id="pb-setup" style="display:none;width:100%;max-width:${W}px">
         <p style="margin:0 0 10px;font-size:12px;color:#6b6480;font-weight:600">참여자 목록</p>
         <div id="pb-name-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
         <button onclick="pbAddName()" style="width:100%;padding:8px;border-radius:10px;border:1px dashed rgba(140,110,200,.35);background:none;color:#6b6480;font-size:12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ 참여자 추가</button>
         <button onclick="pbStart()" style="width:100%;padding:12px;border-radius:16px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(181,102,255,.35)">🔮 추첨 시작</button>
       </div>
+
+      <!-- ④ 관람자: 대기 메시지 -->
+      <div id="pb-viewer-msg" style="display:none;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:12px;border:1px solid rgba(140,110,200,0.2);background:rgba(16,10,30,0.6);width:100%;max-width:${W}px;box-sizing:border-box">
+        <span style="font-size:20px">👀</span>
+        <span style="font-size:12px;color:#9b94b3">방장이 추첨을 시작하면 자동으로 시작돼요</span>
+      </div>
+
       <button id="pb-reset-btn" onclick="pbReset()" style="display:none;padding:10px 28px;border-radius:20px;border:1px solid rgba(140,110,200,.4);background:none;color:#9b94b3;font-size:13px;cursor:pointer;font-family:inherit">다시 하기</button>
     </div>`;
-    pbRenderInputs();
-    // 레티나(고DPR) 디스플레이 대응: 물리 픽셀로 캔버스 크기 확대 후 CSS로 논리 크기 고정
-    const cv=document.getElementById('pb-cv');
-    if(cv){
-      const dpr=window.devicePixelRatio||1;
-      cv.width=W*dpr; cv.height=CVH*dpr;
-      cv.style.width=W+'px'; cv.style.height=CVH+'px';
-      cv.addEventListener('click',window.pbDismissOverlay);
-    }
-    draw();
   }
 
   window.pbStart=pbStart;
   window.pbReset=pbReset;
   window.pbDismissOverlay=pbDismissOverlay;
+  window.pbEnterCode=pbEnterCode;
+  window.pbWatchOnly=pbWatchOnly;
   window.pbAddName=pbAddName;
   window.pbRemoveName=pbRemoveName;
   window.pbSaveName=pbSaveName;
