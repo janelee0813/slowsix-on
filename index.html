@@ -2924,6 +2924,12 @@ window.travelRender=travelRender;
 <script>
 // ===== 소원구슬 핀볼 =====
 (function(){
+  // 핀볼 전용 Supabase 클라이언트 (외부 IIFE와 스코프 분리되어 있으므로 별도 생성)
+  const pbSb=window.supabase.createClient(
+    'https://teugnaahpcpzejbdayyy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA'
+  );
+
   const W=360, CVH=620, WH=3200; // 캔버스높이 620, 게임월드 3200
   const PEG_R=5, BUMP_R=19, BALL_R=11;
   const GRAV=0.065, DAMP=0.51, SP=42;
@@ -3530,8 +3536,8 @@ window.travelRender=travelRender;
 
   // ── Supabase Realtime 채널 설정 ──────────────────────
   function pbChannelSetup(){
-    if(pbChannel){try{sbP.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
-    pbChannel=sbP.channel('pinball-live',{config:{broadcast:{self:false}}});
+    if(pbChannel){try{pbSb.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
+    pbChannel=pbSb.channel('pinball-live',{config:{broadcast:{self:false}}});
 
     if(isViewer){
       pbChannel.on('broadcast',{event:'state'},({payload:p})=>{
@@ -3570,8 +3576,8 @@ window.travelRender=travelRender;
     pbInitCanvas();
     document.getElementById('pb-setup')?.style.setProperty('display','block');
     pbRenderInputs();
+    draw(); // 채널 연결 전에 먼저 보드 렌더링
     pbChannelSetup();
-    draw();
   }
 
   function pbWatchOnly(){
@@ -3579,8 +3585,8 @@ window.travelRender=travelRender;
     document.getElementById('pb-gate')?.style.setProperty('display','none');
     pbInitCanvas(false); // 클릭 리스너 없이
     document.getElementById('pb-viewer-msg')?.style.setProperty('display','flex');
+    draw(); // 채널 연결 전에 먼저 보드 렌더링
     pbChannelSetup();
-    draw();
   }
 
   function pbInitCanvas(addClick=true){
@@ -3624,7 +3630,7 @@ window.travelRender=travelRender;
     const wrap=document.getElementById('pinball-wrap');
     if(!wrap)return;
     if(raf){cancelAnimationFrame(raf);raf=null;}
-    if(pbChannel){try{sbP.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
+    if(pbChannel){try{pbSb.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
     balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;
     isHost=false;isViewer=false;pbBcastFrame=0;
     pbNames=['','',''];
