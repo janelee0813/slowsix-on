@@ -1342,7 +1342,7 @@ function copyResult(){
         <div class="w-20 shrink-0 text-[10px] text-muted-foreground font-semibold text-right">🫧 소원구슬</div>
       </div>`;
       let dbMarbleRank=0;
-      el.innerHTML=header+sorted.map(([nick,cnt],i,arr)=>{
+      function dbMakeRow([nick,cnt],i,arr){
         const pct=Math.min(100,Math.round((cnt%7)/7*100));
         const marbles=Math.floor(cnt/7);
         if(marbles>0) dbMarbleRank++;
@@ -1382,7 +1382,18 @@ function copyResult(){
           </div>
           <div class="w-20 shrink-0 text-left pl-1">${marbleDisplay}</div>
         </div>`;
-      }).join('');
+      }
+      const visible=sorted.filter(([,cnt])=>cnt>4);
+      const hidden=sorted.filter(([,cnt])=>cnt<=4);
+      const hiddenHTML=hidden.length?`
+        <div id="db-hidden-rows" style="display:none" class="space-y-2">
+          <div style="height:1px;background:rgba(140,110,200,0.15);margin:8px 0"></div>
+          ${hidden.map((e,i)=>dbMakeRow(e,visible.length+i,[...visible,...hidden])).join('')}
+        </div>
+        <button id="db-more-btn" onclick="(function(){const h=document.getElementById('db-hidden-rows'),b=document.getElementById('db-more-btn');const open=h.style.display!=='none';h.style.display=open?'none':'block';b.textContent=open?'▾ 더보기 (${hidden.length}명)':'▴ 접기';})()"
+          style="width:100%;margin-top:8px;padding:6px;border-radius:8px;border:1px dashed rgba(140,110,200,0.25);background:none;color:#6b6480;font-size:11px;cursor:pointer;font-family:inherit;transition:color .15s"
+          onmouseover="this.style.color='#9b94b3'" onmouseout="this.style.color='#6b6480'">▾ 더보기 (${hidden.length}명)</button>`:'';
+      el.innerHTML=header+visible.map(dbMakeRow).join('')+hiddenHTML;
     }
 
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',dbInit);
