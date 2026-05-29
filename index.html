@@ -3058,6 +3058,7 @@ window.travelRender=travelRender;
   let balls=[],raf=null,gameOver=false,winnerName='',winnerHue=0,camY=0,overlayActive=false;
   let isHost=false,isViewer=false,pbChannel=null,pbBcastFrame=0;
   let pbNames=['','',''];
+  let pbTargetCount=3,results=[];
 
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -3240,10 +3241,14 @@ window.travelRender=travelRender;
         const inHole=b.x>=HOLE_X-HOLE_W/2&&b.x<=HOLE_X+HOLE_W/2;
         if(inHole){
           // 구멍 안: 공이 완전히 통과할 때까지 자유낙하
-          if(b.y-BALL_R>=FLOOR_Y&&!gameOver){
+          if(b.y-BALL_R>=FLOOR_Y&&!b.won){
             b.dead=true;b.won=true;b.flash=65;
-            gameOver=true;winnerName=b.name;winnerHue=b.hue;overlayActive=true;
-            balls.forEach(o=>{if(o!==b){o.dead=true;o.flash=0;}});
+            results.push({name:b.name,hue:b.hue});
+            pbRenderResults();
+            if(results.length>=pbTargetCount){
+              gameOver=true;winnerName=results[0].name;winnerHue=results[0].hue;overlayActive=true;
+              balls.forEach(o=>{if(!o.won){o.dead=true;o.flash=0;}});
+            }
           }
         } else {
           b.y=FLOOR_Y-BALL_R;
@@ -3449,25 +3454,36 @@ window.travelRender=travelRender;
     ctx.restore();
 
     // 당첨 오버레이 (캔버스 좌표)
-    if(gameOver&&winnerName&&overlayActive){
-      ctx.fillStyle='rgba(5,2,15,.76)';ctx.fillRect(0,0,W,CVH);
-      const bw=230,bh=128,bx=W/2-bw/2,by=CVH/2-bh/2;
-      ctx.shadowBlur=34;ctx.shadowColor='rgba(255,215,0,.7)';
-      ctx.fillStyle='rgba(16,10,2,.97)';
-      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,15);else ctx.rect(bx,by,bw,bh);
+    if(gameOver&&overlayActive&&results.length>0){
+      ctx.fillStyle='rgba(5,2,15,.82)';ctx.fillRect(0,0,W,CVH);
+      const rowH=34,padV=18,padH=20,titleH=40,footH=28;
+      const bh=titleH+results.length*rowH+padV*2+footH;
+      const bw=Math.min(W-24,270);
+      const bx=W/2-bw/2,by=Math.max(16,CVH/2-bh/2);
+      ctx.shadowBlur=30;ctx.shadowColor='rgba(181,102,255,.55)';
+      ctx.fillStyle='rgba(14,8,28,.97)';
+      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,16);else ctx.rect(bx,by,bw,bh);
       ctx.fill();ctx.shadowBlur=0;
-      ctx.strokeStyle='rgba(255,215,0,.52)';ctx.lineWidth=1.5;
-      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,15);else ctx.rect(bx,by,bw,bh);
+      ctx.strokeStyle='rgba(181,102,255,.45)';ctx.lineWidth=1.4;
+      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,16);else ctx.rect(bx,by,bw,bh);
       ctx.stroke();
       ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.font='13px sans-serif';ctx.fillStyle='rgba(255,215,0,.88)';
-      ctx.fillText('🎉 당첨자',W/2,by+30);
-      const fs=Math.min(26,Math.floor(200/Math.max(winnerName.length,1))+8);
-      ctx.font=`bold ${fs}px sans-serif`;ctx.fillStyle='#fff';
-      ctx.shadowBlur=10;ctx.shadowColor=`hsl(${winnerHue},100%,65%)`;
-      ctx.fillText(winnerName,W/2,by+72);ctx.shadowBlur=0;
-      ctx.font='11px sans-serif';ctx.fillStyle='rgba(255,255,255,.38)';
-      ctx.fillText('화면을 탭하여 닫기',W/2,by+108);
+      ctx.font='bold 13px sans-serif';ctx.fillStyle='rgba(255,215,0,.9)';
+      ctx.fillText('🎉 통과 순서',W/2,by+titleH/2);
+      results.forEach((r,idx)=>{
+        const ry=by+titleH+padV+idx*rowH+rowH/2;
+        const rankColors=['rgba(255,215,0,.9)','rgba(192,192,192,.85)','rgba(205,127,50,.85)'];
+        ctx.font=`bold 11px sans-serif`;
+        ctx.fillStyle=rankColors[idx]||'rgba(180,160,220,.7)';
+        ctx.textAlign='left';
+        ctx.fillText(`${idx+1}위`,bx+padH,ry);
+        const fs2=Math.min(16,Math.floor(160/Math.max(r.name.length,1))+7);
+        ctx.font=`bold ${fs2}px sans-serif`;
+        ctx.fillStyle='#fff';ctx.shadowBlur=8;ctx.shadowColor=`hsl(${r.hue},100%,65%)`;
+        ctx.fillText(r.name,bx+padH+38,ry);ctx.shadowBlur=0;
+      });
+      ctx.textAlign='center';ctx.font='10.5px sans-serif';ctx.fillStyle='rgba(255,255,255,.32)';
+      ctx.fillText('화면을 탭하여 닫기',W/2,by+bh-footH/2);
     }
   }
 
@@ -3479,6 +3495,7 @@ window.travelRender=travelRender;
       wm:windmills.map(w=>w.angle),
       mb:movingBumpers.map(m=>m.x),
       sl:sliders.map(s=>s.x),
+      rs:results,tc:pbTargetCount,
     };
   }
 
@@ -3509,8 +3526,11 @@ window.travelRender=travelRender;
     const inputs=document.querySelectorAll('.pb-name-input');
     const names=[...inputs].map(el=>el.value.trim()).filter(n=>n);
     if(names.length<2){alert('참여자를 2명 이상 입력해주세요');return;}
+    const tEl=document.getElementById('pb-target-inp');
+    pbTargetCount=Math.min(names.length,Math.max(1,parseInt(tEl?.value||'3')||3));
     if(raf){cancelAnimationFrame(raf);raf=null;}
-    gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;pbBcastFrame=0;
+    gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;pbBcastFrame=0;results=[];
+    pbRenderResults();
     balls=names.map((n,i)=>mkBall(n,i,names.length));
     document.getElementById('pb-setup')?.style.setProperty('display','none');
     document.getElementById('pb-reset-btn')?.style.setProperty('display','none');
@@ -3529,7 +3549,8 @@ window.travelRender=travelRender;
 
   function pbReset(){
     if(raf){cancelAnimationFrame(raf);raf=null;}
-    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;
+    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;results=[];
+    pbRenderResults();
     if(isHost){
       document.getElementById('pb-setup')?.style.setProperty('display','block');
       document.getElementById('pb-reset-btn')?.style.setProperty('display','none');
@@ -3551,6 +3572,8 @@ window.travelRender=travelRender;
         while(balls.length>(p.b||[]).length) balls.pop();
         (p.b||[]).forEach((s,i)=>{Object.assign(balls[i],s);balls[i].trail=balls[i].trail||[];});
         camY=p.c||0; gameOver=!!p.go; winnerName=p.wn||''; winnerHue=p.wh||0; overlayActive=!!p.oa;
+        if(p.rs){results=p.rs;pbRenderResults();}
+        if(p.tc) pbTargetCount=p.tc;
         if(p.wm) p.wm.forEach((a,i)=>{if(windmills[i])windmills[i].angle=a;});
         if(p.mb) p.mb.forEach((x,i)=>{if(movingBumpers[i])movingBumpers[i].x=x;});
         if(p.sl) p.sl.forEach((x,i)=>{if(sliders[i])sliders[i].x=x;});
@@ -3558,7 +3581,8 @@ window.travelRender=travelRender;
         draw();
       });
       pbChannel.on('broadcast',{event:'reset'},()=>{
-        balls=[];gameOver=false;winnerName='';overlayActive=false;camY=0;
+        balls=[];gameOver=false;winnerName='';overlayActive=false;camY=0;results=[];
+        pbRenderResults();
         document.getElementById('pb-viewer-msg')?.style.setProperty('display','flex');
         draw();
       });
@@ -3620,6 +3644,21 @@ window.travelRender=travelRender;
       </div>`).join('');
   }
 
+  function pbRenderResults(){
+    const el=document.getElementById('pb-results');
+    if(!el)return;
+    if(results.length===0){el.style.display='none';return;}
+    const rankLabels=['🥇','🥈','🥉'];
+    el.style.display='block';
+    el.innerHTML=`<p style="font-size:11px;font-weight:700;color:#b566ff;margin:0 0 10px;letter-spacing:0.06em">통과 순서</p>`
+      +results.map((r,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;background:rgba(181,102,255,0.07);margin-bottom:5px">
+        <span style="font-size:14px;min-width:22px">${rankLabels[i]||`${i+1}위`}</span>
+        <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:hsl(${r.hue},100%,65%);box-shadow:0 0 6px hsl(${r.hue},100%,55%);flex-shrink:0"></span>
+        <span style="font-size:13px;font-weight:600;color:#e5e0f0">${esc(r.name)}</span>
+      </div>`).join('');
+  }
+
   function pbCopyUrl(){
     navigator.clipboard.writeText(location.origin+'/#pinball').then(()=>{
       const btn=document.getElementById('pb-share');if(!btn)return;
@@ -3635,7 +3674,7 @@ window.travelRender=travelRender;
     if(!wrap)return;
     if(raf){cancelAnimationFrame(raf);raf=null;}
     if(pbChannel){try{pbSb.removeChannel(pbChannel);}catch(e){}pbChannel=null;}
-    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;
+    balls=[];gameOver=false;winnerName='';winnerHue=0;camY=0;overlayActive=false;results=[];
     isHost=false;isViewer=false;pbBcastFrame=0;
     pbNames=['','',''];
     wrap.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
@@ -3704,8 +3743,17 @@ window.travelRender=travelRender;
         <p style="margin:0 0 10px;font-size:12px;color:#6b6480;font-weight:600">참여자 목록</p>
         <div id="pb-name-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
         <button onclick="pbAddName()" style="width:100%;padding:8px;border-radius:10px;border:1px dashed rgba(140,110,200,.35);background:none;color:#6b6480;font-size:12px;cursor:pointer;font-family:inherit;margin-bottom:12px">+ 참여자 추가</button>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;border-radius:10px;border:1px solid rgba(140,110,200,.25);background:rgba(30,22,55,.5)">
+          <label style="font-size:12px;color:#9b94b3;white-space:nowrap">통과 목표 수</label>
+          <input id="pb-target-inp" type="number" min="1" max="20" value="3"
+            style="width:60px;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(16,10,30,.8);padding:6px 10px;font-size:14px;color:#e5e0f0;outline:none;font-family:inherit;text-align:center"/>
+          <span style="font-size:11px;color:#6b6480">개 통과 시 종료</span>
+        </div>
         <button onclick="pbStart()" style="width:100%;padding:12px;border-radius:16px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(181,102,255,.35)">🔮 추첨 시작</button>
       </div>
+
+      <!-- ⑤ 실시간 결과 패널 -->
+      <div id="pb-results" style="display:none;width:100%;max-width:${W}px;padding:14px 16px;background:rgba(16,10,30,0.85);border:1px solid rgba(181,102,255,0.25);border-radius:14px;box-sizing:border-box"></div>
 
       <!-- ④ 관람자: 대기 메시지 -->
       <div id="pb-viewer-msg" style="display:none;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:12px;border:1px solid rgba(140,110,200,0.2);background:rgba(16,10,30,0.6);width:100%;max-width:${W}px;box-sizing:border-box">
@@ -3726,6 +3774,7 @@ window.travelRender=travelRender;
   window.pbRemoveName=pbRemoveName;
   window.pbSaveName=pbSaveName;
   window.pbCopyUrl=pbCopyUrl;
+  window.pbRenderResults=pbRenderResults;
   window.pinballInit=pinballInit;
   window.pinballReady=false;
 })();
