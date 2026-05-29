@@ -1334,6 +1334,7 @@ function copyResult(){
       if(!el)return;
       const counts=dbGetCounts();
       const DB_EXCLUDE=['류우'];
+      const DB_ADMIN=['엑서','제인'];
       const sorted=Object.entries(counts).filter(([nick])=>!DB_EXCLUDE.includes(nick)).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ko'));
       if(!sorted.length){el.innerHTML='<p class="text-xs text-muted-foreground text-center py-2">아직 적립된 드래곤볼이 없어요</p>';return;}
       const header=`<div class="flex items-center gap-2 mb-2 pb-2" style="border-bottom:1px solid rgba(140,110,200,0.2)">
@@ -1374,8 +1375,9 @@ function copyResult(){
           :rank===2
           ?'background:linear-gradient(90deg,#c084fc,#f472b6,#e0aaff,#f472b6,#c084fc);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:dbShimmer1 2.8s linear infinite'
           :'';
+        const crownBadge=DB_ADMIN.includes(nick)?`<span style="font-size:10px;line-height:1;vertical-align:middle;margin-right:2px" title="운영진">👑</span>`:'';
         return`${divider}<div class="flex items-center gap-2" style="${rowStyle}">
-          <span class="w-14 shrink-0 text-xs font-semibold text-foreground" style="${nickStyle}">${nick}</span>
+          <span class="w-14 shrink-0 text-xs font-semibold text-foreground" style="${nickStyle}">${crownBadge}${nick}</span>
           <div class="flex-1 flex items-center gap-1.5">
             <div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden"><div style="width:${pct}%" class="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-pink"></div></div>
             <span class="text-xs text-muted-foreground shrink-0" style="min-width:28px">${cnt%7}/7</span>
