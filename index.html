@@ -5144,14 +5144,16 @@ async function tamaBoardConfirmDelete() {
 }
 
 function tamaRenderCd() {
+  const retired = new Date() >= new Date('2026-05-31T00:00:00');
   ['feed','play','pet'].forEach(type => {
     const left = type === 'pet' ? tamaCdLeft(type) : tamaSharedCdLeft(type);
     const cdEl = document.getElementById(`cd-${type}`);
     const btn  = document.getElementById(`btn-${type}`);
     if (!cdEl || !btn) return;
     cdEl.textContent = left > 0 ? tamaFmtCd(left) : '';
-    btn.disabled = left > 0;
-    btn.style.opacity = left > 0 ? '.4' : '1';
+    btn.disabled = retired || left > 0;
+    btn.style.opacity = retired || left > 0 ? '.4' : '1';
+    btn.style.cursor = retired ? 'not-allowed' : '';
   });
 
   // 쓰다듬기 재충전 바 업데이트
@@ -5204,6 +5206,7 @@ async function tamaSyncCooldowns(nick) {
 }
 
 async function tamaAction(type) {
+  if (new Date() >= new Date('2026-05-31T00:00:00')) return;
   const nick = document.getElementById('tama-nick').value.trim();
   if (!nick) { alert('닉네임을 입력해 주세요!'); document.getElementById('tama-nick').focus(); return; }
 
