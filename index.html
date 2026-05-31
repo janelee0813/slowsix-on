@@ -2369,7 +2369,7 @@ function wcRender(){
       <div class="wc-card-title">⏱️ 운동시간/kcal</div>
       ${wcParts.length===0
         ?`<p class="wc-empty">참여자를 등록하면 현황이 표시됩니다</p>`
-        :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        :`<div style="display:grid;grid-template-columns:repeat(${wcParts.length},1fr);gap:8px">
           ${wcSorted.map(p=>{const s=wcStats(p.nickname);return`
           <div style="background:rgba(181,102,255,0.08);border:1px solid rgba(181,102,255,0.18);border-radius:10px;overflow:hidden;text-align:center">
             <div style="font-size:12px;color:#e8e2f8;font-weight:600;padding:8px 4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid rgba(181,102,255,0.15)">${p.nickname}</div>
