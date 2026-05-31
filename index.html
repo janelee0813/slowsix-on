@@ -2392,14 +2392,14 @@ function wcRender(){
           </div>`;}).join('')}
         </div>`}
     </div>
-    ${wcTotalSection()}
+    ${wcTotalSection(wcSorted)}
     ${wcBoardSection()}
 
   `;
 }
 
-function wcTotalSection(){
-  if(wcParts.length===0) return '';
+function wcTotalSection(wcSorted){
+  if(!wcSorted||wcSorted.length===0) return '';
   const stats = wcSorted.map(p=>({nick:p.nickname,...wcStats(p.nickname)}));
   const maxDur = Math.max(...stats.map(s=>s.totalDur), 1);
   const maxCal = Math.max(...stats.map(s=>s.totalCal), 1);
