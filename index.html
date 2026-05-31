@@ -2392,9 +2392,42 @@ function wcRender(){
           </div>`;}).join('')}
         </div>`}
     </div>
+    ${wcTotalSection()}
     ${wcBoardSection()}
 
   `;
+}
+
+function wcTotalSection(){
+  if(wcParts.length===0) return '';
+  const stats = wcSorted.map(p=>({nick:p.nickname,...wcStats(p.nickname)}));
+  const maxDur = Math.max(...stats.map(s=>s.totalDur), 1);
+  const maxCal = Math.max(...stats.map(s=>s.totalCal), 1);
+  const colors = ['#b566ff','#ff5fb0','#5ec8ff','#ffc600'];
+  const barRows = (key, max, unit, label) => stats.map((s,i)=>{
+    const val = s[key] || 0;
+    const pct = Math.round(val / max * 100);
+    return `<div style="margin-bottom:${i<stats.length-1?'10px':'0'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:600;color:#e8e2f8">${s.nick}</span>
+        <span style="font-size:12px;font-weight:700;color:${colors[i]}">${val.toLocaleString('ko-KR')}${unit}</span>
+      </div>
+      <div style="height:10px;background:rgba(140,110,200,0.15);border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${colors[i]};border-radius:99px;box-shadow:0 0 8px ${colors[i]}80;transition:width .6s ease"></div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="wc-card" style="margin-top:12px">
+    <div class="wc-card-title">📊 총 운동량</div>
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;color:#6b6480;margin-bottom:10px;font-weight:600">⏱ 총 운동시간</div>
+      ${barRows('totalDur', maxDur, '분', '총 운동시간')}
+    </div>
+    <div>
+      <div style="font-size:11px;color:#6b6480;margin-bottom:10px;font-weight:600">🔥 총 소모 칼로리</div>
+      ${barRows('totalCal', maxCal, 'kcal', '총 소모 칼로리')}
+    </div>
+  </div>`;
 }
 
 function wcBoardSection(){
