@@ -1738,6 +1738,13 @@ function copyResult(){
 
   <div id="tama-loading" style="text-align:center;padding:32px 0;color:#6b6480;font-size:13px">불러오는 중…</div>
 
+  <!-- 캐릭터 교체 안내 -->
+  <div id="tama-retirement-msg" style="display:none;text-align:center;padding:32px 16px">
+    <div style="font-size:48px;margin-bottom:16px">🌙</div>
+    <p style="font-size:16px;font-weight:700;color:#f5f1ff;margin:0 0 8px">6월 2일에 새로운 캐릭터로 만나요</p>
+    <p style="font-size:13px;color:#9b94b3;margin:0">잠시 준비 중이에요 ✨</p>
+  </div>
+
   <!-- 캐릭터 -->
   <div class="tama-crd" id="tama-char-card" style="display:none;padding:16px;position:relative">
     <button onclick="tamaSaveImage()" style="position:absolute;top:12px;right:12px;z-index:10;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'"><i class="ti ti-download" style="font-size:13px"></i> 저장</button>
@@ -4792,6 +4799,7 @@ CREATE TABLE tamagotchi_actions (
 
   tamaRender();
   tamaBoardInit();
+  tamaApplyRetirement();
 
   if (tamaChannel) tamaChannel.unsubscribe();
   tamaChannel = sb.channel('tama-live')
@@ -4818,6 +4826,22 @@ CREATE TABLE tamagotchi_actions (
   if (tamaIdleTick) clearInterval(tamaIdleTick);
   tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
   setInterval(tamaRenderCd, 10000);
+}
+
+function tamaApplyRetirement() {
+  const DEADLINE = new Date('2026-05-31T23:59:00');
+  const now = new Date();
+  if (now >= DEADLINE) {
+    document.getElementById('tama-char-card').style.display = 'none';
+    ['btn-feed', 'btn-play', 'btn-pet'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) { btn.disabled = true; btn.style.opacity = '0.35'; btn.style.cursor = 'not-allowed'; }
+    });
+    document.getElementById('tama-retirement-msg').style.display = 'block';
+  } else {
+    const msUntil = DEADLINE - now;
+    setTimeout(() => tamaApplyRetirement(), msUntil);
+  }
 }
 
 function tamaSaveImage() {
