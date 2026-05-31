@@ -1197,7 +1197,36 @@ function copyResult(){
       <span style="font-size:0.78em;color:#a78bfa;">(소원구슬을 모아 핀볼 추첨게임을 하여 당첨자에게 선물지급!)</span>
     </p>
 
-    <div class="neon-card neon-card-glow mt-8 p-5 sm:p-6 animate-fade-up animate-glow-pulse" style="animation-delay:220ms,1.2s">
+    <div id="event-dday" class="mt-8 animate-fade-up" style="animation-delay:200ms"></div>
+    <script>
+    (function(){
+      const start = new Date('2026-05-17');
+      const end   = new Date('2026-06-17');
+      const today = new Date(); today.setHours(0,0,0,0);
+      const total    = Math.round((end - start) / 86400000);
+      const elapsed  = Math.max(0, Math.min(Math.round((today - start) / 86400000), total));
+      const remaining = Math.max(0, Math.round((end - today) / 86400000));
+      const pct      = Math.round(elapsed / total * 100);
+      const statusText = today > end ? '이벤트 종료' : `D-${remaining}`;
+      document.getElementById('event-dday').innerHTML =
+        `<div style="background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:16px 20px;margin-bottom:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-size:14px;font-weight:700;color:#f5f1ff">🐉 ${statusText}</div>
+            <div style="font-size:12px;color:#9b94b3">${elapsed}일 경과 · 잔여 ${remaining}일</div>
+          </div>
+          <div style="height:10px;background:rgba(140,110,200,0.15);border-radius:5px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);border-radius:5px;box-shadow:0 0 10px rgba(181,102,255,0.5)"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:7px">
+            <span style="font-size:10px;color:#6b6480">5월 17일 시작</span>
+            <span style="font-size:11px;color:#b566ff;font-weight:700">${pct}%</span>
+            <span style="font-size:10px;color:#6b6480">6월 17일 종료</span>
+          </div>
+        </div>`;
+    })();
+    </script>
+
+    <div class="neon-card neon-card-glow mt-4 p-5 sm:p-6 animate-fade-up animate-glow-pulse" style="animation-delay:220ms,1.2s">
       <div class="mb-4 flex items-center justify-between">
         <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-purple">🔮 이벤트 핵심 요약</span>
         <span class="rounded-full bg-neon-purple/15 px-2.5 py-0.5 text-[10px] font-medium text-neon-purple">추첨은 핀볼게임으로 한번에!</span>
