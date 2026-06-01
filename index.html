@@ -1803,7 +1803,7 @@ function copyResult(){
         <span id="stage-prog-label" style="font-size:9px;color:#6b6480;letter-spacing:.2px;white-space:nowrap;line-height:1.4;text-align:center"></span>
       </div>
       <!-- 캐릭터 영역 (중앙 정렬) -->
-      <div style="flex:1;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0">
+      <div style="flex:1;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 0 12px">
         <div id="tama-stage-badge" style="display:none"></div>
         <div style="position:relative;display:inline-block;margin:6px 0 12px">
           <div id="tama-bubble" class="tama-bubble"></div>
@@ -4762,11 +4762,6 @@ function tamaUpdateStageBar() {
 function tamaCatSVG(stage, mood) {
   const W = [null, 130, 150, 170, 190][stage] || 130;
   const h = Math.round(W * 145 / 116);
-  const mouth = mood === 'happy'
-    ? 'M44,87 Q47,94 50,91 Q53,94 56,87'
-    : mood === 'sad'
-    ? 'M44,91 Q47,86 50,89 Q53,86 56,91'
-    : null;
   return `<svg width="${W}" height="${h}" viewBox="-8 3 116 145" style="overflow:visible">
   <defs><filter id="dh-ol-m" x="-20%" y="-10%" width="140%" height="125%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
   <g filter="url(#dh-ol-m)">
@@ -4789,7 +4784,7 @@ function tamaCatSVG(stage, mood) {
   <line x1="56" y1="78" x2="72" y2="74" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
   <line x1="56" y1="80" x2="72" y2="80" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
   <line x1="56" y1="82" x2="72" y2="86" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
-  ${mouth ? `<path id="tama-mouth" d="${mouth}" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` : `<ellipse id="tama-mouth" cx="50" cy="90" rx="4" ry="2" fill="#ef4444"/>`}
+  <ellipse id="tama-mouth" cx="50" cy="90" rx="4" ry="2" fill="#ef4444"/>
   <ellipse cx="28" cy="72" rx="5" ry="3" fill="rgba(255,182,193,.45)"/>
   <ellipse cx="72" cy="72" rx="5" ry="3" fill="rgba(255,182,193,.45)"/>
 </svg>`;
@@ -5490,18 +5485,9 @@ function tamaPlayAnim(type) {
   // 2단계: 몸 끝난 후 → 표정 변화 + 말풍선 동시
   setTimeout(() => {
     wrap.style.animation = 'cat-float 3s ease-in-out infinite';
-    const mouth = document.getElementById('tama-mouth');
-    if (mouth && mouth.tagName === 'path') mouth.setAttribute('d', 'M44,87 Q47,94 50,91 Q53,94 56,87');
     tamaShowBubble(type);
 
-    // 3단계: 700ms 후 원래 표정 복귀
-    setTimeout(() => {
-      const avg = (tamaHunger() + tamaHappy()) / 2;
-      const mood = avg >= 65 ? 'happy' : avg >= 35 ? 'normal' : 'sad';
-      const paths = { happy:'M44,87 Q47,94 50,91 Q53,94 56,87', sad:'M44,91 Q47,86 50,89 Q53,86 56,91' };
-      const m = document.getElementById('tama-mouth');
-      if (m && mood !== 'normal' && m.tagName === 'path') m.setAttribute('d', paths[mood]);
-    }, 700);
+    setTimeout(() => {}, 700);
   }, dur + 80);
 }
 
