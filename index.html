@@ -5121,7 +5121,13 @@ function tamaBoardParseContent(content) {
 function tamaBoardRender() {
   const el = document.getElementById('tama-board-list');
   if (!el) return;
-  const parents = tamaBoardPosts.filter(c => !c.parent_id);
+  const parents = tamaBoardPosts.filter(c => !c.parent_id)
+    .sort((a, b) => {
+      const an = tamaBoardParseContent(a.content).isNotice;
+      const bn = tamaBoardParseContent(b.content).isNotice;
+      if (an !== bn) return an ? -1 : 1;
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
   const replies = tamaBoardPosts.filter(c => c.parent_id);
   if (!parents.length) {
     el.innerHTML = '<p style="font-size:12px;color:#6b6480;text-align:center;padding:12px 0">아직 게시물이 없어요.</p>';
