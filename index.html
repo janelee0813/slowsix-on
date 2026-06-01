@@ -1633,6 +1633,10 @@ function copyResult(){
   .tama-cd{font-size:10px;color:#6b6480;line-height:1;min-height:12px}
   .tama-log-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(140,110,200,.12);font-size:13px}
   .tama-log-row:last-child{border-bottom:none}
+  @keyframes dh-ear-l{0%,76%,100%{transform:rotate(0deg)}81%{transform:rotate(-10deg)}87%{transform:rotate(5deg)}92%{transform:rotate(-3deg)}96%{transform:rotate(0deg)}}
+  @keyframes dh-ear-r{0%,76%,100%{transform:rotate(0deg)}81%{transform:rotate(10deg)}87%{transform:rotate(-5deg)}92%{transform:rotate(3deg)}96%{transform:rotate(0deg)}}
+  .dh-ear-l{transform-box:fill-box;transform-origin:50% 100%;animation:dh-ear-l 2.8s ease-in-out infinite}
+  .dh-ear-r{transform-box:fill-box;transform-origin:50% 100%;animation:dh-ear-r 2.8s ease-in-out infinite;animation-delay:.4s}
   @keyframes tama-bounce{0%,100%{transform:translateY(0)}20%{transform:translateY(-24px) rotate(-4deg)}45%{transform:translateY(-8px) rotate(2deg)}65%{transform:translateY(-16px) rotate(-2deg)}85%{transform:translateY(-3px) rotate(1deg)}}
   @keyframes tama-shake{0%,100%{transform:rotate(0) scale(1)}15%{transform:rotate(-18deg) scale(1.05)}35%{transform:rotate(18deg) scale(1.05)}55%{transform:rotate(-10deg) scale(1.02)}75%{transform:rotate(10deg) scale(1.02)}90%{transform:rotate(-4deg)}}
   @keyframes tama-pulse{0%,100%{transform:scale(1)}40%{transform:scale(1.22)}70%{transform:scale(1.08)}}
@@ -4767,8 +4771,8 @@ function tamaCatSVG(stage, mood) {
   <g filter="url(#dh-ol-m)">
     <path d="M68,112 Q76,107 74,101" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round"/>
     <ellipse cx="50" cy="116" rx="20" ry="18" fill="#f8f8f0"/>
-    <ellipse cx="24" cy="46" rx="10" ry="14" fill="#ffb3c6"/>
-    <ellipse cx="76" cy="46" rx="10" ry="14" fill="#ffb3c6"/>
+    <g class="dh-ear-l"><ellipse cx="24" cy="46" rx="10" ry="14" fill="#ffb3c6"/></g>
+    <g class="dh-ear-r"><ellipse cx="76" cy="46" rx="10" ry="14" fill="#ffb3c6"/></g>
     <ellipse cx="50" cy="64" rx="28" ry="36" fill="#f8f8f0"/>
     <g transform="translate(37,54)"><g class="cat-te" style="animation-delay:.12s"><circle r="11" fill="#1a1a1a"/><circle cx="-4" cy="-4" r="3" fill="white"/></g></g>
     <g transform="translate(63,54)"><g class="cat-te" style="animation-delay:.2s"><circle r="11" fill="#1a1a1a"/><circle cx="-4" cy="-4" r="3" fill="white"/></g></g>
