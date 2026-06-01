@@ -1848,6 +1848,20 @@ function copyResult(){
 
   <!-- 액션 -->
   <div class="tama-crd" id="tama-action-card" style="display:none;padding:8px 10px">
+    <!-- 캡차 모달 -->
+    <div id="tama-captcha-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,6,18,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+      <div style="background:rgba(34,26,58,.95);border:1px solid rgba(181,102,255,.4);border-radius:16px;padding:24px 28px;text-align:center;width:260px">
+        <p style="font-size:13px;color:#9b94b3;margin:0 0 6px">🤖 매크로 방지 확인</p>
+        <p id="tama-captcha-q" style="font-size:26px;font-weight:800;color:#f5f1ff;margin:0 0 14px;letter-spacing:2px"></p>
+        <input id="tama-captcha-inp" type="number" placeholder="정답 입력" maxlength="4"
+          style="width:100%;box-sizing:border-box;border-radius:10px;border:1px solid rgba(140,110,200,.4);background:rgba(20,14,36,.8);padding:9px 12px;font-size:18px;color:#f5f1ff;outline:none;font-family:inherit;text-align:center;margin-bottom:8px"/>
+        <p id="tama-captcha-msg" style="display:none;font-size:11px;color:#f87171;margin:0 0 8px"></p>
+        <div style="display:flex;gap:8px">
+          <button id="tama-captcha-cancel" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:none;color:#9b94b3;font-size:12px;cursor:pointer;font-family:inherit">취소</button>
+          <button id="tama-captcha-submit" style="flex:2;padding:8px;border-radius:10px;border:none;background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">확인</button>
+        </div>
+      </div>
+    </div>
     <div id="tama-open-countdown" style="display:none;text-align:center;padding:10px 8px;margin-bottom:8px;background:rgba(255,182,193,.08);border:1px solid rgba(255,182,193,.25);border-radius:10px">
       <p style="font-size:11px;color:#9b94b3;margin:0 0 4px">🌸 들희 오픈까지</p>
       <p id="tama-countdown-text" style="font-size:20px;font-weight:800;color:#ffb3c6;margin:0;letter-spacing:2px">--:--:--</p>
@@ -4952,6 +4966,34 @@ CREATE TABLE tamagotchi_actions (
   setInterval(tamaRenderCd, 10000);
 }
 
+function tamaCaptchaCheck() {
+  return new Promise(resolve => {
+    const ops = [['+', (a,b)=>a+b], ['+', (a,b)=>a+b], ['-', (a,b)=>a-b]];
+    const [sym, fn] = ops[Math.floor(Math.random() * ops.length)];
+    const a = Math.floor(Math.random() * 15) + 1;
+    const b = sym === '-' ? Math.floor(Math.random() * a) + 1 : Math.floor(Math.random() * 15) + 1;
+    const answer = fn(a, b);
+    const modal = document.getElementById('tama-captcha-modal');
+    const inp   = document.getElementById('tama-captcha-inp');
+    const msg   = document.getElementById('tama-captcha-msg');
+    document.getElementById('tama-captcha-q').textContent = `${a} ${sym} ${b} = ?`;
+    inp.value = ''; msg.style.display = 'none';
+    modal.style.display = 'flex';
+    setTimeout(() => inp.focus(), 80);
+    function confirm() {
+      if (parseInt(inp.value) === answer) {
+        modal.style.display = 'none'; resolve(true);
+      } else {
+        msg.textContent = '틀렸어요! 다시 입력해 주세요.'; msg.style.display = 'block';
+        inp.value = ''; inp.focus();
+      }
+    }
+    document.getElementById('tama-captcha-submit').onclick = confirm;
+    inp.onkeydown = e => { if (e.key === 'Enter') confirm(); };
+    document.getElementById('tama-captcha-cancel').onclick = () => { modal.style.display = 'none'; resolve(false); };
+  });
+}
+
 const TAMA_OPEN = new Date('2026-06-01T23:59:00');
 let tamaCountdownTimer = null;
 
@@ -5369,6 +5411,10 @@ async function tamaAction(type) {
   // ── 쓰다듬기: 개인별 쿨다운 ──
   if (type === 'pet') {
     if (tamaCdLeft('pet') > 0) { alert(`아직 쿨다운 중이에요!\n${tamaFmtCd(tamaCdLeft('pet'))}`); return; }
+    if ([2, 6, 11, 17].includes(new Date().getHours())) {
+      const passed = await tamaCaptchaCheck();
+      if (!passed) return;
+    }
     let remaining;
     try {
       const { data, error } = await sb.rpc('insert_tama_action', { p_nick: nick, p_type: 'pet' });
