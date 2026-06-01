@@ -1770,8 +1770,8 @@ function copyResult(){
   <!-- 캐릭터 교체 안내 -->
   <div id="tama-retirement-msg" style="display:none;text-align:center;padding:32px 16px">
     <div style="font-size:48px;margin-bottom:16px">🌙</div>
-    <p style="font-size:16px;font-weight:700;color:#f5f1ff;margin:0 0 8px">6월 2일에 새로운 캐릭터로 만나요</p>
-    <p style="font-size:13px;color:#9b94b3;margin:0">잠시 준비 중이에요 ✨</p>
+    <p style="font-size:16px;font-weight:700;color:#f5f1ff;margin:0 0 8px">들희와 함께한 6월이 마무리됐어요</p>
+    <p style="font-size:13px;color:#9b94b3;margin:0">7월에 새 캐릭터로 다시 만나요 ✨</p>
   </div>
 
   <!-- 캐릭터 -->
@@ -4735,51 +4735,63 @@ function tamaDecay(val, rate, since) {
 function tamaHunger() { return Math.round(tamaDecay(tamaData.hunger, HUNGER_DECAY, tamaData.last_updated)); }
 function tamaHappy()  { return Math.round(tamaDecay(tamaData.happiness, HAPPY_DECAY, tamaData.last_updated)); }
 function tamaDay()    { return Math.max(1, Math.min(30, Math.floor((Date.now() - new Date(tamaData.born_at)) / 86400000) + 1)); }
-function tamaStageNum() { const d = tamaDay(); return d <= 20 ? 2 : 3; }
-function tamaStageName() { return ['','아깽이','캣춘기','성묘기'][tamaStageNum()]; }
+function tamaStageNum() {
+  const d = tamaDay();
+  if (d <= 6)  return 1;
+  if (d <= 13) return 2;
+  if (d <= 20) return 3;
+  return 4;
+}
+function tamaStageName() { return ['','아기들희','성장들희','사춘기들희','어른들희'][tamaStageNum()]; }
 
 function tamaUpdateStageBar() {
   const bar   = document.getElementById('stage-prog-bar');
   const label = document.getElementById('stage-prog-label');
   if (!bar || !label) return;
-  const day = tamaDay();             // 1~30
-  const dayInStage = ((day - 1) % 10) + 1; // 1~10
-  const pct = Math.round(dayInStage / 10 * 100);
+  const d = tamaDay();
+  let dayInStage, stageTotal;
+  if (d <= 6)       { dayInStage = d;      stageTotal = 6; }
+  else if (d <= 13) { dayInStage = d - 6;  stageTotal = 7; }
+  else if (d <= 20) { dayInStage = d - 13; stageTotal = 7; }
+  else              { dayInStage = d - 20; stageTotal = 9; }
+  const pct = Math.round(dayInStage / stageTotal * 100);
   bar.style.height = pct + '%';
   label.textContent = tamaStageName() + '\n시절';
 }
 
 function tamaCatSVG(stage, mood) {
-  const W = [null, 110, 143, 178][stage];
-  const h = Math.round(W * 188 / 116);
+  const W = [null, 100, 120, 143, 165][stage] || 110;
+  const h = Math.round(W * 145 / 116);
   const mouth = mood === 'happy'
-    ? 'M42,88 Q47,95 50,91 Q53,95 58,88'
+    ? 'M44,86 Q47,93 50,90 Q53,93 56,86'
     : mood === 'sad'
-    ? 'M44,92 Q47,87 50,90 Q53,87 56,92'
-    : 'M44,88 Q47,92 50,89 Q53,92 56,88';
-  return `<svg width="${W}" height="${h}" viewBox="-8 0 116 188" style="overflow:visible">
-  <defs><filter id="cat-ol-m" x="-20%" y="-8%" width="140%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <g filter="url(#cat-ol-m)">
-    <g class="cat-tail-g"><path d="M68,114 Q96,96 88,72 Q80,50 96,40" stroke="#ddb8ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-    <ellipse cx="50" cy="118" rx="22" ry="18" fill="#ddb8ff"/>
-    <g class="cat-ear-l"><path d="M30,52 L18,18 L44,36 Z" fill="#ddb8ff"/><path d="M30,48 L22,24 L40,36 Z" fill="#c49af5"/></g>
-    <g class="cat-ear-r"><path d="M70,52 L82,18 L56,36 Z" fill="#ddb8ff"/><path d="M70,48 L78,24 L60,36 Z" fill="#c49af5"/></g>
-    <ellipse cx="50" cy="68" rx="30" ry="32" fill="#ddb8ff"/>
-    <g transform="translate(38,56)"><g class="cat-te" style="animation-delay:.1s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
-    <g transform="translate(62,56)"><g class="cat-te" style="animation-delay:.22s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2.5" fill="white"/></g></g>
-    <path d="M47,81 L50,76 L53,81 Q50,85 47,81 Z" fill="#ff7eb3"/>
-    <rect x="38" y="130" width="10" height="18" rx="5" fill="#ddb8ff"/>
-    <rect x="52" y="130" width="10" height="18" rx="5" fill="#ddb8ff"/>
+    ? 'M44,90 Q47,85 50,88 Q53,85 56,90'
+    : 'M44,86 Q47,90 50,88 Q53,90 56,86';
+  return `<svg width="${W}" height="${h}" viewBox="-8 3 116 145" style="overflow:visible">
+  <defs><filter id="dh-ol-m" x="-20%" y="-10%" width="140%" height="125%"><feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/><feFlood flood-color="#1a1a1a" result="col"/><feComposite in="col" in2="exp" operator="in" result="border"/><feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g filter="url(#dh-ol-m)">
+    <path d="M68,112 Q76,107 74,101" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <ellipse cx="50" cy="116" rx="20" ry="18" fill="#f8f8f0"/>
+    <ellipse cx="24" cy="46" rx="10" ry="14" fill="#ffb3c6"/>
+    <ellipse cx="76" cy="46" rx="10" ry="14" fill="#ffb3c6"/>
+    <ellipse cx="50" cy="64" rx="28" ry="36" fill="#f8f8f0"/>
+    <g transform="translate(37,54)"><g class="cat-te" style="animation-delay:.12s"><circle r="11" fill="#1a1a1a"/><circle cx="-4" cy="-4" r="3" fill="white"/></g></g>
+    <g transform="translate(63,54)"><g class="cat-te" style="animation-delay:.2s"><circle r="11" fill="#1a1a1a"/><circle cx="-4" cy="-4" r="3" fill="white"/></g></g>
+    <ellipse cx="50" cy="80" rx="5" ry="4" fill="#1a1a1a"/>
+    <ellipse cx="48" cy="78" rx="1.5" ry="1.2" fill="rgba(255,255,255,.5)"/>
+    <rect x="40" y="128" width="9" height="12" rx="4" fill="#f8f8f0"/>
+    <rect x="51" y="128" width="9" height="12" rx="4" fill="#f8f8f0"/>
   </g>
-  <line x1="42" y1="79" x2="8" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="42" y1="82" x2="8" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="42" y1="85" x2="10" y2="93" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="58" y1="79" x2="92" y2="71" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="58" y1="82" x2="92" y2="82" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="58" y1="85" x2="90" y2="93" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M48,28 C46,18 53,14 54,22" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <line x1="44" y1="78" x2="28" y2="74" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="44" y1="80" x2="28" y2="80" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="44" y1="82" x2="28" y2="86" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="56" y1="78" x2="72" y2="74" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="56" y1="80" x2="72" y2="80" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="56" y1="82" x2="72" y2="86" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
   <path id="tama-mouth" d="${mouth}" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <ellipse cx="30" cy="74" rx="6" ry="4" fill="rgba(196,154,245,.45)"/>
-  <ellipse cx="70" cy="74" rx="6" ry="4" fill="rgba(196,154,245,.45)"/>
+  <ellipse cx="28" cy="72" rx="5" ry="3" fill="rgba(255,182,193,.45)"/>
+  <ellipse cx="72" cy="72" rx="5" ry="3" fill="rgba(255,182,193,.45)"/>
 </svg>`;
 }
 
@@ -4910,7 +4922,7 @@ CREATE TABLE tamagotchi_actions (
 }
 
 function tamaApplyRetirement() {
-  const DEADLINE = new Date('2026-05-31T00:00:00');
+  const DEADLINE = new Date('2026-06-30T23:59:00');
   const now = new Date();
   if (now >= DEADLINE) {
     document.getElementById('tama-char-card').style.display = 'none';
@@ -5238,7 +5250,7 @@ async function tamaBoardConfirmDelete() {
 }
 
 function tamaRenderCd() {
-  const retired = new Date() >= new Date('2026-05-31T00:00:00');
+  const retired = new Date() >= new Date('2026-06-30T23:59:00');
   ['feed','play','pet'].forEach(type => {
     const left = type === 'pet' ? tamaCdLeft(type) : tamaSharedCdLeft(type);
     const cdEl = document.getElementById(`cd-${type}`);
@@ -5300,7 +5312,7 @@ async function tamaSyncCooldowns(nick) {
 }
 
 async function tamaAction(type) {
-  if (new Date() >= new Date('2026-05-31T00:00:00')) return;
+  if (new Date() >= new Date('2026-06-30T23:59:00')) return;
   const nick = document.getElementById('tama-nick').value.trim();
   if (!nick) { alert('닉네임을 입력해 주세요!'); document.getElementById('tama-nick').focus(); return; }
 
