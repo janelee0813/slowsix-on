@@ -1848,6 +1848,10 @@ function copyResult(){
 
   <!-- 액션 -->
   <div class="tama-crd" id="tama-action-card" style="display:none;padding:8px 10px">
+    <div id="tama-open-countdown" style="display:none;text-align:center;padding:10px 8px;margin-bottom:8px;background:rgba(255,182,193,.08);border:1px solid rgba(255,182,193,.25);border-radius:10px">
+      <p style="font-size:11px;color:#9b94b3;margin:0 0 4px">🌸 들희 오픈까지</p>
+      <p id="tama-countdown-text" style="font-size:20px;font-weight:800;color:#ffb3c6;margin:0;letter-spacing:2px">--:--:--</p>
+    </div>
     <input id="tama-nick" placeholder="닉네임을 입력하세요" maxlength="12"
       style="width:100%;padding:7px 13px;border:1px solid rgba(140,110,200,.32);border-radius:10px;font-size:14px;background:rgba(20,14,36,.7);color:#f5f1ff;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:8px"
       oninput="localStorage.setItem('tama_nick',this.value)"
@@ -4903,6 +4907,7 @@ CREATE TABLE tamagotchi_actions (
 
   tamaRender();
   tamaBoardInit();
+  tamaApplyPreOpen();
   tamaApplyRetirement();
 
   if (tamaChannel) tamaChannel.unsubscribe();
@@ -4930,6 +4935,42 @@ CREATE TABLE tamagotchi_actions (
   if (tamaIdleTick) clearInterval(tamaIdleTick);
   tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
   setInterval(tamaRenderCd, 10000);
+}
+
+const TAMA_OPEN = new Date('2026-06-01T23:59:00');
+let tamaCountdownTimer = null;
+
+function tamaApplyPreOpen() {
+  const now = new Date();
+  const cdEl  = document.getElementById('tama-open-countdown');
+  const txtEl = document.getElementById('tama-countdown-text');
+
+  if (now >= TAMA_OPEN) {
+    // 오픈 — 카운트다운 숨기고 버튼 활성화
+    if (cdEl) cdEl.style.display = 'none';
+    ['btn-feed','btn-play','btn-pet'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = ''; }
+    });
+    if (tamaCountdownTimer) { clearInterval(tamaCountdownTimer); tamaCountdownTimer = null; }
+  } else {
+    // 오픈 전 — 버튼 비활성화 + 카운트다운 표시
+    if (cdEl) cdEl.style.display = 'block';
+    ['btn-feed','btn-play','btn-pet'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) { btn.disabled = true; btn.style.opacity = '0.35'; btn.style.cursor = 'not-allowed'; }
+    });
+    function updateCountdown() {
+      const diff = TAMA_OPEN - new Date();
+      if (diff <= 0) { tamaApplyPreOpen(); return; }
+      const h = String(Math.floor(diff / 3600000)).padStart(2,'0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+      if (txtEl) txtEl.textContent = `${h}:${m}:${s}`;
+    }
+    updateCountdown();
+    if (!tamaCountdownTimer) tamaCountdownTimer = setInterval(updateCountdown, 1000);
+  }
 }
 
 function tamaApplyRetirement() {
@@ -5262,15 +5303,16 @@ async function tamaBoardConfirmDelete() {
 
 function tamaRenderCd() {
   const retired = new Date() >= new Date('2026-06-30T23:59:00');
+  const preOpen = new Date() < TAMA_OPEN;
   ['feed','play','pet'].forEach(type => {
     const left = type === 'pet' ? tamaCdLeft(type) : tamaSharedCdLeft(type);
     const cdEl = document.getElementById(`cd-${type}`);
     const btn  = document.getElementById(`btn-${type}`);
     if (!cdEl || !btn) return;
     cdEl.textContent = left > 0 ? tamaFmtCd(left) : '';
-    btn.disabled = retired || left > 0;
-    btn.style.opacity = retired || left > 0 ? '.4' : '1';
-    btn.style.cursor = retired ? 'not-allowed' : '';
+    btn.disabled = retired || preOpen || left > 0;
+    btn.style.opacity = retired || preOpen || left > 0 ? '.4' : '1';
+    btn.style.cursor = retired || preOpen ? 'not-allowed' : '';
   });
 
   // 쓰다듬기 재충전 바 업데이트
@@ -5323,7 +5365,7 @@ async function tamaSyncCooldowns(nick) {
 }
 
 async function tamaAction(type) {
-  if (new Date() >= new Date('2026-06-30T23:59:00')) return;
+  if (new Date() < TAMA_OPEN || new Date() >= new Date('2026-06-30T23:59:00')) return;
   const nick = document.getElementById('tama-nick').value.trim();
   if (!nick) { alert('닉네임을 입력해 주세요!'); document.getElementById('tama-nick').focus(); return; }
 
