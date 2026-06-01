@@ -1892,11 +1892,30 @@ function copyResult(){
   <div class="tama-crd" id="tama-chart-card" style="display:none;padding:14px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <span style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px">📢 게시판</span>
-      <button onclick="tamaBoardTogglePost()" id="tama-board-post-btn"
-        style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s"
-        onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'"
-        onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">✏️ 운영자 글쓰기</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="tamaBoardToggleUserPost()" id="tama-user-post-btn"
+          style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'"
+          onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">✏️ 글쓰기</button>
+        <button onclick="tamaBoardTogglePost()" id="tama-board-post-btn"
+          style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'"
+          onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">📌 공지 쓰기</button>
+      </div>
     </div>
+    <!-- 일반 글쓰기 폼 -->
+    <div id="tama-user-post-form" style="display:none;margin-bottom:10px">
+      <input id="tama-user-nick" placeholder="닉네임" maxlength="12"
+        style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:6px"/>
+      <textarea id="tama-user-inp" placeholder="자유롭게 글을 남겨주세요" rows="3"
+        style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;resize:none;font-family:inherit"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px;gap:8px;align-items:center">
+        <span id="tama-user-post-msg" style="font-size:11px;display:none"></span>
+        <button onclick="tamaBoardSubmitUserPost()" id="tama-user-submit-btn"
+          style="border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:600;color:#fff;background:linear-gradient(90deg,#7c3aed,#db2777);cursor:pointer;font-family:inherit">등록</button>
+      </div>
+    </div>
+    <!-- 공지 쓰기 폼 (운영진 전용) -->
     <div id="tama-board-post-form" style="display:none;margin-bottom:10px">
       <input id="tama-board-pin" type="password" placeholder="운영자 PIN" maxlength="6"
         style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,0.3);background:rgba(30,22,55,0.6);padding:7px 10px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;margin-bottom:6px;color-scheme:dark"
@@ -5040,6 +5059,10 @@ function tamaBoardFmt(ts) {
   return `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 function tamaBoardEsc(s) { return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tamaBoardParseContent(content) {
+  try { const p = JSON.parse(content); if (p.n && p.m) return { nick: p.n, text: p.m, isNotice: false }; } catch(e) {}
+  return { nick: null, text: content, isNotice: true };
+}
 
 function tamaBoardRender() {
   const el = document.getElementById('tama-board-list');
@@ -5051,6 +5074,7 @@ function tamaBoardRender() {
     return;
   }
   el.innerHTML = parents.map(c => {
+    const { nick, text, isNotice } = tamaBoardParseContent(c.content);
     const childList = replies.filter(r => r.parent_id === c.id);
     const childHTML = childList.map(r => `
       <div style="margin-top:8px;padding-left:10px;border-left:2px solid rgba(181,102,255,0.25)" id="tama-bc-${r.id}">
@@ -5069,13 +5093,17 @@ function tamaBoardRender() {
           <button onclick="tamaBoardSubmitReply('${c.id}')" style="border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;color:#fff;background:linear-gradient(90deg,#7c3aed,#db2777);cursor:pointer">등록</button>
         </div>
       </div>`;
-    return `<div style="background:rgba(30,22,55,0.55);border:1px solid rgba(140,110,200,0.2);border-radius:10px;padding:12px" id="tama-bc-${c.id}">
+    const noticeBadge = isNotice ? `<span style="font-size:9px;font-weight:700;color:#fff;background:linear-gradient(90deg,#7c3aed,#db2777);border-radius:4px;padding:1px 5px;margin-right:5px;flex-shrink:0">📌 공지</span>` : '';
+    const authorLine = isNotice
+      ? `<p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">운영자 · ${tamaBoardFmt(c.created_at)}</p>`
+      : `<p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">${tamaBoardEsc(nick)} · ${tamaBoardFmt(c.created_at)}</p>`;
+    return `<div style="background:rgba(30,22,55,0.55);border:1px solid ${isNotice?'rgba(181,102,255,0.35)':'rgba(140,110,200,0.2)'};border-radius:10px;padding:12px" id="tama-bc-${c.id}">
       <div style="display:flex;align-items:flex-start;gap:6px">
-        <p style="flex:1;font-size:13px;color:rgba(245,241,255,0.9);line-height:1.5;white-space:pre-wrap;margin:0">${tamaBoardEsc(c.content)}</p>
+        <div style="flex:1;display:flex;align-items:flex-start;flex-wrap:wrap">${noticeBadge}<p style="flex:1;font-size:13px;color:rgba(245,241,255,0.9);line-height:1.5;white-space:pre-wrap;margin:0;min-width:0">${tamaBoardEsc(text)}</p></div>
         <button onclick="tamaBoardAskDelete('${c.id}')" style="flex-shrink:0;font-size:10px;color:rgba(155,148,179,0.35);background:none;border:none;cursor:pointer;padding:0;margin-top:2px" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,0.35)'">삭제</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:5px">
-        <p style="margin:0;font-size:10px;color:rgba(155,148,179,0.5)">운영자 · ${tamaBoardFmt(c.created_at)}</p>
+        ${authorLine}
         <button onclick="tamaBoardToggleReply('${c.id}')" style="font-size:10px;color:rgba(181,102,255,0.6);background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#b566ff'" onmouseout="this.style.color='rgba(181,102,255,0.6)'">💬 댓글 달기</button>
         <button onclick="tamaBoardLike('${c.id}')" style="font-size:10px;color:${localStorage.getItem('tama_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.4)'};background:none;border:none;cursor:pointer;padding:0;transition:color .15s" onmouseover="this.style.color='#f472b6'" onmouseout="this.style.color='${localStorage.getItem('tama_liked_'+c.id)?'#f472b6':'rgba(155,148,179,0.4)'}'">❤️ ${c.like_count||0}</button>
       </div>
@@ -5099,9 +5127,42 @@ async function tamaBoardLike(id) {
   }
 }
 
+function tamaBoardToggleUserPost() {
+  const form = document.getElementById('tama-user-post-form');
+  const isOpen = form.style.display !== 'none';
+  document.getElementById('tama-board-post-form').style.display = 'none';
+  form.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) setTimeout(() => document.getElementById('tama-user-nick').focus(), 50);
+}
+
+async function tamaBoardSubmitUserPost() {
+  const nickEl = document.getElementById('tama-user-nick');
+  const inpEl  = document.getElementById('tama-user-inp');
+  const msg    = document.getElementById('tama-user-post-msg');
+  const btn    = document.getElementById('tama-user-submit-btn');
+  const nick = nickEl.value.trim();
+  const text = inpEl.value.trim();
+  if (!nick) { msg.textContent = '닉네임을 입력해주세요'; msg.style.color='#f87171'; msg.style.display='inline'; setTimeout(()=>{msg.style.display='none';},2000); return; }
+  if (!text) { msg.textContent = '내용을 입력해주세요'; msg.style.color='#f87171'; msg.style.display='inline'; setTimeout(()=>{msg.style.display='none';},2000); return; }
+  btn.disabled = true; btn.textContent = '등록 중...';
+  const content = JSON.stringify({ n: nick, m: text });
+  const { data, error } = await sb.from('tama_board').insert({ content }).select().single();
+  if (!error && data) {
+    tamaBoardPosts.push(data);
+    tamaBoardRender();
+    nickEl.value = ''; inpEl.value = '';
+    document.getElementById('tama-user-post-form').style.display = 'none';
+  } else {
+    msg.textContent = '오류 발생'; msg.style.color='#f87171'; msg.style.display='inline';
+    setTimeout(()=>{msg.style.display='none';},2500);
+  }
+  btn.disabled = false; btn.textContent = '등록';
+}
+
 function tamaBoardTogglePost() {
   const form = document.getElementById('tama-board-post-form');
   const isOpen = form.style.display !== 'none';
+  document.getElementById('tama-user-post-form').style.display = 'none';
   form.style.display = isOpen ? 'none' : 'block';
   if (!isOpen) setTimeout(() => document.getElementById('tama-board-pin').focus(), 50);
 }
