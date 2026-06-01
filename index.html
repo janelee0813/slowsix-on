@@ -1812,7 +1812,7 @@ function copyResult(){
         <span id="stage-prog-label" style="font-size:9px;color:#6b6480;letter-spacing:.2px;white-space:nowrap;line-height:1.4;text-align:center"></span>
       </div>
       <!-- 캐릭터 영역 (중앙 정렬) -->
-      <div style="flex:1;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 0 12px">
+      <div id="tama-char-area" style="flex:1;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 0 12px;background:rgba(34,26,58,.65);border-radius:10px">
         <div id="tama-stage-badge" style="display:none"></div>
         <div style="position:relative;display:inline-block;margin:6px 0 12px">
           <div id="tama-bubble" class="tama-bubble"></div>
@@ -4996,42 +4996,18 @@ function tamaApplyRetirement() {
 }
 
 function tamaSaveImage() {
-  const wrap = document.getElementById('tama-char-wrap');
-  const svg = wrap.querySelector('svg');
-  if (!svg) return;
-  const clone = svg.cloneNode(true);
-  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-  style.textContent = `
-    .cat-te{animation:none}
-    .cat-tail-g{animation:none}
-    .cat-ear-l{animation:none}
-    .cat-ear-r{animation:none}
-  `;
-  clone.insertBefore(style, clone.firstChild);
-  const W = parseInt(svg.getAttribute('width')) || 143;
-  const H = parseInt(svg.getAttribute('height')) || 232;
-  const scale = 3;
-  clone.setAttribute('width', W * scale);
-  clone.setAttribute('height', H * scale);
-  const xml = new XMLSerializer().serializeToString(clone);
-  const blob = new Blob([xml], {type:'image/svg+xml'});
-  const url = URL.createObjectURL(blob);
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = W * scale;
-    canvas.height = H * scale;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#13111a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
+  const el = document.getElementById('tama-char-area');
+  if (!el) return;
+  htmlToImage.toPng(el, {
+    pixelRatio: 3,
+    backgroundColor: '#13111a',
+    style: { borderRadius: '10px' }
+  }).then(dataUrl => {
     const a = document.createElement('a');
     a.download = '들희_다마고찌.png';
-    a.href = canvas.toDataURL('image/png');
+    a.href = dataUrl;
     a.click();
-  };
-  img.src = url;
+  }).catch(() => alert('저장 중 오류가 발생했어요. 다시 시도해 주세요.'));
 }
 
 function tamaRender() {
