@@ -5317,7 +5317,7 @@ function tamaMonthRange() {
   return {
     thisStart, lastStart,
     thisLabel: monthLabel(now.getFullYear(), now.getMonth()),
-    lastLabel: monthLabel(now.getFullYear(), now.getMonth()-1 < 0 ? now.getFullYear()-1 : now.getFullYear(), now.getMonth()-1 < 0 ? 11 : now.getMonth()-1)
+    lastLabel: monthLabel(now.getMonth()-1 < 0 ? now.getFullYear()-1 : now.getFullYear(), now.getMonth()-1 < 0 ? 11 : now.getMonth()-1)
   };
 }
 
