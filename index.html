@@ -4963,6 +4963,7 @@ CREATE TABLE tamagotchi_actions (
 
   if (tamaIdleTick) clearInterval(tamaIdleTick);
   tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
+  tamaRenderCd();
   setInterval(tamaRenderCd, 10000);
 }
 
@@ -5343,14 +5344,16 @@ async function tamaBoardConfirmDelete() {
 function tamaRenderCd() {
   const retired = new Date() >= new Date('2026-06-30T23:59:00');
   const preOpen = new Date() < TAMA_OPEN;
+  const nick = document.getElementById('tama-nick')?.value.trim();
   ['feed','play','pet'].forEach(type => {
     const left = type === 'pet' ? tamaCdLeft(type) : tamaSharedCdLeft(type);
     const cdEl = document.getElementById(`cd-${type}`);
     const btn  = document.getElementById(`btn-${type}`);
     if (!cdEl || !btn) return;
-    cdEl.textContent = left > 0 ? tamaFmtCd(left) : '';
-    btn.disabled = retired || preOpen || left > 0;
-    btn.style.opacity = retired || preOpen || left > 0 ? '.4' : '1';
+    const noNick = !nick && type === 'pet';
+    cdEl.textContent = left > 0 ? tamaFmtCd(left) : (noNick ? '닉네임 입력 필요' : '');
+    btn.disabled = retired || preOpen || left > 0 || noNick;
+    btn.style.opacity = retired || preOpen || left > 0 || noNick ? '.4' : '1';
     btn.style.cursor = retired || preOpen ? 'not-allowed' : '';
   });
 
@@ -5358,7 +5361,6 @@ function tamaRenderCd() {
   const bar = document.getElementById('pet-cd-bar');
   const lbl = document.getElementById('pet-cd-label');
   if (!bar || !lbl) return;
-  const nick = document.getElementById('tama-nick')?.value.trim();
   const win = T_WINDOW.pet;
   let pct = 100;
   if (nick) {
