@@ -5017,7 +5017,13 @@ CREATE TABLE tamagotchi_actions (
     .subscribe();
 
   if (tamaTick) clearInterval(tamaTick);
-  tamaTick = setInterval(() => tamaRenderStat(), 30000);
+  tamaTick = setInterval(async () => {
+    // 공유 쿨다운(feed_next_at, play_next_at) 서버 동기화
+    const { data } = await sb.from('tamagotchi').select('feed_next_at,play_next_at,last_updated,hunger,happiness,affection').eq('id',1).maybeSingle();
+    if (data) Object.assign(tamaData, data);
+    tamaRenderStat();
+    tamaRenderCd();
+  }, 30000);
 
   if (tamaIdleTick) clearInterval(tamaIdleTick);
   tamaIdleTick = setInterval(tamaShowIdleBubble, 10000);
@@ -5460,7 +5466,10 @@ async function tamaCheckServerCd(nick, type) {
 
 async function tamaSyncCooldowns(nick) {
   if (!nick) return;
-  await tamaCheckServerCd(nick, 'pet'); // feed/play는 tamaData(공유) 기준
+  // 서버에서 tamaData 최신화 (feed_next_at, play_next_at 포함)
+  const { data } = await sb.from('tamagotchi').select('*').eq('id',1).maybeSingle();
+  if (data) tamaData = data;
+  await tamaCheckServerCd(nick, 'pet');
   tamaRenderCd();
 }
 
