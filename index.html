@@ -2596,6 +2596,7 @@ let wcRecs=[];
 let wcBoardPosts=[];
 let wcBoardDeleteId=null;
 let wcFormOpen=false;
+let wcSignups=[];
 const wcForm={date:wcToday(),nickname:'',isCompleted:true,isPass:false,calories:'',duration:''};
 window.wcForm=wcForm;
 
@@ -2670,16 +2671,30 @@ async function wcAutoMarkYesterday(){
 }
 
 async function wcInit(){
-  const[p,r,b]=await Promise.all([
+  const[p,r,b,s]=await Promise.all([
     sb.from('wc_participants').select('*').order('created_at'),
     sb.from('wc_records').select('*'),
-    sb.from('wc_board').select('*').order('created_at',{ascending:false})
+    sb.from('wc_board').select('*').order('created_at',{ascending:false}),
+    sb.from('challenge_signups').select('*').order('created_at')
   ]);
   if(!p.error)wcParts=p.data;
   if(!r.error)wcRecs=r.data;
   if(!b.error)wcBoardPosts=b.data;
+  if(!s.error)wcSignups=s.data||[];
   await wcAutoMarkYesterday();
   wcRender();
+}
+
+async function wcSignupChallenge(){
+  const inp=document.getElementById('wc-signup-nick');
+  const nick=(inp?.value||'').trim();
+  if(!nick)return;
+  const fixed=['엘라','제인'];
+  if(fixed.includes(nick)){wcToast('이미 참여 중인 멤버예요 😊');inp.value='';return;}
+  if(wcSignups.find(s=>s.nickname===nick)){wcToast('이미 신청된 닉네임이에요');inp.value='';return;}
+  const{data,error}=await sb.from('challenge_signups').insert({nickname:nick}).select().single();
+  if(!error&&data){wcSignups.push(data);wcToast(`${nick}님 신청 완료! 🎉`);inp.value='';wcRender();}
+  else wcToast('신청 실패. 다시 시도해주세요',true);
 }
 
 async function wcAddParticipant(){
@@ -2776,29 +2791,43 @@ function wcRender(){
   const wcSorted=[...wcParts].sort((a,b)=>{const ai=_WC_ORDER.indexOf(a.nickname),bi=_WC_ORDER.indexOf(b.nickname);return(ai<0?99:ai)-(bi<0?99:bi);});
   app.innerHTML=`
     <!-- 챌린지 신청 히어로 -->
-    <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:1rem;background:linear-gradient(135deg,rgba(124,58,237,.85),rgba(219,39,119,.75),rgba(94,200,255,.5));padding:20px 20px 18px;box-shadow:0 8px 32px -8px rgba(181,102,255,.5)">
-      <div style="position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><circle cx=%2220%22 cy=%2220%22 r=%2260%22 fill=%22rgba(255,255,255,.04)%22/><circle cx=%2280%22 cy=%2280%22 r=%2240%22 fill=%22rgba(255,255,255,.03)%22/></svg>');pointer-events:none"></div>
-      <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-        <button onclick="wcCopyUrl()" id="wc-share-btn" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(255,255,255,.25);border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);font-size:11px;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)">
+    <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:1rem;background:linear-gradient(135deg,rgba(124,58,237,.9),rgba(219,39,119,.8),rgba(94,200,255,.55));padding:22px 20px 20px;box-shadow:0 8px 36px -8px rgba(181,102,255,.6)">
+      <div style="position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><circle cx=%2230%22 cy=%2230%22 r=%2280%22 fill=%22rgba(255,255,255,.04)%22/><circle cx=%22170%22 cy=%22170%22 r=%2260%22 fill=%22rgba(255,255,255,.03)%22/></svg>');pointer-events:none"></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button onclick="wcCopyUrl()" id="wc-share-btn" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(255,255,255,.25);border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-size:11px;cursor:pointer;font-family:inherit">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>URL 공유
         </button>
       </div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:1.5px;margin-bottom:6px">🏃 CHALLENGE</div>
-      <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;line-height:1.2;letter-spacing:-.3px">6월 운동 챌린지</h2>
-      <p style="font-size:12px;color:rgba(255,255,255,.7);margin:0 0 14px;line-height:1.6">하루 60분 · 주 5회 · 5월 11일 ~ 6월 10일<br>함께 달리면 더 즐겁습니다 💪</p>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="text" id="wc-inp-nick" placeholder="닉네임으로 신청하기" maxlength="20"
-          style="flex:1;padding:9px 13px;border-radius:10px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:13px;outline:none;font-family:inherit;backdrop-filter:blur(4px)"
-          onkeydown="if(event.key==='Enter')wcAddParticipant()" onfocus="this.style.background='rgba(255,255,255,.22)'" onblur="this.style.background='rgba(255,255,255,.15)'"
-          placeholder="닉네임으로 신청하기"/>
-        <button onclick="wcAddParticipant()" id="wc-reg-btn"
-          style="padding:9px 16px;border-radius:10px;border:none;background:#fff;color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap">신청 →</button>
+      <div style="display:inline-block;font-size:10px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:2px;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:20px;margin-bottom:8px">🏃 CHALLENGE</div>
+      <h2 style="font-size:24px;font-weight:800;color:#fff;margin:0 0 6px;line-height:1.2;letter-spacing:-.3px">6월 운동 챌린지</h2>
+      <p style="font-size:12px;color:rgba(255,255,255,.75);margin:0 0 16px;line-height:1.7">하루 60분 · 주 5회 달성 · 6월 15일 ~ 7월 12일<br>함께 달리면 더 즐겁습니다 💪</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <input type="text" id="wc-signup-nick" placeholder="닉네임으로 신청하기" maxlength="20"
+          style="flex:1;padding:10px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:13px;outline:none;font-family:inherit"
+          onkeydown="if(event.key==='Enter')wcSignupChallenge()"/>
+        <button onclick="wcSignupChallenge()"
+          style="padding:10px 18px;border-radius:10px;border:none;background:#fff;color:#7c3aed;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.15)">신청 →</button>
       </div>
-      ${wcParts.length>0?`
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:5px;align-items:center">
-        <span style="font-size:10px;color:rgba(255,255,255,.55);margin-right:2px">참여 ${wcParts.length}명</span>
-        ${wcSorted.map(p=>`<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;background:rgba(255,255,255,.12);border-radius:20px;font-size:11px;color:rgba(255,255,255,.85)">${p.nickname}<button onclick="wcDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}'"  style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.45);padding:0;font-size:11px;line-height:1">×</button></span>`).join('')}
-      </div>`:''}
+      <!-- 참여자 목록 -->
+      <div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px 14px">
+        <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">참여 ${2+wcSignups.length}명</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <!-- 확정 멤버: 엘라, 제인 -->
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(255,200,0,.25),rgba(255,160,0,.2));border:1px solid rgba(255,200,0,.4);border-radius:20px">
+            <span style="font-size:14px">👑</span>
+            <span style="font-size:12px;font-weight:700;color:#ffd700">엘라</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(255,200,0,.25),rgba(255,160,0,.2));border:1px solid rgba(255,200,0,.4);border-radius:20px">
+            <span style="font-size:14px">👑</span>
+            <span style="font-size:12px;font-weight:700;color:#ffd700">제인</span>
+          </div>
+          ${wcSignups.map(s=>`
+          <div style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px">
+            <span style="font-size:11px;color:rgba(255,255,255,.5)">🆕</span>
+            <span style="font-size:12px;font-weight:600;color:#fff">${s.nickname}</span>
+          </div>`).join('')}
+        </div>
+      </div>
     </div>
     <div class="wc-header" style="padding-top:.5rem">
       <h1 style="font-size:1.7rem;font-weight:800;letter-spacing:-0.01em"><span style="background:linear-gradient(135deg,#b566ff,#db2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">운동 인증</span> 챌린지</h1>
