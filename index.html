@@ -5198,8 +5198,7 @@ function tamaGetUsages(type, nick) {
 }
 function petRndExp(nick) { return parseInt(localStorage.getItem(`tama_pet_rndexp_${nick}`) || '0'); }
 function setPetRndExp(nick, fromTs) {
-  const ms = (55 + Math.random() * 10) * 60000; // 55~65분 랜덤
-  localStorage.setItem(`tama_pet_rndexp_${nick}`, Math.round(fromTs + ms));
+  localStorage.setItem(`tama_pet_rndexp_${nick}`, Math.round(fromTs + T_WINDOW.pet));
 }
 function tamaCdLeft(type) {
   const nick = document.getElementById('tama-nick')?.value.trim();
@@ -5326,6 +5325,7 @@ function tamaCaptchaCheck() {
     setTimeout(() => inp.focus(), 80);
     function confirm() {
       if (parseInt(inp.value) === answer) {
+        localStorage.setItem('tama_captcha_last', Date.now().toString());
         modal.style.display = 'none'; resolve(true);
       } else {
         msg.textContent = '틀렸어요! 다시 입력해 주세요.'; msg.style.display = 'block';
@@ -5748,18 +5748,25 @@ async function tamaSyncCooldowns(nick) {
   tamaRenderCd();
 }
 
+function tamaNeedsCaptcha3h() {
+  const last = parseInt(localStorage.getItem('tama_captcha_last') || '0');
+  return Date.now() - last > 3 * 3600000;
+}
+
 async function tamaAction(type) {
   if (new Date() < TAMA_OPEN || new Date() >= new Date('2026-06-30T23:59:00')) return;
   const nick = document.getElementById('tama-nick').value.trim();
   if (!nick) { alert('닉네임을 입력해 주세요!'); document.getElementById('tama-nick').focus(); return; }
 
+  // ── 3시간마다 캡차 확인 (전체 액션 공통) ──
+  if (tamaNeedsCaptcha3h()) {
+    const passed = await tamaCaptchaCheck();
+    if (!passed) return;
+  }
+
   // ── 쓰다듬기: 개인별 쿨다운 ──
   if (type === 'pet') {
     if (tamaCdLeft('pet') > 0) { alert(`아직 쿨다운 중이에요!\n${tamaFmtCd(tamaCdLeft('pet'))}`); return; }
-    if ([2, 6, 11, 17].includes(new Date().getHours())) {
-      const passed = await tamaCaptchaCheck();
-      if (!passed) return;
-    }
     let remaining;
     try {
       const { data, error } = await sb.rpc('insert_tama_action', { p_nick: nick, p_type: 'pet' });
