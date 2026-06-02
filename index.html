@@ -142,6 +142,7 @@
       <div class="w-full sm:hidden"></div>
       <button onclick="showPage('roulette')" id="btn-roulette" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">다마고찌</button>
       <button onclick="showPage('diet')" id="btn-diet" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">운동</button>
+      <button onclick="showPage('challenge')" id="btn-challenge" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">챌린지</button>
       <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">소식</button>
       <button onclick="showPage('travel')" id="btn-travel" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">여행</button>
       <button onclick="showPage('pinball')" id="btn-pinball" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">Beta</button>
@@ -2073,6 +2074,461 @@ function copyResult(){
     .subscribe();
 
   loadComments();
+</script>
+
+<div id="page-challenge" class="hidden">
+<style>
+#ch-app{max-width:520px;margin:0 auto;padding:1rem 1rem 3rem}
+.ch-card{background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:1.125rem 1.25rem;margin-bottom:0.875rem}
+.ch-title{font-size:12px;font-weight:600;color:#9b94b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:0.875rem;display:flex;align-items:center;gap:5px}
+.ch-row{display:flex;align-items:center;gap:8px;margin-bottom:0.625rem}
+.ch-label{font-size:13px;color:#9b94b3;min-width:70px}
+#ch-app input,#ch-app select{flex:1;font-size:14px;padding:8px 11px;border-radius:8px;border:1px solid rgba(140,110,200,0.25);background:#0a0612;color:#f5f1ff;outline:none;font-family:inherit;width:100%;box-sizing:border-box}
+#ch-app input:focus,#ch-app select:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.15)}
+#ch-app input[type="date"]::-webkit-calendar-picker-indicator{opacity:.4;filter:invert(1);cursor:pointer}
+.ch-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border:none;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:linear-gradient(90deg,#7c3aed,#db2777);cursor:pointer;font-family:inherit;transition:opacity .15s;width:100%}
+.ch-btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.ch-nick-btn{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#b566ff;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.ch-week-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(140,110,200,.1)}
+.ch-week-row:last-child{border-bottom:none}
+.ch-bar-bg{flex:1;height:8px;background:rgba(140,110,200,.15);border-radius:99px;overflow:hidden}
+.ch-bar{height:100%;border-radius:99px;transition:width .6s ease}
+.ch-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(20,14,36,.95);border:1px solid rgba(181,102,255,.4);border-radius:10px;padding:9px 18px;font-size:13px;color:#f5f1ff;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none}
+/* 모달 */
+#ch-monthly-modal{position:fixed;inset:0;z-index:9998;background:rgba(10,6,18,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px}
+#ch-monthly-box{background:rgba(26,18,48,.98);border:1px solid rgba(140,110,200,.35);border-radius:16px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;padding:20px}
+</style>
+
+<!-- 월간 현황 모달 -->
+<div id="ch-monthly-modal">
+  <div id="ch-monthly-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span id="ch-monthly-title" style="font-size:14px;font-weight:700;color:#f5f1ff"></span>
+      <button onclick="document.getElementById('ch-monthly-modal').style.display='none'" style="background:none;border:none;color:#9b94b3;font-size:18px;cursor:pointer;padding:0;line-height:1">✕</button>
+    </div>
+    <div id="ch-monthly-body"></div>
+  </div>
+</div>
+
+<div id="ch-app">
+  <div class="wc-header" style="padding:1.5rem 0 0.5rem;position:relative">
+    <button onclick="chCopyUrl(this)" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>URL 공유
+    </button>
+    <h1 style="font-size:22px;font-weight:700;color:#f5f1ff;letter-spacing:-.5px">💪 60분 운동 챌린지</h1>
+    <p style="font-size:13px;color:#9b94b3;margin-top:4px">하루 60분 운동 인증 · 주 5회 미션</p>
+  </div>
+
+  <div id="ch-dday" style="margin-bottom:.875rem"></div>
+  <div id="ch-loading" style="text-align:center;padding:32px 0;color:#6b6480;font-size:13px">불러오는 중…</div>
+  <div id="ch-content" style="display:none">
+    <!-- 참여자 등록 (관리자용 hidden) -->
+    <div class="ch-card" style="display:none">
+      <div class="ch-title">👥 참여자 등록</div>
+      <div class="ch-row">
+        <input id="ch-inp-nick" placeholder="닉네임" maxlength="20"/>
+        <button onclick="chAddParticipant()" class="ch-btn-primary" style="width:auto;padding:8px 16px;flex-shrink:0">추가</button>
+      </div>
+      <div id="ch-chips" style="min-height:32px;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+    </div>
+
+    <!-- 인증 기록 폼 -->
+    <div class="ch-card">
+      <div class="ch-title">✅ 오늘 운동 인증 <span style="font-size:10px;color:#6b6480;font-weight:400;text-transform:none">(60분 고정)</span></div>
+      <div id="ch-form-body"></div>
+    </div>
+
+    <!-- 주간/월간 현황 -->
+    <div class="ch-card">
+      <div class="ch-title">📅 주간/월간 운동 현황 <span style="font-size:10px;color:#9b94b3;font-weight:400;text-transform:none">· 닉네임 클릭 시 개인 월간 현황</span></div>
+      <div id="ch-weekly"></div>
+    </div>
+
+    <!-- 벌금 현황 -->
+    <div class="ch-card">
+      <div class="ch-title">💸 벌금 현황 <span style="font-size:10px;color:#9b94b3;font-weight:400;text-transform:none">· 주 5회 미만 실패 시 1만원</span></div>
+      <div id="ch-penalty"></div>
+    </div>
+
+    <!-- 운동 인증 게시판 -->
+    <div class="ch-card">
+      <div class="ch-title" style="justify-content:space-between">
+        📸 운동 인증 게시판
+        <button onclick="chBoardToggle()" id="ch-board-btn" style="font-size:11px;padding:4px 10px;border:1px solid rgba(140,110,200,.35);border-radius:20px;background:rgba(44,33,72,.7);color:#9b94b3;cursor:pointer;font-family:inherit">✏️ 인증하기</button>
+      </div>
+      <div id="ch-board-form" style="display:none;margin-bottom:12px">
+        <input id="ch-board-nick" placeholder="닉네임" maxlength="20" style="margin-bottom:6px"/>
+        <textarea id="ch-board-text" placeholder="운동 내용을 입력하세요 (선택)" rows="2"
+          style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:#0a0612;padding:8px 11px;font-size:13px;color:#f5f1ff;outline:none;resize:none;font-family:inherit;margin-bottom:6px"></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <label style="font-size:12px;color:#9b94b3;flex-shrink:0">📷 사진</label>
+          <input id="ch-board-file" type="file" accept="image/*" style="font-size:12px;flex:1;color:#9b94b3"/>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;align-items:center">
+          <span id="ch-board-msg" style="font-size:11px;display:none"></span>
+          <button onclick="chBoardSubmit()" id="ch-board-submit" class="ch-btn-primary" style="width:auto;padding:7px 18px">인증 등록</button>
+        </div>
+      </div>
+      <div id="ch-board-list"></div>
+    </div>
+  </div>
+</div>
+<div id="ch-toast" class="ch-toast"></div>
+</div>
+
+<script>
+(function(){
+const SUPABASE_URL='https://teugnaahpcpzejbdayyy.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+const chSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── 챌린지 설정 ──
+const CH_START = '2026-06-02';
+const CH_END   = '2026-07-06';
+const CH_WEEKS = [
+  {mon:'2026-06-02', sun:'2026-06-08'},
+  {mon:'2026-06-09', sun:'2026-06-15'},
+  {mon:'2026-06-16', sun:'2026-06-22'},
+  {mon:'2026-06-23', sun:'2026-06-29'},
+  {mon:'2026-06-30', sun:'2026-07-06'},
+];
+const CH_MISSION  = 5;
+const CH_PENALTY  = 10000;
+const CH_DURATION = 60;
+
+let chParts = [], chRecs = [], chBoardPosts = [];
+
+function chToday() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+function chFmt(ts) {
+  const d = new Date(ts);
+  return `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function chEsc(s) { return (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function chToast(msg, err) {
+  const t = document.getElementById('ch-toast');
+  t.textContent = msg; t.style.color = err ? '#f87171' : '#5ee0a8';
+  t.style.opacity = '1'; setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+// ── 진행 바 ──
+function chDdayBar() {
+  const start = new Date(CH_START), end = new Date(CH_END);
+  const today = new Date(chToday());
+  const total   = Math.round((end - start) / 86400000);
+  const elapsed = Math.max(0, Math.min(Math.round((today - start) / 86400000), total));
+  const remaining = Math.max(0, Math.round((end - today) / 86400000));
+  const pct = Math.round(elapsed / total * 100);
+  const status = today > end ? '챌린지 종료' : `D-${remaining}`;
+  document.getElementById('ch-dday').innerHTML =
+    `<div style="background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:16px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;color:#f5f1ff">💪 ${status}</div>
+        <div style="font-size:12px;color:#9b94b3">${elapsed}일 경과 · 잔여 ${remaining}일</div>
+      </div>
+      <div style="height:10px;background:rgba(140,110,200,0.15);border-radius:5px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);border-radius:5px;box-shadow:0 0 10px rgba(181,102,255,0.5)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px">
+        <span style="font-size:10px;color:#6b6480">6월 2일 시작</span>
+        <span style="font-size:11px;color:#b566ff;font-weight:700">${pct}%</span>
+        <span style="font-size:10px;color:#6b6480">7월 6일 종료</span>
+      </div>
+    </div>`;
+}
+
+// ── 인증 폼 렌더 ──
+function chRenderForm() {
+  const el = document.getElementById('ch-form-body');
+  const sorted = [...chParts].sort((a,b)=>a.nickname.localeCompare(b.nickname,'ko'));
+  const today = chToday();
+  el.innerHTML = `
+    <div class="ch-row"><label class="ch-label">닉네임</label>
+      <select id="ch-sel-nick" style="flex:1">
+        <option value="">선택하세요</option>
+        ${sorted.map(p=>`<option value="${p.nickname}">${p.nickname}</option>`).join('')}
+      </select>
+    </div>
+    <div class="ch-row"><label class="ch-label">날짜</label>
+      <input id="ch-sel-date" type="date" value="${today}" min="${CH_START}" max="${CH_END}"/>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;align-items:center;margin-top:8px">
+      <span id="ch-form-msg" style="font-size:12px;display:none"></span>
+      <button onclick="chSubmitRecord()" id="ch-form-btn" class="ch-btn-primary" style="width:auto;padding:9px 20px">✅ 60분 인증</button>
+    </div>`;
+}
+
+// ── 주간/월간 현황 렌더 ──
+function chRenderWeekly() {
+  const el = document.getElementById('ch-weekly');
+  if (!chParts.length) { el.innerHTML = '<p style="font-size:12px;color:#6b6480">참여자가 없어요.</p>'; return; }
+  const today = chToday();
+  const curWeek = CH_WEEKS.find(w => today >= w.mon && today <= w.sun) || CH_WEEKS[CH_WEEKS.length-1];
+  const sorted = [...chParts].sort((a,b)=>{
+    const ca = chRecs.filter(r=>r.nickname===a.nickname&&r.is_completed&&r.date>=curWeek.mon&&r.date<=curWeek.sun).length;
+    const cb = chRecs.filter(r=>r.nickname===b.nickname&&r.is_completed&&r.date>=curWeek.mon&&r.date<=curWeek.sun).length;
+    return cb - ca;
+  });
+  const weekLabel = `${curWeek.mon.slice(5).replace('-','/')} ~ ${curWeek.sun.slice(5).replace('-','/')}`;
+  el.innerHTML = `<p style="font-size:11px;color:#6b6480;margin-bottom:10px">📆 이번 주 ${weekLabel}</p>` +
+    sorted.map(p => {
+      const cnt = chRecs.filter(r=>r.nickname===p.nickname&&r.is_completed&&r.date>=curWeek.mon&&r.date<=curWeek.sun).length;
+      const total = chRecs.filter(r=>r.nickname===p.nickname&&r.is_completed&&r.date>=CH_START&&r.date<=CH_END).length;
+      const pct = Math.round(cnt/CH_MISSION*100);
+      const barColor = cnt >= CH_MISSION ? '#5ee0a8' : cnt >= 3 ? '#b566ff' : '#ff5fb0';
+      return `<div class="ch-week-row">
+        <button class="ch-nick-btn" onclick="chShowMonthly('${p.nickname}')" style="min-width:52px;text-align:left">${chEsc(p.nickname)}</button>
+        <div class="ch-bar-bg"><div class="ch-bar" style="width:${Math.min(100,pct)}%;background:${barColor}"></div></div>
+        <span style="font-size:12px;color:#f5f1ff;font-weight:700;min-width:28px;text-align:right">${cnt}<span style="font-size:10px;color:#6b6480;font-weight:400">/${CH_MISSION}</span></span>
+        <span style="font-size:10px;color:#9b94b3;min-width:36px;text-align:right">누계 ${total}</span>
+      </div>`;
+    }).join('');
+}
+
+// ── 개인 월간 현황 모달 ──
+window.chShowMonthly = function(nick) {
+  const recs = chRecs.filter(r=>r.nickname===nick&&r.is_completed&&r.date>=CH_START&&r.date<=CH_END)
+    .map(r=>r.date).sort();
+  const total = recs.length;
+  document.getElementById('ch-monthly-title').textContent = `${nick}님의 운동 현황`;
+  const weeks = CH_WEEKS.map(({mon,sun}) => {
+    const cnt = recs.filter(d=>d>=mon&&d<=sun).length;
+    const dots = Array.from({length:7},(_,i)=>{
+      const d = new Date(mon); d.setDate(d.getDate()+i);
+      const ds = d.toISOString().slice(0,10);
+      const done = recs.includes(ds);
+      const isFuture = ds > chToday();
+      return `<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;
+        background:${done?'linear-gradient(135deg,#7c3aed,#db2777)':isFuture?'rgba(140,110,200,.08)':'rgba(140,110,200,.18)'};
+        color:${done?'#fff':isFuture?'#3a3050':'#6b6480'}">${d.getDate()}</div>`;
+    }).join('');
+    const ok = cnt >= CH_MISSION;
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;color:#9b94b3">${mon.slice(5).replace('-','/')} ~ ${sun.slice(5).replace('-','/')}</span>
+        <span style="font-size:11px;font-weight:700;color:${ok?'#5ee0a8':'#f87171'}">${cnt}/${CH_MISSION} ${ok?'✅':'❌'}</span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">${dots}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('ch-monthly-body').innerHTML =
+    `<p style="font-size:13px;color:#b566ff;font-weight:700;margin:0 0 14px">누적 운동: ${total}회 (${total*60}분)</p>${weeks}`;
+  document.getElementById('ch-monthly-modal').style.display = 'flex';
+};
+
+// ── 벌금 현황 ──
+function chRenderPenalty() {
+  const el = document.getElementById('ch-penalty');
+  const today = chToday();
+  if (!chParts.length) { el.innerHTML = '<p style="font-size:12px;color:#6b6480">참여자가 없어요.</p>'; return; }
+  const sorted = [...chParts].sort((a,b)=>a.nickname.localeCompare(b.nickname,'ko'));
+  el.innerHTML = sorted.map(p => {
+    let totalPenalty = 0;
+    const weekRows = CH_WEEKS.map(({mon,sun}) => {
+      if (mon > today) return ''; // 아직 시작 안 한 주
+      const cnt = chRecs.filter(r=>r.nickname===p.nickname&&r.is_completed&&r.date>=mon&&r.date<=sun).length;
+      const isOver = sun < today;
+      const sunDate = new Date(sun); const todayDate = new Date(today);
+      const daysLeft = isOver ? 0 : Math.round((sunDate - todayDate) / 86400000) + 1;
+      const confirmed = cnt + daysLeft < CH_MISSION;
+      let status, color;
+      if (isOver) {
+        status = cnt >= CH_MISSION ? `✅ ${cnt}회` : `❌ ${cnt}회`;
+        color = cnt >= CH_MISSION ? '#5ee0a8' : '#f87171';
+        if (cnt < CH_MISSION) totalPenalty += CH_PENALTY;
+      } else if (confirmed) {
+        status = `❌ 실패확정 (${cnt}회)`;
+        color = '#f87171';
+        totalPenalty += CH_PENALTY;
+      } else {
+        status = `⏳ ${cnt}회 진행중`;
+        color = cnt >= CH_MISSION ? '#5ee0a8' : '#9b94b3';
+      }
+      return `<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0">
+        <span style="color:#6b6480">${mon.slice(5).replace('-','/')}~${sun.slice(5).replace('-','/')}</span>
+        <span style="color:${color};font-weight:600">${status}</span>
+      </div>`;
+    }).filter(Boolean).join('');
+    return `<div style="background:rgba(30,22,55,.6);border:1px solid rgba(140,110,200,.18);border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:700;color:#f5f1ff">${chEsc(p.nickname)}</span>
+        <span style="font-size:13px;font-weight:800;color:${totalPenalty>0?'#f87171':'#5ee0a8'}">${totalPenalty>0?`벌금 ${(totalPenalty/10000).toFixed(0)}만원`:'벌금 없음 🎉'}</span>
+      </div>
+      ${weekRows}
+    </div>`;
+  }).join('');
+}
+
+// ── 인증 게시판 렌더 ──
+function chBoardRender() {
+  const el = document.getElementById('ch-board-list');
+  if (!chBoardPosts.length) { el.innerHTML = '<p style="font-size:12px;color:#6b6480;text-align:center;padding:12px 0">아직 인증 게시물이 없어요. 첫 번째로 인증해보세요!</p>'; return; }
+  el.innerHTML = chBoardPosts.map(p => {
+    const imgHtml = p.image_url ? `<img src="${p.image_url}" style="width:100%;border-radius:8px;margin-top:8px;max-height:280px;object-fit:cover"/>` : '';
+    return `<div style="background:rgba(30,22,55,.55);border:1px solid rgba(140,110,200,.2);border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
+        <div style="flex:1">
+          <span style="font-size:12px;font-weight:700;color:#b566ff">${chEsc(p.nickname)}</span>
+          <span style="font-size:10px;color:#6b6480;margin-left:6px">${chFmt(p.created_at)}</span>
+          ${p.content ? `<p style="font-size:13px;color:rgba(245,241,255,.9);line-height:1.5;margin:4px 0 0;white-space:pre-wrap">${chEsc(p.content)}</p>` : ''}
+          ${imgHtml}
+        </div>
+        <button onclick="chBoardDelete('${p.id}')" style="font-size:10px;color:rgba(155,148,179,.3);background:none;border:none;cursor:pointer;padding:0;flex-shrink:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(155,148,179,.3)'">삭제</button>
+      </div>
+      <div style="margin-top:6px">
+        <button onclick="chBoardLike('${p.id}')" style="font-size:11px;color:${localStorage.getItem('ch_liked_'+p.id)?'#f472b6':'rgba(155,148,179,.4)'};background:none;border:none;cursor:pointer;padding:0" onmouseover="this.style.color='#f472b6'" onmouseout="this.style.color='${localStorage.getItem('ch_liked_'+p.id)?'#f472b6':'rgba(155,148,179,.4)'}'">❤️ ${p.like_count||0}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── 전체 렌더 ──
+function chRender() {
+  chDdayBar();
+  const chips = document.getElementById('ch-chips');
+  if (chips) chips.innerHTML = chParts.map(p=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;background:rgba(181,102,255,.12);border:1px solid rgba(140,110,200,.28);border-radius:20px;font-size:12px;color:#e8e2f8">${chEsc(p.nickname)}<button onclick="chDeleteParticipant('${p.nickname.replace(/'/g,"\\'")}')" style="background:none;border:none;cursor:pointer;color:#6b6480;padding:0;font-size:12px;line-height:1">×</button></span>`).join('');
+  chRenderForm();
+  chRenderWeekly();
+  chRenderPenalty();
+  chBoardRender();
+}
+
+// ── 초기화 ──
+window.chInit = async function() {
+  chDdayBar();
+  const [partsRes, recsRes, boardRes] = await Promise.all([
+    chSb.from('wc_participants').select('*').order('created_at'),
+    chSb.from('wc_records').select('*').gte('date', CH_START).lte('date', CH_END),
+    chSb.from('challenge_posts').select('*').order('created_at',{ascending:false}).limit(30),
+  ]);
+  chParts = partsRes.data || [];
+  chRecs  = recsRes.data  || [];
+  if (boardRes.error && boardRes.error.code === 'PGRST205') {
+    document.getElementById('ch-loading').innerHTML =
+      `<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px;font-size:12px;color:#fca5a5;line-height:1.8;text-align:left">
+        ⚠️ <b>최초 설정 필요</b><br>Supabase 대시보드 → SQL 에디터에서 아래 쿼리를 실행해주세요:<br>
+        <code style="display:block;margin-top:8px;background:rgba(0,0,0,.3);padding:10px;border-radius:8px;font-size:11px;color:#e5e0f0;white-space:pre">CREATE TABLE challenge_posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nickname TEXT NOT NULL,
+  content TEXT,
+  image_url TEXT,
+  like_count INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</code>
+        <br>그 다음 <b>challenge-photos</b> Storage 버킷도 생성해주세요.
+      </div>`;
+    document.getElementById('ch-content').style.display = 'block';
+    chParts = partsRes.data || []; chRecs = recsRes.data || [];
+    chDdayBar(); chRenderForm(); chRenderWeekly(); chRenderPenalty();
+    return;
+  }
+  chBoardPosts = boardRes.data || [];
+  document.getElementById('ch-loading').style.display = 'none';
+  document.getElementById('ch-content').style.display = 'block';
+  chRender();
+};
+
+// ── 인증 제출 ──
+window.chSubmitRecord = async function() {
+  const nick = document.getElementById('ch-sel-nick').value;
+  const date = document.getElementById('ch-sel-date').value;
+  const msg  = document.getElementById('ch-form-msg');
+  const btn  = document.getElementById('ch-form-btn');
+  if (!nick) { msg.textContent='닉네임을 선택해주세요'; msg.style.color='#f87171'; msg.style.display='inline'; return; }
+  if (!date || date < CH_START || date > CH_END) { msg.textContent='날짜를 확인해주세요'; msg.style.color='#f87171'; msg.style.display='inline'; return; }
+  const exists = chRecs.find(r=>r.nickname===nick&&r.date===date&&r.is_completed);
+  if (exists) { msg.textContent='이미 인증된 날짜예요'; msg.style.color='#f87171'; msg.style.display='inline'; return; }
+  btn.disabled=true; btn.textContent='저장 중...';
+  const existing = chRecs.find(r=>r.nickname===nick&&r.date===date);
+  let error;
+  if (existing) {
+    ({error} = await chSb.from('wc_records').update({is_completed:true,duration:CH_DURATION,calories:existing.calories||0}).eq('id',existing.id));
+    if (!error) { existing.is_completed=true; existing.duration=CH_DURATION; }
+  } else {
+    const {data,error:e} = await chSb.from('wc_records').insert({date,nickname:nick,is_completed:true,duration:CH_DURATION,calories:0}).select().single();
+    error=e; if (!error&&data) chRecs.push(data);
+  }
+  if (error) { msg.textContent='저장 실패'; msg.style.color='#f87171'; msg.style.display='inline'; }
+  else { msg.textContent='✅ 인증 완료!'; msg.style.color='#5ee0a8'; msg.style.display='inline'; setTimeout(()=>{msg.style.display='none';},2500); chRenderWeekly(); chRenderPenalty(); }
+  btn.disabled=false; btn.textContent='✅ 60분 인증';
+};
+
+// ── 게시판 토글/제출/삭제/좋아요 ──
+window.chBoardToggle = function() {
+  const f = document.getElementById('ch-board-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  if (f.style.display === 'block') document.getElementById('ch-board-nick').focus();
+};
+window.chBoardSubmit = async function() {
+  const nick = document.getElementById('ch-board-nick').value.trim();
+  const text = document.getElementById('ch-board-text').value.trim();
+  const file = document.getElementById('ch-board-file').files[0];
+  const msg  = document.getElementById('ch-board-msg');
+  const btn  = document.getElementById('ch-board-submit');
+  if (!nick) { msg.textContent='닉네임을 입력해주세요'; msg.style.color='#f87171'; msg.style.display='inline'; return; }
+  if (!text && !file) { msg.textContent='내용이나 사진을 추가해주세요'; msg.style.color='#f87171'; msg.style.display='inline'; return; }
+  btn.disabled=true; btn.textContent='등록 중...';
+  let imageUrl = null;
+  if (file) {
+    const ext = file.name.split('.').pop();
+    const path = `${Date.now()}_${nick}.${ext}`;
+    const {data:upData, error:upErr} = await chSb.storage.from('challenge-photos').upload(path, file, {upsert:true});
+    if (upErr) { msg.textContent='사진 업로드 실패 (Supabase Storage 버킷 challenge-photos 생성 필요)'; msg.style.color='#f87171'; msg.style.display='inline'; btn.disabled=false; btn.textContent='인증 등록'; return; }
+    const {data:{publicUrl}} = chSb.storage.from('challenge-photos').getPublicUrl(path);
+    imageUrl = publicUrl;
+  }
+  const {data, error} = await chSb.from('challenge_posts').insert({nickname:nick, content:text||null, image_url:imageUrl}).select().single();
+  if (error) { msg.textContent='등록 실패 (challenge_posts 테이블 생성 필요)'; msg.style.color='#f87171'; msg.style.display='inline'; }
+  else {
+    chBoardPosts.unshift(data); chBoardRender();
+    document.getElementById('ch-board-nick').value='';
+    document.getElementById('ch-board-text').value='';
+    document.getElementById('ch-board-file').value='';
+    document.getElementById('ch-board-form').style.display='none';
+    chToast('인증 등록 완료! 🎉');
+  }
+  btn.disabled=false; btn.textContent='인증 등록';
+};
+window.chBoardDelete = async function(id) {
+  const pin = prompt('관리자 PIN을 입력하세요');
+  if (!pin) return;
+  if (pin !== DB_PIN) { alert('PIN이 올바르지 않아요'); return; }
+  const {error} = await chSb.from('challenge_posts').delete().eq('id',id);
+  if (!error) { chBoardPosts = chBoardPosts.filter(p=>p.id!==id); chBoardRender(); }
+};
+window.chBoardLike = async function(id) {
+  const key = 'ch_liked_'+id;
+  if (localStorage.getItem(key)) return;
+  const post = chBoardPosts.find(p=>p.id===id);
+  if (!post) return;
+  const {error} = await chSb.from('challenge_posts').update({like_count:(post.like_count||0)+1}).eq('id',id);
+  if (!error) { post.like_count=(post.like_count||0)+1; localStorage.setItem(key,'1'); chBoardRender(); }
+};
+
+// ── 참여자 추가/삭제 (관리자) ──
+window.chAddParticipant = async function() {
+  const nick = document.getElementById('ch-inp-nick').value.trim();
+  if (!nick) return;
+  const {data,error} = await chSb.from('wc_participants').insert({nickname:nick}).select().single();
+  if (!error&&data) { chParts.push(data); chRender(); document.getElementById('ch-inp-nick').value=''; }
+};
+window.chDeleteParticipant = async function(nick) {
+  if (!confirm(`"${nick}"을 삭제할까요?`)) return;
+  const {error} = await chSb.from('wc_participants').delete().eq('nickname',nick);
+  if (!error) { chParts=chParts.filter(p=>p.nickname!==nick); chRender(); }
+};
+
+// ── URL 공유 ──
+window.chCopyUrl = function(btn) {
+  const orig = btn.innerHTML;
+  navigator.clipboard.writeText(location.origin+location.pathname+'#challenge').then(()=>{
+    btn.innerHTML='✓ 복사됨'; btn.style.color='#5ee0a8';
+    setTimeout(()=>{btn.innerHTML=orig; btn.style.color='#9b94b3';},2000);
+  });
+};
+})();
 </script>
 
 <div id="page-diet" class="hidden">
@@ -4698,7 +5154,7 @@ Oh my Blue Moon</div>
   }
 
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'spin', 'beta', 'travel', 'pinball'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'diet', 'challenge', 'spin', 'beta', 'travel', 'pinball'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       if (btn) btn.className = p === page
@@ -4723,6 +5179,10 @@ Oh my Blue Moon</div>
       requestAnimationFrame(() => {
         if (!qzInitialized) { qzInitialized = true; qzInit(); }
       });
+    }
+    if (page === 'challenge') {
+      if (!window.chReady) { window.chReady = true; chInit(); }
+      else chRender();
     }
     if (page === 'beta') {
       betaInit();
@@ -4756,6 +5216,7 @@ Oh my Blue Moon</div>
     else if (hash === 'event' || hash === 'hobby-map' || hash === 'fortune') showPage('fortune');
     else if (hash === 'tamagotchi') { showPage('roulette'); setTimeout(()=>{ if(!tamaReady){tamaReady=true;tamaInit();} },300); }
     else if (hash === 'diet') showPage('diet');
+    else if (hash === 'challenge') { showPage('challenge'); }
     else if (hash === 'spin') showPage('spin');
     else if (hash === 'beta') showPage('beta');
     else if (hash === 'travel') { showPage('travel'); }
