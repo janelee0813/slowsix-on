@@ -2813,18 +2813,10 @@ function wcRender(){
         <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">참여 ${2+wcSignups.length}명</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           <!-- 확정 멤버: 엘라, 제인 -->
+          ${['엘라','제인',...wcSignups.map(s=>s.nickname)].map(name=>`
           <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(255,200,0,.25),rgba(255,160,0,.2));border:1px solid rgba(255,200,0,.4);border-radius:20px">
-            <span style="font-size:14px">👑</span>
-            <span style="font-size:12px;font-weight:700;color:#ffd700">엘라</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(255,200,0,.25),rgba(255,160,0,.2));border:1px solid rgba(255,200,0,.4);border-radius:20px">
-            <span style="font-size:14px">👑</span>
-            <span style="font-size:12px;font-weight:700;color:#ffd700">제인</span>
-          </div>
-          ${wcSignups.map(s=>`
-          <div style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px">
-            <span style="font-size:11px;color:rgba(255,255,255,.5)">🆕</span>
-            <span style="font-size:12px;font-weight:600;color:#fff">${s.nickname}</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <span style="font-size:12px;font-weight:700;color:#ffd700">${name}</span>
           </div>`).join('')}
         </div>
       </div>
