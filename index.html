@@ -5779,7 +5779,7 @@ async function tamaAction(type) {
       const lastTs = Date.now() - (T_WINDOW.pet - remaining);
       localStorage.setItem(`tama_pet_${nick}`, JSON.stringify([lastTs]));
       setPetRndExp(nick, lastTs);
-      alert(`다른 기기에서 이미 사용했어요!\n${tamaFmtCd(remaining)} 후 가능해요`);
+      alert(`아직 쿨다운이 남아있어요!\n${tamaFmtCd(remaining)} 가능해요`);
       tamaRenderCd(); return;
     }
     const now = Date.now();
@@ -5811,7 +5811,7 @@ async function tamaAction(type) {
     // 다른 사람이 이미 먼저 클릭
     if (type === 'feed') tamaData.feed_next_at = nextAt;
     else tamaData.play_next_at = nextAt;
-    alert(`다른 분이 먼저 눌렀어요!\n${tamaFmtCd(tamaSharedCdLeft(type))} 후 가능해요`);
+    alert(`다른 분이 먼저 눌렀어요!\n${tamaFmtCd(tamaSharedCdLeft(type))} 가능해요`);
     tamaRenderCd(); return;
   }
 
