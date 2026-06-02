@@ -2150,27 +2150,6 @@ function copyResult(){
       <div id="ch-penalty"></div>
     </div>
 
-    <!-- 운동 인증 게시판 -->
-    <div class="ch-card">
-      <div class="ch-title" style="justify-content:space-between">
-        📸 운동 인증 게시판
-        <button onclick="chBoardToggle()" id="ch-board-btn" style="font-size:11px;padding:4px 10px;border:1px solid rgba(140,110,200,.35);border-radius:20px;background:rgba(44,33,72,.7);color:#9b94b3;cursor:pointer;font-family:inherit">✏️ 인증하기</button>
-      </div>
-      <div id="ch-board-form" style="display:none;margin-bottom:12px">
-        <input id="ch-board-nick" placeholder="닉네임" maxlength="20" style="margin-bottom:6px"/>
-        <textarea id="ch-board-text" placeholder="운동 내용을 입력하세요 (선택)" rows="2"
-          style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:#0a0612;padding:8px 11px;font-size:13px;color:#f5f1ff;outline:none;resize:none;font-family:inherit;margin-bottom:6px"></textarea>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <label style="font-size:12px;color:#9b94b3;flex-shrink:0">📷 사진</label>
-          <input id="ch-board-file" type="file" accept="image/*" style="font-size:12px;flex:1;color:#9b94b3"/>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;align-items:center">
-          <span id="ch-board-msg" style="font-size:11px;display:none"></span>
-          <button onclick="chBoardSubmit()" id="ch-board-submit" class="ch-btn-primary" style="width:auto;padding:7px 18px">인증 등록</button>
-        </div>
-      </div>
-      <div id="ch-board-list"></div>
-    </div>
   </div>
 </div>
 <div id="ch-toast" class="ch-toast"></div>
@@ -2518,6 +2497,12 @@ window.chDeleteParticipant = async function(nick) {
   if (!confirm(`"${nick}"을 삭제할까요?`)) return;
   const {error} = await chSb.from('wc_participants').delete().eq('nickname',nick);
   if (!error) { chParts=chParts.filter(p=>p.nickname!==nick); chRender(); }
+};
+
+// ── 인증 게시판 단독 초기화 (운동 메뉴용) ──
+window.chBoardInit = async function() {
+  const {data, error} = await chSb.from('challenge_posts').select('*').order('created_at',{ascending:false}).limit(30);
+  if (!error) { chBoardPosts = data || []; chBoardRender(); }
 };
 
 // ── URL 공유 ──
@@ -2910,7 +2895,6 @@ function wcRender(){
         </div>`}
     </div>
     ${wcTotalSection(wcSorted)}
-    ${wcBoardSection()}
 
   `;
 }
@@ -3239,6 +3223,31 @@ window.wcBoardConfirmDelete=wcBoardConfirmDelete;
 wcInit();
 })();
 </script>
+
+<!-- 운동 인증 게시판 -->
+<div style="max-width:520px;margin:0 auto;padding:0 1rem 3rem">
+  <div class="wc-card">
+    <div class="wc-card-title" style="justify-content:space-between;margin-bottom:0.875rem">
+      📸 운동 인증 게시판
+      <button onclick="chBoardToggle()" id="ch-board-btn" style="font-size:11px;padding:4px 10px;border:1px solid rgba(140,110,200,.35);border-radius:20px;background:rgba(44,33,72,.7);color:#9b94b3;cursor:pointer;font-family:inherit">✏️ 인증하기</button>
+    </div>
+    <div id="ch-board-form" style="display:none;margin-bottom:12px">
+      <input id="ch-board-nick" placeholder="닉네임" maxlength="20"
+        style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:#0a0612;padding:8px 11px;font-size:13px;color:#f5f1ff;outline:none;font-family:inherit;margin-bottom:6px"/>
+      <textarea id="ch-board-text" placeholder="운동 내용을 입력하세요 (선택)" rows="2"
+        style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:#0a0612;padding:8px 11px;font-size:13px;color:#f5f1ff;outline:none;resize:none;font-family:inherit;margin-bottom:6px"></textarea>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <label style="font-size:12px;color:#9b94b3;flex-shrink:0">📷 사진</label>
+        <input id="ch-board-file" type="file" accept="image/*" style="font-size:12px;flex:1;color:#9b94b3"/>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;align-items:center">
+        <span id="ch-board-msg" style="font-size:11px;display:none"></span>
+        <button onclick="chBoardSubmit()" id="ch-board-submit" style="border:none;border-radius:8px;padding:7px 18px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(90deg,#7c3aed,#db2777);cursor:pointer;font-family:inherit">인증 등록</button>
+      </div>
+    </div>
+    <div id="ch-board-list"><p style="font-size:12px;color:#6b6480;text-align:center;padding:12px 0">불러오는 중...</p></div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -5179,6 +5188,9 @@ Oh my Blue Moon</div>
       requestAnimationFrame(() => {
         if (!qzInitialized) { qzInitialized = true; qzInit(); }
       });
+    }
+    if (page === 'diet') {
+      if (window.chBoardInit) chBoardInit();
     }
     if (page === 'challenge') {
       if (!window.chReady) { window.chReady = true; chInit(); }
