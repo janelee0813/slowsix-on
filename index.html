@@ -5558,17 +5558,23 @@ function tamaMonthRange() {
 }
 
 function tamaCountPets(rows) {
-  const cnt = {};
-  (rows||[]).forEach(r => { cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1; });
-  return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const cnt = {}, first = {};
+  (rows||[]).forEach(r => {
+    cnt[r.actor_nickname] = (cnt[r.actor_nickname]||0) + 1;
+    if (!first[r.actor_nickname] || r.created_at < first[r.actor_nickname])
+      first[r.actor_nickname] = r.created_at;
+  });
+  return Object.entries(cnt)
+    .sort((a,b) => b[1]-a[1] || (first[a[0]]||'') < (first[b[0]]||'') ? -1 : 1)
+    .slice(0,8);
 }
 
 async function tamaLoadAllRanks() {
   const { thisStart, lastStart, thisLabel, lastLabel } = tamaMonthRange();
 
   const [{ data: thisPets }, { data: lastPets }] = await Promise.all([
-    sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', thisStart),
-    sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', lastStart).lt('created_at', thisStart)
+    sb.from('tamagotchi_actions').select('actor_nickname,created_at').eq('action_type','pet').gte('created_at', thisStart),
+    sb.from('tamagotchi_actions').select('actor_nickname,created_at').eq('action_type','pet').gte('created_at', lastStart).lt('created_at', thisStart)
   ]);
 
   tamaRankData = tamaCountPets(thisPets);
@@ -5585,7 +5591,7 @@ async function tamaLoadAllRanks() {
 
 async function tamaRefreshRank() {
   const { thisStart, lastStart, thisLabel } = tamaMonthRange();
-  const { data: thisPets } = await sb.from('tamagotchi_actions').select('actor_nickname').eq('action_type','pet').gte('created_at', thisStart);
+  const { data: thisPets } = await sb.from('tamagotchi_actions').select('actor_nickname,created_at').eq('action_type','pet').gte('created_at', thisStart);
   tamaRankData = tamaCountPets(thisPets);
   const titleEl = document.getElementById('tama-rank-title');
   if (titleEl) titleEl.textContent = `${thisLabel} 애정 랭킹 (쓰다듬기 횟수)`;
