@@ -1638,6 +1638,7 @@ function copyResult(){
   @keyframes dh-ear-r{0%,76%,100%{transform:rotate(0deg)}81%{transform:rotate(10deg)}87%{transform:rotate(-5deg)}92%{transform:rotate(3deg)}96%{transform:rotate(0deg)}}
   .dh-ear-l{transform-box:fill-box;transform-origin:50% 100%;animation:dh-ear-l 2.8s ease-in-out infinite}
   .dh-ear-r{transform-box:fill-box;transform-origin:50% 100%;animation:dh-ear-r 2.8s ease-in-out infinite;animation-delay:.4s}
+  @keyframes rank1shine{0%,100%{box-shadow:0 0 8px rgba(255,215,0,.8),0 0 18px rgba(255,180,0,.4)}50%{box-shadow:0 0 14px rgba(255,215,0,1),0 0 30px rgba(255,200,0,.7),0 0 45px rgba(255,160,0,.3)}}
   @keyframes tama-bounce{0%,100%{transform:translateY(0)}20%{transform:translateY(-24px) rotate(-4deg)}45%{transform:translateY(-8px) rotate(2deg)}65%{transform:translateY(-16px) rotate(-2deg)}85%{transform:translateY(-3px) rotate(1deg)}}
   @keyframes tama-shake{0%,100%{transform:rotate(0) scale(1)}15%{transform:rotate(-18deg) scale(1.05)}35%{transform:rotate(18deg) scale(1.05)}55%{transform:rotate(-10deg) scale(1.02)}75%{transform:rotate(10deg) scale(1.02)}90%{transform:rotate(-4deg)}}
   @keyframes tama-pulse{0%,100%{transform:scale(1)}40%{transform:scale(1.22)}70%{transform:scale(1.08)}}
@@ -5194,16 +5195,32 @@ function tamaRenderRank() {
   let rankIdx = 0;
   el.innerHTML = tamaRankData.map(([nick, cnt]) => {
     const isAdmin = TAMA_ADMIN.includes(nick);
+    const isFirst = !isAdmin && rankIdx === 0;
     let badge;
     if (isAdmin) {
       badge = '<span style="font-size:11px;color:#6b6480">👑</span>';
     } else if (rankIdx < 4) {
-      badge = `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);font-size:10px;font-weight:700;color:white;box-shadow:0 0 8px rgba(181,102,255,0.6);flex-shrink:0">${rankLabels[rankIdx]}</span>`;
+      const bg = isFirst
+        ? 'linear-gradient(135deg,#ffd700,#ff9500,#ffec6e,#ffd700)'
+        : 'linear-gradient(135deg,#7c3aed,#db2777)';
+      const shadow = isFirst
+        ? '0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,180,0,0.4)'
+        : '0 0 8px rgba(181,102,255,0.6)';
+      badge = `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${bg};background-size:200% 200%;font-size:10px;font-weight:800;color:${isFirst?'#1a0a2e':'white'};box-shadow:${shadow};flex-shrink:0;${isFirst?'animation:rank1shine 1.8s ease-in-out infinite;':''}">${rankLabels[rankIdx]}</span>`;
     } else {
       badge = `<span style="font-size:11px;color:#6b6480">${rankIdx+1}위</span>`;
     }
     if (!isAdmin) rankIdx++;
-    return `<div class="tama-log-row"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="color:#f5f1ff;font-weight:600">${nick}</span></span><span style="color:#b566ff;font-weight:700">${cnt} 🤍</span></div>`;
+    const rowStyle = isFirst
+      ? 'background:linear-gradient(90deg,rgba(255,215,0,.08),rgba(255,150,0,.05),transparent);border-radius:8px;padding:2px 4px;margin:-2px -4px;'
+      : '';
+    const nameStyle = isFirst
+      ? 'background:linear-gradient(90deg,#ffd700,#ffb347,#ffe066);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700;'
+      : 'color:#f5f1ff;font-weight:600;';
+    const cntStyle = isFirst
+      ? 'background:linear-gradient(90deg,#ffd700,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800;'
+      : 'color:#b566ff;font-weight:700;';
+    return `<div class="tama-log-row" style="${rowStyle}"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="${nameStyle}">${nick}</span></span><span style="${cntStyle}">${cnt} 🤍</span></div>`;
   }).join('');
   tamaRenderLastMonth();
 }
