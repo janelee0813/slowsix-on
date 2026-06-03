@@ -5000,9 +5000,7 @@ function tamaCatSVG(stage, mood) {
 function tamaTimeAgo(iso) {
   const s = Math.floor((Date.now() - new Date(iso)) / 1000);
   if (s < 60) return '방금 전';
-  if (s < 3600) return Math.floor(s/60) + '분 전';
-  if (s < 86400) return Math.floor(s/3600) + '시간 전';
-  return Math.floor(s/86400) + '일 전';
+  return Math.floor(s/60) + '분 전';
 }
 function tamaActionLabel(t) { return {feed:'밥을 줬어요 🍚', play:'놀아줬어요 🎾', pet:'쓰다듬었어요 🤍'}[t] || t; }
 
