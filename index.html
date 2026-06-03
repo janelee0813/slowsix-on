@@ -660,37 +660,45 @@
 (function(){
   const SB_URL='https://teugnaahpcpzejbdayyy.supabase.co';
   const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
-  const sessionStart = Date.now();
-  let logged = false;
 
-  function logSession() {
-    if (logged) return;
+  // 세션 ID: sessionStorage에 저장 (탭 닫으면 사라짐)
+  let sid = sessionStorage.getItem('_sid');
+  if (!sid) { sid = Date.now().toString(36) + Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', sid); }
+  const sessionStart = Date.now();
+
+  function upsertSession() {
     const secs = Math.floor((Date.now() - sessionStart) / 1000);
-    if (secs < 10) return; // 10초 미만 튕김 제외
-    logged = true;
+    if (secs < 10) return;
     fetch(`${SB_URL}/rest/v1/session_logs`, {
       method: 'POST',
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ duration_seconds: secs })
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ session_id: sid, duration_seconds: secs })
     }).catch(()=>{});
   }
 
-  // 탭 전환/숨김 시 기록
-  document.addEventListener('visibilitychange', () => { if (document.hidden) logSession(); });
-  window.addEventListener('beforeunload', logSession);
-  window.addEventListener('pagehide', logSession);
+  // 2분마다 자동 갱신 (장시간 체류 포착)
+  setInterval(upsertSession, 2 * 60 * 1000);
 
-  // 평균 체류시간 조회 (최근 500건 기준)
-  fetch(`${SB_URL}/rest/v1/session_logs?select=duration_seconds&order=created_at.desc&limit=500`, {
-    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-  }).then(r=>r.json()).then(rows=>{
-    if (!rows || !rows.length) return;
-    const avg = Math.round(rows.reduce((s,r)=>s+(r.duration_seconds||0),0) / rows.length);
-    const min = Math.floor(avg/60);
-    const sec = avg % 60;
-    const el = document.getElementById('avg-dwell');
-    if (el) el.textContent = min > 0 ? `${min}분${sec>0?' '+sec+'초':''}` : `${sec}초`;
-  }).catch(()=>{});
+  // 탭 전환/종료 시 최종 저장
+  document.addEventListener('visibilitychange', () => { if (document.hidden) upsertSession(); else {} });
+  window.addEventListener('pagehide', upsertSession);
+  window.addEventListener('beforeunload', upsertSession);
+
+  // 평균 체류시간 표시 (최근 500건, 30초 이상만 집계)
+  function loadAvgDwell() {
+    fetch(`${SB_URL}/rest/v1/session_logs?select=duration_seconds&order=created_at.desc&limit=500`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    }).then(r=>r.json()).then(rows=>{
+      if (!rows||!rows.length) return;
+      const valid = rows.filter(r=>r.duration_seconds>=30);
+      if (!valid.length) return;
+      const avg = Math.round(valid.reduce((s,r)=>s+(r.duration_seconds||0),0) / valid.length);
+      const min = Math.floor(avg/60), sec = avg%60;
+      const el = document.getElementById('avg-dwell');
+      if (el) el.textContent = min>0 ? `${min}분${sec>0?' '+sec+'초':''}` : `${sec}초`;
+    }).catch(()=>{});
+  }
+  loadAvgDwell();
 })();
 </script>
 
