@@ -2022,6 +2022,13 @@ function copyResult(){
   </div>
 </div>
 
+<!-- 출석 달력 -->
+<div class="tama-crd" id="tama-cal-card" style="display:none;padding:14px">
+  <div style="font-size:11px;color:#9b94b3;font-weight:600;letter-spacing:.8px;margin-bottom:12px">📅 6월 출석 달력</div>
+  <div id="tama-cal-grid"></div>
+  <p style="font-size:11px;color:#6b6480;margin-top:10px;text-align:center">날짜를 클릭하면 출석 도장이 찍혀요 · 닉네임 입력 필수</p>
+</div>
+
 
 </div>
 <script>
@@ -5135,12 +5142,13 @@ CREATE TABLE tamagotchi_actions (
   await tamaCheckCycleEnd();
 
   if (loadEl) loadEl.style.display = 'none';
-  ['tama-char-card','tama-stat-card','tama-action-card','tama-log-card','tama-rank-card','tama-chart-card'].forEach(id => {
+  ['tama-char-card','tama-stat-card','tama-action-card','tama-log-card','tama-rank-card','tama-chart-card','tama-cal-card'].forEach(id => {
     document.getElementById(id).style.display = 'block';
   });
 
   tamaRender();
   tamaBoardInit();
+  tamaCalInit();
   tamaApplyPreOpen();
   tamaApplyRetirement();
 
@@ -5369,6 +5377,81 @@ function tamaRenderRank() {
     return `<div class="tama-log-row" style="${rowStyle}"><span style="display:flex;align-items:center;gap:7px">${badge}<span style="${nameStyle}">${nick}</span></span><span style="${cntStyle}">${cnt} 🤍</span></div>`;
   }).join('');
   tamaRenderLastMonth();
+}
+
+// ── 출석 달력 ──
+let tamaAttendance = []; // {id, nickname, date}
+
+async function tamaCalInit() {
+  const { data, error } = await sb.from('tama_attendance').select('nickname,date').gte('date','2026-06-01').lte('date','2026-06-30');
+  if (!error) tamaAttendance = data || [];
+  tamaCalRender();
+}
+
+function tamaCalRender() {
+  const el = document.getElementById('tama-cal-grid');
+  if (!el) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = ['월','화','수','목','금','토','일'];
+  // June 1, 2026 = Sunday (day 0), so first Mon = May 25...
+  // June 2026: starts on Monday (2026-06-01 is Monday)
+  const firstDay = new Date('2026-06-01').getDay(); // 0=Sun,1=Mon...
+  // adjust: Mon=0 in our grid
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+  let html = `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">
+    ${days.map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;color:#6b6480;padding:2px 0">${d}</div>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">`;
+
+  // empty cells before June 1
+  for (let i = 0; i < startOffset; i++) {
+    html += `<div></div>`;
+  }
+
+  for (let d = 1; d <= 30; d++) {
+    const dateStr = `2026-06-${String(d).padStart(2,'0')}`;
+    const cellDate = new Date(dateStr); cellDate.setHours(0,0,0,0);
+    const isFuture = cellDate > today;
+    const isToday = cellDate.getTime() === today.getTime();
+    const attendees = tamaAttendance.filter(a => a.date === dateStr).map(a => a.nickname);
+    const dayOfWeek = (startOffset + d - 1) % 7; // 0=Mon...6=Sun
+    const isSat = dayOfWeek === 5;
+    const isSun = dayOfWeek === 6;
+    const dayColor = isSun ? 'rgba(248,113,113,.8)' : isSat ? 'rgba(96,165,250,.8)' : '#9b94b3';
+
+    html += `<div onclick="${isFuture ? '' : `tamaCalCheck('${dateStr}')`}"
+      style="border-radius:8px;padding:4px 3px;min-height:52px;
+        background:${isToday ? 'rgba(181,102,255,.18)' : 'rgba(30,22,55,.6)'};
+        border:1px solid ${isToday ? 'rgba(181,102,255,.5)' : 'rgba(140,110,200,.15)'};
+        cursor:${isFuture ? 'default' : 'pointer'};
+        opacity:${isFuture ? '.35' : '1'};
+        transition:background .15s"
+      ${isFuture ? '' : `onmouseover="this.style.background='rgba(181,102,255,.12)'" onmouseout="this.style.background='${isToday ? 'rgba(181,102,255,.18)' : 'rgba(30,22,55,.6)'}'"` }>
+      <div style="font-size:11px;font-weight:700;color:${dayColor};margin-bottom:2px">${d}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:1px">
+        ${attendees.map(n=>`<span style="font-size:8px;color:#d4a8ff;background:rgba(181,102,255,.2);border-radius:3px;padding:0 2px;line-height:1.5;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+async function tamaCalCheck(dateStr) {
+  const nick = document.getElementById('tama-nick')?.value.trim();
+  if (!nick) { alert('닉네임을 먼저 입력해 주세요!'); document.getElementById('tama-nick')?.focus(); return; }
+  const already = tamaAttendance.find(a => a.date === dateStr && a.nickname === nick);
+  if (already) {
+    if (confirm(`${nick}님의 ${dateStr.slice(5).replace('-','/')} 출석을 취소할까요?`)) {
+      const { error } = await sb.from('tama_attendance').delete().eq('nickname', nick).eq('date', dateStr);
+      if (!error) { tamaAttendance = tamaAttendance.filter(a => !(a.date === dateStr && a.nickname === nick)); tamaCalRender(); }
+    }
+    return;
+  }
+  const { data, error } = await sb.from('tama_attendance').insert({ nickname: nick, date: dateStr }).select('nickname,date').single();
+  if (!error && data) { tamaAttendance.push(data); tamaCalRender(); }
+  else if (error) alert('출석 체크 실패. 다시 시도해 주세요.');
 }
 
 let tamaBoardPosts = [];
