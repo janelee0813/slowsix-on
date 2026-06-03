@@ -5399,10 +5399,10 @@ function tamaCalRender() {
   // adjust: Mon=0 in our grid
   const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
-  let html = `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">
-    ${days.map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;color:#6b6480;padding:2px 0">${d}</div>`).join('')}
+  let html = `<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;margin-bottom:4px;width:100%">
+    ${days.map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;color:#6b6480;padding:3px 0">${d}</div>`).join('')}
   </div>
-  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">`;
+  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;width:100%">`;
 
   // empty cells before June 1
   for (let i = 0; i < startOffset; i++) {
@@ -5423,7 +5423,7 @@ function tamaCalRender() {
     const dayColor = isSun ? 'rgba(248,113,113,.8)' : isSat ? 'rgba(96,165,250,.8)' : '#9b94b3';
 
     html += `<div onclick="${isDisabled ? '' : `tamaCalCheck('${dateStr}')`}"
-      style="border-radius:8px;padding:4px 3px;min-height:52px;
+      style="border-radius:8px;padding:5px 4px;min-height:48px;width:100%;box-sizing:border-box;
         background:${isToday ? 'rgba(181,102,255,.18)' : 'rgba(30,22,55,.6)'};
         border:1px solid ${isToday ? 'rgba(181,102,255,.5)' : 'rgba(140,110,200,.15)'};
         cursor:${isDisabled ? 'default' : 'pointer'};
