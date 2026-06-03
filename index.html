@@ -5413,21 +5413,23 @@ function tamaCalRender() {
     const dateStr = `2026-06-${String(d).padStart(2,'0')}`;
     const cellDate = new Date(dateStr); cellDate.setHours(0,0,0,0);
     const isFuture = cellDate > today;
+    const isPast = cellDate < today;
     const isToday = cellDate.getTime() === today.getTime();
+    const isDisabled = isFuture || isPast;
     const attendees = tamaAttendance.filter(a => a.date === dateStr).map(a => a.nickname);
     const dayOfWeek = (startOffset + d - 1) % 7; // 0=Mon...6=Sun
     const isSat = dayOfWeek === 5;
     const isSun = dayOfWeek === 6;
     const dayColor = isSun ? 'rgba(248,113,113,.8)' : isSat ? 'rgba(96,165,250,.8)' : '#9b94b3';
 
-    html += `<div onclick="${isFuture ? '' : `tamaCalCheck('${dateStr}')`}"
+    html += `<div onclick="${isDisabled ? '' : `tamaCalCheck('${dateStr}')`}"
       style="border-radius:8px;padding:4px 3px;min-height:52px;
         background:${isToday ? 'rgba(181,102,255,.18)' : 'rgba(30,22,55,.6)'};
         border:1px solid ${isToday ? 'rgba(181,102,255,.5)' : 'rgba(140,110,200,.15)'};
-        cursor:${isFuture ? 'default' : 'pointer'};
-        opacity:${isFuture ? '.35' : '1'};
+        cursor:${isDisabled ? 'default' : 'pointer'};
+        opacity:${isDisabled ? '.3' : '1'};
         transition:background .15s"
-      ${isFuture ? '' : `onmouseover="this.style.background='rgba(181,102,255,.12)'" onmouseout="this.style.background='${isToday ? 'rgba(181,102,255,.18)' : 'rgba(30,22,55,.6)'}'"` }>
+      ${isDisabled ? '' : `onmouseover="this.style.background='rgba(181,102,255,.12)'" onmouseout="this.style.background='${isToday ? 'rgba(181,102,255,.18)' : 'rgba(30,22,55,.6)'}'"` }>
       <div style="font-size:11px;font-weight:700;color:${dayColor};margin-bottom:2px">${d}</div>
       <div style="display:flex;flex-wrap:wrap;gap:1px">
         ${attendees.map(n=>`<span style="font-size:8px;color:#d4a8ff;background:rgba(181,102,255,.2);border-radius:3px;padding:0 2px;line-height:1.5;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span>`).join('')}
