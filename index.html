@@ -5133,8 +5133,8 @@ function tamaCaptchaCheck() {
   return new Promise(resolve => {
     const ops = [['+', (a,b)=>a+b], ['+', (a,b)=>a+b], ['-', (a,b)=>a-b]];
     const [sym, fn] = ops[Math.floor(Math.random() * ops.length)];
-    const a = Math.floor(Math.random() * 15) + 1;
-    const b = sym === '-' ? Math.floor(Math.random() * a) + 1 : Math.floor(Math.random() * 15) + 1;
+    const a = Math.floor(Math.random() * 9) + 1;
+    const b = sym === '-' ? Math.floor(Math.random() * a) + 1 : Math.floor(Math.random() * 9) + 1;
     const answer = fn(a, b);
     const modal = document.getElementById('tama-captcha-modal');
     const inp   = document.getElementById('tama-captcha-inp');
