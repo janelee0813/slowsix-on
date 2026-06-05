@@ -3257,6 +3257,13 @@ window.travelRender=travelRender;
   // ── 장애물 생성 ──────────────────────────────────
   const obs=[];
 
+  // § 0구역: 양 끝 가장자리 핀 (공 쏠림 방지)
+  [[22,50],[22,110],[22,170],[22,230],[22,290],
+   [338,50],[338,110],[338,170],[338,230],[338,290],
+   [48,80],[48,190],[48,300],
+   [312,80],[312,190],[312,300]].forEach(([x,y])=>
+    obs.push({x,y,r:PEG_R,t:'p',lit:0}));
+
   // § 1구역: 삼각 핀 (3행)
   for(let r=0;r<3;r++){
     const n=r+3,span=(n-1)*SP,sx=(W-span)/2;
@@ -3380,9 +3387,9 @@ window.travelRender=travelRender;
   function mkBall(name,idx,total){
     const spread=Math.min(total*25,220);
     const hue=HUES[idx%HUES.length];
-    const sx=total===1?W/2:W/2-spread/2+(idx/(total-1))*spread+(Math.random()-.5)*8;
+    const sx=total===1?W/2:W/2-spread/2+(idx/(total-1))*spread+(Math.random()-.5)*18;
     return{x:Math.max(BALL_R+5,Math.min(W-BALL_R-5,sx)),y:14,
-      vx:(Math.random()-.5)*.7, vy:.2+Math.random()*.3,
+      vx:(Math.random()-.5)*1.0, vy:.2+Math.random()*.3,
       hue,name,trail:[],dead:false,won:false,flash:0};
   }
 
