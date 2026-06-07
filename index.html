@@ -4188,33 +4188,63 @@ window.travelRender=travelRender;
           <div style="font-size:10px;color:#6b6480">6/2 ~ 6/7</div>
         </div>
 
-        <!-- ② 2단계 알 -->
+        <!-- ② 2단계 성장 들희 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.7)) drop-shadow(0 0 20px rgba(255,182,193,.35))">
-            <svg width="100" viewBox="14 30 72 108" style="max-width:100%;height:auto">
+          <div class="dr-tc" style="filter:drop-shadow(0 0 8px rgba(255,182,193,.8)) drop-shadow(0 0 22px rgba(255,182,193,.4))">
+            <svg width="120" viewBox="-8 0 116 188" style="max-width:100%;height:auto;overflow:visible">
               <defs>
-                <filter id="egg-ol-2" x="-15%" y="-8%" width="130%" height="116%">
+                <filter id="dog-ol2" x="-20%" y="-8%" width="140%" height="120%">
                   <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="exp"/>
                   <feFlood flood-color="#1a1a1a" result="col"/>
                   <feComposite in="col" in2="exp" operator="in" result="border"/>
                   <feMerge><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
-              <g filter="url(#egg-ol-2)">
-                <ellipse cx="50" cy="88" rx="36" ry="50" fill="rgba(255,182,193,.2)" style="animation:dr-egg-glow 2.4s ease-in-out infinite"/>
-                <ellipse cx="50" cy="86" rx="30" ry="44" fill="#fff0f8"/>
-                <circle cx="34" cy="66" r="4" fill="rgba(255,182,193,.65)"/>
-                <circle cx="67" cy="76" r="3" fill="rgba(255,182,193,.45)"/>
-                <circle cx="38" cy="104" r="3.5" fill="rgba(255,182,193,.55)"/>
+              <g filter="url(#dog-ol2)">
+                <ellipse cx="50" cy="132" rx="26" ry="22" fill="#f8f8f0"/>
+                <path d="M36,34 Q18,22 14,32 Q14,46 28,46 Q34,42 36,34 Z" fill="#ffb3c6"/>
+                <path d="M60,28 Q66,6 72,10 Q72,24 64,34 Q61,36 60,28 Z" fill="#ffb3c6"/>
+                <ellipse cx="50" cy="64" rx="24" ry="40" fill="#f8f8f0"/>
+                <g transform="translate(38,52)">
+                  <g class="dr-te" style="animation-delay:.12s">
+                    <circle r="9" fill="#1a1a1a"/>
+                    <circle cx="-3" cy="-3" r="2" fill="white"/>
+                  </g>
+                </g>
+                <g transform="translate(62,52)">
+                  <g class="dr-te" style="animation-delay:.2s">
+                    <circle r="9" fill="#1a1a1a"/>
+                    <circle cx="-3" cy="-3" r="2" fill="white"/>
+                  </g>
+                </g>
+                <circle cx="50" cy="78" r="8" fill="#1a1a1a"/>
+                <ellipse cx="47" cy="75" rx="2.5" ry="2" fill="rgba(255,255,255,.5)"/>
+                <rect x="28" y="96" width="44" height="22" rx="9" fill="#e8917a"/>
+                <rect x="40" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+                <rect x="52" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+                <path d="M74,130 Q94,118 88,102 Q82,88 92,76" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
-              <ellipse cx="38" cy="62" rx="9" ry="6" fill="rgba(255,255,255,.7)" transform="rotate(-22,38,62)"/>
-              <!-- 금 (애니메이션: 서서히 금이 감) -->
-              <path class="dr-crack-m" d="M52,48 L49,57 L54,63 L50,73 L55,80" stroke="rgba(185,115,145,.7)" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="40" stroke-dashoffset="40"/>
-              <path class="dr-crack-b" d="M49,57 L44,61" stroke="rgba(185,115,145,.5)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0"/>
-              <path class="dr-crack-b" d="M54,63 L58,67" stroke="rgba(185,115,145,.5)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0"/>
+              <path d="M42,26 C55,18 68,24 76,36" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M44,28 C57,22 70,30 76,42" stroke="#1a1a1a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+              <path d="M46,30 C59,26 72,36 74,48" stroke="#1a1a1a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+              <path d="M48,32 C61,30 72,42 72,54" stroke="#1a1a1a" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+              <line x1="35" y1="99" x2="31" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="41" y1="99" x2="37" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="47" y1="99" x2="43" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="53" y1="99" x2="49" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="59" y1="99" x2="55" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="65" y1="99" x2="61" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="71" y1="99" x2="67" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="40" y1="76" x2="10" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="40" y1="79" x2="10" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="40" y1="82" x2="12" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="60" y1="76" x2="90" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="60" y1="79" x2="90" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="60" y1="82" x2="88" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              <ellipse cx="50" cy="93" rx="4" ry="2" fill="#ef4444"/>
             </svg>
           </div>
-          <div style="font-size:11px;color:#9b94b3;font-weight:600">들희 2단계 🔒</div>
+          <div style="font-size:11px;color:#9b94b3;font-weight:600">들희 2단계</div>
           <div style="font-size:10px;color:#6b6480">6/8 ~ 6/14</div>
         </div>
 
