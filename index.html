@@ -2254,7 +2254,7 @@ async function wcSignupChallenge(){
   const inp=document.getElementById('wc-signup-nick');
   const nick=(inp?.value||'').trim();
   if(!nick)return;
-  const fixed=['엘라','제인'];
+  const fixed=['엘라'];
   if(fixed.includes(nick)){wcToast('이미 참여 중인 멤버예요 😊');inp.value='';return;}
   if(wcSignups.find(s=>s.nickname===nick)){wcToast('이미 신청된 닉네임이에요');inp.value='';return;}
   const{data,error}=await sb.from('challenge_signups').insert({nickname:nick}).select().single();
@@ -2352,7 +2352,7 @@ function wcRender(){
   const t=wcToday();
   const todayMap={};
   wcRecs.filter(r=>r.date===t).forEach(r=>{todayMap[r.nickname]=r});
-  const _WC_ORDER=['엘라','하늘','제인'];
+  const _WC_ORDER=['엘라','하늘'];
   const wcSorted=[...wcParts].sort((a,b)=>{const ai=_WC_ORDER.indexOf(a.nickname),bi=_WC_ORDER.indexOf(b.nickname);return(ai<0?99:ai)-(bi<0?99:bi);});
   app.innerHTML=`
     <!-- 챌린지 신청 히어로 -->
@@ -2375,10 +2375,10 @@ function wcRender(){
       </div>
       <!-- 참여자 목록 -->
       <div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px 14px">
-        <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">참여 ${2+wcSignups.length}명</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">참여 ${1+wcSignups.length}명</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <!-- 확정 멤버: 엘라, 제인 -->
-          ${['엘라','제인',...wcSignups.map(s=>s.nickname)].map(name=>`
+          <!-- 확정 멤버: 엘라 -->
+          ${['엘라',...wcSignups.map(s=>s.nickname)].map(name=>`
           <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(255,200,0,.25),rgba(255,160,0,.2));border:1px solid rgba(255,200,0,.4);border-radius:20px">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             <span style="font-size:12px;font-weight:700;color:#ffd700">${name}</span>
