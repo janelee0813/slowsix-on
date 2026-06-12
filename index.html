@@ -5138,7 +5138,45 @@ function tamaCatSVG(stage, mood) {
   <ellipse id="tama-mouth" cx="50" cy="93" rx="4" ry="2" fill="#ef4444"/>
 </svg>`;
   }
-  const W = [null, 130, 130, 170, 190][stage] || 130;
+  if (stage === 4) {
+    const W = 170, h = Math.round(W * 188 / 116);
+    return `<svg width="${W}" height="${h}" viewBox="-8 0 116 188" style="overflow:visible">
+  ${defs}
+  <g filter="url(#dh-ol-m)">
+    <ellipse cx="50" cy="132" rx="20" ry="22" fill="#f8f8f0"/>
+    <g class="dh-ear-l"><path d="M44,28 Q36,0 26,4 Q24,22 36,36 Q42,38 44,28 Z" fill="#ffb3c6"/></g>
+    <g class="dh-ear-r"><path d="M56,28 Q64,0 74,4 Q76,22 64,36 Q58,38 56,28 Z" fill="#ffb3c6"/></g>
+    <ellipse cx="50" cy="64" rx="24" ry="40" fill="#f8f8f0"/>
+    <g transform="translate(38,52)"><g class="cat-te" style="animation-delay:.12s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2" fill="white"/></g></g>
+    <g transform="translate(62,52)"><g class="cat-te" style="animation-delay:.2s"><circle r="9" fill="#1a1a1a"/><circle cx="-3" cy="-3" r="2" fill="white"/></g></g>
+    <circle cx="50" cy="78" r="8" fill="#1a1a1a"/>
+    <ellipse cx="47" cy="75" rx="2.5" ry="2" fill="rgba(255,255,255,.5)"/>
+    <rect x="28" y="96" width="44" height="22" rx="9" fill="#e8917a"/>
+    <rect x="40" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+    <rect x="52" y="150" width="10" height="22" rx="5" fill="#f8f8f0"/>
+    <path d="M68,130 Q94,118 88,102 Q82,88 92,76" stroke="#f8f8f0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M42,26 C55,18 68,24 76,36" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M44,28 C57,22 70,30 76,42" stroke="#1a1a1a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <path d="M46,30 C59,26 72,36 74,48" stroke="#1a1a1a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <path d="M48,32 C61,30 72,42 72,54" stroke="#1a1a1a" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <line x1="35" y1="99" x2="31" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="41" y1="99" x2="37" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="47" y1="99" x2="43" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="53" y1="99" x2="49" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="59" y1="99" x2="55" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="65" y1="99" x2="61" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="71" y1="99" x2="67" y2="116" stroke="#c96040" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="40" y1="76" x2="10" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="40" y1="79" x2="10" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="40" y1="82" x2="12" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="60" y1="76" x2="90" y2="68" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="60" y1="79" x2="90" y2="79" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="60" y1="82" x2="88" y2="90" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <path id="tama-mouth" d="M46,91 Q50,97 54,91" stroke="#ef4444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`;
+  }
+  const W = [null, 130, 130, 170][stage] || 130;
   const h = Math.round(W * 145 / 116);
   return `<svg width="${W}" height="${h}" viewBox="-8 3 116 145" style="overflow:visible">
   ${defs}
