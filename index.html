@@ -1181,28 +1181,6 @@ function copyResult(){
   <div class="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-neon-purple/60 to-transparent"></div>
   <div class="mx-auto max-w-screen-md px-5 pt-4 pb-12 sm:pt-6 sm:pb-20" style="position:relative">
 
-    <div style="margin:12px 0 16px;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,95,176,0.45);background:linear-gradient(135deg,rgba(181,102,255,0.18),rgba(255,95,176,0.18));text-align:center;box-shadow:0 0 18px rgba(255,95,176,0.3)">
-      <div id="fortune-countdown" style="font-size:15px;font-weight:800;color:#ffd0ec;letter-spacing:0.03em;font-variant-numeric:tabular-nums">--일 --시간 --분 --초</div>
-    </div>
-    <script>
-    (function(){
-      const end = new Date('2026-06-20T23:59:00');
-      function update() {
-        const el = document.getElementById('fortune-countdown');
-        if (!el) return;
-        const diff = end - new Date();
-        if (diff <= 0) { el.textContent = '💥 종료'; clearInterval(tid); return; }
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        el.textContent = `${d}일 ${String(h).padStart(2,'0')}시간 ${String(m).padStart(2,'0')}분 ${String(s).padStart(2,'0')}초`;
-      }
-      update();
-      const tid = setInterval(update, 1000);
-    })();
-    </script>
-
     <div style="text-align:right;margin-bottom:8px">
       <button onclick="fortuneCopyUrl()" id="fortune-share-btn" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(140,110,200,0.35);border-radius:20px;background:rgba(44,33,72,0.7);color:#9b94b3;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='rgba(181,102,255,0.6)';this.style.color='#b566ff'" onmouseout="this.style.borderColor='rgba(140,110,200,0.35)';this.style.color='#9b94b3'">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
@@ -4165,6 +4143,28 @@ window.travelRender=travelRender;
         URL 공유
       </button>
     </div>
+
+    <div style="margin:0 0 16px;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,95,176,0.45);background:linear-gradient(135deg,rgba(181,102,255,0.18),rgba(255,95,176,0.18));text-align:center;box-shadow:0 0 18px rgba(255,95,176,0.3)">
+      <div id="beta-countdown" style="font-size:15px;font-weight:800;color:#ffd0ec;letter-spacing:0.03em;font-variant-numeric:tabular-nums">--일 --시간 --분 --초</div>
+    </div>
+    <script>
+    (function(){
+      const end = new Date('2026-06-20T23:59:00');
+      function update() {
+        const el = document.getElementById('beta-countdown');
+        if (!el) return;
+        const diff = end - new Date();
+        if (diff <= 0) { el.textContent = '💥 종료'; clearInterval(tid); return; }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = `${d}일 ${String(h).padStart(2,'0')}시간 ${String(m).padStart(2,'0')}분 ${String(s).padStart(2,'0')}초`;
+      }
+      update();
+      const tid = setInterval(update, 1000);
+    })();
+    </script>
 
     <!-- 익명 댓글 게시판 -->
     <div>
