@@ -1188,6 +1188,29 @@ function copyResult(){
       </button>
     </div>
 
+    <div style="margin:12px 0 16px;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,95,176,0.45);background:linear-gradient(135deg,rgba(181,102,255,0.18),rgba(255,95,176,0.18));text-align:center;box-shadow:0 0 18px rgba(255,95,176,0.3)">
+      <div id="fortune-countdown" style="font-size:24px;font-weight:800;color:#ffd0ec;letter-spacing:0.03em;font-variant-numeric:tabular-nums">--일 --시간 --분 --초</div>
+      <div style="font-size:12px;font-weight:600;color:#f9a8d4;margin-top:4px">폭탄 투하 (카운트다운) 전</div>
+    </div>
+    <script>
+    (function(){
+      const end = new Date('2026-06-20T23:59:00');
+      function update() {
+        const el = document.getElementById('fortune-countdown');
+        if (!el) return;
+        const diff = end - new Date();
+        if (diff <= 0) { el.textContent = '💥 종료'; clearInterval(tid); return; }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = `${d}일 ${String(h).padStart(2,'0')}시간 ${String(m).padStart(2,'0')}분 ${String(s).padStart(2,'0')}초`;
+      }
+      update();
+      const tid = setInterval(update, 1000);
+    })();
+    </script>
+
     <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur animate-fade-up">
       <span style="font-size:14px">🐉</span>
       <span>드래곤볼 이벤트</span>
