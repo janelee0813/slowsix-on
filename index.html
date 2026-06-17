@@ -1369,7 +1369,7 @@ function copyResult(){
       const el=document.getElementById('db-status-list');
       if(!el)return;
       const counts=dbGetCounts();
-      const DB_EXCLUDE=['류우','제인'];
+      const DB_EXCLUDE=['류우','제인','엑서'];
       const DB_ADMIN=['엑서','제인'];
       const sorted=Object.entries(counts).filter(([nick])=>!DB_EXCLUDE.includes(nick)).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ko'));
       if(!sorted.length){el.innerHTML='<p class="text-xs text-muted-foreground text-center py-2">아직 적립된 드래곤볼이 없어요</p>';return;}
