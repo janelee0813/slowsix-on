@@ -4691,6 +4691,18 @@ Oh my Blue Moon</div>
       o.start(); o.stop(ctx.currentTime+0.55);
     }catch(e){}
   }
+  function hdAnnounceLevel(){
+    try{
+      if(!window.speechSynthesis){ hdBeep(); return; }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance('Blind Level Up');
+      u.lang = 'en-US';
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
+      if(enVoice) u.voice = enVoice;
+      window.speechSynthesis.speak(u);
+    }catch(e){ hdBeep(); }
+  }
 
   function holdemInit(){
     if(!hdWrap()) return;
@@ -5053,7 +5065,7 @@ Oh my Blue Moon</div>
   function hdLevelComplete(){
     if(hd.levelIdx < hd.levels.length-1){
       hd.levelIdx++; hd.remainAtPause = hd.levels[hd.levelIdx].min*60; hd.endAt = Date.now()+hd.remainAtPause*1000;
-      hdBeep(); hdSaveRunState(); hdRenderTimer();
+      hdAnnounceLevel(); hdSaveRunState(); hdRenderTimer();
     } else {
       hd.running=false; hd.finished=true; hd.remainAtPause=0;
       if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
