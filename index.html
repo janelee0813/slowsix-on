@@ -4972,16 +4972,16 @@ Oh my Blue Moon</div>
 
   function hdPrizeBlock(totalChips){
     if(!hd.prizes.length) return '';
-    return `<div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:6px">
+    return `<div style="padding:16px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:6px">
         <p style="font-size:13px;font-weight:700;color:#b566ff;margin:0;letter-spacing:0.08em">🏆 프라이즈</p>
         <span style="font-size:11px;color:#6b6480">현재 총 칩 ${fmtNum(totalChips)}원 기준</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px">
         ${hd.prizes.map(p=>`
-        <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:14px 10px;text-align:center">
-          <div style="font-size:12px;color:#9b94b3;margin-bottom:8px">${p.rank}위 <span style="color:#6b6480">(${p.pct||0}%)</span></div>
-          <div style="font-size:clamp(18px,2.6vw,26px);font-weight:800;color:#ffb547">${fmtNum(Math.round(totalChips*(p.pct||0)/100))}<span style="font-size:12px;color:#6b6480;font-weight:500">원</span></div>
+        <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:10px 8px;text-align:center">
+          <div style="font-size:11px;color:#9b94b3;margin-bottom:6px">${p.rank}위 <span style="color:#6b6480">(${p.pct||0}%)</span></div>
+          <div style="font-size:clamp(15px,2.2vh,20px);font-weight:800;color:#ffb547">${fmtNum(Math.round(totalChips*(p.pct||0)/100))}<span style="font-size:11px;color:#6b6480;font-weight:500">원</span></div>
         </div>`).join('')}
       </div>
     </div>`;
@@ -5017,67 +5017,73 @@ Oh my Blue Moon</div>
     const pct = totalSec>0 ? Math.max(0, Math.min(100, (remain/totalSec)*100)) : 0;
 
     wrap.innerHTML = `
-      <div style="max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:clamp(12px,1.6vw,15px);color:#9b94b3">레벨 ${hd.levelIdx+1} / ${hd.levels.length}</span>
+      <div style="max-width:1700px;margin:0 auto;height:100dvh;box-sizing:border-box;padding:10px 0 6px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+          <span style="font-size:13px;color:#9b94b3">레벨 ${hd.levelIdx+1} / ${hd.levels.length}</span>
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle}">⚙ 설정으로</button>
         </div>
 
-        <div style="width:100%;box-sizing:border-box;padding:5vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center">
-          ${lv.brk ? `<div style="font-size:clamp(24px,5vw,44px);font-weight:800;color:#ffb547;margin-bottom:10px">☕ 브레이크</div>`
-                   : `<div style="font-size:clamp(13px,1.8vw,18px);color:#9b94b3;margin-bottom:8px">SB / BB${lv.ante?' / 안티':''}</div>
-                      <div style="font-size:clamp(2.4rem,7.5vw,6rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4vw,3rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
-          <div style="font-size:clamp(4.5rem,16vw,12rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:5vh 0 3vh;color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
-          <div style="height:10px;border-radius:5px;background:rgba(140,110,200,0.15);overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
-          </div>
-          <div style="margin-top:16px;font-size:clamp(12px,1.6vw,16px);color:#6b6480">${next ? (next.brk ? '다음: 브레이크' : `다음 레벨: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : '마지막 레벨'}</div>
-        </div>
-
-        <div style="display:flex;gap:8px">
-          <button onclick="hdPrevLevel()" style="${hdTimerCtrlBtnStyle}">⏮ 이전</button>
-          <button onclick="hdToggleRun()" style="${hdTimerCtrlBtnStyle};flex:2;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;border:none">${hd.running ? '⏸ 일시정지' : '▶ 재개'}</button>
-          <button onclick="hdNextLevel()" style="${hdTimerCtrlBtnStyle}">다음 ⏭</button>
-        </div>
-        <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};align-self:center">🔁 처음부터 다시</button>
-
-        <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
-          <p style="font-size:13px;font-weight:700;color:#b566ff;margin:0 0 14px;letter-spacing:0.08em">👥 참가 인원 & 스택 <span style="font-weight:400;color:#6b6480">(시작 등록 ${hd.players}명 기준)</span></p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">
-            <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:14px 10px;text-align:center">
-              <div style="font-size:12px;color:#9b94b3;margin-bottom:8px">인원</div>
-              <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-                <button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>
-                <span style="font-size:clamp(22px,3vw,32px);font-weight:800;color:#f5f1ff;min-width:52px">${hd.currentPlayers}</span>
-                <button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>
+        <div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:12px">
+          <div style="min-height:0;display:flex;flex-direction:column;gap:8px">
+            <div style="flex:1;min-height:0;box-sizing:border-box;padding:2vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px">☕ 브레이크</div>`
+                       : `<div style="font-size:clamp(12px,1.8vh,16px);color:#9b94b3;margin-bottom:6px">SB / BB${lv.ante?' / 안티':''}</div>
+                          <div style="font-size:clamp(1.8rem,8vh,4rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1rem,4vh,2rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
+              <div style="font-size:clamp(3rem,19vh,9rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
+              <div style="width:100%;height:8px;border-radius:4px;background:rgba(140,110,200,0.15);overflow:hidden">
+                <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
               </div>
-              <div style="font-size:11px;color:#6b6480;margin-top:2px">명</div>
+              <div style="margin-top:12px;font-size:clamp(11px,1.6vh,14px);color:#6b6480">${next ? (next.brk ? '다음: 브레이크' : `다음 레벨: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : '마지막 레벨'}</div>
             </div>
-            <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:14px 10px;text-align:center">
-              <div style="font-size:12px;color:#9b94b3;margin-bottom:8px">리바인</div>
-              <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-                <button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>
-                <span style="font-size:clamp(22px,3vw,32px);font-weight:800;color:#f5f1ff;min-width:52px">${hd.rebuys}</span>
-                <button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>
+
+            <div style="display:flex;gap:8px;flex-shrink:0">
+              <button onclick="hdPrevLevel()" style="${hdTimerCtrlBtnStyle}">⏮ 이전</button>
+              <button onclick="hdToggleRun()" style="${hdTimerCtrlBtnStyle};flex:2;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;border:none">${hd.running ? '⏸ 일시정지' : '▶ 재개'}</button>
+              <button onclick="hdNextLevel()" style="${hdTimerCtrlBtnStyle}">다음 ⏭</button>
+            </div>
+            <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};align-self:center;flex-shrink:0">🔁 처음부터 다시</button>
+          </div>
+
+          <div style="min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px">
+            <div style="padding:16px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+              <p style="font-size:13px;font-weight:700;color:#b566ff;margin:0 0 12px;letter-spacing:0.08em">👥 참가 인원 & 스택 <span style="font-weight:400;color:#6b6480">(시작 등록 ${hd.players}명 기준)</span></p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px">
+                <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:10px 8px;text-align:center">
+                  <div style="font-size:11px;color:#9b94b3;margin-bottom:6px">인원</div>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                    <button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>
+                    <span style="font-size:clamp(18px,2.6vh,26px);font-weight:800;color:#f5f1ff;min-width:44px">${hd.currentPlayers}</span>
+                    <button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>
+                  </div>
+                  <div style="font-size:10px;color:#6b6480;margin-top:2px">명</div>
+                </div>
+                <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:10px 8px;text-align:center">
+                  <div style="font-size:11px;color:#9b94b3;margin-bottom:6px">리바인</div>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                    <button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>
+                    <span style="font-size:clamp(18px,2.6vh,26px);font-weight:800;color:#f5f1ff;min-width:44px">${hd.rebuys}</span>
+                    <button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>
+                  </div>
+                  <div style="font-size:10px;color:#6b6480;margin-top:2px">회</div>
+                </div>
+                <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:10px 8px;text-align:center">
+                  <div style="font-size:11px;color:#9b94b3;margin-bottom:6px">시작 칩</div>
+                  <div style="font-size:clamp(15px,2.2vh,20px);font-weight:800;color:#f5f1ff">${fmtNum(hd.startingChips)}</div>
+                </div>
+                <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:10px 8px;text-align:center">
+                  <div style="font-size:11px;color:#9b94b3;margin-bottom:6px">총 칩</div>
+                  <div style="font-size:clamp(15px,2.2vh,20px);font-weight:800;color:#f5f1ff">${fmtNum(totalChips)}</div>
+                </div>
+                <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:10px 8px;text-align:center">
+                  <div style="font-size:11px;color:#9b94b3;margin-bottom:6px">평균 스택</div>
+                  <div style="font-size:clamp(15px,2.2vh,20px);font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(avgStack)}</div>
+                </div>
               </div>
-              <div style="font-size:11px;color:#6b6480;margin-top:2px">회</div>
             </div>
-            <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:14px 10px;text-align:center">
-              <div style="font-size:12px;color:#9b94b3;margin-bottom:8px">시작 칩</div>
-              <div style="font-size:clamp(18px,2.6vw,26px);font-weight:800;color:#f5f1ff">${fmtNum(hd.startingChips)}</div>
-            </div>
-            <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:14px 10px;text-align:center">
-              <div style="font-size:12px;color:#9b94b3;margin-bottom:8px">총 칩</div>
-              <div style="font-size:clamp(18px,2.6vw,26px);font-weight:800;color:#f5f1ff">${fmtNum(totalChips)}</div>
-            </div>
-            <div style="background:rgba(16,10,30,0.6);border:1px solid rgba(140,110,200,0.18);border-radius:14px;padding:14px 10px;text-align:center">
-              <div style="font-size:12px;color:#9b94b3;margin-bottom:8px">평균 스택</div>
-              <div style="font-size:clamp(18px,2.6vw,26px);font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(avgStack)}</div>
-            </div>
+
+            ${hdPrizeBlock(totalChips)}
           </div>
         </div>
-
-        ${hdPrizeBlock(totalChips)}
       </div>`;
   }
 
