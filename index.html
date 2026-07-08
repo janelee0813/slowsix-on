@@ -4595,7 +4595,7 @@ Oh my Blue Moon</div>
 
 <!-- 소원구슬 핀볼 페이지 -->
 <div id="page-holdem" class="hidden">
-  <div class="px-3 sm:px-5 py-6">
+  <div class="px-3 sm:px-5">
     <div id="holdem-wrap"></div>
   </div>
 </div>
@@ -4719,7 +4719,7 @@ Oh my Blue Moon</div>
     const totalChips = hd.startingChips * hd.players;
     const presets = hdLoadPresets();
     wrap.innerHTML = `
-      <div style="max-width:768px;margin:0 auto">
+      <div style="max-width:768px;margin:0 auto;padding-top:20px;padding-bottom:20px">
       <div style="position:relative;margin-bottom:20px">
         <h1 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.01em;text-align:center"><span style="background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">홀덤</span> 블라인드 타이머</h1>
         <p style="font-size:12px;color:#6b6480;margin-top:6px;text-align:center">블라인드 레벨 · 시작칩 · 프라이즈까지 한 번에 셋팅하세요 ♠️</p>
@@ -4997,10 +4997,12 @@ Oh my Blue Moon</div>
     const wrap = hdWrap(); if(!wrap) return;
     const totalChips = hd.startingChips * (hd.currentPlayers + hd.rebuys);
     const avgStack = hd.currentPlayers>0 ? Math.round(totalChips/hd.currentPlayers) : 0;
+    const navEl = document.querySelector('nav');
+    const availH = window.innerHeight - (navEl ? navEl.getBoundingClientRect().height : 0);
 
     if(hd.finished){
       wrap.innerHTML = `
-        <div style="max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+        <div style="max-width:1400px;margin:0 auto;padding:20px 0;display:flex;flex-direction:column;gap:16px">
           <div style="padding:40px 20px;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:20px;text-align:center">
             <div style="font-size:clamp(28px,6vw,48px);margin-bottom:10px">🏆</div>
             <div style="font-size:clamp(20px,4vw,32px);font-weight:800;color:#e5e0f0">토너먼트 종료</div>
@@ -5023,7 +5025,7 @@ Oh my Blue Moon</div>
     const pct = totalSec>0 ? Math.max(0, Math.min(100, (remain/totalSec)*100)) : 0;
 
     wrap.innerHTML = `
-      <div style="max-width:1700px;margin:0 auto;height:100dvh;box-sizing:border-box;padding:10px 0 6px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+      <div style="max-width:1700px;margin:0 auto;height:${availH}px;box-sizing:border-box;padding:10px 0 6px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0;min-width:0">
           <span style="font-size:20px;font-weight:700;color:#c9c3dc;${hdNowrap}">레벨 ${hd.levelIdx+1} / ${hd.levels.length}</span>
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};font-size:15px;padding:8px 16px;white-space:nowrap;flex-shrink:0">⚙ 설정으로</button>
