@@ -4642,11 +4642,12 @@ Oh my Blue Moon</div>
   const hdGhostBtnStyle = 'padding:6px 12px;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.4);color:#9b94b3;font-size:11.5px;cursor:pointer;font-family:inherit;white-space:nowrap';
   const hdRoundBtnStyle = 'width:48px;height:48px;border-radius:50%;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:26px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;flex-shrink:0';
   const hdTimerCtrlBtnStyle = 'flex:1;padding:16px;border-radius:16px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:clamp(14px,2vw,19px);font-weight:700;cursor:pointer;font-family:inherit';
-  const hdQuadCtrlBtnStyle = 'flex:1;padding:8px;border-radius:14px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:clamp(18px,3vh,28px);font-weight:700;cursor:pointer;font-family:inherit';
-  const hdQuadStyle = 'padding:10px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px;display:flex;flex-direction:column;min-height:0;box-sizing:border-box';
-  const hdQuadTitleStyle = 'font-size:15px;font-weight:700;color:#b566ff;margin:0 0 6px;letter-spacing:0.04em;flex-shrink:0';
-  const hdQuadLabelStyle = 'font-size:15px;color:#9b94b3;margin-bottom:2px';
-  const hdQuadValueStyle = 'font-size:clamp(30px,4.8vh,46px);font-weight:800;color:#f5f1ff;line-height:1.05';
+  const hdQuadCtrlBtnStyle = 'flex:1;padding:8px;min-width:0;border-radius:14px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:clamp(16px,2.6vh,24px);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  const hdQuadStyle = 'padding:10px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px;display:flex;flex-direction:column;min-height:0;min-width:0;box-sizing:border-box';
+  const hdNowrap = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%';
+  const hdQuadTitleStyle = `font-size:15px;font-weight:700;color:#b566ff;margin:0 0 6px;letter-spacing:0.04em;flex-shrink:0;${hdNowrap}`;
+  const hdQuadLabelStyle = `font-size:15px;color:#9b94b3;margin-bottom:2px;${hdNowrap}`;
+  const hdQuadValueStyle = `font-size:clamp(18px,3vh,28px);font-weight:800;color:#f5f1ff;line-height:1.05;${hdNowrap}`;
 
   let hd = null;
 
@@ -5023,65 +5024,65 @@ Oh my Blue Moon</div>
 
     wrap.innerHTML = `
       <div style="max-width:1700px;margin:0 auto;height:100dvh;box-sizing:border-box;padding:10px 0 6px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-          <span style="font-size:20px;font-weight:700;color:#c9c3dc">레벨 ${hd.levelIdx+1} / ${hd.levels.length}</span>
-          <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};font-size:15px;padding:8px 16px">⚙ 설정으로</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0;min-width:0">
+          <span style="font-size:20px;font-weight:700;color:#c9c3dc;${hdNowrap}">레벨 ${hd.levelIdx+1} / ${hd.levels.length}</span>
+          <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};font-size:15px;padding:8px 16px;white-space:nowrap;flex-shrink:0">⚙ 설정으로</button>
         </div>
 
         <div style="flex:1;min-height:0;display:flex;flex-wrap:wrap;gap:8px">
           <div style="flex:2 1 480px;min-width:0;min-height:0;box-sizing:border-box;padding:2vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px">☕ 브레이크</div>`
-                     : `<div style="font-size:clamp(16px,2.6vh,22px);color:#c9c3dc;margin-bottom:8px;font-weight:600">SB / BB${lv.ante?' / Ante':''}</div>
-                        <div style="font-size:clamp(2.2rem,9vh,5.5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4.5vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
-            <div style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
+            ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">☕ 브레이크</div>`
+                     : `<div style="font-size:clamp(16px,2.6vh,22px);color:#c9c3dc;margin-bottom:8px;font-weight:600;${hdNowrap}">SB / BB${lv.ante?' / Ante':''}</div>
+                        <div style="font-size:clamp(2rem,8.5vh,5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${hdNowrap}">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4.5vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
+            <div style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
             <div style="width:100%;height:10px;border-radius:5px;background:rgba(140,110,200,0.15);overflow:hidden">
               <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
             </div>
-            <div style="margin-top:14px;font-size:clamp(15px,2.2vh,19px);color:#9b94b3;font-weight:600">${next ? (next.brk ? '다음: 브레이크' : `다음 레벨: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : '마지막 레벨'}</div>
+            <div style="margin-top:14px;font-size:clamp(15px,2.2vh,19px);color:#9b94b3;font-weight:600;${hdNowrap}">${next ? (next.brk ? '다음: 브레이크' : `다음 레벨: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : '마지막 레벨'}</div>
           </div>
 
           <div style="flex:1 1 380px;max-width:440px;min-width:0;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px">
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">🪙 칩 현황</p>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
-                <div style="text-align:center"><div style="${hdQuadLabelStyle}">시작 칩</div><div style="${hdQuadValueStyle}">${fmtNum(hd.startingChips)}</div></div>
-                <div style="text-align:center"><div style="${hdQuadLabelStyle}">총 칩</div><div style="${hdQuadValueStyle}">${fmtNum(totalChips)}</div></div>
-                <div style="text-align:center"><div style="${hdQuadLabelStyle}">평균 스택</div><div style="${hdQuadValueStyle};background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(avgStack)}</div></div>
+                <div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">시작 칩</div><div style="${hdQuadValueStyle}">${fmtNum(hd.startingChips)}</div></div>
+                <div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">총 칩</div><div style="${hdQuadValueStyle}">${fmtNum(totalChips)}</div></div>
+                <div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">평균 스택</div><div style="${hdQuadValueStyle};background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(avgStack)}</div></div>
               </div>
             </div>
 
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">🏆 프라이즈</p>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
-                ${hd.prizes.length ? hd.prizes.slice(0,3).map(p=>`<div style="text-align:center"><div style="${hdQuadLabelStyle}">${p.rank}위 (${p.pct||0}%)</div><div style="${hdQuadValueStyle};color:#ffb547">${fmtNum(Math.round(totalChips*(p.pct||0)/100))}원</div></div>`).join('') : `<div style="text-align:center;font-size:15px;color:#6b6480">등록된 프라이즈 없음</div>`}
+                ${hd.prizes.length ? hd.prizes.slice(0,3).map(p=>`<div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">${p.rank}위 (${p.pct||0}%)</div><div style="${hdQuadValueStyle};color:#ffb547">${fmtNum(Math.round(totalChips*(p.pct||0)/100))}원</div></div>`).join('') : `<div style="text-align:center;font-size:15px;color:#6b6480;${hdNowrap}">등록된 프라이즈 없음</div>`}
               </div>
             </div>
 
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">⏱ 컨트롤</p>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:8px">
-                <button onclick="hdToggleRun()" style="flex:1;border-radius:14px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;font-size:clamp(20px,3.4vh,32px);cursor:pointer;font-family:inherit">${hd.running ? '⏸ 일시정지' : '▶ 재개'}</button>
-                <div style="flex:1;display:flex;gap:8px">
+                <button onclick="hdToggleRun()" style="flex:1;min-width:0;border-radius:14px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;font-size:clamp(20px,3.4vh,32px);cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${hd.running ? '⏸ 일시정지' : '▶ 재개'}</button>
+                <div style="flex:1;display:flex;gap:8px;min-width:0">
                   <button onclick="hdPrevLevel()" style="${hdQuadCtrlBtnStyle}">⏮ 이전</button>
                   <button onclick="hdNextLevel()" style="${hdQuadCtrlBtnStyle}">다음 ⏭</button>
                 </div>
-                <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:15px;padding:8px">🔁 처음부터 다시</button>
+                <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:15px;padding:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">🔁 처음부터 다시</button>
               </div>
             </div>
 
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">👥 인원 & 리바인</p>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
-                <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-                  <span style="font-size:15px;color:#9b94b3;min-width:44px">인원</span>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;min-width:0">
+                  <span style="font-size:15px;color:#9b94b3;min-width:44px;${hdNowrap}">인원</span>
                   <button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>
-                  <span style="font-size:clamp(26px,4.2vh,38px);font-weight:800;color:#f5f1ff;min-width:44px;text-align:center">${hd.currentPlayers}</span>
+                  <span style="font-size:clamp(22px,3.6vh,30px);font-weight:800;color:#f5f1ff;min-width:40px;text-align:center;${hdNowrap}">${hd.currentPlayers}</span>
                   <button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-                  <span style="font-size:15px;color:#9b94b3;min-width:44px">리바인</span>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;min-width:0">
+                  <span style="font-size:15px;color:#9b94b3;min-width:44px;${hdNowrap}">리바인</span>
                   <button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>
-                  <span style="font-size:clamp(26px,4.2vh,38px);font-weight:800;color:#f5f1ff;min-width:44px;text-align:center">${hd.rebuys}</span>
+                  <span style="font-size:clamp(22px,3.6vh,30px);font-weight:800;color:#f5f1ff;min-width:40px;text-align:center;${hdNowrap}">${hd.rebuys}</span>
                   <button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>
                 </div>
               </div>
