@@ -4874,15 +4874,16 @@ Oh my Blue Moon</div>
     if(hd.playerMode) hdSyncPlayersFromList();
     hdSaveSettings(); hdRenderSetup();
   }
-  function hdAddPlayerName(){
-    const nameEl = document.getElementById('hd-playerNameInput');
+  function hdAddPlayerName(inputId){
+    inputId = inputId || 'hd-playerNameInput';
+    const nameEl = document.getElementById(inputId);
     const name = nameEl ? nameEl.value.trim() : '';
     if(!name) return;
     hd.playerList.push({ id:'pl'+Date.now()+Math.random().toString(36).slice(2,6), name, alive:true, rebuys:0 });
     if(nameEl) nameEl.value = '';
     hdSyncPlayersFromList();
-    hdSaveSettings(); hdSaveRunState(); hdRenderSetup();
-    const again = document.getElementById('hd-playerNameInput');
+    hdSaveSettings(); hdSaveRunState(); hdRender();
+    const again = document.getElementById(inputId);
     if(again) again.focus();
   }
   function hdRemovePlayerName(id){
@@ -4920,6 +4921,10 @@ Oh my Blue Moon</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;margin-bottom:8px">
         <p style="${hdQuadTitleStyle};margin:0">👥 바인/리바인 관리</p>
         <button onclick="hdCloseRebuyPanel()" style="flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,95,109,.15);color:#ff5f6d;font-size:13px;cursor:pointer;font-family:inherit">✕</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;margin-bottom:8px">
+        <input id="hd-timerPlayerNameInput" type="text" placeholder="플레이어 이름" onkeydown="if(event.key==='Enter')hdAddPlayerName('hd-timerPlayerNameInput')" style="flex:1;min-width:0;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:6px 8px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box"/>
+        <button onclick="hdAddPlayerName('hd-timerPlayerNameInput')" style="flex-shrink:0;padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#b566ff,#5ec8ff);color:#0a0612;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">추가</button>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px">
         ${hd.playerList.length ? hd.playerList.map(p=>`
@@ -5032,7 +5037,17 @@ Oh my Blue Moon</div>
     if(hd.mode!=='timer' || !hd.running) return;
     const remain = hdRemainSeconds();
     if(remain<=0){ hdLevelComplete(); return; }
-    hdRenderTimer();
+    hdUpdateClock(remain);
+  }
+  function hdUpdateClock(remain){
+    const cd = document.getElementById('hd-countdown');
+    const bar = document.getElementById('hd-progressFill');
+    if(!cd || !bar){ hdRenderTimer(); return; }
+    cd.textContent = fmtTime(remain);
+    cd.style.color = remain<=30 ? '#ff5f6d' : '#f5f1ff';
+    const totalSec = hd.levels[hd.levelIdx].min*60;
+    const pct = totalSec>0 ? Math.max(0, Math.min(100, (remain/totalSec)*100)) : 0;
+    bar.style.width = pct+'%';
   }
   function hdLevelComplete(){
     if(hd.levelIdx < hd.levels.length-1){
@@ -5153,9 +5168,9 @@ Oh my Blue Moon</div>
               ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">Break</div>`
                        : `<div style="font-size:clamp(16px,2.6vh,22px);color:#c9c3dc;margin-bottom:8px;font-weight:600;${hdNowrap}">SB / BB${lv.ante?' / Ante':''}</div>
                           <div style="font-size:clamp(2rem,8.5vh,5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${hdNowrap}">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4.5vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
-              <div style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
+              <div id="hd-countdown" style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
               <div style="width:100%;height:10px;border-radius:5px;background:rgba(140,110,200,0.15);overflow:hidden">
-                <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
+                <div id="hd-progressFill" style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
               </div>
               <div style="margin-top:14px;font-size:clamp(32px,5vh,42px);color:#c9c3dc;font-weight:700;${hdNowrap}">${next ? (next.brk ? 'Next: Break' : `Next Level: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : 'Last Level'}</div>
             </div>
