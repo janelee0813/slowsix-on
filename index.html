@@ -4595,6 +4595,11 @@ Oh my Blue Moon</div>
 
 <!-- 소원구슬 핀볼 페이지 -->
 <div id="page-holdem" class="hidden">
+  <style>
+    @media (orientation: landscape){
+      .hd-main-row{ flex-wrap: nowrap !important; }
+    }
+  </style>
   <div class="px-3 sm:px-5">
     <div id="holdem-wrap"></div>
   </div>
@@ -5180,7 +5185,7 @@ Oh my Blue Moon</div>
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};font-size:15px;padding:8px 16px;white-space:nowrap;flex-shrink:0">⚙ Setup</button>
         </div>
 
-        <div style="flex:1;min-height:0;display:flex;flex-wrap:wrap;gap:8px">
+        <div class="hd-main-row" style="flex:1;min-height:0;display:flex;flex-wrap:wrap;gap:8px">
           <div style="flex:2 1 480px;min-width:0;min-height:0;box-sizing:border-box;padding:2vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center;display:flex;flex-direction:column;align-items:center">
             <div style="flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center">
               ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">Break</div>`
