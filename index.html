@@ -4647,12 +4647,12 @@ Oh my Blue Moon</div>
   const hdGhostBtnStyle = 'padding:6px 12px;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.4);color:#9b94b3;font-size:11.5px;cursor:pointer;font-family:inherit;white-space:nowrap';
   const hdRoundBtnStyle = 'width:clamp(22px,5.5vh,40px);height:clamp(22px,5.5vh,40px);border-radius:50%;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:clamp(13px,3vh,22px);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0';
   const hdTimerCtrlBtnStyle = 'flex:1;padding:16px;border-radius:16px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:clamp(14px,2vw,19px);font-weight:700;cursor:pointer;font-family:inherit';
-  const hdQuadCtrlBtnStyle = 'flex:1;padding:4px;min-width:0;min-height:0;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:clamp(9px,2vh,18px);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-  const hdQuadStyle = 'padding:clamp(4px,1.6vh,10px) clamp(4px,1.2vw,10px);background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:14px;display:flex;flex-direction:column;min-height:0;min-width:0;box-sizing:border-box';
+  const hdQuadCtrlBtnStyle = 'flex:1;padding:4px;min-width:0;min-height:0;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:clamp(11px,2vh,18px);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  const hdQuadStyle = 'padding:clamp(4px,1.6vh,10px) clamp(4px,1.2vw,10px);background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:14px;display:flex;flex-direction:column;min-height:0;min-width:0;box-sizing:border-box;overflow:hidden';
   const hdNowrap = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%';
-  const hdQuadTitleStyle = `font-size:clamp(8px,1.8vh,13px);font-weight:700;color:#b566ff;margin:0 0 3px;letter-spacing:0.02em;flex-shrink:0;${hdNowrap}`;
-  const hdQuadLabelStyle = `font-size:clamp(8px,1.7vh,13px);color:#9b94b3;margin-bottom:1px;${hdNowrap}`;
-  const hdQuadValueStyle = `font-size:clamp(11px,2.8vh,26px);font-weight:800;color:#f5f1ff;line-height:1.05;${hdNowrap}`;
+  const hdQuadTitleStyle = `font-size:clamp(10px,1.8vh,13px);font-weight:700;color:#b566ff;margin:0 0 3px;letter-spacing:0.02em;flex-shrink:0;${hdNowrap}`;
+  const hdQuadLabelStyle = `font-size:clamp(10px,1.7vh,13px);color:#9b94b3;margin-bottom:1px;${hdNowrap}`;
+  const hdQuadValueStyle = `font-size:clamp(13px,2.8vh,26px);font-weight:800;color:#f5f1ff;line-height:1.05;${hdNowrap}`;
 
   let hd = null;
 
@@ -5184,7 +5184,7 @@ Oh my Blue Moon</div>
               ${lv.brk ? `<div style="font-size:clamp(1.1rem,6vh,3rem);font-weight:800;color:#ffb547;margin-bottom:clamp(2px,0.8vh,10px);${hdNowrap}">Break</div>`
                        : `<div style="font-size:clamp(9px,2.2vh,22px);color:#c9c3dc;margin-bottom:clamp(1px,0.6vh,8px);font-weight:600;${hdNowrap}">SB / BB${lv.ante?' / Ante':''}</div>
                           <div style="font-size:clamp(1.1rem,7vh,5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${hdNowrap}">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(0.7rem,3.8vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
-              <div id="hd-countdown" style="font-size:clamp(1.6rem,16vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:clamp(2px,1vh,14px) 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
+              <div id="hd-countdown" style="font-size:clamp(1.6rem,min(16vh,26vw),10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:clamp(2px,1vh,14px) 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
               <div style="width:100%;height:clamp(3px,0.8vh,10px);border-radius:5px;background:rgba(140,110,200,0.15);overflow:hidden">
                 <div id="hd-progressFill" style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
               </div>
@@ -5211,14 +5211,14 @@ Oh my Blue Moon</div>
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">🏆 Prizes</p>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
-                ${hd.prizes.length ? hd.prizes.slice(0,3).map(p=>`<div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">${hdOrdinal(p.rank)} (${p.pct||0}%)</div><div style="${hdQuadValueStyle};color:#ffb547">${fmtNum(Math.round(totalChips*(p.pct||0)/100))}</div></div>`).join('') : `<div style="text-align:center;font-size:clamp(8px,1.7vh,15px);color:#6b6480;${hdNowrap}">No prizes set</div>`}
+                ${hd.prizes.length ? hd.prizes.slice(0,3).map(p=>`<div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">${hdOrdinal(p.rank)} (${p.pct||0}%)</div><div style="${hdQuadValueStyle};color:#ffb547">${fmtNum(Math.round(totalChips*(p.pct||0)/100))}</div></div>`).join('') : `<div style="text-align:center;font-size:clamp(10px,1.7vh,15px);color:#6b6480;${hdNowrap}">No prizes set</div>`}
               </div>
             </div>
 
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">⏱ Controls</p>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(2px,0.8vh,8px)">
-                <button onclick="hdToggleRun()" style="flex:1;min-width:0;min-height:0;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;font-size:clamp(9px,2.8vh,30px);cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${hd.running ? '⏸ Pause' : '▶ Resume'}</button>
+                <button onclick="hdToggleRun()" style="flex:1;min-width:0;min-height:0;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;font-size:clamp(13px,2.8vh,30px);cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${hd.running ? '⏸ Pause' : '▶ Resume'}</button>
                 <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(2px,0.6vh,6px);min-width:0">
                   <div style="flex:1;display:flex;gap:clamp(2px,0.8vh,8px);min-width:0;min-height:0">
                     <button onclick="hdPrevLevel()" style="${hdQuadCtrlBtnStyle}">⏮ Prev</button>
@@ -5229,31 +5229,31 @@ Oh my Blue Moon</div>
                     <button onclick="hdAdjustTime(60)" style="${hdQuadCtrlBtnStyle}">+1 min</button>
                   </div>
                 </div>
-                <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:clamp(7px,1.6vh,14px);padding:clamp(1px,0.6vh,7px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">🔁 Restart</button>
+                <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:clamp(10px,1.6vh,14px);padding:clamp(1px,0.6vh,7px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">🔁 Restart</button>
               </div>
             </div>
 
             <div style="${hdQuadStyle}">
               <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
                 <p style="${hdQuadTitleStyle};margin:0">👥 Entries</p>
-                ${hd.playerMode ? `<button onclick="hdOpenRebuyPanel()" style="flex-shrink:0;padding:clamp(1px,0.5vh,3px) clamp(3px,1vh,8px);border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#9b94b3;font-size:clamp(7px,1.5vh,11px);cursor:pointer;font-family:inherit;white-space:nowrap">Manage</button>` : ''}
+                ${hd.playerMode ? `<button onclick="hdOpenRebuyPanel()" style="flex-shrink:0;padding:clamp(1px,0.5vh,3px) clamp(3px,1vh,8px);border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#9b94b3;font-size:clamp(9px,1.5vh,11px);cursor:pointer;font-family:inherit;white-space:nowrap">Manage</button>` : ''}
               </div>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
-                  <span style="font-size:clamp(8px,1.7vh,14px);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">${hd.playerMode?'Player':'Players'}</span>
+                  <span style="font-size:clamp(10px,1.7vh,14px);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">${hd.playerMode?'Player':'Players'}</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>`}
-                  <span style="font-size:clamp(11px,2.6vh,24px);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers}</span>
+                  <span style="font-size:clamp(13px,2.6vh,24px);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers}</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
-                  <span style="font-size:clamp(8px,1.7vh,14px);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Rebuys</span>
+                  <span style="font-size:clamp(10px,1.7vh,14px);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Rebuys</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>`}
-                  <span style="font-size:clamp(11px,2.6vh,24px);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.rebuys}</span>
+                  <span style="font-size:clamp(13px,2.6vh,24px);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.rebuys}</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
-                  <span style="font-size:clamp(8px,1.7vh,14px);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Total Entries</span>
-                  <span style="font-size:clamp(11px,2.6vh,24px);font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers + hd.rebuys}</span>
+                  <span style="font-size:clamp(10px,1.7vh,14px);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Total Entries</span>
+                  <span style="font-size:clamp(13px,2.6vh,24px);font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers + hd.rebuys}</span>
                 </div>
               </div>
             </div>
