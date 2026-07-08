@@ -141,7 +141,7 @@
   <div class="mx-auto max-w-screen-md px-3 sm:px-5">
     <!-- 모바일: 2줄 / 데스크탑: 1줄 -->
     <div class="flex flex-wrap gap-1.5 py-2 sm:flex-nowrap sm:py-2.5">
-      <button onclick="showPage('slowsix')" id="btn-slowsix" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">슬로우식스온</button>
+      <button onclick="showPage('slowsix')" id="btn-slowsix" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-semibold text-background transition-all">슬로우식스온 안내</button>
       <!-- 필독 버튼 숨김 (재사용 시 아래 주석 해제)
       <button onclick="showPage('guide')" id="btn-guide" class="rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-semibold text-background transition-all">필독</button>
       -->
@@ -181,7 +181,7 @@
 })();
 </script>
 
-<div id="page-slowsix" class="hidden">
+<div id="page-slowsix">
 
 <!-- HERO -->
 <section class="relative overflow-hidden">
@@ -443,7 +443,7 @@
 })();
 </script>
 
-<div id="page-guide">
+<div id="page-guide" class="hidden">
 
 <div class="mx-auto max-w-screen-md px-5 pt-2 text-right">
   <a href="/admin.html" class="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors">관리자 로그인</a>
@@ -5623,7 +5623,7 @@ Oh my Blue Moon</div>
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : page === 'pinball' ? '#pinball' : page === 'holdem' ? '#holdem' : '#' + page;
+    const hash = page === 'slowsix' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : page === 'pinball' ? '#pinball' : page === 'holdem' ? '#holdem' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
     if (page === 'roulette') {
