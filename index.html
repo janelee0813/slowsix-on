@@ -5095,7 +5095,12 @@ Oh my Blue Moon</div>
   }
   function hdResumeTimer(){
     hd.mode='timer';
+    if(!hd.finished && !hd.running){
+      hd.running = true;
+      hd.endAt = Date.now() + hd.remainAtPause*1000;
+    }
     if(hd.running) hdStartTick();
+    hdSaveRunState();
     hdRenderTimer();
   }
   function hdAdjustPlayers(delta){
