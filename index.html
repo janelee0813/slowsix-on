@@ -5121,17 +5121,19 @@ Oh my Blue Moon</div>
         </div>
 
         <div style="flex:1;min-height:0;display:flex;flex-wrap:wrap;gap:8px">
-          <div style="flex:2 1 480px;min-width:0;min-height:0;box-sizing:border-box;padding:2vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">Break</div>`
-                     : `<div style="font-size:clamp(16px,2.6vh,22px);color:#c9c3dc;margin-bottom:8px;font-weight:600;${hdNowrap}">SB / BB${lv.ante?' / Ante':''}</div>
-                        <div style="font-size:clamp(2rem,8.5vh,5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${hdNowrap}">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4.5vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
-            <div style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
-            <div style="width:100%;height:10px;border-radius:5px;background:rgba(140,110,200,0.15);overflow:hidden">
-              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
+          <div style="flex:2 1 480px;min-width:0;min-height:0;box-sizing:border-box;padding:2vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center;display:flex;flex-direction:column;align-items:center">
+            <div style="flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">Break</div>`
+                       : `<div style="font-size:clamp(16px,2.6vh,22px);color:#c9c3dc;margin-bottom:8px;font-weight:600;${hdNowrap}">SB / BB${lv.ante?' / Ante':''}</div>
+                          <div style="font-size:clamp(2rem,8.5vh,5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${hdNowrap}">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4.5vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
+              <div style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
+              <div style="width:100%;height:10px;border-radius:5px;background:rgba(140,110,200,0.15);overflow:hidden">
+                <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
+              </div>
+              <div style="margin-top:14px;font-size:clamp(32px,5vh,42px);color:#c9c3dc;font-weight:700;${hdNowrap}">${next ? (next.brk ? 'Next: Break' : `Next Level: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : 'Last Level'}</div>
             </div>
-            <div style="margin-top:14px;font-size:clamp(32px,5vh,42px);color:#c9c3dc;font-weight:700;${hdNowrap}">${next ? (next.brk ? 'Next: Break' : `Next Level: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : 'Last Level'}</div>
             ${hd.playerMode && hd.playerList.length ? `
-            <div style="margin-top:16px;max-height:16vh;overflow-y:auto;width:100%;display:flex;flex-wrap:wrap;justify-content:center;gap:8px">
+            <div style="flex-shrink:0;margin-top:8px;padding-top:12px;border-top:1px solid rgba(140,110,200,0.15);max-height:16vh;overflow-y:auto;width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-end;gap:8px">
               ${hd.playerList.filter(p=>p.alive).map(p=>`<button onclick="hdEliminatePlayer('${p.id}')" title="탈락 처리" style="padding:8px 18px;border-radius:999px;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:clamp(14px,2vh,17px);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">${hdEsc(p.name)}${p.rebuys?` <span style="color:#ffb547">·${p.rebuys+1}바인</span>`:''}</button>`).join('')}
             </div>` : ''}
           </div>
