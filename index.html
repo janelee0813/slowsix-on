@@ -4607,20 +4607,38 @@ Oh my Blue Moon</div>
 <script>
 (function(){
   const HD_DEFAULT_LEVELS = [
-    {sb:25,bb:50,ante:0,min:15,brk:false},
-    {sb:50,bb:100,ante:0,min:15,brk:false},
-    {sb:75,bb:150,ante:0,min:15,brk:false},
-    {sb:100,bb:200,ante:25,min:15,brk:false},
-    {sb:0,bb:0,ante:0,min:10,brk:true},
-    {sb:150,bb:300,ante:25,min:15,brk:false},
-    {sb:200,bb:400,ante:50,min:15,brk:false},
-    {sb:300,bb:600,ante:75,min:15,brk:false},
-    {sb:400,bb:800,ante:100,min:15,brk:false},
-    {sb:500,bb:1000,ante:100,min:15,brk:false}
+    {sb:100,bb:200,ante:0,min:12,brk:false},
+    {sb:200,bb:400,ante:0,min:12,brk:false},
+    {sb:300,bb:600,ante:0,min:12,brk:false},
+    {sb:400,bb:800,ante:0,min:12,brk:false},
+    {sb:500,bb:1000,ante:0,min:12,brk:false},
+    {sb:0,bb:0,ante:0,min:12,brk:true},
+    {sb:600,bb:1200,ante:0,min:12,brk:false},
+    {sb:800,bb:1600,ante:0,min:12,brk:false},
+    {sb:1000,bb:2000,ante:0,min:12,brk:false},
+    {sb:1200,bb:2400,ante:0,min:12,brk:false},
+    {sb:1400,bb:2800,ante:0,min:12,brk:false},
+    {sb:0,bb:0,ante:0,min:12,brk:true},
+    {sb:1500,bb:3000,ante:0,min:12,brk:false},
+    {sb:2000,bb:4000,ante:0,min:12,brk:false},
+    {sb:3000,bb:6000,ante:0,min:12,brk:false},
+    {sb:4000,bb:8000,ante:0,min:12,brk:false},
+    {sb:5000,bb:10000,ante:0,min:12,brk:false},
+    {sb:0,bb:0,ante:0,min:12,brk:true},
+    {sb:6000,bb:12000,ante:0,min:12,brk:false},
+    {sb:7000,bb:14000,ante:0,min:12,brk:false},
+    {sb:8000,bb:16000,ante:0,min:12,brk:false},
+    {sb:10000,bb:20000,ante:0,min:12,brk:false},
+    {sb:15000,bb:30000,ante:0,min:12,brk:false},
+    {sb:0,bb:0,ante:0,min:12,brk:true},
+    {sb:20000,bb:40000,ante:0,min:12,brk:false},
+    {sb:30000,bb:60000,ante:0,min:12,brk:false},
+    {sb:40000,bb:80000,ante:0,min:12,brk:false},
+    {sb:50000,bb:100000,ante:0,min:12,brk:false}
   ];
   const HD_DEFAULT_PRIZES = [ {rank:1,pct:50}, {rank:2,pct:30}, {rank:3,pct:20} ];
-  const HD_STORE_KEY = 'holdemTimerSettings_v2';
-  const HD_STATE_KEY = 'holdemTimerState_v2';
+  const HD_STORE_KEY = 'holdemTimerSettings_v3';
+  const HD_STATE_KEY = 'holdemTimerState_v3';
 
   const hdInputStyle = 'width:100%;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:8px 10px;font-size:13px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box';
   const hdCellInputStyle = 'width:68px;border-radius:8px;border:1px solid rgba(140,110,200,.25);background:rgba(30,22,55,.6);padding:5px 6px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box';
@@ -4794,10 +4812,10 @@ Oh my Blue Moon</div>
   function hdAddLevel(){
     let last = null;
     for(let i=hd.levels.length-1;i>=0;i--){ if(!hd.levels[i].brk){ last = hd.levels[i]; break; } }
-    hd.levels.push({ sb: last? last.sb*2:25, bb: last? last.bb*2:50, ante: last? last.ante:0, min: last? last.min:15, brk:false });
+    hd.levels.push({ sb: last? last.sb*2:100, bb: last? last.bb*2:200, ante: last? last.ante:0, min: last? last.min:12, brk:false });
     hdSaveSettings(); hdRenderSetup();
   }
-  function hdAddBreak(){ hd.levels.push({sb:0,bb:0,ante:0,min:10,brk:true}); hdSaveSettings(); hdRenderSetup(); }
+  function hdAddBreak(){ hd.levels.push({sb:0,bb:0,ante:0,min:12,brk:true}); hdSaveSettings(); hdRenderSetup(); }
   function hdRemoveLevel(i){ if(hd.levels.length<=1) return; hd.levels.splice(i,1); hdSaveSettings(); hdRenderSetup(); }
   function hdResetLevels(){ hd.levels = JSON.parse(JSON.stringify(HD_DEFAULT_LEVELS)); hdSaveSettings(); hdRenderSetup(); }
   function hdPrizeTotals(){
