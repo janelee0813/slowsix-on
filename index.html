@@ -115,7 +115,7 @@
 </div>
 
 <!-- 방문자 카운터 (모바일 포함 항상 표시) -->
-<div class="fixed top-2 right-3 z-50 flex items-center gap-1.5 rounded-full border border-neon-purple/20 bg-surface/80 px-2.5 py-1 backdrop-blur-sm">
+<div class="fixed top-2 right-3 z-50 hidden sm:flex items-center gap-1.5 rounded-full border border-neon-purple/20 bg-surface/80 px-2.5 py-1 backdrop-blur-sm">
   <svg class="h-2.5 w-2.5 text-neon-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
   <span class="text-[9px] text-muted-foreground">방문자수</span>
   <span id="visit-count" class="text-[9px] font-semibold text-neon-purple">—</span>
@@ -4696,19 +4696,6 @@ Oh my Blue Moon</div>
       o.start(); o.stop(ctx.currentTime+0.55);
     }catch(e){}
   }
-  function hdAnnounceLevel(){
-    try{
-      if(!window.speechSynthesis){ hdBeep(); return; }
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance('Blind Level Up');
-      u.lang = 'en-US';
-      const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
-      if(enVoice) u.voice = enVoice;
-      window.speechSynthesis.speak(u);
-    }catch(e){ hdBeep(); }
-  }
-
   function holdemInit(){
     if(!hdWrap()) return;
     const settings = hdLoadSettings();
@@ -5071,7 +5058,7 @@ Oh my Blue Moon</div>
   function hdLevelComplete(){
     if(hd.levelIdx < hd.levels.length-1){
       hd.levelIdx++; hd.remainAtPause = hd.levels[hd.levelIdx].min*60; hd.endAt = Date.now()+hd.remainAtPause*1000;
-      hdAnnounceLevel(); hdSaveRunState(); hdRenderTimer();
+      hdBeep(); hdSaveRunState(); hdRenderTimer();
     } else {
       hd.running=false; hd.finished=true; hd.remainAtPause=0;
       if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
