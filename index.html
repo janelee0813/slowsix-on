@@ -147,6 +147,7 @@
       -->
 
       <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">소식</button>
+      <button onclick="showPage('holdem')" id="btn-holdem" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">홀덤</button>
       <!-- 여행 버튼 숨김 (재사용 시 아래 주석 해제)
       <button onclick="showPage('travel')" id="btn-travel" class="rounded-full border border-border px-3.5 py-1.5 text-[12.5px] sm:text-[13px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple">여행</button>
       -->
@@ -4593,6 +4594,370 @@ Oh my Blue Moon</div>
 </div>
 
 <!-- 소원구슬 핀볼 페이지 -->
+<div id="page-holdem" class="hidden">
+  <div class="mx-auto max-w-screen-md px-5 py-10">
+    <div style="position:relative;margin-bottom:20px">
+      <h1 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.01em;text-align:center"><span style="background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">홀덤</span> 블라인드 타이머</h1>
+      <p style="font-size:12px;color:#6b6480;margin-top:6px;text-align:center">블라인드 레벨 · 시작칩 · 프라이즈까지 한 번에 셋팅하세요 ♠️</p>
+    </div>
+    <div id="holdem-wrap"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const HD_DEFAULT_LEVELS = [
+    {sb:25,bb:50,ante:0,min:15,brk:false},
+    {sb:50,bb:100,ante:0,min:15,brk:false},
+    {sb:75,bb:150,ante:0,min:15,brk:false},
+    {sb:100,bb:200,ante:25,min:15,brk:false},
+    {sb:0,bb:0,ante:0,min:10,brk:true},
+    {sb:150,bb:300,ante:25,min:15,brk:false},
+    {sb:200,bb:400,ante:50,min:15,brk:false},
+    {sb:300,bb:600,ante:75,min:15,brk:false},
+    {sb:400,bb:800,ante:100,min:15,brk:false},
+    {sb:500,bb:1000,ante:100,min:15,brk:false}
+  ];
+  const HD_DEFAULT_PRIZES = [ {rank:1,amount:0}, {rank:2,amount:0}, {rank:3,amount:0} ];
+  const HD_STORE_KEY = 'holdemTimerSettings_v1';
+  const HD_STATE_KEY = 'holdemTimerState_v1';
+
+  const hdInputStyle = 'width:100%;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:8px 10px;font-size:13px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box';
+  const hdCellInputStyle = 'width:68px;border-radius:8px;border:1px solid rgba(140,110,200,.25);background:rgba(30,22,55,.6);padding:5px 6px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box';
+  const hdGhostBtnStyle = 'padding:6px 12px;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.4);color:#9b94b3;font-size:11.5px;cursor:pointer;font-family:inherit;white-space:nowrap';
+  const hdCtrlBtnStyle = 'flex:1;padding:12px;border-radius:12px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#e5e0f0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit';
+  const hdRoundBtnStyle = 'width:36px;height:36px;border-radius:50%;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:18px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center';
+
+  let hd = null;
+
+  function hdWrap(){ return document.getElementById('holdem-wrap'); }
+  function fmtNum(n){ return Number(n||0).toLocaleString('ko-KR'); }
+  function fmtTime(sec){ sec = Math.max(0, Math.round(sec)); const m = Math.floor(sec/60), s = sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+
+  function hdLoadSettings(){
+    try{ const raw = localStorage.getItem(HD_STORE_KEY); if(raw){ const s = JSON.parse(raw); if(s && s.levels && s.levels.length) return s; } }catch(e){}
+    return { startingChips:10000, players:9, levels: JSON.parse(JSON.stringify(HD_DEFAULT_LEVELS)), prizes: JSON.parse(JSON.stringify(HD_DEFAULT_PRIZES)) };
+  }
+  function hdSaveSettings(){
+    try{ localStorage.setItem(HD_STORE_KEY, JSON.stringify({startingChips:hd.startingChips, players:hd.players, levels:hd.levels, prizes:hd.prizes})); }catch(e){}
+  }
+  function hdSaveRunState(){
+    try{
+      if(hd.mode==='timer') localStorage.setItem(HD_STATE_KEY, JSON.stringify({levelIdx:hd.levelIdx, endAt:hd.endAt, running:hd.running, remainAtPause:hd.remainAtPause, currentPlayers:hd.currentPlayers, finished:hd.finished}));
+      else localStorage.removeItem(HD_STATE_KEY);
+    }catch(e){}
+  }
+  function hdLoadRunState(){
+    try{ const raw = localStorage.getItem(HD_STATE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return null;
+  }
+  function hdBeep(){
+    try{
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type='sine'; o.frequency.value=880;
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.5);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime+0.55);
+    }catch(e){}
+  }
+
+  function holdemInit(){
+    if(!hdWrap()) return;
+    const settings = hdLoadSettings();
+    hd = { mode:'setup', startingChips:settings.startingChips, players:settings.players, levels:settings.levels, prizes:settings.prizes,
+      levelIdx:0, currentPlayers:settings.players, running:false, endAt:0, remainAtPause:0, tick:null, finished:false };
+    const rs = hdLoadRunState();
+    if(rs && hd.levels[rs.levelIdx]){
+      hd.mode='timer'; hd.levelIdx=rs.levelIdx; hd.currentPlayers=rs.currentPlayers; hd.running=rs.running;
+      hd.endAt=rs.endAt; hd.remainAtPause=rs.remainAtPause; hd.finished=!!rs.finished;
+      if(hd.running){
+        const remain = (hd.endAt-Date.now())/1000;
+        if(remain<=0){ hd.running=false; hd.remainAtPause=0; if(hd.levelIdx===hd.levels.length-1) hd.finished=true; }
+      }
+    }
+    hdRender();
+    if(hd.mode==='timer' && hd.running) hdStartTick();
+  }
+
+  function hdRender(){ if(hd.mode==='setup') hdRenderSetup(); else hdRenderTimer(); }
+
+  /* ---------- 설정 화면 ---------- */
+  function hdRenderSetup(){
+    const wrap = hdWrap(); if(!wrap) return;
+    const totalChips = hd.startingChips * hd.players;
+    wrap.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+          <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 14px;letter-spacing:0.08em">🪙 기본 설정</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:11px;color:#9b94b3">시작 칩 수량</span>
+              <input id="hd-startChips" oninput="hdOnBasicInput(this)" type="number" min="0" step="100" value="${hd.startingChips}" style="${hdInputStyle}"/>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:11px;color:#9b94b3">참가자 수</span>
+              <input id="hd-players" oninput="hdOnBasicInput(this)" type="number" min="1" step="1" value="${hd.players}" style="${hdInputStyle}"/>
+            </label>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:16px;font-size:12px;color:#9b94b3">
+            <span>총 칩: <b id="hd-totalChipsVal" style="color:#e5e0f0">${fmtNum(totalChips)}</b></span>
+            <span>평균 스택: <b id="hd-avgStackVal" style="color:#e5e0f0">${fmtNum(Math.round(totalChips/(hd.players||1)))}</b></span>
+          </div>
+        </div>
+
+        <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0;letter-spacing:0.08em">📈 블라인드 레벨</p>
+            <div style="display:flex;gap:8px">
+              <button onclick="hdResetLevels()" style="${hdGhostBtnStyle}">기본값</button>
+              <button onclick="hdAddBreak()" style="${hdGhostBtnStyle}">+ 브레이크</button>
+              <button onclick="hdAddLevel()" style="${hdGhostBtnStyle}">+ 레벨 추가</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="color:#6b6480;text-align:left">
+                  <th style="padding:6px 4px;font-weight:600">Lv</th>
+                  <th style="padding:6px 4px;font-weight:600">SB</th>
+                  <th style="padding:6px 4px;font-weight:600">BB</th>
+                  <th style="padding:6px 4px;font-weight:600">안티</th>
+                  <th style="padding:6px 4px;font-weight:600">시간(분)</th>
+                  <th style="padding:6px 4px;font-weight:600">브레이크</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${hd.levels.map((lv,i)=>`
+                <tr style="border-top:1px solid rgba(140,110,200,0.12)">
+                  <td style="padding:6px 4px;color:#9b94b3">${i+1}</td>
+                  <td style="padding:6px 4px">${lv.brk? '—' : `<input data-i="${i}" data-f="sb" onchange="hdEditLevel(this)" type="number" min="0" value="${lv.sb}" style="${hdCellInputStyle}"/>`}</td>
+                  <td style="padding:6px 4px">${lv.brk? '—' : `<input data-i="${i}" data-f="bb" onchange="hdEditLevel(this)" type="number" min="0" value="${lv.bb}" style="${hdCellInputStyle}"/>`}</td>
+                  <td style="padding:6px 4px">${lv.brk? '—' : `<input data-i="${i}" data-f="ante" onchange="hdEditLevel(this)" type="number" min="0" value="${lv.ante}" style="${hdCellInputStyle}"/>`}</td>
+                  <td style="padding:6px 4px"><input data-i="${i}" data-f="min" onchange="hdEditLevel(this)" type="number" min="1" value="${lv.min}" style="${hdCellInputStyle}"/></td>
+                  <td style="padding:6px 4px;text-align:center"><input data-i="${i}" data-f="brk" onchange="hdEditLevel(this)" type="checkbox" ${lv.brk?'checked':''}/></td>
+                  <td style="padding:6px 4px"><button onclick="hdRemoveLevel(${i})" style="background:none;border:none;color:#6b6480;cursor:pointer;font-size:14px" title="삭제">✕</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0;letter-spacing:0.08em">🏆 프라이즈</p>
+            <button onclick="hdAddPrize()" style="${hdGhostBtnStyle}">+ 순위 추가</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${hd.prizes.map((p,i)=>`
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:#9b94b3;min-width:36px">${p.rank}위</span>
+              <input data-i="${i}" onchange="hdEditPrize(this)" type="number" min="0" step="1000" value="${p.amount}" style="${hdInputStyle};flex:1" placeholder="상금(원)"/>
+              <button onclick="hdRemovePrize(${i})" style="background:none;border:none;color:#6b6480;cursor:pointer;font-size:14px">✕</button>
+            </div>`).join('')}
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:#9b94b3">총 상금: <b style="color:#e5e0f0">${fmtNum(hd.prizes.reduce((s,p)=>s+Number(p.amount||0),0))}원</b></div>
+        </div>
+
+        <button onclick="hdStart()" style="padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">▶ 타이머 시작</button>
+      </div>`;
+  }
+
+  function hdOnBasicInput(el){
+    if(el.id==='hd-startChips') hd.startingChips = Math.max(0, Number(el.value)||0);
+    if(el.id==='hd-players') hd.players = Math.max(1, Number(el.value)||1);
+    hdSaveSettings();
+    const total = hd.startingChips*hd.players;
+    const totalEl = document.getElementById('hd-totalChipsVal');
+    const avgEl = document.getElementById('hd-avgStackVal');
+    if(totalEl) totalEl.textContent = fmtNum(total);
+    if(avgEl) avgEl.textContent = fmtNum(Math.round(total/(hd.players||1)));
+  }
+  function hdEditLevel(el){
+    const i = Number(el.dataset.i), f = el.dataset.f;
+    if(f==='brk'){ hd.levels[i].brk = el.checked; if(hd.levels[i].brk){ hd.levels[i].sb=0; hd.levels[i].bb=0; hd.levels[i].ante=0; } }
+    else hd.levels[i][f] = Math.max(0, Number(el.value)||0);
+    hdSaveSettings(); hdRenderSetup();
+  }
+  function hdAddLevel(){
+    let last = null;
+    for(let i=hd.levels.length-1;i>=0;i--){ if(!hd.levels[i].brk){ last = hd.levels[i]; break; } }
+    hd.levels.push({ sb: last? last.sb*2:25, bb: last? last.bb*2:50, ante: last? last.ante:0, min: last? last.min:15, brk:false });
+    hdSaveSettings(); hdRenderSetup();
+  }
+  function hdAddBreak(){ hd.levels.push({sb:0,bb:0,ante:0,min:10,brk:true}); hdSaveSettings(); hdRenderSetup(); }
+  function hdRemoveLevel(i){ if(hd.levels.length<=1) return; hd.levels.splice(i,1); hdSaveSettings(); hdRenderSetup(); }
+  function hdResetLevels(){ hd.levels = JSON.parse(JSON.stringify(HD_DEFAULT_LEVELS)); hdSaveSettings(); hdRenderSetup(); }
+  function hdEditPrize(el){ const i = Number(el.dataset.i); hd.prizes[i].amount = Math.max(0, Number(el.value)||0); hdSaveSettings(); hdRenderSetup(); }
+  function hdAddPrize(){ const nextRank = hd.prizes.length? hd.prizes[hd.prizes.length-1].rank+1 : 1; hd.prizes.push({rank:nextRank, amount:0}); hdSaveSettings(); hdRenderSetup(); }
+  function hdRemovePrize(i){ hd.prizes.splice(i,1); hd.prizes.forEach((p,idx)=>p.rank=idx+1); hdSaveSettings(); hdRenderSetup(); }
+
+  function hdStart(){
+    const scEl = document.getElementById('hd-startChips'), plEl = document.getElementById('hd-players');
+    if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
+    if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
+    if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
+    hdSaveSettings();
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.finished=false;
+    hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
+    hdSaveRunState(); hdStartTick(); hdRenderTimer();
+  }
+
+  /* ---------- 타이머 화면 ---------- */
+  function hdRemainSeconds(){ return hd.running ? Math.max(0,(hd.endAt-Date.now())/1000) : hd.remainAtPause; }
+  function hdStartTick(){ if(hd.tick) clearInterval(hd.tick); hd.tick = setInterval(hdTick, 1000); }
+  function hdTick(){
+    if(hd.mode!=='timer' || !hd.running) return;
+    const remain = hdRemainSeconds();
+    if(remain<=0){ hdLevelComplete(); return; }
+    hdRenderTimer();
+  }
+  function hdLevelComplete(){
+    if(hd.levelIdx < hd.levels.length-1){
+      hd.levelIdx++; hd.remainAtPause = hd.levels[hd.levelIdx].min*60; hd.endAt = Date.now()+hd.remainAtPause*1000;
+      hdBeep(); hdSaveRunState(); hdRenderTimer();
+    } else {
+      hd.running=false; hd.finished=true; hd.remainAtPause=0;
+      if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
+      hdBeep(); hdSaveRunState(); hdRenderTimer();
+    }
+  }
+  function hdToggleRun(){
+    if(hd.finished) return;
+    if(hd.running){ hd.remainAtPause = hdRemainSeconds(); hd.running=false; if(hd.tick){ clearInterval(hd.tick); hd.tick=null; } }
+    else { hd.endAt = Date.now()+hd.remainAtPause*1000; hd.running=true; hdStartTick(); }
+    hdSaveRunState(); hdRenderTimer();
+  }
+  function hdGotoLevel(idx){
+    idx = Math.max(0, Math.min(hd.levels.length-1, idx));
+    hd.levelIdx = idx; hd.finished=false; hd.remainAtPause = hd.levels[idx].min*60;
+    if(hd.running) hd.endAt = Date.now()+hd.remainAtPause*1000;
+    hdSaveRunState(); hdRenderTimer();
+  }
+  function hdPrevLevel(){ hdGotoLevel(hd.levelIdx-1); }
+  function hdNextLevel(){ hdGotoLevel(hd.levelIdx+1); }
+  function hdConfirmReset(){ if(confirm('처음부터 다시 시작할까요? 진행 중인 타이머가 초기화됩니다.')) hdResetTimerRun(); }
+  function hdResetTimerRun(){
+    hd.levelIdx=0; hd.finished=false; hd.currentPlayers=hd.players; hd.remainAtPause = hd.levels[0].min*60;
+    hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000; hdStartTick(); hdSaveRunState(); hdRenderTimer();
+  }
+  function hdBackToSetup(){
+    if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
+    hd.mode='setup'; hd.running=false;
+    try{ localStorage.removeItem(HD_STATE_KEY); }catch(e){}
+    hdRenderSetup();
+  }
+  function hdAdjustPlayers(delta){
+    hd.currentPlayers = Math.max(1, Math.min(hd.players, hd.currentPlayers+delta));
+    hdSaveRunState(); hdRenderTimer();
+  }
+
+  function hdPrizeBlock(){
+    if(!hd.prizes.length) return '';
+    return `<div style="padding:18px 20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+      <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 12px;letter-spacing:0.08em">🏆 프라이즈</p>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${hd.prizes.map(p=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#e5e0f0"><span>${p.rank}위</span><span>${fmtNum(p.amount)}원</span></div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  function hdRenderTimer(){
+    const wrap = hdWrap(); if(!wrap) return;
+
+    if(hd.finished){
+      wrap.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="padding:40px 20px;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:20px;text-align:center">
+            <div style="font-size:32px;margin-bottom:10px">🏆</div>
+            <div style="font-size:20px;font-weight:800;color:#e5e0f0">토너먼트 종료</div>
+            <p style="font-size:12px;color:#6b6480;margin-top:8px">모든 블라인드 레벨이 끝났어요.</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="hdPrevLevel()" style="${hdCtrlBtnStyle}">⏮ 이전 레벨로</button>
+            <button onclick="hdConfirmReset()" style="${hdCtrlBtnStyle};flex:2">🔁 처음부터 다시</button>
+          </div>
+          <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};align-self:center">⚙ 설정으로 돌아가기</button>
+          ${hdPrizeBlock()}
+        </div>`;
+      return;
+    }
+
+    const lv = hd.levels[hd.levelIdx];
+    const next = hd.levels[hd.levelIdx+1];
+    const totalChips = hd.startingChips * hd.players;
+    const avgStack = hd.currentPlayers>0 ? Math.round(totalChips/hd.currentPlayers) : 0;
+    const remain = hdRemainSeconds();
+    const totalSec = lv.min*60;
+    const pct = totalSec>0 ? Math.max(0, Math.min(100, (remain/totalSec)*100)) : 0;
+
+    wrap.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:#9b94b3">레벨 ${hd.levelIdx+1} / ${hd.levels.length}</span>
+          <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle}">⚙ 설정으로</button>
+        </div>
+
+        <div style="padding:32px 20px;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:20px;text-align:center">
+          ${lv.brk ? `<div style="font-size:16px;font-weight:800;color:#ffb547;margin-bottom:10px">☕ 브레이크</div>`
+                   : `<div style="font-size:14px;color:#9b94b3;margin-bottom:6px">SB / BB${lv.ante?' / 안티':''}</div>
+                      <div style="font-size:34px;font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:20px;color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
+          <div style="font-size:56px;font-weight:800;letter-spacing:0.02em;margin:18px 0 10px;color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
+          <div style="height:6px;border-radius:4px;background:rgba(140,110,200,0.15);overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);transition:width 1s linear"></div>
+          </div>
+          <div style="margin-top:14px;font-size:12px;color:#6b6480">${next ? (next.brk ? '다음: 브레이크' : `다음 레벨: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : '마지막 레벨'}</div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button onclick="hdPrevLevel()" style="${hdCtrlBtnStyle}">⏮ 이전</button>
+          <button onclick="hdToggleRun()" style="${hdCtrlBtnStyle};flex:2;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;border:none">${hd.running ? '⏸ 일시정지' : '▶ 재개'}</button>
+          <button onclick="hdNextLevel()" style="${hdCtrlBtnStyle}">다음 ⏭</button>
+        </div>
+        <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};align-self:center">🔁 처음부터 다시</button>
+
+        <div style="padding:18px 20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+          <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 12px;letter-spacing:0.08em">👥 참가 인원 & 스택</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>
+            <span style="font-size:18px;font-weight:700;min-width:70px;text-align:center">${hd.currentPlayers}명</span>
+            <button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>
+            <span style="font-size:11px;color:#6b6480">(시작 ${hd.players}명)</span>
+          </div>
+          <div style="display:flex;gap:16px;font-size:12px;color:#9b94b3">
+            <span>총 칩: <b style="color:#e5e0f0">${fmtNum(totalChips)}</b></span>
+            <span>평균 스택: <b style="color:#e5e0f0">${fmtNum(avgStack)}</b></span>
+          </div>
+        </div>
+
+        ${hdPrizeBlock()}
+      </div>`;
+  }
+
+  window.holdemInit = holdemInit;
+  window.holdemReady = false;
+  window.hdOnBasicInput = hdOnBasicInput;
+  window.hdEditLevel = hdEditLevel;
+  window.hdAddLevel = hdAddLevel;
+  window.hdAddBreak = hdAddBreak;
+  window.hdRemoveLevel = hdRemoveLevel;
+  window.hdResetLevels = hdResetLevels;
+  window.hdEditPrize = hdEditPrize;
+  window.hdAddPrize = hdAddPrize;
+  window.hdRemovePrize = hdRemovePrize;
+  window.hdStart = hdStart;
+  window.hdToggleRun = hdToggleRun;
+  window.hdPrevLevel = hdPrevLevel;
+  window.hdNextLevel = hdNextLevel;
+  window.hdConfirmReset = hdConfirmReset;
+  window.hdBackToSetup = hdBackToSetup;
+  window.hdAdjustPlayers = hdAdjustPlayers;
+})();
+</script>
+
 <div id="page-pinball" class="hidden">
   <div class="mx-auto max-w-screen-md px-5 py-10">
     <div style="position:relative;margin-bottom:20px">
@@ -5000,14 +5365,14 @@ Oh my Blue Moon</div>
   }
 
   function showPage(page) {
-    ['guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'pinball'].forEach(p => {
+    ['guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'pinball', 'holdem'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       if (btn) btn.className = p === page
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all'
         : 'rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple';
     });
-    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : page === 'pinball' ? '#pinball' : '#' + page;
+    const hash = page === 'guide' ? '' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : page === 'pinball' ? '#pinball' : page === 'holdem' ? '#holdem' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
     if (page === 'roulette') {
@@ -5039,6 +5404,9 @@ Oh my Blue Moon</div>
     if (page === 'pinball') {
       if (!window.pinballReady) { window.pinballReady = true; window.pinballInit(); }
     }
+    if (page === 'holdem') {
+      if (!window.holdemReady) { window.holdemReady = true; window.holdemInit(); }
+    }
   }
 
   function copyCalcUrl() {
@@ -5065,6 +5433,7 @@ Oh my Blue Moon</div>
     else if (hash === 'beta') showPage('beta');
     else if (hash === 'travel') { showPage('travel'); }
     else if (hash === 'pinball') { showPage('pinball'); }
+    else if (hash === 'holdem') { showPage('holdem'); }
   })();
 </script>
 
