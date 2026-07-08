@@ -4663,10 +4663,8 @@ Oh my Blue Moon</div>
     try{ localStorage.setItem(HD_STORE_KEY, JSON.stringify({startingChips:hd.startingChips, players:hd.players, levels:hd.levels, prizes:hd.prizes, playerMode:hd.playerMode, playerList:hd.playerList})); }catch(e){}
   }
   function hdSaveRunState(){
-    try{
-      if(hd.mode==='timer') localStorage.setItem(HD_STATE_KEY, JSON.stringify({levelIdx:hd.levelIdx, endAt:hd.endAt, running:hd.running, remainAtPause:hd.remainAtPause, currentPlayers:hd.currentPlayers, rebuys:hd.rebuys, finished:hd.finished, playerList:hd.playerList}));
-      else localStorage.removeItem(HD_STATE_KEY);
-    }catch(e){}
+    if(!hd.hasRun) return;
+    try{ localStorage.setItem(HD_STATE_KEY, JSON.stringify({levelIdx:hd.levelIdx, endAt:hd.endAt, running:hd.running, remainAtPause:hd.remainAtPause, currentPlayers:hd.currentPlayers, rebuys:hd.rebuys, finished:hd.finished, playerList:hd.playerList})); }catch(e){}
   }
   function hdLoadRunState(){
     try{ const raw = localStorage.getItem(HD_STATE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
@@ -4698,9 +4696,10 @@ Oh my Blue Moon</div>
     const settings = hdLoadSettings();
     hd = { mode:'setup', startingChips:settings.startingChips, players:settings.players, levels:settings.levels, prizes:settings.prizes,
       playerMode:!!settings.playerMode, playerList:settings.playerList||[],
-      levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false };
+      levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false };
     const rs = hdLoadRunState();
     if(rs && hd.levels[rs.levelIdx]){
+      hd.hasRun = true;
       hd.mode='timer'; hd.levelIdx=rs.levelIdx; hd.currentPlayers=rs.currentPlayers; hd.rebuys=rs.rebuys||0; hd.running=rs.running;
       hd.endAt=rs.endAt; hd.remainAtPause=rs.remainAtPause; hd.finished=!!rs.finished;
       if(hd.playerMode && rs.playerList) hd.playerList = rs.playerList;
@@ -4727,6 +4726,11 @@ Oh my Blue Moon</div>
         <p style="font-size:12px;color:#6b6480;margin-top:6px;text-align:center">블라인드 레벨 · 시작칩 · 프라이즈까지 한 번에 셋팅하세요 ♠️</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
+        ${hd.hasRun ? `
+        <div style="padding:14px 16px;background:rgba(181,102,255,0.12);border:1px solid rgba(181,102,255,0.35);border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <span style="font-size:12.5px;color:#e5e0f0">진행 중인 타이머가 있어요${hd.finished?' (종료됨)':' (일시정지됨)'}.</span>
+          <button onclick="hdResumeTimer()" style="padding:8px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">▶ 타이머로 돌아가기</button>
+        </div>` : ''}
         <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
           <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 14px;letter-spacing:0.08em">💾 게임별 프리셋</p>
           <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
@@ -4771,12 +4775,17 @@ Oh my Blue Moon</div>
             <input id="hd-playerNameInput" type="text" placeholder="플레이어 이름" onkeydown="if(event.key==='Enter')hdAddPlayerName()" style="${hdInputStyle};flex:1"/>
             <button onclick="hdAddPlayerName()" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#5ec8ff);color:#0a0612;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">추가</button>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:6px">
             ${hd.playerList.length ? hd.playerList.map(p=>`
-            <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;border-radius:999px;background:rgba(30,22,55,.6);border:1px solid rgba(140,110,200,.3);font-size:12.5px;color:#e5e0f0">
-              ${hdEsc(p.name)}
-              <button onclick="hdRemovePlayerName('${p.id}')" style="width:18px;height:18px;border-radius:50%;border:none;background:rgba(255,95,109,.18);color:#ff5f6d;font-size:11px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">✕</button>
-            </span>`).join('') : `<span style="font-size:12px;color:#6b6480">아직 등록된 플레이어가 없어요.</span>`}
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:rgba(30,22,55,.5);border:1px solid rgba(140,110,200,.25)">
+              <button onclick="hdTogglePlayerAlive('${p.id}')" title="${p.alive?'탈락 처리':'생존 처리'}" style="flex-shrink:0;width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;font-size:11px;font-family:inherit;background:${p.alive?'rgba(94,224,168,.18)':'rgba(255,95,109,.18)'};color:${p.alive?'#5ee0a8':'#ff5f6d'}">${p.alive?'●':'✕'}</button>
+              <span style="flex:1;min-width:0;font-size:12.5px;color:${p.alive?'#e5e0f0':'#6b6480'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${p.alive?'':'text-decoration:line-through'}">${hdEsc(p.name)}</span>
+              <span style="flex-shrink:0;font-size:10.5px;color:#6b6480">바인</span>
+              <button onclick="hdAdjustPlayerRebuy('${p.id}',-1)" style="flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center">−</button>
+              <span style="flex-shrink:0;min-width:14px;text-align:center;font-size:12.5px;font-weight:700;color:#f5f1ff">${(p.rebuys||0)+1}</span>
+              <button onclick="hdAdjustPlayerRebuy('${p.id}',1)" style="flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center">+</button>
+              <button onclick="hdRemovePlayerName('${p.id}')" style="flex-shrink:0;width:20px;height:20px;border-radius:50%;border:none;background:rgba(255,95,109,.15);color:#ff5f6d;font-size:11px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>`).join('') : `<span style="font-size:12px;color:#6b6480">아직 등록된 플레이어가 없어요.</span>`}
           </div>` : `<p style="font-size:11px;color:#6b6480;margin:8px 0 0">켜면 플레이어 이름으로 인원을 관리하고, 타이머 실행 중 생존 인원을 이름으로 표시해요.</p>`}
         </div>
 
@@ -4866,7 +4875,7 @@ Oh my Blue Moon</div>
     const nameEl = document.getElementById('hd-playerNameInput');
     const name = nameEl ? nameEl.value.trim() : '';
     if(!name) return;
-    hd.playerList.push({ id:'pl'+Date.now()+Math.random().toString(36).slice(2,6), name, alive:true });
+    hd.playerList.push({ id:'pl'+Date.now()+Math.random().toString(36).slice(2,6), name, alive:true, rebuys:0 });
     if(nameEl) nameEl.value = '';
     hdSyncPlayersFromList();
     hdSaveSettings(); hdRenderSetup();
@@ -4885,6 +4894,21 @@ Oh my Blue Moon</div>
     p.alive = false;
     hd.currentPlayers = hd.playerList.filter(p=>p.alive).length;
     hdSaveRunState(); hdRenderTimer();
+  }
+  function hdSyncRebuysFromList(){ hd.rebuys = hd.playerList.reduce((s,p)=>s+(p.rebuys||0), 0); }
+  function hdTogglePlayerAlive(id){
+    const p = hd.playerList.find(p=>p.id===id);
+    if(!p) return;
+    p.alive = !p.alive;
+    hd.currentPlayers = hd.playerList.filter(p=>p.alive).length;
+    hdSaveSettings(); hdSaveRunState(); hdRenderSetup();
+  }
+  function hdAdjustPlayerRebuy(id, delta){
+    const p = hd.playerList.find(p=>p.id===id);
+    if(!p) return;
+    p.rebuys = Math.max(0, (p.rebuys||0)+delta);
+    hdSyncRebuysFromList();
+    hdSaveSettings(); hdSaveRunState(); hdRenderSetup();
   }
   function hdEditLevel(el){
     const i = Number(el.dataset.i), f = el.dataset.f;
@@ -4968,12 +4992,12 @@ Oh my Blue Moon</div>
     if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
     if(hd.playerMode){
       if(!hd.playerList.length){ alert('플레이어를 1명 이상 등록해주세요.'); return; }
-      hd.playerList.forEach(p=>p.alive=true);
+      hd.playerList.forEach(p=>{ p.alive=true; p.rebuys=0; });
       hdSyncPlayersFromList();
     } else if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
     if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
     hdSaveSettings();
-    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false;
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true;
     hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
     hdSaveRunState(); hdStartTick(); hdRenderTimer();
   }
@@ -5013,15 +5037,21 @@ Oh my Blue Moon</div>
   function hdNextLevel(){ hdGotoLevel(hd.levelIdx+1); }
   function hdConfirmReset(){ if(confirm('처음부터 다시 시작할까요? 진행 중인 타이머가 초기화됩니다.')) hdResetTimerRun(); }
   function hdResetTimerRun(){
-    if(hd.playerMode){ hd.playerList.forEach(p=>p.alive=true); hdSyncPlayersFromList(); }
+    if(hd.playerMode){ hd.playerList.forEach(p=>{ p.alive=true; p.rebuys=0; }); hdSyncPlayersFromList(); }
     hd.levelIdx=0; hd.finished=false; hd.currentPlayers=hd.players; hd.rebuys=0; hd.remainAtPause = hd.levels[0].min*60;
     hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000; hdStartTick(); hdSaveRunState(); hdRenderTimer();
   }
   function hdBackToSetup(){
+    if(hd.running){ hd.remainAtPause = hdRemainSeconds(); hd.running=false; }
     if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
-    hd.mode='setup'; hd.running=false;
-    try{ localStorage.removeItem(HD_STATE_KEY); }catch(e){}
+    hd.mode='setup';
+    hdSaveRunState();
     hdRenderSetup();
+  }
+  function hdResumeTimer(){
+    hd.mode='timer';
+    if(hd.running) hdStartTick();
+    hdRenderTimer();
   }
   function hdAdjustPlayers(delta){
     hd.currentPlayers = Math.max(1, hd.currentPlayers+delta);
@@ -5099,7 +5129,7 @@ Oh my Blue Moon</div>
             <div style="margin-top:14px;font-size:clamp(32px,5vh,42px);color:#c9c3dc;font-weight:700;${hdNowrap}">${next ? (next.brk ? 'Next: Break' : `Next Level: ${fmtNum(next.sb)} / ${fmtNum(next.bb)}${next.ante?` +${fmtNum(next.ante)}`:''}`) : 'Last Level'}</div>
             ${hd.playerMode && hd.playerList.length ? `
             <div style="margin-top:16px;max-height:16vh;overflow-y:auto;width:100%;display:flex;flex-wrap:wrap;justify-content:center;gap:8px">
-              ${hd.playerList.filter(p=>p.alive).map(p=>`<button onclick="hdEliminatePlayer('${p.id}')" title="탈락 처리" style="padding:8px 18px;border-radius:999px;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:clamp(14px,2vh,17px);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">${hdEsc(p.name)}</button>`).join('')}
+              ${hd.playerList.filter(p=>p.alive).map(p=>`<button onclick="hdEliminatePlayer('${p.id}')" title="탈락 처리" style="padding:8px 18px;border-radius:999px;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:clamp(14px,2vh,17px);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">${hdEsc(p.name)}${p.rebuys?` <span style="color:#ffb547">·${p.rebuys+1}바인</span>`:''}</button>`).join('')}
             </div>` : ''}
           </div>
 
@@ -5143,9 +5173,9 @@ Oh my Blue Moon</div>
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:8px;min-width:0">
                   <span style="font-size:15px;color:#9b94b3;min-width:44px;${hdNowrap}">리바인</span>
-                  <button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>
+                  ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>`}
                   <span style="font-size:clamp(22px,3.6vh,30px);font-weight:800;color:#f5f1ff;min-width:40px;text-align:center;${hdNowrap}">${hd.rebuys}</span>
-                  <button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>
+                  ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
               </div>
             </div>
@@ -5161,6 +5191,9 @@ Oh my Blue Moon</div>
   window.hdAddPlayerName = hdAddPlayerName;
   window.hdRemovePlayerName = hdRemovePlayerName;
   window.hdEliminatePlayer = hdEliminatePlayer;
+  window.hdTogglePlayerAlive = hdTogglePlayerAlive;
+  window.hdAdjustPlayerRebuy = hdAdjustPlayerRebuy;
+  window.hdResumeTimer = hdResumeTimer;
   window.hdEditLevel = hdEditLevel;
   window.hdAddLevel = hdAddLevel;
   window.hdAddBreak = hdAddBreak;
