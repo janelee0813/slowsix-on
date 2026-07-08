@@ -5033,7 +5033,7 @@ Oh my Blue Moon</div>
 
         <div style="flex:1;min-height:0;display:flex;flex-wrap:wrap;gap:8px">
           <div style="flex:2 1 480px;min-width:0;min-height:0;box-sizing:border-box;padding:2vh 3vw;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">☕ 브레이크</div>`
+            ${lv.brk ? `<div style="font-size:clamp(1.6rem,7vh,3rem);font-weight:800;color:#ffb547;margin-bottom:10px;${hdNowrap}">Break</div>`
                      : `<div style="font-size:clamp(16px,2.6vh,22px);color:#c9c3dc;margin-bottom:8px;font-weight:600;${hdNowrap}">SB / BB${lv.ante?' / Ante':''}</div>
                         <div style="font-size:clamp(2rem,8.5vh,5rem);font-weight:800;line-height:1.05;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${hdNowrap}">${fmtNum(lv.sb)} / ${fmtNum(lv.bb)}${lv.ante?` <span style="font-size:clamp(1.2rem,4.5vh,2.6rem);color:#ffb547;-webkit-text-fill-color:#ffb547">+${fmtNum(lv.ante)}</span>`:''}</div>`}
             <div style="font-size:clamp(3.2rem,20vh,10rem);font-weight:800;letter-spacing:0.02em;line-height:1;margin:2vh 0;${hdNowrap};color:${remain<=30?'#ff5f6d':'#f5f1ff'}">${fmtTime(remain)}</div>
