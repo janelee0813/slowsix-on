@@ -4865,7 +4865,10 @@ Oh my Blue Moon</div>
     if(avgEl) avgEl.textContent = fmtNum(Math.round(total/(hd.players||1)));
     hdRefreshPrizeAmounts();
   }
-  function hdSyncPlayersFromList(){ hd.players = hd.playerList.length; }
+  function hdSyncPlayersFromList(){
+    hd.players = hd.playerList.length;
+    if(hd.hasRun) hd.currentPlayers = hd.playerList.filter(p=>p.alive).length;
+  }
   function hdTogglePlayerMode(){
     hd.playerMode = !hd.playerMode;
     if(hd.playerMode) hdSyncPlayersFromList();
@@ -4878,14 +4881,14 @@ Oh my Blue Moon</div>
     hd.playerList.push({ id:'pl'+Date.now()+Math.random().toString(36).slice(2,6), name, alive:true, rebuys:0 });
     if(nameEl) nameEl.value = '';
     hdSyncPlayersFromList();
-    hdSaveSettings(); hdRenderSetup();
+    hdSaveSettings(); hdSaveRunState(); hdRenderSetup();
     const again = document.getElementById('hd-playerNameInput');
     if(again) again.focus();
   }
   function hdRemovePlayerName(id){
     hd.playerList = hd.playerList.filter(p=>p.id!==id);
     hdSyncPlayersFromList();
-    hdSaveSettings(); hdRenderSetup();
+    hdSaveSettings(); hdSaveRunState(); hdRenderSetup();
   }
   function hdEliminatePlayer(id){
     const p = hd.playerList.find(p=>p.id===id);
