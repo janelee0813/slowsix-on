@@ -4643,10 +4643,13 @@ Oh my Blue Moon</div>
       --hd-ctrl-innergap: clamp(2px,0.6vh,6px);
       --hd-ctrl-rowgap: clamp(2px,0.8vh,8px);
       --hd-restart-font: clamp(11px,2.6vh,18px);
-      --hd-restart-pad: clamp(1px,0.6vh,7px);
+      --hd-restart-pad-v: clamp(1px,0.6vh,7px);
+      --hd-restart-pad-h: clamp(1px,0.6vh,7px);
       --hd-manage-font: clamp(10px,2vh,14px);
       --hd-manage-pad-v: clamp(1px,0.5vh,3px);
       --hd-manage-pad-h: clamp(3px,1vh,8px);
+      --hd-entries-label-font: var(--hd-quad-label-font);
+      --hd-entries-value-font: var(--hd-quad-value-font);
     }
     @media (orientation: landscape){
       .hd-main-row{ flex-wrap: nowrap !important; }
@@ -4663,6 +4666,27 @@ Oh my Blue Moon</div>
         --hd-restart-font: clamp(10px,1.6vh,14px);
         --hd-manage-font: clamp(9px,1.5vh,11px);
         --hd-countdown-font: clamp(1.6rem,min(16vh,26vw),10rem);
+
+        /* 세로 피드백 반영 */
+        --hd-nextlevel-font: clamp(6px,2vh,21px);
+        --hd-pad-top: clamp(1px,0.6vh,6px);
+        --hd-pad-bot: clamp(1px,0.5vh,4px);
+        --hd-gap-outer: clamp(1px,0.6vh,5px);
+        --hd-mainrow-gap: clamp(2px,0.6vh,5px);
+        --hd-hero-pad-v: clamp(2px,1vh,10px);
+        --hd-sbbb-mb: clamp(1px,0.4vh,5px);
+        --hd-break-mb: clamp(1px,0.5vh,6px);
+        --hd-countdown-margin: clamp(1px,0.6vh,8px);
+        --hd-nextlevel-mt: clamp(1px,0.6vh,8px);
+        --hd-pills-mt: clamp(1px,0.5vh,5px);
+        --hd-pills-pt: clamp(1px,0.6vh,7px);
+        --hd-quad-pad-v: clamp(2px,1vh,9px);
+        --hd-ctrl-innergap: clamp(1px,0.4vh,4px);
+        --hd-ctrl-rowgap: clamp(1px,0.5vh,5px);
+        --hd-quadgrid-gap: clamp(1px,0.6vh,5px);
+        --hd-restart-pad-v: clamp(1px,0.3vh,4px);
+        --hd-entries-label-font: clamp(8px,1.36vh,10px);
+        --hd-entries-value-font: clamp(10px,2.24vh,21px);
       }
     }
   </style>
@@ -5295,7 +5319,7 @@ Oh my Blue Moon</div>
                     <button onclick="hdAdjustTime(60)" style="${hdQuadCtrlBtnStyle}">+1 min</button>
                   </div>
                 </div>
-                <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:var(--hd-restart-font);padding:var(--hd-restart-pad);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">🔁 Restart</button>
+                <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:var(--hd-restart-font);padding:var(--hd-restart-pad-v) var(--hd-restart-pad-h);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">🔁 Restart</button>
               </div>
             </div>
 
@@ -5306,20 +5330,20 @@ Oh my Blue Moon</div>
               </div>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
-                  <span style="font-size:var(--hd-quad-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">${hd.playerMode?'Player':'Players'}</span>
+                  <span style="font-size:var(--hd-entries-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">${hd.playerMode?'Player':'Players'}</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>`}
-                  <span style="font-size:var(--hd-quad-value-font);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers}</span>
+                  <span style="font-size:var(--hd-entries-value-font);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers}</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
-                  <span style="font-size:var(--hd-quad-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Rebuys</span>
+                  <span style="font-size:var(--hd-entries-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Rebuys</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>`}
-                  <span style="font-size:var(--hd-quad-value-font);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.rebuys}</span>
+                  <span style="font-size:var(--hd-entries-value-font);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.rebuys}</span>
                   ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
-                  <span style="font-size:var(--hd-quad-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Total Entries</span>
-                  <span style="font-size:var(--hd-quad-value-font);font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers + hd.rebuys}</span>
+                  <span style="font-size:var(--hd-entries-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Total Entries</span>
+                  <span style="font-size:var(--hd-entries-value-font);font-weight:800;background:linear-gradient(135deg,#b566ff,#5ec8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers + hd.rebuys}</span>
                 </div>
               </div>
             </div>
