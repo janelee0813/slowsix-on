@@ -4561,22 +4561,17 @@ Oh my Blue Moon</div>
       <svg class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="bg-search" type="text" placeholder="게임 이름으로 검색" class="w-full rounded-full border border-border bg-surface/60 py-3 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-neon-purple/60" />
     </div>
-  </div>
-  <div class="divider-neon mx-auto max-w-screen-md"></div>
-</section>
 
-<section class="px-5 py-8 sm:py-10">
-  <div class="mx-auto max-w-screen-md">
-    <p id="bg-count" class="mb-2.5 text-xs font-medium text-muted-foreground"></p>
+    <p id="bg-count" class="mt-4 mb-1.5 text-xs font-medium text-muted-foreground"></p>
     <div class="overflow-x-auto rounded-xl border border-border">
       <table class="w-full min-w-[520px] border-collapse text-left">
         <thead>
           <tr class="border-b border-border bg-surface/60">
-            <th data-key="name" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">게임명<span class="bg-sort-arrow"></span></th>
-            <th data-key="players" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">인원수<span class="bg-sort-arrow"></span></th>
-            <th data-key="genre" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">장르<span class="bg-sort-arrow"></span></th>
-            <th data-key="time" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">시간<span class="bg-sort-arrow"></span></th>
-            <th data-key="level" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">난이도<span class="bg-sort-arrow"></span></th>
+            <th data-key="name" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:bg-neon-purple/10 hover:text-neon-purple">게임명<span class="bg-sort-arrow ml-0.5 text-muted-foreground/50">⇅</span></th>
+            <th data-key="players" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:bg-neon-purple/10 hover:text-neon-purple">인원수<span class="bg-sort-arrow ml-0.5 text-muted-foreground/50">⇅</span></th>
+            <th data-key="genre" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:bg-neon-purple/10 hover:text-neon-purple">장르<span class="bg-sort-arrow ml-0.5 text-muted-foreground/50">⇅</span></th>
+            <th data-key="time" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:bg-neon-purple/10 hover:text-neon-purple">시간<span class="bg-sort-arrow ml-0.5 text-muted-foreground/50">⇅</span></th>
+            <th data-key="level" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:bg-neon-purple/10 hover:text-neon-purple">난이도<span class="bg-sort-arrow ml-0.5 text-muted-foreground/50">⇅</span></th>
           </tr>
         </thead>
         <tbody id="bg-list"></tbody>
@@ -4660,7 +4655,12 @@ Oh my Blue Moon</div>
     document.querySelectorAll('.bg-sort-th').forEach(th => {
       const arrow = th.querySelector('.bg-sort-arrow');
       if (!arrow) return;
-      arrow.textContent = th.dataset.key === bgSortKey ? (bgSortDir === 1 ? ' ▲' : ' ▼') : '';
+      const active = th.dataset.key === bgSortKey;
+      arrow.textContent = active ? (bgSortDir === 1 ? '▲' : '▼') : '⇅';
+      arrow.classList.toggle('text-neon-purple', active);
+      arrow.classList.toggle('text-muted-foreground/50', !active);
+      th.classList.toggle('bg-neon-purple/10', active);
+      th.classList.toggle('text-neon-purple', active);
     });
   }
 
