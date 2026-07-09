@@ -4572,11 +4572,11 @@ Oh my Blue Moon</div>
       <table class="w-full min-w-[520px] border-collapse text-left">
         <thead>
           <tr class="border-b border-border bg-surface/60">
-            <th class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">게임명</th>
-            <th class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">인원수</th>
-            <th class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">장르</th>
-            <th class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">시간</th>
-            <th class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">난이도</th>
+            <th data-key="name" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">게임명<span class="bg-sort-arrow"></span></th>
+            <th data-key="players" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">인원수<span class="bg-sort-arrow"></span></th>
+            <th data-key="genre" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">장르<span class="bg-sort-arrow"></span></th>
+            <th data-key="time" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">시간<span class="bg-sort-arrow"></span></th>
+            <th data-key="level" class="bg-sort-th cursor-pointer select-none px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-neon-purple">난이도<span class="bg-sort-arrow"></span></th>
           </tr>
         </thead>
         <tbody id="bg-list"></tbody>
@@ -4620,25 +4620,78 @@ Oh my Blue Moon</div>
     empty.classList.add('hidden');
     wrap.innerHTML = list.map(g => `
       <tr class="border-b border-border/60 last:border-b-0 even:bg-surface/30 hover:bg-surface/50">
-        <td class="px-3 py-2 text-[12.5px] font-medium text-foreground sm:text-sm">${bgEscape(g.name)}</td>
-        <td class="px-3 py-2 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.players)}</td>
-        <td class="px-3 py-2 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.genre)}</td>
-        <td class="px-3 py-2 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.time)}</td>
-        <td class="px-3 py-2 text-[12px] sm:text-[13px] ${bgLevelColor[g.level] || 'text-muted-foreground'}">${bgEscape(g.level)}</td>
+        <td class="whitespace-nowrap px-3 py-1 text-[12.5px] font-medium text-foreground sm:text-sm">${bgEscape(g.name)}</td>
+        <td class="whitespace-nowrap px-3 py-1 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.players)}</td>
+        <td class="whitespace-nowrap px-3 py-1 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.genre)}</td>
+        <td class="whitespace-nowrap px-3 py-1 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.time)}</td>
+        <td class="whitespace-nowrap px-3 py-1 text-[12px] sm:text-[13px] ${bgLevelColor[g.level] || 'text-muted-foreground'}">${bgEscape(g.level)}</td>
       </tr>
     `).join('');
   }
 
+  const bgLevelRank = { '쉬움':1, '보통':2, '어려움':3 };
+
+  function bgNumFrom(s){
+    const m = String(s).match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  }
+
+  function bgSortValue(g, key){
+    if (key === 'players') { const n = bgNumFrom(g.players); return n === null ? Infinity : n; }
+    if (key === 'time') { const n = bgNumFrom(g.time); return n === null ? Infinity : n; }
+    if (key === 'level') return bgLevelRank[g.level] || 99;
+    return String(g[key] || '');
+  }
+
+  let bgSortKey = null;
+  let bgSortDir = 1;
+
+  function bgApplySort(list){
+    if (!bgSortKey) return list;
+    const key = bgSortKey, dir = bgSortDir;
+    return [...list].sort((a, b) => {
+      const va = bgSortValue(a, key), vb = bgSortValue(b, key);
+      if (typeof va === 'string') return va.localeCompare(vb, 'ko') * dir;
+      return (va - vb) * dir;
+    });
+  }
+
+  function bgUpdateHeaderIndicators(){
+    document.querySelectorAll('.bg-sort-th').forEach(th => {
+      const arrow = th.querySelector('.bg-sort-arrow');
+      if (!arrow) return;
+      arrow.textContent = th.dataset.key === bgSortKey ? (bgSortDir === 1 ? ' ▲' : ' ▼') : '';
+    });
+  }
+
+  function bgCurrentFiltered(){
+    const input = document.getElementById('bg-search');
+    const q = input ? input.value.trim() : '';
+    return q ? bgGames.filter(g => g.name.includes(q)) : bgGames;
+  }
+
+  function bgRefresh(){
+    bgRender(bgApplySort(bgCurrentFiltered()));
+    bgUpdateHeaderIndicators();
+  }
+
   function bgInit(){
-    bgRender(bgGames);
+    bgRefresh();
     const input = document.getElementById('bg-search');
     if (input && !input.dataset.bound) {
       input.dataset.bound = '1';
-      input.addEventListener('input', () => {
-        const q = input.value.trim();
-        bgRender(q ? bgGames.filter(g => g.name.includes(q)) : bgGames);
-      });
+      input.addEventListener('input', bgRefresh);
     }
+    document.querySelectorAll('.bg-sort-th').forEach(th => {
+      if (th.dataset.bound) return;
+      th.dataset.bound = '1';
+      th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        if (bgSortKey === key) bgSortDir *= -1;
+        else { bgSortKey = key; bgSortDir = 1; }
+        bgRefresh();
+      });
+    });
   }
   window.bgInit = bgInit;
   bgInit();
