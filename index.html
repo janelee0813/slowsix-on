@@ -978,7 +978,9 @@
     #page-guide section:first-of-type .animate-fade-up,
     #page-guide section:first-of-type .animate-glow-pulse,
     #page-fortune section:first-of-type .animate-fade-up,
-    #page-fortune section:first-of-type .animate-glow-pulse{animation:none!important}
+    #page-fortune section:first-of-type .animate-glow-pulse,
+    #page-slowsix section:first-of-type .animate-fade-up,
+    #page-slowsix section:first-of-type .animate-glow-pulse{animation:none!important}
   `;
   document.head.appendChild(early);
 
@@ -1073,6 +1075,7 @@
   function setup(){
     setupPage(document.getElementById('page-guide'));
     setupPage(document.getElementById('page-fortune'));
+    setupPage(document.getElementById('page-slowsix'));
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);
