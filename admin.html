@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>관리자 모드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={
+  theme:{
+    extend:{
+      fontFamily:{sans:['Pretendard Variable','Pretendard','-apple-system','BlinkMacSystemFont','Apple SD Gothic Neo','Segoe UI','Roboto','sans-serif']},
+      colors:{
+        background:'#0a0612',surface:'#15101f',
+        foreground:'#f5f1ff',muted:'#1a1428','muted-foreground':'#9b94b3',
+        border:'rgba(140,110,200,0.22)',
+        'neon-purple':'#b566ff','neon-pink':'#ff5fb0','neon-blue':'#5ec8ff',
+        destructive:'#ff5f6d',
+      }
+    }
+  }
+}
+</script>
+<style>
+html{background:#0a0612;color-scheme:dark}
+body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.neon-card{position:relative;background:linear-gradient(180deg,rgba(28,21,48,0.85),rgba(21,16,31,0.7));border:1px solid rgba(140,110,200,0.28);backdrop-filter:blur(8px);border-radius:1rem}
+.neon-card-glow::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(181,102,255,0.7),rgba(255,95,176,0.4),rgba(94,200,255,0.6));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.grid-bg{background-image:radial-gradient(circle at 20% 0%,rgba(181,102,255,0.18),transparent 45%),radial-gradient(circle at 80% 10%,rgba(255,95,176,0.14),transparent 50%),radial-gradient(circle at 50% 100%,rgba(94,200,255,0.12),transparent 55%)}
+.form-input{width:100%;padding:9px 12px;border:1px solid rgba(140,110,200,0.28);border-radius:8px;font-size:14px;background:rgba(10,6,18,0.6);color:#f5f1ff;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+.form-input:focus{border-color:#b566ff;box-shadow:0 0 0 3px rgba(181,102,255,0.18)}
+.form-input::placeholder{color:#6b6480}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:10px;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:disabled{opacity:.6;cursor:default}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- 로그인 화면 -->
+<div id="login-page" class="min-h-screen flex items-center justify-center px-4">
+  <div class="grid-bg fixed inset-0 -z-10"></div>
+  <div class="w-full max-w-sm">
+    <a href="/" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-neon-purple transition-colors mb-8">
+      ← 가이드로 돌아가기
+    </a>
+    <div class="neon-card neon-card-glow p-7">
+      <div class="text-center mb-7">
+        <h1 class="text-xl font-bold text-foreground tracking-tight">관리자 모드</h1>
+        <p class="mt-1.5 text-xs text-muted-foreground">비밀번호를 입력해주세요.</p>
+      </div>
+      <div class="space-y-4">
+        <input id="login-pw" type="password" class="form-input" placeholder="비밀번호 입력" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()"/>
+        <div id="login-error" class="hidden rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-xs text-destructive font-medium">
+          비밀번호가 올바르지 않습니다.
+        </div>
+        <button onclick="doLogin()" id="login-btn" class="btn-primary w-full py-3 text-sm rounded-xl">입장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 페이지 (로그인 후 · 준비 중) -->
+<div id="admin-page" class="hidden min-h-screen">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+    <span class="text-sm font-bold text-foreground">관리자 모드</span>
+    <button onclick="doLogout()" class="text-xs text-muted-foreground hover:text-neon-purple transition-colors">로그아웃</button>
+  </div>
+</div>
+
+<script>
+const ADMIN_EMAIL = 'slowsixon@gmail.com';
+const sb = window.supabase.createClient(
+  'https://teugnaahpcpzejbdayyy.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA'
+);
+
+async function doLogin(){
+  const pw = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  btn.textContent = '확인 중...';
+  btn.disabled = true;
+
+  const { error } = await sb.auth.signInWithPassword({ email: ADMIN_EMAIL, password: pw });
+
+  btn.textContent = '입장';
+  btn.disabled = false;
+
+  if(error){
+    errEl.classList.remove('hidden');
+  } else {
+    errEl.classList.add('hidden');
+    showAdminPage();
+  }
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+function showAdminPage(){
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('admin-page').classList.remove('hidden');
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if(session) showAdminPage();
+});
+</script>
+</body>
+</html>
