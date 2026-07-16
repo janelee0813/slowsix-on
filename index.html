@@ -4929,7 +4929,12 @@ Oh my Blue Moon</div>
   const HD_DEFAULT_PRIZES = [ {rank:1,pct:50}, {rank:2,pct:30}, {rank:3,pct:20} ];
   const HD_STORE_KEY = 'holdemTimerSettings_v3';
   const HD_STATE_KEY = 'holdemTimerState_v3';
-  const HD_PRESETS_KEY = 'holdemTimerPresets_v1';
+  const HD_SB = window.supabase.createClient(
+    'https://teugnaahpcpzejbdayyy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA'
+  );
+  let hdPresets = [];
+  let hdPresetsLoading = false;
 
   const hdInputStyle = 'width:100%;border-radius:10px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:8px 10px;font-size:13px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box';
   const hdCellInputStyle = 'width:68px;border-radius:8px;border:1px solid rgba(140,110,200,.25);background:rgba(30,22,55,.6);padding:5px 6px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box';
@@ -4966,12 +4971,12 @@ Oh my Blue Moon</div>
     return null;
   }
   function hdEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function hdLoadPresets(){
-    try{ const raw = localStorage.getItem(HD_PRESETS_KEY); if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr)) return arr; } }catch(e){}
-    return [];
-  }
-  function hdSavePresetsList(list){
-    try{ localStorage.setItem(HD_PRESETS_KEY, JSON.stringify(list)); }catch(e){}
+  async function hdFetchPresets(){
+    hdPresetsLoading = true;
+    const { data, error } = await HD_SB.from('holdem_presets').select('*').order('created_at', { ascending: true });
+    hdPresetsLoading = false;
+    if(!error && data) hdPresets = data;
+    return hdPresets;
   }
   function hdBeep(){
     try{
@@ -5004,6 +5009,7 @@ Oh my Blue Moon</div>
     }
     hdRender();
     if(hd.mode==='timer' && hd.running) hdStartTick();
+    hdFetchPresets().then(()=>{ if(hd.mode==='setup') hdRenderSetup(); });
   }
 
   function hdRender(){ if(hd.mode==='setup') hdRenderSetup(); else hdRenderTimer(); }
@@ -5013,7 +5019,7 @@ Oh my Blue Moon</div>
     const wrap = hdWrap(); if(!wrap) return;
     hdSetNavVisible(true);
     const totalChips = hd.startingChips * hd.players;
-    const presets = hdLoadPresets();
+    const presets = hdPresets;
     wrap.innerHTML = `
       <div style="max-width:768px;margin:0 auto;padding-top:20px;padding-bottom:20px">
       <div style="position:relative;margin-bottom:20px">
@@ -5030,7 +5036,7 @@ Oh my Blue Moon</div>
           <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 14px;letter-spacing:0.08em">💾 게임별 프리셋</p>
           <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
             <select id="hd-presetSelect" onchange="hdOnPresetSelectChange(this)" style="${hdInputStyle};flex:1;min-width:140px">
-              <option value="">${presets.length ? '저장된 게임 선택' : '저장된 게임이 없어요'}</option>
+              <option value="">${presets.length ? '저장된 게임 선택' : (hdPresetsLoading ? '불러오는 중...' : '저장된 게임이 없어요')}</option>
               ${presets.map(p=>`<option value="${p.id}">${hdEsc(p.name)}</option>`).join('')}
             </select>
             <button onclick="hdLoadPreset()" style="${hdGhostBtnStyle}">불러오기</button>
@@ -5262,39 +5268,44 @@ Oh my Blue Moon</div>
     if(!nameEl) return;
     nameEl.value = el.value ? el.options[el.selectedIndex].textContent : '';
   }
-  function hdSavePreset(){
+  async function hdSavePreset(){
     const nameEl = document.getElementById('hd-presetName');
     const name = nameEl ? nameEl.value.trim() : '';
     if(!name){ alert('게임 이름을 입력해주세요.'); return; }
-    const list = hdLoadPresets();
-    const idx = list.findIndex(p=>p.name===name);
-    if(idx>=0 && !confirm(`"${name}" 프리셋이 이미 있어요. 덮어쓸까요?`)) return;
-    const preset = { id: idx>=0? list[idx].id : 'p'+Date.now(), name,
-      startingChips: hd.startingChips, rebuyChips: hd.rebuyChips, players: hd.players,
-      levels: JSON.parse(JSON.stringify(hd.levels)), prizes: JSON.parse(JSON.stringify(hd.prizes)), prizeExclude: hd.prizeExclude||0, savedAt: Date.now() };
-    if(idx>=0) list[idx] = preset; else list.push(preset);
-    hdSavePresetsList(list);
+    const existing = hdPresets.find(p=>p.name===name);
+    if(existing && !confirm(`"${name}" 프리셋이 이미 있어요. 덮어쓸까요?`)) return;
+    const payload = {
+      name,
+      starting_chips: hd.startingChips, rebuy_chips: hd.rebuyChips, players: hd.players,
+      levels: hd.levels, prizes: hd.prizes, prize_exclude: hd.prizeExclude||0
+    };
+    const { error } = existing
+      ? await HD_SB.from('holdem_presets').update(payload).eq('id', existing.id)
+      : await HD_SB.from('holdem_presets').insert(payload);
+    if(error){ alert('저장 실패: '+error.message); return; }
+    await hdFetchPresets();
     hdRenderSetup();
   }
   function hdLoadPreset(){
     const sel = document.getElementById('hd-presetSelect');
     if(!sel || !sel.value) return;
-    const preset = hdLoadPresets().find(p=>p.id===sel.value);
+    const preset = hdPresets.find(p=>p.id===sel.value);
     if(!preset) return;
-    hd.startingChips = preset.startingChips; hd.rebuyChips = preset.rebuyChips!=null ? preset.rebuyChips : preset.startingChips; hd.players = preset.players;
+    hd.startingChips = preset.starting_chips; hd.rebuyChips = preset.rebuy_chips!=null ? preset.rebuy_chips : preset.starting_chips; hd.players = preset.players;
     hd.levels = JSON.parse(JSON.stringify(preset.levels));
     hd.prizes = JSON.parse(JSON.stringify(preset.prizes));
-    hd.prizeExclude = preset.prizeExclude||0;
+    hd.prizeExclude = preset.prize_exclude||0;
     hdSaveSettings(); hdRenderSetup();
   }
-  function hdDeletePreset(){
+  async function hdDeletePreset(){
     const sel = document.getElementById('hd-presetSelect');
     if(!sel || !sel.value) return;
-    const list = hdLoadPresets();
-    const preset = list.find(p=>p.id===sel.value);
+    const preset = hdPresets.find(p=>p.id===sel.value);
     if(!preset) return;
     if(!confirm(`"${preset.name}" 프리셋을 삭제할까요?`)) return;
-    hdSavePresetsList(list.filter(p=>p.id!==sel.value));
+    const { error } = await HD_SB.from('holdem_presets').delete().eq('id', preset.id);
+    if(error){ alert('삭제 실패: '+error.message); return; }
+    await hdFetchPresets();
     hdRenderSetup();
   }
   function hdPrizeBasis(totalChips){ return Math.max(0, totalChips - (hd.prizeExclude||0)); }
