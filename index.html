@@ -4941,6 +4941,8 @@ Oh my Blue Moon</div>
   const HD_DEFAULT_PRIZES = [ {rank:1,pct:50}, {rank:2,pct:30}, {rank:3,pct:20} ];
   const HD_STORE_KEY = 'holdemTimerSettings_v3';
   const HD_STATE_KEY = 'holdemTimerState_v3';
+  const HD_ROOM_KEY = 'holdemTimerRoom_v1';
+  let hdRoomChannel = null;
   const HD_SB = window.supabase.createClient(
     'https://teugnaahpcpzejbdayyy.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA'
@@ -4975,12 +4977,121 @@ Oh my Blue Moon</div>
     try{ localStorage.setItem(HD_STORE_KEY, JSON.stringify({startingChips:hd.startingChips, rebuyChips:hd.rebuyChips, players:hd.players, levels:hd.levels, prizes:hd.prizes, prizeExclude:hd.prizeExclude, playerMode:hd.playerMode, playerList:hd.playerList})); }catch(e){}
   }
   function hdSaveRunState(){
+    if(hd.roomCode){ if(hd.isHost) hdPushRoomState(); return; }
     if(!hd.hasRun) return;
     try{ localStorage.setItem(HD_STATE_KEY, JSON.stringify({levelIdx:hd.levelIdx, endAt:hd.endAt, running:hd.running, remainAtPause:hd.remainAtPause, currentPlayers:hd.currentPlayers, rebuys:hd.rebuys, finished:hd.finished, playerList:hd.playerList})); }catch(e){}
   }
   function hdLoadRunState(){
     try{ const raw = localStorage.getItem(HD_STATE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
     return null;
+  }
+  function hdGenRoomCode(){
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for(let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+    return s;
+  }
+  function hdSaveRoomInfo(){
+    try{ localStorage.setItem(HD_ROOM_KEY, JSON.stringify({roomCode:hd.roomCode, isHost:hd.isHost, hostToken:hd.hostToken})); }catch(e){}
+  }
+  function hdLoadRoomInfo(){
+    try{ const raw = localStorage.getItem(HD_ROOM_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return null;
+  }
+  function hdClearRoomInfo(){ try{ localStorage.removeItem(HD_ROOM_KEY); }catch(e){} }
+  function hdRoomPayload(){
+    return {
+      starting_chips: hd.startingChips, rebuy_chips: hd.rebuyChips, players: hd.players,
+      levels: hd.levels, prizes: hd.prizes, prize_exclude: hd.prizeExclude||0,
+      player_mode: hd.playerMode, player_list: hd.playerList,
+      level_idx: hd.levelIdx, running: hd.running,
+      end_at: hd.running ? new Date(hd.endAt).toISOString() : null,
+      remain_at_pause: hd.remainAtPause,
+      current_players: hd.currentPlayers, rebuys: hd.rebuys, finished: hd.finished,
+      updated_at: new Date().toISOString()
+    };
+  }
+  function hdApplyRoomRow(row){
+    hd.startingChips = row.starting_chips; hd.rebuyChips = row.rebuy_chips; hd.players = row.players;
+    hd.levels = row.levels; hd.prizes = row.prizes; hd.prizeExclude = row.prize_exclude||0;
+    hd.playerMode = !!row.player_mode; hd.playerList = row.player_list||[];
+    hd.levelIdx = row.level_idx; hd.running = !!row.running;
+    hd.endAt = row.end_at ? new Date(row.end_at).getTime() : 0;
+    hd.remainAtPause = Number(row.remain_at_pause)||0;
+    hd.currentPlayers = row.current_players; hd.rebuys = row.rebuys;
+    hd.finished = !!row.finished;
+    hd.hasRun = true;
+  }
+  async function hdPushRoomState(){
+    if(!hd.roomCode || !hd.isHost || !hd.hostToken) return;
+    const { error } = await HD_SB.from('holdem_rooms').update(hdRoomPayload()).eq('code', hd.roomCode).eq('host_token', hd.hostToken);
+    if(error) console.error('room sync failed', error);
+  }
+  function hdSubscribeRoom(code){
+    hdUnsubscribeRoom();
+    hdRoomChannel = HD_SB.channel('holdem-room-'+code)
+      .on('postgres_changes', { event:'UPDATE', schema:'public', table:'holdem_rooms', filter:'code=eq.'+code }, payload=>{
+        if(!hd || hd.roomCode!==code) return;
+        hdApplyRoomRow(payload.new);
+        if(hd.running){ if(!hd.tick) hdStartTick(); } else if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
+        if(hd.mode==='timer') hdRenderTimer();
+      })
+      .subscribe();
+  }
+  function hdUnsubscribeRoom(){
+    if(hdRoomChannel){ HD_SB.removeChannel(hdRoomChannel); hdRoomChannel=null; }
+  }
+  async function hdStartShared(){
+    const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), plEl = document.getElementById('hd-players');
+    if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
+    if(rcEl) hd.rebuyChips = Math.max(0, Number(rcEl.value)||0);
+    if(hd.playerMode){
+      if(!hd.playerList.length){ alert('플레이어를 1명 이상 등록해주세요.'); return; }
+      hd.playerList.forEach(p=>{ p.alive=true; p.rebuys=0; });
+      hdSyncPlayersFromList();
+    } else if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
+    if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
+    hdSaveSettings();
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false;
+    hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
+    hd.isHost = true;
+    hd.hostToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'tok'+Date.now()+Math.random().toString(36).slice(2);
+    hd.roomCode = hdGenRoomCode();
+    const payload = hdRoomPayload();
+    payload.code = hd.roomCode;
+    payload.host_token = hd.hostToken;
+    const { error } = await HD_SB.from('holdem_rooms').insert(payload);
+    if(error){ alert('공유방 생성 실패: '+error.message); hd.roomCode=null; hd.isHost=false; hd.hostToken=null; hdStartTick(); hdRenderTimer(); return; }
+    hdSaveRoomInfo();
+    hdSubscribeRoom(hd.roomCode);
+    hdStartTick(); hdRenderTimer();
+  }
+  async function hdJoinRoomByCode(){
+    const inp = document.getElementById('hd-roomJoinInput');
+    const code = inp ? inp.value.trim().toUpperCase() : '';
+    if(!code){ alert('공유 코드를 입력해주세요.'); return; }
+    const { data, error } = await HD_SB.from('holdem_rooms').select('*').eq('code', code).maybeSingle();
+    if(error || !data){ alert('해당 코드의 공유방을 찾을 수 없어요.'); return; }
+    hd.roomCode = code; hd.isHost = false; hd.hostToken = null;
+    hdApplyRoomRow(data);
+    hd.mode = 'timer'; hd.showRebuyPanel = false;
+    hdSaveRoomInfo();
+    hdSubscribeRoom(code);
+    if(hd.running) hdStartTick();
+    hdRenderTimer();
+  }
+  function hdLeaveRoom(){
+    if(!confirm(hd.isHost ? '공유방을 나갈까요? 다른 참가자는 마지막 상태를 계속 볼 수 있어요.' : '공유방에서 나갈까요?')) return;
+    hdUnsubscribeRoom();
+    if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
+    hdClearRoomInfo();
+    hdInitLocal();
+  }
+  function hdCopyRoomCode(){
+    if(!hd.roomCode) return;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(hd.roomCode).then(()=>alert('코드가 복사됐어요: '+hd.roomCode)).catch(()=>alert('코드: '+hd.roomCode));
+    } else alert('코드: '+hd.roomCode);
   }
   function hdEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   async function hdFetchPresets(){
@@ -5004,10 +5115,32 @@ Oh my Blue Moon</div>
   }
   function holdemInit(){
     if(!hdWrap()) return;
+    hdFetchPresets().then(()=>{ if(hd && hd.mode==='setup') hdRenderSetup(); });
+    const roomInfo = hdLoadRoomInfo();
+    if(roomInfo && roomInfo.roomCode){
+      const settings = hdLoadSettings();
+      hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
+        playerMode:!!settings.playerMode, playerList:settings.playerList||[],
+        levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false,
+        roomCode:roomInfo.roomCode, isHost:!!roomInfo.isHost, hostToken:roomInfo.hostToken||null };
+      HD_SB.from('holdem_rooms').select('*').eq('code', roomInfo.roomCode).maybeSingle().then(({data,error})=>{
+        if(error || !data){ hdClearRoomInfo(); hdInitLocal(); return; }
+        hdApplyRoomRow(data);
+        hd.mode = 'timer';
+        hdSubscribeRoom(hd.roomCode);
+        hdRenderTimer();
+        if(hd.running) hdStartTick();
+      });
+      return;
+    }
+    hdInitLocal();
+  }
+  function hdInitLocal(){
     const settings = hdLoadSettings();
     hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
       playerMode:!!settings.playerMode, playerList:settings.playerList||[],
-      levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false };
+      levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false,
+      roomCode:null, isHost:false, hostToken:null };
     const rs = hdLoadRunState();
     if(rs && hd.levels[rs.levelIdx]){
       hd.hasRun = true;
@@ -5021,7 +5154,6 @@ Oh my Blue Moon</div>
     }
     hdRender();
     if(hd.mode==='timer' && hd.running) hdStartTick();
-    hdFetchPresets().then(()=>{ if(hd.mode==='setup') hdRenderSetup(); });
   }
 
   function hdRender(){ if(hd.mode==='setup') hdRenderSetup(); else hdRenderTimer(); }
@@ -5039,11 +5171,35 @@ Oh my Blue Moon</div>
         <p style="font-size:12px;color:#6b6480;margin-top:6px;text-align:center">블라인드 레벨 · 시작칩 · 프라이즈까지 한 번에 셋팅하세요 ♠️</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
-        ${hd.hasRun ? `
+        ${hd.hasRun && !hd.roomCode ? `
         <div style="padding:14px 16px;background:rgba(181,102,255,0.12);border:1px solid rgba(181,102,255,0.35);border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
           <span style="font-size:12.5px;color:#e5e0f0">진행 중인 타이머가 있어요${hd.finished?' (종료됨)':' (일시정지됨)'}.</span>
           <button onclick="hdResumeTimer()" style="padding:8px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">▶ 타이머로 돌아가기</button>
         </div>` : ''}
+        ${hd.roomCode ? `
+        <div style="padding:20px;background:rgba(94,224,168,0.08);border:1px solid rgba(94,224,168,0.3);border-radius:16px">
+          <p style="font-size:12px;font-weight:700;color:#5ee0a8;margin:0 0 10px;letter-spacing:0.08em">🔗 함께 보기 · ${hd.isHost ? '호스트' : '보기 전용'}</p>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+            <span style="font-size:11px;color:#9b94b3">공유 코드</span>
+            <span style="font-size:20px;font-weight:800;letter-spacing:0.12em;color:#f5f1ff">${hd.roomCode}</span>
+            <button onclick="hdCopyRoomCode()" style="${hdGhostBtnStyle}">코드 복사</button>
+          </div>
+          <p style="font-size:11px;color:#6b6480;margin:0 0 12px">${hd.isHost ? '이 코드를 공유하면 다른 사람이 같은 타이머를 실시간으로 볼 수 있어요. 시작/일시정지/레벨 이동 같은 조작은 이 기기에서만 가능해요.' : '호스트가 조작하는 타이머를 실시간으로 보고 있어요. 이 기기에서는 조작할 수 없어요.'}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button onclick="hdResumeTimer()" style="padding:8px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">▶ 타이머로 돌아가기</button>
+            <button onclick="hdLeaveRoom()" style="${hdGhostBtnStyle}">공유방 나가기</button>
+          </div>
+        </div>` : `
+        <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
+          <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 14px;letter-spacing:0.08em">🔗 함께 보기 (여러 기기에서 같은 타이머)</p>
+          <p style="font-size:11px;color:#6b6480;margin:0 0 12px">아래 설정으로 공유방을 만들면 코드를 받은 사람 누구나 실시간으로 같은 타이머를 볼 수 있어요. 조작은 만든 사람만 할 수 있어요.</p>
+          <button onclick="hdStartShared()" style="padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#5ee0a8,#5ec8ff);color:#0a0612;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px">🔗 새 공유방 만들고 시작</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(140,110,200,0.15)">
+            <input id="hd-roomJoinInput" type="text" placeholder="공유 코드 입력" maxlength="6" style="${hdInputStyle};flex:1;min-width:140px;text-transform:uppercase" onkeydown="if(event.key==='Enter' && !event.isComposing && event.keyCode!==229)hdJoinRoomByCode()"/>
+            <button onclick="hdJoinRoomByCode()" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#5ec8ff);color:#0a0612;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">참여하기</button>
+          </div>
+        </div>`}
+        ${(!hd.roomCode || hd.isHost) ? `
         <div style="padding:20px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
           <p style="font-size:12px;font-weight:700;color:#b566ff;margin:0 0 14px;letter-spacing:0.08em">💾 게임별 프리셋</p>
           <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
@@ -5171,6 +5327,7 @@ Oh my Blue Moon</div>
         </div>
 
         <button onclick="hdStart()" style="padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">▶ 타이머 시작</button>
+        ` : ''}
       </div>
       </div>`;
   }
@@ -5420,15 +5577,17 @@ Oh my Blue Moon</div>
     hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000; hdStartTick(); hdSaveRunState(); hdRenderTimer();
   }
   function hdBackToSetup(){
-    if(hd.running){ hd.remainAtPause = hdRemainSeconds(); hd.running=false; }
+    const canControl = !hd.roomCode || hd.isHost;
+    if(canControl && hd.running){ hd.remainAtPause = hdRemainSeconds(); hd.running=false; }
     if(hd.tick){ clearInterval(hd.tick); hd.tick=null; }
     hd.mode='setup';
     hdSaveRunState();
     hdRenderSetup();
   }
   function hdResumeTimer(){
+    const canControl = !hd.roomCode || hd.isHost;
     hd.mode='timer';
-    if(!hd.finished && !hd.running){
+    if(canControl && !hd.finished && !hd.running){
       hd.running = true;
       hd.endAt = Date.now() + hd.remainAtPause*1000;
     }
@@ -5474,20 +5633,24 @@ Oh my Blue Moon</div>
     const totalChips = hd.startingChips * hd.currentPlayers + hd.rebuyChips * hd.rebuys;
     const prizeBasis = hdPrizeBasis(totalChips);
     const avgStack = hd.currentPlayers>0 ? Math.round(totalChips/hd.currentPlayers) : 0;
+    const canControl = !hd.roomCode || hd.isHost;
+    const roomBadge = hd.roomCode ? `<span style="flex-shrink:0;padding:3px 10px;border-radius:999px;border:1px solid rgba(94,224,168,0.35);background:rgba(94,224,168,0.1);color:#5ee0a8;font-size:10.5px;font-weight:700;white-space:nowrap">🔗 ${hd.roomCode} · ${hd.isHost?'호스트':'보기 전용'}</span>` : '';
     hdSetNavVisible(false);
 
     if(hd.finished){
       wrap.innerHTML = `
         <div style="max-width:1400px;margin:0 auto;padding:20px 0;display:flex;flex-direction:column;gap:16px">
+          ${roomBadge ? `<div>${roomBadge}</div>` : ''}
           <div style="padding:40px 20px;background:rgba(16,10,30,0.85);border:1px solid rgba(140,110,200,0.3);border-radius:20px;text-align:center">
             <div style="font-size:clamp(28px,6vw,48px);margin-bottom:10px">🏆</div>
             <div style="font-size:clamp(20px,4vw,32px);font-weight:800;color:#e5e0f0">Tournament Over</div>
             <p style="font-size:13px;color:#6b6480;margin-top:8px">All blind levels have finished.</p>
           </div>
+          ${canControl ? `
           <div style="display:flex;gap:8px">
             <button onclick="hdPrevLevel()" style="${hdTimerCtrlBtnStyle}">⏮ Previous Level</button>
             <button onclick="hdConfirmReset()" style="${hdTimerCtrlBtnStyle};flex:2">🔁 Restart</button>
-          </div>
+          </div>` : ''}
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};align-self:center">⚙ Back to Setup</button>
           ${hdPrizeBlock(totalChips)}
         </div>`;
@@ -5502,8 +5665,11 @@ Oh my Blue Moon</div>
 
     wrap.innerHTML = `
       <div style="max-width:1700px;margin:0 auto;height:100vh;height:100dvh;height:100svh;box-sizing:border-box;padding:var(--hd-pad-top) 0 var(--hd-pad-bot);display:flex;flex-direction:column;gap:var(--hd-gap-outer);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0;min-width:0">
-          <span style="font-size:var(--hd-level-font);font-weight:700;color:#c9c3dc;${hdNowrap}">Level ${hd.levelIdx+1}</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0;min-width:0;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0">
+            <span style="font-size:var(--hd-level-font);font-weight:700;color:#c9c3dc;${hdNowrap}">Level ${hd.levelIdx+1}</span>
+            ${roomBadge}
+          </div>
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};font-size:var(--hd-setupbtn-font);padding:var(--hd-setupbtn-pad-v) var(--hd-setupbtn-pad-h);white-space:nowrap;flex-shrink:0">⚙ Setup</button>
         </div>
 
@@ -5521,12 +5687,12 @@ Oh my Blue Moon</div>
             </div>
             ${hd.playerMode && hd.playerList.length ? `
             <div style="flex-shrink:0;margin-top:var(--hd-pills-mt);padding-top:var(--hd-pills-pt);border-top:1px solid rgba(140,110,200,0.15);max-height:16vh;overflow-y:auto;width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-end;gap:var(--hd-pills-gap)">
-              ${hd.playerList.filter(p=>p.alive).map(p=>`<button onclick="hdEliminatePlayer('${p.id}')" title="Eliminate" style="padding:var(--hd-pills-pad-v) var(--hd-pills-pad-h);border-radius:999px;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:var(--hd-pills-font);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">${hdEsc(p.name)}${p.rebuys?` <span style="color:#ffb547">·${p.rebuys+1} buy-ins</span>`:''}</button>`).join('')}
+              ${hd.playerList.filter(p=>p.alive).map(p=>canControl ? `<button onclick="hdEliminatePlayer('${p.id}')" title="Eliminate" style="padding:var(--hd-pills-pad-v) var(--hd-pills-pad-h);border-radius:999px;border:1px solid rgba(140,110,200,.35);background:rgba(30,22,55,.6);color:#e5e0f0;font-size:var(--hd-pills-font);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">${hdEsc(p.name)}${p.rebuys?` <span style="color:#ffb547">·${p.rebuys+1} buy-ins</span>`:''}</button>` : `<span style="padding:var(--hd-pills-pad-v) var(--hd-pills-pad-h);border-radius:999px;border:1px solid rgba(140,110,200,.2);background:rgba(30,22,55,.4);color:#c9c3dc;font-size:var(--hd-pills-font);font-weight:600;white-space:nowrap">${hdEsc(p.name)}${p.rebuys?` <span style="color:#ffb547">·${p.rebuys+1} buy-ins</span>`:''}</span>`).join('')}
             </div>` : ''}
           </div>
 
           <div style="flex:1 1 380px;max-width:440px;min-width:0;min-height:0;display:flex;flex-direction:column">
-          ${hd.playerMode && hd.showRebuyPanel ? hdRebuyPanelHtml() : `
+          ${hd.playerMode && hd.showRebuyPanel && canControl ? hdRebuyPanelHtml() : `
           <div style="flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:var(--hd-quadgrid-gap)">
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">🪙 Chips</p>
@@ -5546,6 +5712,7 @@ Oh my Blue Moon</div>
 
             <div style="${hdQuadStyle}">
               <p style="${hdQuadTitleStyle}">⏱ Controls</p>
+              ${canControl ? `
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:var(--hd-ctrl-rowgap)">
                 <button onclick="hdToggleRun()" style="flex:1;min-width:0;min-height:0;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#ff5fb0);color:#0a0612;font-weight:800;font-size:var(--hd-pause-font);cursor:pointer;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${hd.running ? '⏸ Pause' : '▶ Resume'}</button>
                 <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:var(--hd-ctrl-innergap);min-width:0">
@@ -5559,26 +5726,29 @@ Oh my Blue Moon</div>
                   </div>
                 </div>
                 <button onclick="hdConfirmReset()" style="${hdGhostBtnStyle};flex-shrink:0;font-size:var(--hd-restart-font);padding:var(--hd-restart-pad-v) var(--hd-restart-pad-h);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">🔁 Restart</button>
-              </div>
+              </div>` : `
+              <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center">
+                <span style="font-size:var(--hd-quad-label-font);color:${hd.running?'#5ee0a8':'#ffb547'};font-weight:700">${hd.running ? '▶ 진행 중' : '⏸ 일시정지'}</span>
+              </div>`}
             </div>
 
             <div style="${hdQuadStyle}">
               <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
                 <p style="${hdQuadTitleStyle};margin:0">👥 Entries</p>
-                ${hd.playerMode ? `<button onclick="hdOpenRebuyPanel()" style="flex-shrink:0;padding:var(--hd-manage-pad-v) var(--hd-manage-pad-h);border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#9b94b3;font-size:var(--hd-manage-font);cursor:pointer;font-family:inherit;white-space:nowrap">Manage</button>` : ''}
+                ${hd.playerMode && canControl ? `<button onclick="hdOpenRebuyPanel()" style="flex-shrink:0;padding:var(--hd-manage-pad-v) var(--hd-manage-pad-h);border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#9b94b3;font-size:var(--hd-manage-font);cursor:pointer;font-family:inherit;white-space:nowrap">Manage</button>` : ''}
               </div>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
                   <span style="font-size:var(--hd-entries-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">${hd.playerMode?'Player':'Players'}</span>
-                  ${hd.playerMode ? '' : `<button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>`}
+                  ${(hd.playerMode || !canControl) ? '' : `<button onclick="hdAdjustPlayers(-1)" style="${hdRoundBtnStyle}">−</button>`}
                   <span style="font-size:var(--hd-entries-value-font);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.currentPlayers}</span>
-                  ${hd.playerMode ? '' : `<button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>`}
+                  ${(hd.playerMode || !canControl) ? '' : `<button onclick="hdAdjustPlayers(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
                   <span style="font-size:var(--hd-entries-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Rebuys</span>
-                  ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>`}
+                  ${(hd.playerMode || !canControl) ? '' : `<button onclick="hdAdjustRebuys(-1)" style="${hdRoundBtnStyle}">−</button>`}
                   <span style="font-size:var(--hd-entries-value-font);font-weight:800;color:#f5f1ff;min-width:0;text-align:center;${hdNowrap}">${hd.rebuys}</span>
-                  ${hd.playerMode ? '' : `<button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>`}
+                  ${(hd.playerMode || !canControl) ? '' : `<button onclick="hdAdjustRebuys(1)" style="${hdRoundBtnStyle}">+</button>`}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:clamp(3px,0.8vh,8px);min-width:0">
                   <span style="font-size:var(--hd-entries-label-font);color:#9b94b3;min-width:0;flex-shrink:1;${hdNowrap}">Total Entries</span>
@@ -5627,6 +5797,10 @@ Oh my Blue Moon</div>
   window.hdBackToSetup = hdBackToSetup;
   window.hdAdjustPlayers = hdAdjustPlayers;
   window.hdAdjustRebuys = hdAdjustRebuys;
+  window.hdStartShared = hdStartShared;
+  window.hdJoinRoomByCode = hdJoinRoomByCode;
+  window.hdLeaveRoom = hdLeaveRoom;
+  window.hdCopyRoomCode = hdCopyRoomCode;
 })();
 </script>
 
