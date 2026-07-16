@@ -4979,7 +4979,7 @@ Oh my Blue Moon</div>
   function hdSaveRunState(){
     if(hd.roomCode){ if(hd.isHost) hdPushRoomState(); return; }
     if(!hd.hasRun) return;
-    try{ localStorage.setItem(HD_STATE_KEY, JSON.stringify({levelIdx:hd.levelIdx, endAt:hd.endAt, running:hd.running, remainAtPause:hd.remainAtPause, currentPlayers:hd.currentPlayers, rebuys:hd.rebuys, finished:hd.finished, playerList:hd.playerList})); }catch(e){}
+    try{ localStorage.setItem(HD_STATE_KEY, JSON.stringify({levelIdx:hd.levelIdx, endAt:hd.endAt, running:hd.running, remainAtPause:hd.remainAtPause, currentPlayers:hd.currentPlayers, rebuys:hd.rebuys, finished:hd.finished, playerList:hd.playerList, showPrizes:hd.showPrizes})); }catch(e){}
   }
   function hdLoadRunState(){
     try{ const raw = localStorage.getItem(HD_STATE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
@@ -5009,6 +5009,7 @@ Oh my Blue Moon</div>
       end_at: hd.running ? new Date(hd.endAt).toISOString() : null,
       remain_at_pause: hd.remainAtPause,
       current_players: hd.currentPlayers, rebuys: hd.rebuys, finished: hd.finished,
+      show_prizes: hd.showPrizes,
       updated_at: new Date().toISOString()
     };
   }
@@ -5023,6 +5024,7 @@ Oh my Blue Moon</div>
     hd.remainAtPause = Number(row.remain_at_pause)||0;
     hd.currentPlayers = row.current_players; hd.rebuys = row.rebuys;
     hd.finished = !!row.finished;
+    hd.showPrizes = row.show_prizes!=null ? !!row.show_prizes : true;
     hd.hasRun = true;
   }
   async function hdPushRoomState(){
@@ -5057,7 +5059,7 @@ Oh my Blue Moon</div>
     } else if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
     if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
     hdSaveSettings();
-    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false;
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false; hd.showPrizes=true;
     hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
     hd.isHost = true;
     hd.hostToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'tok'+Date.now()+Math.random().toString(36).slice(2);
@@ -5126,7 +5128,7 @@ Oh my Blue Moon</div>
       const settings = hdLoadSettings();
       hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, buyInCost:settings.buyInCost, rebuyCost:settings.rebuyCost, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
         playerMode:!!settings.playerMode, playerList:settings.playerList||[],
-        levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false,
+        levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false, showPrizes:true,
         roomCode:roomInfo.roomCode, isHost:!!roomInfo.isHost, hostToken:roomInfo.hostToken||null };
       HD_SB.from('holdem_rooms').select('*').eq('code', roomInfo.roomCode).maybeSingle().then(({data,error})=>{
         if(error || !data){ hdClearRoomInfo(); hdInitLocal(); return; }
@@ -5144,13 +5146,14 @@ Oh my Blue Moon</div>
     const settings = hdLoadSettings();
     hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, buyInCost:settings.buyInCost, rebuyCost:settings.rebuyCost, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
       playerMode:!!settings.playerMode, playerList:settings.playerList||[],
-      levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false,
+      levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false, showPrizes:true,
       roomCode:null, isHost:false, hostToken:null };
     const rs = hdLoadRunState();
     if(rs && hd.levels[rs.levelIdx]){
       hd.hasRun = true;
       hd.mode='timer'; hd.levelIdx=rs.levelIdx; hd.currentPlayers=rs.currentPlayers; hd.rebuys=rs.rebuys||0; hd.running=rs.running;
       hd.endAt=rs.endAt; hd.remainAtPause=rs.remainAtPause; hd.finished=!!rs.finished;
+      hd.showPrizes = rs.showPrizes!=null ? !!rs.showPrizes : true;
       if(hd.playerMode && rs.playerList) hd.playerList = rs.playerList;
       if(hd.running){
         const remain = (hd.endAt-Date.now())/1000;
@@ -5541,7 +5544,7 @@ Oh my Blue Moon</div>
     } else if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
     if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
     hdSaveSettings();
-    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false;
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false; hd.showPrizes=true;
     hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
     hdSaveRunState(); hdStartTick(); hdRenderTimer();
   }
@@ -5599,7 +5602,7 @@ Oh my Blue Moon</div>
   function hdConfirmReset(){ if(confirm('처음부터 다시 시작할까요? 진행 중인 타이머가 초기화됩니다.')) hdResetTimerRun(); }
   function hdResetTimerRun(){
     if(hd.playerMode){ hd.playerList.forEach(p=>{ p.alive=true; p.rebuys=0; }); hdSyncPlayersFromList(); }
-    hd.levelIdx=0; hd.finished=false; hd.currentPlayers=hd.players; hd.rebuys=0; hd.remainAtPause = hd.levels[0].min*60;
+    hd.levelIdx=0; hd.finished=false; hd.currentPlayers=hd.players; hd.rebuys=0; hd.remainAtPause = hd.levels[0].min*60; hd.showPrizes=true;
     hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000; hdStartTick(); hdSaveRunState(); hdRenderTimer();
   }
   function hdBackToSetup(){
@@ -5629,14 +5632,32 @@ Oh my Blue Moon</div>
     hd.rebuys = Math.max(0, hd.rebuys+delta);
     hdSaveRunState(); hdRenderTimer();
   }
+  function hdTogglePrizesVisible(){
+    if(hd.roomCode && !hd.isHost) return;
+    hd.showPrizes = !hd.showPrizes;
+    hdSaveRunState(); hdRenderTimer();
+  }
 
-  function hdPrizeBlock(totalMoney){
+  function hdPrizeBlock(totalMoney, canControl){
     if(!hd.prizes.length) return '';
     const basis = hdPrizeBasis(totalMoney);
+    const toggleBtn = canControl ? `<button onclick="hdTogglePrizesVisible()" style="${hdGhostBtnStyle}">${hd.showPrizes?'숨기기':'공개'}</button>` : '';
+    if(!hd.showPrizes){
+      return `<div style="padding:16px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px;text-align:center">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <p style="font-size:13px;font-weight:700;color:#b566ff;margin:0;letter-spacing:0.08em">🏆 Prizes</p>
+          ${toggleBtn}
+        </div>
+        <p style="font-size:12px;color:#6b6480;margin:10px 0 0">🔒 프라이즈가 비공개 상태예요.</p>
+      </div>`;
+    }
     return `<div style="padding:16px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:6px">
         <p style="font-size:13px;font-weight:700;color:#b566ff;margin:0;letter-spacing:0.08em">🏆 Prizes</p>
-        <span style="font-size:11px;color:#6b6480">Based on: ${fmtNum(basis)}${hd.prizeExclude?` (총 참가비 ${fmtNum(totalMoney)} − 제외 ${fmtNum(hd.prizeExclude)})`:''}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;color:#6b6480">Based on: ${fmtNum(basis)}${hd.prizeExclude?` (총 참가비 ${fmtNum(totalMoney)} − 제외 ${fmtNum(hd.prizeExclude)})`:''}</span>
+          ${toggleBtn}
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px">
         ${hd.prizes.map(p=>`
@@ -5679,7 +5700,7 @@ Oh my Blue Moon</div>
             <button onclick="hdConfirmReset()" style="${hdTimerCtrlBtnStyle};flex:2">🔁 Restart</button>
           </div>` : ''}
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};align-self:center">⚙ Back to Setup</button>
-          ${hdPrizeBlock(totalMoney)}
+          ${hdPrizeBlock(totalMoney, canControl)}
         </div>`;
       return;
     }
@@ -5731,9 +5752,13 @@ Oh my Blue Moon</div>
             </div>
 
             <div style="${hdQuadStyle}">
-              <p style="${hdQuadTitleStyle}">🏆 Prizes</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+                <p style="${hdQuadTitleStyle};margin:0">🏆 Prizes</p>
+                ${canControl ? `<button onclick="hdTogglePrizesVisible()" style="flex-shrink:0;padding:var(--hd-manage-pad-v) var(--hd-manage-pad-h);border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.5);color:#9b94b3;font-size:var(--hd-manage-font);cursor:pointer;font-family:inherit;white-space:nowrap">${hd.showPrizes?'숨기기':'공개'}</button>` : ''}
+              </div>
               <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around">
-                ${hd.prizes.length ? hd.prizes.slice(0,3).map(p=>`<div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">${hdOrdinal(p.rank)} (${p.pct||0}%)</div><div style="${hdQuadValueStyle};color:#ffb547">${fmtNum(Math.round(prizeBasis*(p.pct||0)/100))}</div></div>`).join('') : `<div style="text-align:center;font-size:var(--hd-quad-label-font);color:#6b6480;${hdNowrap}">No prizes set</div>`}
+                ${!hd.showPrizes ? `<div style="text-align:center;font-size:var(--hd-quad-label-font);color:#6b6480;${hdNowrap}">🔒 프라이즈 비공개</div>`
+                  : hd.prizes.length ? hd.prizes.slice(0,3).map(p=>`<div style="text-align:center;min-width:0"><div style="${hdQuadLabelStyle}">${hdOrdinal(p.rank)} (${p.pct||0}%)</div><div style="${hdQuadValueStyle};color:#ffb547">${fmtNum(Math.round(prizeBasis*(p.pct||0)/100))}</div></div>`).join('') : `<div style="text-align:center;font-size:var(--hd-quad-label-font);color:#6b6480;${hdNowrap}">No prizes set</div>`}
               </div>
             </div>
 
@@ -5824,6 +5849,7 @@ Oh my Blue Moon</div>
   window.hdBackToSetup = hdBackToSetup;
   window.hdAdjustPlayers = hdAdjustPlayers;
   window.hdAdjustRebuys = hdAdjustRebuys;
+  window.hdTogglePrizesVisible = hdTogglePrizesVisible;
   window.hdStartShared = hdStartShared;
   window.hdJoinRoomByCode = hdJoinRoomByCode;
   window.hdLeaveRoom = hdLeaveRoom;
