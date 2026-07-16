@@ -5077,7 +5077,7 @@ Oh my Blue Moon</div>
           </div>
           ${hd.playerMode ? `
           <div style="display:flex;gap:8px;margin-bottom:12px">
-            <input id="hd-playerNameInput" type="text" placeholder="플레이어 이름" onkeydown="if(event.key==='Enter')hdAddPlayerName()" style="${hdInputStyle};flex:1"/>
+            <input id="hd-playerNameInput" type="text" placeholder="플레이어 이름" onkeydown="if(event.key==='Enter' && !event.isComposing && event.keyCode!==229)hdAddPlayerName()" style="${hdInputStyle};flex:1"/>
             <button onclick="hdAddPlayerName()" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#b566ff,#5ec8ff);color:#0a0612;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">추가</button>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px">
@@ -5233,7 +5233,7 @@ Oh my Blue Moon</div>
         <button onclick="hdCloseRebuyPanel()" style="flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,95,109,.15);color:#ff5f6d;font-size:13px;cursor:pointer;font-family:inherit">✕</button>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;margin-bottom:8px">
-        <input id="hd-timerPlayerNameInput" type="text" placeholder="Player name" onkeydown="if(event.key==='Enter')hdAddPlayerName('hd-timerPlayerNameInput')" style="flex:1;min-width:0;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:6px 8px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box"/>
+        <input id="hd-timerPlayerNameInput" type="text" placeholder="Player name" onkeydown="if(event.key==='Enter' && !event.isComposing && event.keyCode!==229)hdAddPlayerName('hd-timerPlayerNameInput')" style="flex:1;min-width:0;border-radius:8px;border:1px solid rgba(140,110,200,.3);background:rgba(30,22,55,.7);padding:6px 8px;font-size:12px;color:#e5e0f0;outline:none;font-family:inherit;box-sizing:border-box"/>
         <button onclick="hdAddPlayerName('hd-timerPlayerNameInput')" style="flex-shrink:0;padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#b566ff,#5ec8ff);color:#0a0612;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Add</button>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px">
