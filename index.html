@@ -4970,11 +4970,11 @@ Oh my Blue Moon</div>
   function hdOrdinal(n){ const v = n%100; if(v>=11&&v<=13) return n+'th'; switch(n%10){ case 1: return n+'st'; case 2: return n+'nd'; case 3: return n+'rd'; default: return n+'th'; } }
 
   function hdLoadSettings(){
-    try{ const raw = localStorage.getItem(HD_STORE_KEY); if(raw){ const s = JSON.parse(raw); if(s && s.levels && s.levels.length){ if(s.rebuyChips==null) s.rebuyChips = s.startingChips; if(s.prizeExclude==null) s.prizeExclude = 0; return s; } } }catch(e){}
-    return { startingChips:10000, rebuyChips:10000, players:9, levels: JSON.parse(JSON.stringify(HD_DEFAULT_LEVELS)), prizes: JSON.parse(JSON.stringify(HD_DEFAULT_PRIZES)), prizeExclude:0, playerMode:false, playerList:[] };
+    try{ const raw = localStorage.getItem(HD_STORE_KEY); if(raw){ const s = JSON.parse(raw); if(s && s.levels && s.levels.length){ if(s.rebuyChips==null) s.rebuyChips = s.startingChips; if(s.prizeExclude==null) s.prizeExclude = 0; if(s.buyInCost==null) s.buyInCost = s.startingChips; if(s.rebuyCost==null) s.rebuyCost = s.rebuyChips; return s; } } }catch(e){}
+    return { startingChips:10000, rebuyChips:10000, buyInCost:10000, rebuyCost:10000, players:9, levels: JSON.parse(JSON.stringify(HD_DEFAULT_LEVELS)), prizes: JSON.parse(JSON.stringify(HD_DEFAULT_PRIZES)), prizeExclude:0, playerMode:false, playerList:[] };
   }
   function hdSaveSettings(){
-    try{ localStorage.setItem(HD_STORE_KEY, JSON.stringify({startingChips:hd.startingChips, rebuyChips:hd.rebuyChips, players:hd.players, levels:hd.levels, prizes:hd.prizes, prizeExclude:hd.prizeExclude, playerMode:hd.playerMode, playerList:hd.playerList})); }catch(e){}
+    try{ localStorage.setItem(HD_STORE_KEY, JSON.stringify({startingChips:hd.startingChips, rebuyChips:hd.rebuyChips, buyInCost:hd.buyInCost, rebuyCost:hd.rebuyCost, players:hd.players, levels:hd.levels, prizes:hd.prizes, prizeExclude:hd.prizeExclude, playerMode:hd.playerMode, playerList:hd.playerList})); }catch(e){}
   }
   function hdSaveRunState(){
     if(hd.roomCode){ if(hd.isHost) hdPushRoomState(); return; }
@@ -5001,7 +5001,8 @@ Oh my Blue Moon</div>
   function hdClearRoomInfo(){ try{ localStorage.removeItem(HD_ROOM_KEY); }catch(e){} }
   function hdRoomPayload(){
     return {
-      starting_chips: hd.startingChips, rebuy_chips: hd.rebuyChips, players: hd.players,
+      starting_chips: hd.startingChips, rebuy_chips: hd.rebuyChips,
+      buy_in_cost: hd.buyInCost, rebuy_cost: hd.rebuyCost, players: hd.players,
       levels: hd.levels, prizes: hd.prizes, prize_exclude: hd.prizeExclude||0,
       player_mode: hd.playerMode, player_list: hd.playerList,
       level_idx: hd.levelIdx, running: hd.running,
@@ -5013,6 +5014,8 @@ Oh my Blue Moon</div>
   }
   function hdApplyRoomRow(row){
     hd.startingChips = row.starting_chips; hd.rebuyChips = row.rebuy_chips; hd.players = row.players;
+    hd.buyInCost = row.buy_in_cost!=null ? row.buy_in_cost : row.starting_chips;
+    hd.rebuyCost = row.rebuy_cost!=null ? row.rebuy_cost : row.rebuy_chips;
     hd.levels = row.levels; hd.prizes = row.prizes; hd.prizeExclude = row.prize_exclude||0;
     hd.playerMode = !!row.player_mode; hd.playerList = row.player_list||[];
     hd.levelIdx = row.level_idx; hd.running = !!row.running;
@@ -5042,9 +5045,11 @@ Oh my Blue Moon</div>
     if(hdRoomChannel){ HD_SB.removeChannel(hdRoomChannel); hdRoomChannel=null; }
   }
   async function hdStartShared(){
-    const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), plEl = document.getElementById('hd-players');
+    const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), bcEl = document.getElementById('hd-buyInCost'), rcoEl = document.getElementById('hd-rebuyCost'), plEl = document.getElementById('hd-players');
     if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
     if(rcEl) hd.rebuyChips = Math.max(0, Number(rcEl.value)||0);
+    if(bcEl) hd.buyInCost = Math.max(0, Number(bcEl.value)||0);
+    if(rcoEl) hd.rebuyCost = Math.max(0, Number(rcoEl.value)||0);
     if(hd.playerMode){
       if(!hd.playerList.length){ alert('플레이어를 1명 이상 등록해주세요.'); return; }
       hd.playerList.forEach(p=>{ p.alive=true; p.rebuys=0; });
@@ -5119,7 +5124,7 @@ Oh my Blue Moon</div>
     const roomInfo = hdLoadRoomInfo();
     if(roomInfo && roomInfo.roomCode){
       const settings = hdLoadSettings();
-      hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
+      hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, buyInCost:settings.buyInCost, rebuyCost:settings.rebuyCost, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
         playerMode:!!settings.playerMode, playerList:settings.playerList||[],
         levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false,
         roomCode:roomInfo.roomCode, isHost:!!roomInfo.isHost, hostToken:roomInfo.hostToken||null };
@@ -5137,7 +5142,7 @@ Oh my Blue Moon</div>
   }
   function hdInitLocal(){
     const settings = hdLoadSettings();
-    hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
+    hd = { mode:'setup', startingChips:settings.startingChips, rebuyChips:settings.rebuyChips, buyInCost:settings.buyInCost, rebuyCost:settings.rebuyCost, players:settings.players, levels:settings.levels, prizes:settings.prizes, prizeExclude:settings.prizeExclude||0,
       playerMode:!!settings.playerMode, playerList:settings.playerList||[],
       levelIdx:0, currentPlayers:settings.players, rebuys:0, running:false, endAt:0, remainAtPause:0, tick:null, finished:false, hasRun:false, showRebuyPanel:false,
       roomCode:null, isHost:false, hostToken:null };
@@ -5163,6 +5168,7 @@ Oh my Blue Moon</div>
     const wrap = hdWrap(); if(!wrap) return;
     hdSetNavVisible(true);
     const totalChips = hd.startingChips * hd.players;
+    const totalMoney = hd.buyInCost * hd.players;
     const presets = hdPresets;
     wrap.innerHTML = `
       <div style="max-width:768px;margin:0 auto;padding-top:20px;padding-bottom:20px">
@@ -5224,17 +5230,27 @@ Oh my Blue Moon</div>
               <input id="hd-startChips" oninput="hdOnBasicInput(this)" type="number" min="0" step="100" value="${hd.startingChips}" style="${hdInputStyle}"/>
             </label>
             <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:11px;color:#9b94b3">바인비용 (참가비, 원)</span>
+              <input id="hd-buyInCost" oninput="hdOnBasicInput(this)" type="number" min="0" step="1000" value="${hd.buyInCost}" style="${hdInputStyle}"/>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
               <span style="font-size:11px;color:#9b94b3">리바이 칩 수량</span>
               <input id="hd-rebuyChips" oninput="hdOnBasicInput(this)" type="number" min="0" step="100" value="${hd.rebuyChips}" style="${hdInputStyle}"/>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:11px;color:#9b94b3">리바인비용 (원)</span>
+              <input id="hd-rebuyCost" oninput="hdOnBasicInput(this)" type="number" min="0" step="1000" value="${hd.rebuyCost}" style="${hdInputStyle}"/>
             </label>
             <label style="display:flex;flex-direction:column;gap:6px">
               <span style="font-size:11px;color:#9b94b3">참가자 수${hd.playerMode ? ' (플레이어 명단 기준)' : ''}</span>
               <input id="hd-players" oninput="hdOnBasicInput(this)" type="number" min="1" step="1" value="${hd.players}" ${hd.playerMode?'disabled':''} style="${hdInputStyle};${hd.playerMode?'opacity:.5;cursor:not-allowed':''}"/>
             </label>
           </div>
-          <div style="margin-top:14px;display:flex;gap:16px;font-size:12px;color:#9b94b3">
+          <p style="font-size:10.5px;color:#6b6480;margin:10px 0 0">칩 수량은 게임용 스택, 비용은 프라이즈(상금) 계산에 쓰여요. 칩과 비용 비율이 다를 때(예: 5만원에 6만 칩) 나눠서 입력하세요.</p>
+          <div style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#9b94b3">
             <span>총 칩: <b id="hd-totalChipsVal" style="color:#e5e0f0">${fmtNum(totalChips)}</b></span>
             <span>평균 스택: <b id="hd-avgStackVal" style="color:#e5e0f0">${fmtNum(Math.round(totalChips/(hd.players||1)))}</b></span>
+            <span>총 참가비: <b id="hd-totalMoneyVal" style="color:#e5e0f0">${fmtNum(totalMoney)}원</b></span>
           </div>
         </div>
 
@@ -5306,23 +5322,23 @@ Oh my Blue Moon</div>
             <button onclick="hdAddPrize()" style="${hdGhostBtnStyle}">+ 순위 추가</button>
           </div>
           <label style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
-            <span style="font-size:11px;color:#9b94b3">제외 금액 (진행비 등, 총 칩에서 뺀 나머지로 프라이즈 계산)</span>
+            <span style="font-size:11px;color:#9b94b3">제외 금액 (진행비 등, 총 참가비에서 뺀 나머지로 프라이즈 계산)</span>
             <input id="hd-prizeExclude" oninput="hdOnPrizeExcludeInput(this)" type="number" min="0" step="1000" value="${hd.prizeExclude||0}" style="${hdInputStyle}"/>
           </label>
-          <div style="margin-bottom:14px;font-size:11px;color:#6b6480">칩 = 금액 기준, 총 칩 ${fmtNum(totalChips)}원에서 제외 금액을 뺀 <b id="hd-prizeBasis" style="color:#e5e0f0">${fmtNum(hdPrizeBasis(totalChips))}</b>원 기준으로 퍼센트만큼 자동 계산돼요.</div>
+          <div style="margin-bottom:14px;font-size:11px;color:#6b6480">바인비용·리바인비용(참가비) 기준, 총 참가비 ${fmtNum(totalMoney)}원에서 제외 금액을 뺀 <b id="hd-prizeBasis" style="color:#e5e0f0">${fmtNum(hdPrizeBasis(totalMoney))}</b>원 기준으로 퍼센트만큼 자동 계산돼요.</div>
           <div style="display:flex;flex-direction:column;gap:8px">
             ${hd.prizes.map((p,i)=>`
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:12px;color:#9b94b3;min-width:32px">${p.rank}위</span>
               <input data-i="${i}" oninput="hdOnPrizePctInput(this)" type="number" min="0" max="100" step="1" value="${p.pct}" style="${hdCellInputStyle};width:56px"/>
               <span style="font-size:11px;color:#6b6480">%</span>
-              <span id="hd-prizeAmt-${i}" style="flex:1;text-align:right;font-size:12.5px;color:#e5e0f0">${fmtNum(Math.round(hdPrizeBasis(totalChips)*(p.pct||0)/100))}원</span>
+              <span id="hd-prizeAmt-${i}" style="flex:1;text-align:right;font-size:12.5px;color:#e5e0f0">${fmtNum(Math.round(hdPrizeBasis(totalMoney)*(p.pct||0)/100))}원</span>
               <button onclick="hdRemovePrize(${i})" style="background:none;border:none;color:#6b6480;cursor:pointer;font-size:14px">✕</button>
             </div>`).join('')}
           </div>
           <div style="margin-top:12px;display:flex;justify-content:space-between;font-size:12px;color:#9b94b3">
-            <span>합계 퍼센트: <b id="hd-prizePctTotal" style="color:${hdPrizeTotals(totalChips).totalPct===100?'#5ee0a8':'#ffb547'}">${hdPrizeTotals(totalChips).totalPct}%</b></span>
-            <span>합계 금액: <b id="hd-prizeAmtTotal" style="color:#e5e0f0">${fmtNum(hdPrizeTotals(totalChips).totalAmt)}원</b></span>
+            <span>합계 퍼센트: <b id="hd-prizePctTotal" style="color:${hdPrizeTotals(totalMoney).totalPct===100?'#5ee0a8':'#ffb547'}">${hdPrizeTotals(totalMoney).totalPct}%</b></span>
+            <span>합계 금액: <b id="hd-prizeAmtTotal" style="color:#e5e0f0">${fmtNum(hdPrizeTotals(totalMoney).totalAmt)}원</b></span>
           </div>
         </div>
 
@@ -5335,13 +5351,18 @@ Oh my Blue Moon</div>
   function hdOnBasicInput(el){
     if(el.id==='hd-startChips') hd.startingChips = Math.max(0, Number(el.value)||0);
     if(el.id==='hd-rebuyChips') hd.rebuyChips = Math.max(0, Number(el.value)||0);
+    if(el.id==='hd-buyInCost') hd.buyInCost = Math.max(0, Number(el.value)||0);
+    if(el.id==='hd-rebuyCost') hd.rebuyCost = Math.max(0, Number(el.value)||0);
     if(el.id==='hd-players') hd.players = Math.max(1, Number(el.value)||1);
     hdSaveSettings();
     const total = hd.startingChips*hd.players;
+    const totalMoney = hd.buyInCost*hd.players;
     const totalEl = document.getElementById('hd-totalChipsVal');
     const avgEl = document.getElementById('hd-avgStackVal');
+    const totalMoneyEl = document.getElementById('hd-totalMoneyVal');
     if(totalEl) totalEl.textContent = fmtNum(total);
     if(avgEl) avgEl.textContent = fmtNum(Math.round(total/(hd.players||1)));
+    if(totalMoneyEl) totalMoneyEl.textContent = fmtNum(totalMoney)+'원';
     hdRefreshPrizeAmounts();
   }
   function hdSyncPlayersFromList(){
@@ -5445,7 +5466,8 @@ Oh my Blue Moon</div>
     if(existing && !confirm(`"${name}" 프리셋이 이미 있어요. 덮어쓸까요?`)) return;
     const payload = {
       name,
-      starting_chips: hd.startingChips, rebuy_chips: hd.rebuyChips, players: hd.players,
+      starting_chips: hd.startingChips, rebuy_chips: hd.rebuyChips,
+      buy_in_cost: hd.buyInCost, rebuy_cost: hd.rebuyCost, players: hd.players,
       levels: hd.levels, prizes: hd.prizes, prize_exclude: hd.prizeExclude||0
     };
     const { error } = existing
@@ -5461,6 +5483,8 @@ Oh my Blue Moon</div>
     const preset = hdPresets.find(p=>p.id===sel.value);
     if(!preset) return;
     hd.startingChips = preset.starting_chips; hd.rebuyChips = preset.rebuy_chips!=null ? preset.rebuy_chips : preset.starting_chips; hd.players = preset.players;
+    hd.buyInCost = preset.buy_in_cost!=null ? preset.buy_in_cost : hd.startingChips;
+    hd.rebuyCost = preset.rebuy_cost!=null ? preset.rebuy_cost : hd.rebuyChips;
     hd.levels = JSON.parse(JSON.stringify(preset.levels));
     hd.prizes = JSON.parse(JSON.stringify(preset.prizes));
     hd.prizeExclude = preset.prize_exclude||0;
@@ -5485,13 +5509,13 @@ Oh my Blue Moon</div>
     return {totalPct, totalAmt};
   }
   function hdRefreshPrizeAmounts(){
-    const totalChips = hd.startingChips * hd.players;
-    const basis = hdPrizeBasis(totalChips);
+    const totalMoney = hd.buyInCost * hd.players;
+    const basis = hdPrizeBasis(totalMoney);
     hd.prizes.forEach((p,i)=>{
       const amtEl = document.getElementById('hd-prizeAmt-'+i);
       if(amtEl) amtEl.textContent = fmtNum(Math.round(basis*(p.pct||0)/100))+'원';
     });
-    const {totalPct, totalAmt} = hdPrizeTotals(totalChips);
+    const {totalPct, totalAmt} = hdPrizeTotals(totalMoney);
     const pctEl = document.getElementById('hd-prizePctTotal');
     const amtEl = document.getElementById('hd-prizeAmtTotal');
     const basisEl = document.getElementById('hd-prizeBasis');
@@ -5505,9 +5529,11 @@ Oh my Blue Moon</div>
   function hdRemovePrize(i){ hd.prizes.splice(i,1); hd.prizes.forEach((p,idx)=>p.rank=idx+1); hdSaveSettings(); hdRenderSetup(); }
 
   function hdStart(){
-    const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), plEl = document.getElementById('hd-players');
+    const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), bcEl = document.getElementById('hd-buyInCost'), rcoEl = document.getElementById('hd-rebuyCost'), plEl = document.getElementById('hd-players');
     if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
     if(rcEl) hd.rebuyChips = Math.max(0, Number(rcEl.value)||0);
+    if(bcEl) hd.buyInCost = Math.max(0, Number(bcEl.value)||0);
+    if(rcoEl) hd.rebuyCost = Math.max(0, Number(rcoEl.value)||0);
     if(hd.playerMode){
       if(!hd.playerList.length){ alert('플레이어를 1명 이상 등록해주세요.'); return; }
       hd.playerList.forEach(p=>{ p.alive=true; p.rebuys=0; });
@@ -5604,13 +5630,13 @@ Oh my Blue Moon</div>
     hdSaveRunState(); hdRenderTimer();
   }
 
-  function hdPrizeBlock(totalChips){
+  function hdPrizeBlock(totalMoney){
     if(!hd.prizes.length) return '';
-    const basis = hdPrizeBasis(totalChips);
+    const basis = hdPrizeBasis(totalMoney);
     return `<div style="padding:16px;background:rgba(16,10,30,0.7);border:1px solid rgba(140,110,200,0.2);border-radius:16px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:6px">
         <p style="font-size:13px;font-weight:700;color:#b566ff;margin:0;letter-spacing:0.08em">🏆 Prizes</p>
-        <span style="font-size:11px;color:#6b6480">Based on: ${fmtNum(basis)}${hd.prizeExclude?` (총 ${fmtNum(totalChips)} − 제외 ${fmtNum(hd.prizeExclude)})`:''}</span>
+        <span style="font-size:11px;color:#6b6480">Based on: ${fmtNum(basis)}${hd.prizeExclude?` (총 참가비 ${fmtNum(totalMoney)} − 제외 ${fmtNum(hd.prizeExclude)})`:''}</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px">
         ${hd.prizes.map(p=>`
@@ -5631,7 +5657,8 @@ Oh my Blue Moon</div>
   function hdRenderTimer(){
     const wrap = hdWrap(); if(!wrap) return;
     const totalChips = hd.startingChips * hd.currentPlayers + hd.rebuyChips * hd.rebuys;
-    const prizeBasis = hdPrizeBasis(totalChips);
+    const totalMoney = hd.buyInCost * hd.currentPlayers + hd.rebuyCost * hd.rebuys;
+    const prizeBasis = hdPrizeBasis(totalMoney);
     const avgStack = hd.currentPlayers>0 ? Math.round(totalChips/hd.currentPlayers) : 0;
     const canControl = !hd.roomCode || hd.isHost;
     const roomBadge = hd.roomCode ? `<span style="flex-shrink:0;padding:3px 10px;border-radius:999px;border:1px solid rgba(94,224,168,0.35);background:rgba(94,224,168,0.1);color:#5ee0a8;font-size:10.5px;font-weight:700;white-space:nowrap">🔗 ${hd.roomCode} · ${hd.isHost?'호스트':'보기 전용'}</span>` : '';
@@ -5652,7 +5679,7 @@ Oh my Blue Moon</div>
             <button onclick="hdConfirmReset()" style="${hdTimerCtrlBtnStyle};flex:2">🔁 Restart</button>
           </div>` : ''}
           <button onclick="hdBackToSetup()" style="${hdGhostBtnStyle};align-self:center">⚙ Back to Setup</button>
-          ${hdPrizeBlock(totalChips)}
+          ${hdPrizeBlock(totalMoney)}
         </div>`;
       return;
     }
