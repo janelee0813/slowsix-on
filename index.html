@@ -4856,6 +4856,15 @@ Oh my Blue Moon</div>
         --hd-quadctrl-font: clamp(11px,2.6vh,18px);
       }
     }
+    /* PC(마우스) 가로모드 전용: 우측 칩/프라이즈 숫자 박스 폭(최대 440px)에 비해
+       세로 뷰포트(vh) 기준 클램프가 지나치게 커져 숫자가 잘리는 문제 보정.
+       휴대폰 가로모드는 터치 입력이라 이 규칙의 영향을 받지 않음. */
+    @media (orientation: landscape) and (hover: hover) and (pointer: fine){
+      #page-holdem{
+        --hd-quad-value-font: clamp(15px,4.2vh,28px);
+        --hd-entries-value-font: clamp(15px,4.2vh,28px);
+      }
+    }
     @media (orientation: portrait){
       #page-holdem{
         --hd-quad-title-font: clamp(10px,1.8vh,13px);
