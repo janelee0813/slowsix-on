@@ -5344,20 +5344,11 @@ Oh my Blue Moon</div>
 
 <!-- 샷클락 페이지 -->
 <div id="page-shotclock" class="hidden">
-  <div class="mx-auto flex max-w-screen-md flex-col items-center px-5 pb-16 pt-8 text-center sm:pt-10">
-    <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-      <span style="font-size:14px">⏱️</span>
-      <span>샷클락</span>
-      <span class="mx-1 h-1 w-1 rounded-full bg-border"></span>
-      <span class="text-neon-blue">홀덤 딜러용</span>
-    </div>
+  <div id="sc-tap-area" onclick="scPageTap()" style="min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;cursor:pointer;user-select:none;transition:background-color .2s">
+    <div id="sc-number" style="font-size:min(52vw,58vh);font-weight:800;line-height:1;color:#5ee0a8;font-variant-numeric:tabular-nums;transition:color .2s">30</div>
+    <p class="mt-3 text-xs text-muted-foreground">화면을 탭하면 즉시 30초로 재시작해요</p>
 
-    <div id="sc-display" onclick="scTapReset()" style="width:min(72vw,300px);height:min(72vw,300px);border-radius:50%;display:flex;align-items:center;justify-content:center;border:6px solid #5ee0a8;box-shadow:0 0 40px -10px rgba(94,224,168,0.5);margin-top:20px;cursor:pointer;user-select:none;transition:border-color .2s,box-shadow .2s;background:radial-gradient(circle at 50% 40%,rgba(94,224,168,0.08),transparent 70%)">
-      <span id="sc-number" style="font-size:min(24vw,110px);font-weight:800;line-height:1;color:#f5f1ff;font-variant-numeric:tabular-nums">30</span>
-    </div>
-    <p class="mt-4 text-xs text-muted-foreground">시계를 탭하면 즉시 30초로 재시작해요</p>
-
-    <div class="mt-8 flex items-center gap-3">
+    <div class="mt-7 flex items-center gap-3" onclick="event.stopPropagation()">
       <button id="sc-toggle" onclick="scToggle()" style="padding:14px 30px;border-radius:999px;border:none;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);color:#0a0612;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">시작</button>
       <button onclick="scReset()" style="padding:14px 24px;border-radius:999px;border:1px solid rgba(140,110,200,0.35);background:rgba(44,33,72,0.7);color:#e5e0f0;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">리셋</button>
     </div>
@@ -5373,14 +5364,14 @@ Oh my Blue Moon</div>
 
   function scRender(){
     const el = document.getElementById('sc-number');
-    const disp = document.getElementById('sc-display');
-    if (!el || !disp) return;
+    const area = document.getElementById('sc-tap-area');
+    if (!el || !area) return;
     el.textContent = scRemaining;
-    let color = '#5ee0a8', glow = 'rgba(94,224,168,0.5)';
-    if (scRemaining <= 5) { color = '#ff5f6d'; glow = 'rgba(255,95,109,0.6)'; }
-    else if (scRemaining <= 10) { color = '#ffb547'; glow = 'rgba(255,181,71,0.55)'; }
-    disp.style.borderColor = color;
-    disp.style.boxShadow = '0 0 40px -10px ' + glow;
+    let color = '#5ee0a8', tint = 'transparent';
+    if (scRemaining <= 5) { color = '#ff5f6d'; tint = 'rgba(255,95,109,0.08)'; }
+    else if (scRemaining <= 10) { color = '#ffb547'; tint = 'rgba(255,181,71,0.07)'; }
+    el.style.color = color;
+    area.style.backgroundColor = tint;
   }
 
   function scBeep(freq, dur){
@@ -5447,6 +5438,10 @@ Oh my Blue Moon</div>
     scRemaining = SC_DEFAULT;
     scRender();
     scStart();
+  };
+
+  window.scPageTap = function(){
+    scTapReset();
   };
 
   window.scStopIfRunning = function(){
