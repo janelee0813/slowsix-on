@@ -72,11 +72,12 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
   </div>
 
   <div class="mx-auto max-w-screen-lg px-5 py-6">
-    <div class="mb-5 flex items-center justify-between">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h1 class="text-lg font-bold text-foreground">미니 홀덤대회 신청자</h1>
       <div class="flex items-center gap-2">
         <span id="ap-admin-count" class="text-xs text-muted-foreground"></span>
         <button onclick="loadApplications()" class="rounded-full border border-border px-3 py-1.5 text-xs text-foreground/90 transition-colors hover:border-neon-purple/50 hover:text-neon-purple">새로고침</button>
+        <button onclick="downloadCsv()" class="rounded-full border border-border px-3 py-1.5 text-xs text-foreground/90 transition-colors hover:border-neon-purple/50 hover:text-neon-purple">엑셀 다운로드</button>
       </div>
     </div>
 
@@ -178,6 +179,43 @@ async function loadApplications(){
 async function setStatus(id, status){
   await sb.from('holdem_applications').update({ status }).eq('id', id);
   loadApplications();
+}
+
+function csvCell(v){
+  const s = v === null || v === undefined ? '' : String(v);
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+async function downloadCsv(){
+  const btn = event.currentTarget;
+  const orig = btn.textContent;
+  btn.textContent = '다운로드 중...';
+  btn.disabled = true;
+
+  const { data, error } = await sb.from('holdem_applications').select('*').order('created_at', { ascending: false });
+
+  btn.textContent = orig;
+  btn.disabled = false;
+
+  if (error) { alert('다운로드 실패: ' + error.message); return; }
+
+  const header = ['실명', '닉네임', '성별', '출생연도', '홀덤경험', '카톡닉네임', '문의사항', '상태', '신청시각'];
+  const rows = data.map(row => {
+    const dt = new Date(row.created_at);
+    const dtStr = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0') + ' ' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+    return [row.name, row.nickname, row.gender, row.birth_year, row.experience, row.kakao_nick, row.note, AP_STATUS_LABEL[row.status] || row.status, dtStr];
+  });
+
+  const csv = [header, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '미니홀덤대회_신청자_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
