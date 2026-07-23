@@ -5322,7 +5322,7 @@ Oh my Blue Moon</div>
 
     const chatDisabled = !holdemEvent.openChatUrl;
     document.querySelectorAll('.hd2-chat-btn').forEach(btn => {
-      btn.textContent = chatDisabled ? '커뮤니티 준비 중' : '홀덤 커뮤니티 참여';
+      btn.textContent = chatDisabled ? '커뮤니티 준비 중' : '미니홀덤대회 운영을 위한 카톡방 참여';
       btn.disabled = chatDisabled;
       btn.onclick = chatDisabled ? null : () => window.open(holdemEvent.openChatUrl, '_blank');
     });
