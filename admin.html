@@ -154,7 +154,7 @@ async function loadApplications(){
     <div class="neon-card p-4 sm:p-5">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-bold text-foreground">${escHtml(row.name)}</span>
+          <span class="text-sm font-bold text-foreground">${escHtml(row.name)}${row.nickname ? ` (${escHtml(row.nickname)})` : ''}</span>
           <span class="text-xs text-muted-foreground">(${escHtml(row.gender)} · ${row.birth_year}년생)</span>
         </div>
         <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid ${AP_STATUS_COLOR[st]};color:${AP_STATUS_COLOR[st]}">${AP_STATUS_LABEL[st] || st}</span>
