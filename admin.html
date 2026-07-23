@@ -50,13 +50,13 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
     <div class="neon-card neon-card-glow p-7">
       <div class="text-center mb-7">
         <h1 class="text-xl font-bold text-foreground tracking-tight">관리자 모드</h1>
-        <p class="mt-1.5 text-xs text-muted-foreground">비밀번호를 입력해주세요.</p>
+        <p class="mt-1.5 text-xs text-muted-foreground">PIN 번호를 입력해주세요.</p>
       </div>
       <div class="space-y-4">
-        <input id="login-pw" type="password" class="form-input" placeholder="비밀번호 입력" autocomplete="current-password"
+        <input id="login-pw" type="password" inputmode="numeric" maxlength="6" class="form-input" placeholder="PIN 번호"
           onkeydown="if(event.key==='Enter')doLogin()"/>
         <div id="login-error" class="hidden rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-xs text-destructive font-medium">
-          비밀번호가 올바르지 않습니다.
+          PIN이 올바르지 않습니다.
         </div>
         <button onclick="doLogin()" id="login-btn" class="btn-primary w-full py-3 text-sm rounded-xl">입장</button>
       </div>
@@ -87,34 +87,27 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
 </div>
 
 <script>
-const ADMIN_EMAIL = 'slowsixon@gmail.com';
+const ADMIN_PIN = '505050';
 const sb = window.supabase.createClient(
   'https://teugnaahpcpzejbdayyy.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA'
 );
 
-async function doLogin(){
+function doLogin(){
   const pw = document.getElementById('login-pw').value;
   const errEl = document.getElementById('login-error');
-  const btn = document.getElementById('login-btn');
-  btn.textContent = '확인 중...';
-  btn.disabled = true;
 
-  const { error } = await sb.auth.signInWithPassword({ email: ADMIN_EMAIL, password: pw });
-
-  btn.textContent = '입장';
-  btn.disabled = false;
-
-  if(error){
+  if (pw !== ADMIN_PIN) {
     errEl.classList.remove('hidden');
-  } else {
-    errEl.classList.add('hidden');
-    showAdminPage();
+    return;
   }
+  errEl.classList.add('hidden');
+  sessionStorage.setItem('admin-authed', '1');
+  showAdminPage();
 }
 
-async function doLogout(){
-  await sb.auth.signOut();
+function doLogout(){
+  sessionStorage.removeItem('admin-authed');
   location.reload();
 }
 
@@ -187,9 +180,8 @@ async function setStatus(id, status){
   loadApplications();
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if(session) showAdminPage();
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('admin-authed') === '1') showAdminPage();
 });
 </script>
 </body>
