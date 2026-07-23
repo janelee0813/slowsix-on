@@ -4550,10 +4550,220 @@ Oh my Blue Moon</div>
 
 <!-- 임시-출석이벤트 페이지 -->
 <div id="page-attendance" class="hidden">
-  <div class="mx-auto max-w-screen-md px-5 pb-16 pt-16 text-center">
-    <p class="text-lg font-semibold text-foreground/90">임시-출석이벤트</p>
-    <p class="mt-3 text-sm text-muted-foreground">준비중입니다</p>
+
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="grid-bg absolute inset-0 -z-10"></div>
+  <div class="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-neon-purple/60 to-transparent"></div>
+  <div class="mx-auto max-w-screen-md px-5 pt-11 pb-12 sm:pt-16 sm:pb-20">
+    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur animate-fade-up">
+      <span style="font-size:14px">💝</span>
+      <span>예린팀 하반기 출석 이벤트</span>
+      <span class="mx-1 h-1 w-1 rounded-full bg-border"></span>
+      <span class="text-neon-blue">26.06.01 ~ 12.31</span>
+    </div>
+    <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl animate-fade-up" style="animation-delay:60ms">
+      함께해주셔서 감사한<br/>
+      <span class="text-gradient-neon">마음을 담아 💝</span>
+    </h1>
+    <p class="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg animate-fade-up" style="animation-delay:140ms">
+      그동안 초청에 자주 함께해주신 분들께 감사한 마음을 담아 작은 이벤트를 준비했습니다.<br/>
+      많이 와주신 분들께는 감사 선물을, 당일 참석자분들께는 랜덤 추첨 선물을 드릴 예정입니다.
+    </p>
+
+    <div id="attendance-dday" class="mt-8 animate-fade-up" style="animation-delay:200ms"></div>
+    <script>
+    (function(){
+      const start = new Date('2026-06-01');
+      const end   = new Date('2026-12-31');
+      const today = new Date(); today.setHours(0,0,0,0);
+      const total    = Math.round((end - start) / 86400000);
+      const elapsed  = Math.max(0, Math.min(Math.round((today - start) / 86400000), total));
+      const remaining = Math.max(0, Math.round((end - today) / 86400000));
+      const pct      = Math.round(elapsed / total * 100);
+      const statusText = today > end ? '이벤트 종료' : `D-${remaining}`;
+      const el = document.getElementById('attendance-dday');
+      if (el) el.innerHTML =
+        `<div style="background:#15101f;border:1px solid rgba(140,110,200,0.22);border-radius:14px;padding:16px 20px;margin-bottom:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-size:14px;font-weight:700;color:#f5f1ff">💝 ${statusText}</div>
+            <div style="font-size:12px;color:#9b94b3">${elapsed}일 경과 · 잔여 ${remaining}일</div>
+          </div>
+          <div style="height:10px;background:rgba(140,110,200,0.15);border-radius:5px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff);border-radius:5px;box-shadow:0 0 10px rgba(181,102,255,0.5)"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:7px">
+            <span style="font-size:10px;color:#6b6480">6월 1일 시작</span>
+            <span style="font-size:11px;color:#b566ff;font-weight:700">${pct}%</span>
+            <span style="font-size:10px;color:#6b6480">12월 31일 종료</span>
+          </div>
+        </div>`;
+    })();
+    </script>
   </div>
+  <div class="divider-neon mx-auto max-w-screen-md"></div>
+</section>
+
+<!-- EVENT 01 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          EVENT 01
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:text-4xl">당일 참석 랜덤 추첨 ☕️</h2>
+    </div>
+    <div class="neon-card neon-card-glow p-5 sm:p-6">
+      <p class="text-[13.5px] leading-relaxed text-foreground/85 sm:text-sm">초청 당일에 와주신 분께 한해 랜덤으로 추첨을 통해 <span class="font-semibold text-foreground">스타벅스 커피 기프티콘</span>을 드립니다 ☕️</p>
+    </div>
+  </div>
+</section>
+
+<!-- EVENT 02 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          EVENT 02
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:text-4xl">누적 참석 횟수 리워드 🥰</h2>
+      <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">초청에 와주신 분들께 한해 참석 횟수에 따른 기프티콘과 상품들을 드리고 있어요.</p>
+    </div>
+    <div class="relative">
+      <div class="absolute left-[19px] top-2 bottom-2 w-px bg-gradient-to-b from-neon-purple/60 via-neon-pink/40 to-transparent sm:left-[23px]"></div>
+      <div class="space-y-5">
+        <div class="relative pl-12 sm:pl-14">
+          <div class="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full border border-neon-purple/50 bg-background text-xs font-bold text-neon-purple shadow-[0_0_20px_-6px_#b566ff] sm:h-12 sm:w-12 sm:text-sm">5</div>
+          <div class="neon-card neon-card-glow p-5 sm:p-6">
+            <h3 class="mb-2 text-base font-semibold text-foreground sm:text-lg">누적 참석 5회 달성</h3>
+            <p class="text-[13.5px] leading-relaxed text-muted-foreground sm:text-sm">👉 <span class="font-semibold text-foreground">스타벅스 3만원 기프티콘</span></p>
+          </div>
+        </div>
+        <div class="relative pl-12 sm:pl-14">
+          <div class="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full border border-neon-purple/50 bg-background text-xs font-bold text-neon-purple shadow-[0_0_20px_-6px_#b566ff] sm:h-12 sm:w-12 sm:text-sm">10</div>
+          <div class="neon-card neon-card-glow p-5 sm:p-6">
+            <h3 class="mb-2 text-base font-semibold text-foreground sm:text-lg">누적 참석 10회 달성</h3>
+            <p class="text-[13.5px] leading-relaxed text-muted-foreground sm:text-sm">👉 <span class="font-semibold text-foreground">올리브영 또는 배달의민족 5만원 기프티콘 (택1)</span></p>
+          </div>
+        </div>
+        <div class="relative pl-12 sm:pl-14">
+          <div class="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full border border-neon-purple/50 bg-background text-xs font-bold text-neon-purple shadow-[0_0_20px_-6px_#b566ff] sm:h-12 sm:w-12 sm:text-sm">30</div>
+          <div class="neon-card neon-card-glow p-5 sm:p-6">
+            <h3 class="mb-2 text-base font-semibold text-foreground sm:text-lg">누적 참석 30회 달성</h3>
+            <p class="text-[13.5px] leading-relaxed text-muted-foreground sm:text-sm">👉 <span class="font-semibold text-foreground">예리니에게 무엇이든 시켜봐 소원권 😎</span><br/><span class="text-[12px] text-muted-foreground/80">(금전적 요구, 성적인 요구 제외하고 사용 가능!)</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENT 03 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          EVENT 03
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:text-4xl">3개월 최다 참여자 시상 👑</h2>
+    </div>
+    <div class="neon-card neon-card-glow p-5 sm:p-6">
+      <p class="text-[13.5px] leading-relaxed text-foreground/85 sm:text-sm">3개월마다 한 번씩 초청 최다 참여자에게 <span class="font-semibold text-foreground">[한국 표준 금거래소]에서 제작한 24k 순금 피규어</span>를 증정합니다 👑<br/>2번째로 많이 참여하신 분께는 <span class="font-semibold text-foreground">콩알금</span>을 증정해드려요! ☀️</p>
+    </div>
+  </div>
+</section>
+
+<!-- 출석현황 -->
+<section class="px-5 py-16 sm:py-20">
+  <div class="mx-auto max-w-screen-md">
+    <div class="mb-8">
+      <div class="mb-3 flex justify-start">
+        <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-neon-purple uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#b566ff]"></span>
+          출석현황
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:text-4xl">누적 참석 현황</h2>
+      <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">누적 참석 횟수 현황이에요.</p>
+    </div>
+    <div class="neon-card p-5 sm:p-6">
+      <div id="attendance-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 마무리 -->
+<section class="px-5 pb-20 sm:pb-24">
+  <div class="mx-auto max-w-screen-md text-center leading-relaxed">
+    <p class="text-base font-medium text-foreground/90 sm:text-lg">홀덤도 치고 무료로 커피도 밥도 먹고 금까지 받아갈 수 있는 찬스 😎😎😎</p>
+    <p class="mt-2 text-sm text-muted-foreground">도대체 어느 누가 이벤트로 금을 뿌리나요!! 그거슨 바로 나 ㅋ 예린쨩 ❣️</p>
+    <p class="mt-5 text-2xl font-bold sm:text-3xl" style="background:linear-gradient(90deg,#b566ff,#ff5fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">다들 초청 많이 참여하시고 혜택 받아가세요 😘</p>
+  </div>
+</section>
+
+<script>
+(function(){
+  const attendanceData = [
+    { name: '재치', count: 26 },
+    { name: '꿍', count: 5 },
+    { name: '젤로', count: 7 },
+    { name: '아는핸디', count: 1 },
+    { name: 'AA', count: 4 },
+    { name: '완설', count: 2 },
+    { name: '영포티 성이름', count: 1 },
+    { name: '베가스', count: 9 },
+    { name: '예리니 절었다', count: 2 },
+    { name: '하퍼', count: 9 },
+    { name: '여운', count: 9 },
+    { name: '리버A', count: 6 },
+    { name: '틸다', count: 14 },
+    { name: '녹', count: 2 },
+    { name: '행', count: 2 },
+    { name: '종바리', count: 4 },
+    { name: '홀덤여행', count: 3 },
+    { name: '애기왕자', count: 10 },
+    { name: '차니', count: 3 },
+    { name: '후니', count: 2 },
+    { name: 'Deus', count: 1 },
+    { name: '쫄았다', count: 1 },
+    { name: '러너구디', count: 1 },
+    { name: '뚱쟈', count: 1 },
+    { name: '행주', count: 1 },
+  ];
+  const ATT_MAX = 30; // 최고 티어(30회) 기준 게이지 스케일
+
+  function renderAttendanceList(data){
+    const el = document.getElementById('attendance-list');
+    if (!el) return;
+    el.innerHTML = data.map(d => {
+      const pct = Math.max(0, Math.min(100, Math.round(d.count / ATT_MAX * 100)));
+      return `
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:13.5px;font-weight:600;color:#e5e0f0">${d.name}</span>
+          <span style="font-size:12px;color:#b566ff;font-weight:700">${d.count}회</span>
+        </div>
+        <div style="height:10px;background:rgba(140,110,200,0.15);border-radius:5px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#b566ff,#ff5fb0);border-radius:5px;box-shadow:0 0 8px rgba(181,102,255,0.4)"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.renderAttendanceList = renderAttendanceList;
+  renderAttendanceList([...attendanceData].sort((a, b) => b.count - a.count));
+})();
+</script>
+
 </div>
 
 <div id="page-boardgame" class="hidden">
