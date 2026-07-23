@@ -5404,7 +5404,8 @@ Oh my Blue Moon</div>
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       return;
     }
-    if (scRemaining <= 5) scBeep(660, 0.08);
+    if (scRemaining === 10) scBeep(660, 0.15);
+    else if (scRemaining <= 5) scBeep(660, 0.08);
     scRender();
   }
 
