@@ -4948,12 +4948,12 @@ Oh my Blue Moon</div>
 <script>
 (function(){
   const bgGames = [
-    { name:'색감과 직감', players:'3~10인', genre:'파티', time:'30분', level:'쉬움' },
-    { name:'도미니언', players:'2~4인', genre:'덱빌딩', time:'30분', level:'보통' },
-    { name:'아줄', players:'2~4인', genre:'전략', time:'30~45분', level:'보통' },
-    { name:'블러핏', players:'2~6인', genre:'파티', time:'15분', level:'쉬움' },
-    { name:'모자가 아니잖아', players:'3~8인', genre:'파티', time:'15분', level:'쉬움' },
-    { name:'하모니즈', players:'1~4인', genre:'전략', time:'30~45분', level:'보통' },
+    { name:'색감과 직감', players:'3~10인', genre:'파티', time:'30분', level:'쉬움', isNew:true },
+    { name:'도미니언', players:'2~4인', genre:'덱빌딩', time:'30분', level:'보통', isNew:true },
+    { name:'아줄', players:'2~4인', genre:'전략', time:'30~45분', level:'보통', isNew:true },
+    { name:'블러핏', players:'2~6인', genre:'파티', time:'15분', level:'쉬움', isNew:true },
+    { name:'모자가 아니잖아', players:'3~8인', genre:'파티', time:'15분', level:'쉬움', isNew:true },
+    { name:'하모니즈', players:'1~4인', genre:'전략', time:'30~45분', level:'보통', isNew:true },
     { name:'바퀴벌레 포커', players:'2~6인', genre:'카드', time:'15~20분', level:'쉬움' },
     { name:'스컬킹', players:'2~6인', genre:'카드', time:'30분', level:'보통' },
     { name:'저스트 원', players:'3~7인', genre:'파티', time:'20분', level:'쉬움' },
@@ -5094,7 +5094,13 @@ Oh my Blue Moon</div>
   let bgSortDir = 1;
 
   function bgApplySort(list){
-    if (!bgSortKey) return list;
+    if (!bgSortKey) {
+      return [...list].sort((a, b) => {
+        const na = a.isNew ? 0 : 1, nb = b.isNew ? 0 : 1;
+        if (na !== nb) return na - nb;
+        return a.name.localeCompare(b.name, 'ko');
+      });
+    }
     const key = bgSortKey, dir = bgSortDir;
     return [...list].sort((a, b) => {
       const va = bgSortValue(a, key), vb = bgSortValue(b, key);
