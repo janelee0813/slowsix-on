@@ -5067,7 +5067,7 @@ Oh my Blue Moon</div>
     empty.classList.add('hidden');
     wrap.innerHTML = list.map(g => `
       <tr class="border-b border-border/60 last:border-b-0 even:bg-surface/30 hover:bg-surface/50">
-        <td class="whitespace-nowrap px-3 py-1 text-[12.5px] font-medium text-foreground sm:text-sm">${g.isNew ? '<span style="display:inline-block;background:#ffd76a;color:#1a1229;font-size:9px;font-weight:800;padding:1px 5px;border-radius:5px;margin-right:5px;vertical-align:middle">NEW</span>' : ''}${bgEscape(g.name)}</td>
+        <td class="whitespace-nowrap px-3 py-1 text-[12.5px] font-medium text-foreground sm:text-sm">${g.isNew ? '<span style="display:inline-block;background:#ffd76a;color:#1a1229;font-size:7px;font-weight:800;padding:0.5px 4px;border-radius:4px;margin-right:4px;vertical-align:middle;line-height:1.4">NEW</span>' : ''}${bgEscape(g.name)}</td>
         <td class="whitespace-nowrap px-3 py-1 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.players)}</td>
         <td class="whitespace-nowrap px-3 py-1 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.genre)}</td>
         <td class="whitespace-nowrap px-3 py-1 text-[12px] text-muted-foreground sm:text-[13px]">${bgEscape(g.time)}</td>
