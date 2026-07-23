@@ -64,11 +64,25 @@ body{background:#0a0612;color:#f5f1ff;font-family:'Pretendard Variable','Pretend
   </div>
 </div>
 
-<!-- 관리자 페이지 (로그인 후 · 준비 중) -->
+<!-- 관리자 페이지 -->
 <div id="admin-page" class="hidden min-h-screen">
   <div class="flex items-center justify-between px-5 py-4 border-b border-border">
     <span class="text-sm font-bold text-foreground">관리자 모드</span>
     <button onclick="doLogout()" class="text-xs text-muted-foreground hover:text-neon-purple transition-colors">로그아웃</button>
+  </div>
+
+  <div class="mx-auto max-w-screen-lg px-5 py-6">
+    <div class="mb-5 flex items-center justify-between">
+      <h1 class="text-lg font-bold text-foreground">미니 홀덤대회 신청자</h1>
+      <div class="flex items-center gap-2">
+        <span id="ap-admin-count" class="text-xs text-muted-foreground"></span>
+        <button onclick="loadApplications()" class="rounded-full border border-border px-3 py-1.5 text-xs text-foreground/90 transition-colors hover:border-neon-purple/50 hover:text-neon-purple">새로고침</button>
+      </div>
+    </div>
+
+    <div id="ap-admin-empty" class="hidden neon-card p-8 text-center text-sm text-muted-foreground">아직 신청자가 없어요.</div>
+
+    <div id="ap-admin-list" class="space-y-3"></div>
   </div>
 </div>
 
@@ -107,6 +121,70 @@ async function doLogout(){
 function showAdminPage(){
   document.getElementById('login-page').classList.add('hidden');
   document.getElementById('admin-page').classList.remove('hidden');
+  loadApplications();
+}
+
+function escHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const AP_STATUS_LABEL = { pending: '대기중', confirmed: '확정', waitlisted: '보류', cancelled: '취소' };
+const AP_STATUS_COLOR = { pending: '#9b94b3', confirmed: '#5ee0a8', waitlisted: '#ffb547', cancelled: '#ff5f6d' };
+
+async function loadApplications(){
+  const listEl = document.getElementById('ap-admin-list');
+  const emptyEl = document.getElementById('ap-admin-empty');
+  const countEl = document.getElementById('ap-admin-count');
+  listEl.innerHTML = '<p class="text-sm text-muted-foreground">불러오는 중...</p>';
+
+  const { data, error } = await sb.from('holdem_applications').select('*').order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = '<p class="text-sm text-destructive">불러오기 실패: ' + escHtml(error.message) + '</p>';
+    return;
+  }
+
+  countEl.textContent = '총 ' + data.length + '명';
+
+  if (!data.length) {
+    listEl.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  listEl.innerHTML = data.map(row => {
+    const st = row.status || 'pending';
+    const dt = new Date(row.created_at);
+    const dtStr = (dt.getMonth() + 1) + '/' + dt.getDate() + ' ' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+    return `
+    <div class="neon-card p-4 sm:p-5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-foreground">${escHtml(row.name)}</span>
+          <span class="text-xs text-muted-foreground">(${escHtml(row.gender)} · ${row.birth_year}년생)</span>
+        </div>
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid ${AP_STATUS_COLOR[st]};color:${AP_STATUS_COLOR[st]}">${AP_STATUS_LABEL[st] || st}</span>
+      </div>
+      <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground sm:grid-cols-4">
+        <div>연락처: <span class="text-foreground/90">${escHtml(row.phone)}</span></div>
+        <div>홀덤 경험: <span class="text-foreground/90">${escHtml(row.experience)}</span></div>
+        <div>카톡 닉네임: <span class="text-foreground/90">${escHtml(row.kakao_nick)}</span></div>
+        <div>신청 시각: <span class="text-foreground/90">${dtStr}</span></div>
+      </div>
+      ${row.note ? `<div class="mt-2 text-xs text-muted-foreground">문의: <span class="text-foreground/90">${escHtml(row.note)}</span></div>` : ''}
+      <div class="mt-3 flex flex-wrap gap-1.5">
+        <button onclick="setStatus(${row.id},'confirmed')" class="rounded-full border border-border px-3 py-1 text-[11px] text-foreground/90 transition-colors hover:border-neon-purple/50 hover:text-neon-purple">확정</button>
+        <button onclick="setStatus(${row.id},'waitlisted')" class="rounded-full border border-border px-3 py-1 text-[11px] text-foreground/90 transition-colors hover:border-neon-purple/50 hover:text-neon-purple">대기</button>
+        <button onclick="setStatus(${row.id},'cancelled')" class="rounded-full border border-border px-3 py-1 text-[11px] text-foreground/90 transition-colors hover:border-neon-purple/50 hover:text-neon-purple">취소</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function setStatus(id, status){
+  await sb.from('holdem_applications').update({ status }).eq('id', id);
+  loadApplications();
 }
 
 window.addEventListener('DOMContentLoaded', async () => {

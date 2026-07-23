@@ -5543,7 +5543,7 @@ Oh my Blue Moon</div>
 
         <p id="ap-error" class="hidden text-xs text-destructive"></p>
 
-        <button type="submit" class="w-full rounded-full px-5 py-3 text-sm font-semibold text-background transition-transform hover:scale-[1.01]" style="background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff)">참가 신청하기</button>
+        <button type="submit" id="ap-submit-btn" disabled class="w-full rounded-full px-5 py-3 text-sm font-semibold text-background transition-transform hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed" style="background:linear-gradient(90deg,#b566ff,#ff5fb0,#5ec8ff)">신청 준비 중</button>
       </div>
     </form>
 
@@ -5559,6 +5559,37 @@ Oh my Blue Moon</div>
 
 <script>
 (function(){
+  const AP_SUPABASE_URL = 'https://teugnaahpcpzejbdayyy.supabase.co';
+  const AP_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWduYWFocGNwemVqYmRheXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkwMzIsImV4cCI6MjA5MzM1NTAzMn0.cbIoK_4DpEacggY5kDVRO799h_z-VtMjADyya2EF1SA';
+  const apSb = window.supabase.createClient(AP_SUPABASE_URL, AP_SUPABASE_KEY);
+
+  const AP_OPEN_AT = new Date('2026-07-24T21:00:00+09:00');
+  let apOpenTimer = null;
+  let apIsOpen = false;
+
+  function apPad(n){ return String(n).padStart(2, '0'); }
+
+  function apRenderCountdown(){
+    const btn = document.getElementById('ap-submit-btn');
+    if (!btn) return;
+    const diff = AP_OPEN_AT - new Date();
+    if (diff <= 0) {
+      apIsOpen = true;
+      btn.disabled = false;
+      btn.textContent = '참가 신청하기';
+      if (apOpenTimer) { clearInterval(apOpenTimer); apOpenTimer = null; }
+      return;
+    }
+    apIsOpen = false;
+    const totalSec = Math.floor(diff / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const clock = apPad(hours) + ':' + apPad(mins) + ':' + apPad(secs);
+    btn.textContent = (days > 0 ? days + '일 ' : '') + clock + ' 후 신청 오픈';
+  }
+
   function applyRequiredFilled(){
     const ids = ['ap-name', 'ap-phone', 'ap-birthyear', 'ap-exp', 'ap-kakao'];
     for (const id of ids) {
@@ -5573,6 +5604,7 @@ Oh my Blue Moon</div>
 
   window.applySubmit = function(e){
     e.preventDefault();
+    if (!apIsOpen) return false;
     const err = document.getElementById('ap-error');
     if (!applyRequiredFilled()) {
       err.textContent = '필수 항목을 모두 입력하고 동의해주세요.';
@@ -5580,10 +5612,32 @@ Oh my Blue Moon</div>
       return false;
     }
     err.classList.add('hidden');
-    // 폼 UI만 우선 구현 - 내용 확정되면 Supabase 저장 로직을 여기에 추가할 예정
-    document.getElementById('apply-form').classList.add('hidden');
-    document.getElementById('apply-done').classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const btn = document.getElementById('ap-submit-btn');
+    btn.disabled = true;
+    btn.textContent = '제출 중...';
+
+    const gender = document.querySelector('input[name="ap-gender"]:checked').value;
+    apSb.from('holdem_applications').insert({
+      name: document.getElementById('ap-name').value.trim(),
+      gender: gender,
+      phone: document.getElementById('ap-phone').value.trim(),
+      birth_year: parseInt(document.getElementById('ap-birthyear').value, 10),
+      experience: document.getElementById('ap-exp').value,
+      kakao_nick: document.getElementById('ap-kakao').value.trim(),
+      note: document.getElementById('ap-note').value.trim() || null,
+    }).then(({ error }) => {
+      if (error) {
+        btn.disabled = false;
+        btn.textContent = '참가 신청하기';
+        err.textContent = '신청 접수 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
+        err.classList.remove('hidden');
+        return;
+      }
+      document.getElementById('apply-form').classList.add('hidden');
+      document.getElementById('apply-done').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     return false;
   };
 
@@ -5594,6 +5648,10 @@ Oh my Blue Moon</div>
     if (done) done.classList.add('hidden');
     const err = document.getElementById('ap-error');
     if (err) err.classList.add('hidden');
+
+    if (apOpenTimer) clearInterval(apOpenTimer);
+    apRenderCountdown();
+    apOpenTimer = setInterval(apRenderCountdown, 1000);
   };
 })();
 </script>
