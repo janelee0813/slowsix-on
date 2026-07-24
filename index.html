@@ -5380,18 +5380,27 @@ Oh my Blue Moon</div>
     area.style.backgroundColor = tint;
   }
 
-  function scBeep(freq, dur){
+  let scAudioCtx = null;
+
+  function scUnlockAudio(){
     try{
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+      if (!scAudioCtx) scAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (scAudioCtx.state === 'suspended') scAudioCtx.resume();
+    }catch(e){}
+  }
+
+  function scBeep(freq, dur){
+    if (!scAudioCtx) return;
+    try{
+      if (scAudioCtx.state === 'suspended') scAudioCtx.resume();
+      const osc = scAudioCtx.createOscillator();
+      const gain = scAudioCtx.createGain();
       osc.frequency.value = freq;
       osc.connect(gain);
-      gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.connect(scAudioCtx.destination);
+      gain.gain.setValueAtTime(0.2, scAudioCtx.currentTime);
       osc.start();
-      osc.stop(ctx.currentTime + dur);
-      setTimeout(() => { try{ ctx.close(); }catch(e){} }, (dur + 0.1) * 1000);
+      osc.stop(scAudioCtx.currentTime + dur);
     }catch(e){}
   }
 
@@ -5416,6 +5425,7 @@ Oh my Blue Moon</div>
   }
 
   function scStart(){
+    scUnlockAudio();
     if (scRunning) return;
     if (scRemaining <= 0) scRemaining = SC_DEFAULT;
     scRunning = true;
