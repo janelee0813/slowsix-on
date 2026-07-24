@@ -6236,6 +6236,7 @@ Oh my Blue Moon</div>
     if(hdRoomChannel){ HD_SB.removeChannel(hdRoomChannel); hdRoomChannel=null; }
   }
   async function hdStartShared(){
+    hdUnlockAudio();
     const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), bcEl = document.getElementById('hd-buyInCost'), rcoEl = document.getElementById('hd-rebuyCost'), plEl = document.getElementById('hd-players');
     if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
     if(rcEl) hd.rebuyChips = Math.max(0, Number(rcEl.value)||0);
@@ -6248,7 +6249,7 @@ Oh my Blue Moon</div>
     } else if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
     if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
     hdSaveSettings();
-    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false; hd.showPrizes=true;
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false; hd.showPrizes=true; hd.warned30=false;
     hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
     hd.isHost = true;
     hd.hostToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'tok'+Date.now()+Math.random().toString(36).slice(2);
@@ -6297,16 +6298,47 @@ Oh my Blue Moon</div>
     if(!error && data) hdPresets = data;
     return hdPresets;
   }
-  function hdBeep(){
+  let hdAudioCtx = null;
+  function hdUnlockAudio(){
     try{
-      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      if(!hdAudioCtx) hdAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      if(hdAudioCtx.state==='suspended') hdAudioCtx.resume();
+    }catch(e){}
+  }
+  function hdBeep(){
+    if(!hdAudioCtx) return;
+    try{
+      if(hdAudioCtx.state==='suspended') hdAudioCtx.resume();
+      const ctx = hdAudioCtx;
+      const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+      o1.type='sine'; o1.frequency.value=880;
+      g1.gain.setValueAtTime(0.001, ctx.currentTime);
+      g1.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+      g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+      o1.connect(g1); g1.connect(ctx.destination);
+      o1.start(); o1.stop(ctx.currentTime+0.32);
+
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.type='sine'; o2.frequency.value=1175;
+      g2.gain.setValueAtTime(0.001, ctx.currentTime+0.16);
+      g2.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.18);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.6);
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.start(ctx.currentTime+0.16); o2.stop(ctx.currentTime+0.62);
+    }catch(e){}
+  }
+  function hdTickBeep(){
+    if(!hdAudioCtx) return;
+    try{
+      if(hdAudioCtx.state==='suspended') hdAudioCtx.resume();
+      const ctx = hdAudioCtx;
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type='sine'; o.frequency.value=880;
+      o.type='sine'; o.frequency.value=660;
       g.gain.setValueAtTime(0.001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.5);
+      g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.18);
       o.connect(g); g.connect(ctx.destination);
-      o.start(); o.stop(ctx.currentTime+0.55);
+      o.start(); o.stop(ctx.currentTime+0.2);
     }catch(e){}
   }
   function holdemInit(){
@@ -6721,6 +6753,7 @@ Oh my Blue Moon</div>
   function hdRemovePrize(i){ hd.prizes.splice(i,1); hd.prizes.forEach((p,idx)=>p.rank=idx+1); hdSaveSettings(); hdRenderSetup(); }
 
   function hdStart(){
+    hdUnlockAudio();
     const scEl = document.getElementById('hd-startChips'), rcEl = document.getElementById('hd-rebuyChips'), bcEl = document.getElementById('hd-buyInCost'), rcoEl = document.getElementById('hd-rebuyCost'), plEl = document.getElementById('hd-players');
     if(scEl) hd.startingChips = Math.max(0, Number(scEl.value)||0);
     if(rcEl) hd.rebuyChips = Math.max(0, Number(rcEl.value)||0);
@@ -6733,7 +6766,7 @@ Oh my Blue Moon</div>
     } else if(plEl) hd.players = Math.max(1, Number(plEl.value)||1);
     if(!hd.levels.length){ alert('블라인드 레벨을 1개 이상 등록해주세요.'); return; }
     hdSaveSettings();
-    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false; hd.showPrizes=true;
+    hd.mode='timer'; hd.levelIdx=0; hd.currentPlayers=hd.players; hd.rebuys=0; hd.finished=false; hd.hasRun=true; hd.showRebuyPanel=false; hd.showPrizes=true; hd.warned30=false;
     hd.remainAtPause = hd.levels[0].min*60; hd.running=true; hd.endAt = Date.now()+hd.remainAtPause*1000;
     hdSaveRunState(); hdStartTick(); hdRenderTimer();
   }
@@ -6745,6 +6778,7 @@ Oh my Blue Moon</div>
     if(hd.mode!=='timer' || !hd.running) return;
     const remain = hdRemainSeconds();
     if(remain<=0){ hdLevelComplete(); return; }
+    if(!hd.warned30 && remain<=30){ hd.warned30=true; hdTickBeep(); }
     hdUpdateClock(remain);
   }
   function hdUpdateClock(remain){
@@ -6759,7 +6793,7 @@ Oh my Blue Moon</div>
   }
   function hdLevelComplete(){
     if(hd.levelIdx < hd.levels.length-1){
-      hd.levelIdx++; hd.remainAtPause = hd.levels[hd.levelIdx].min*60; hd.endAt = Date.now()+hd.remainAtPause*1000;
+      hd.levelIdx++; hd.remainAtPause = hd.levels[hd.levelIdx].min*60; hd.endAt = Date.now()+hd.remainAtPause*1000; hd.warned30=false;
       hdBeep(); hdSaveRunState(); hdRenderTimer();
     } else {
       hd.running=false; hd.finished=true; hd.remainAtPause=0;
@@ -6768,6 +6802,7 @@ Oh my Blue Moon</div>
     }
   }
   function hdToggleRun(){
+    hdUnlockAudio();
     if(hd.finished) return;
     if(hd.running){ hd.remainAtPause = hdRemainSeconds(); hd.running=false; if(hd.tick){ clearInterval(hd.tick); hd.tick=null; } }
     else { hd.endAt = Date.now()+hd.remainAtPause*1000; hd.running=true; hdStartTick(); }
