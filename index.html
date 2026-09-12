@@ -99,14 +99,6 @@
   }
 </style>
 </head>
-<script>
-  (function(){
-    const h = window.location.hash;
-    if(h.includes('type=recovery') || h.includes('type=invite')){
-      window.location.replace('/admin.html' + h);
-    }
-  })();
-</script>
 <body id="top" class="min-h-screen bg-background text-foreground font-sans">
 
 <!-- Scroll progress -->
@@ -150,11 +142,11 @@
       -->
 
       <button onclick="showPage('boardgame-select')" id="btn-boardgame-select" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">보드게임 목록</button>
-      <button onclick="showPage('beta')" id="btn-beta" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">공지사항</button>
+      <button onclick="showPage('beta')" id="btn-beta" hidden class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">공지사항</button>
       <!-- 미니홀덤대회 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
       <button onclick="showPage('holdemevent')" id="btn-holdemevent" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">미니홀덤대회</button>
       -->
-      <button onclick="showPage('holdem')" id="btn-holdem" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">홀덤 타이머</button>
+      <button onclick="showPage('utilities')" id="btn-utilities" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">유용한 기능</button>
       <!-- 임시 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
       <button onclick="showPage('temp')" id="btn-temp" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">임시</button>
       -->
@@ -181,7 +173,7 @@
   </div>
 </nav>
 <div class="mx-auto max-w-screen-md px-3 sm:px-5 pt-1 text-right">
-  <a href="admin.html" class="inline-block text-[8px] leading-none" style="letter-spacing:.02em;color:#3d3844">관리자 모드</a>
+  <button type="button" disabled class="inline-block text-[8px] leading-none" style="letter-spacing:.02em;color:#3d3844">관리자 모드</button>
 </div>
 <script>
 (function(){
@@ -745,7 +737,7 @@
       <svg class="h-3.5 w-3.5 text-neon-pink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
       <span>공간 이용 안내</span>
       <span class="mx-1 h-1 w-1 rounded-full bg-border"></span>
-      <span class="text-neon-blue">슬로우식스D</span>
+      <span class="text-neon-blue">슬로우식스P</span>
     </div>
     <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl animate-fade-up" style="animation-delay:60ms">
       슬로우식스D<br/>
@@ -978,10 +970,6 @@
 </script>
 
 <div id="page-guide" class="hidden">
-
-<div class="mx-auto max-w-screen-md px-5 pt-2 text-right">
-  <a href="/admin.html" class="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors">관리자 로그인</a>
-</div>
 
 <!-- HERO -->
 <section class="relative overflow-hidden">
@@ -6437,6 +6425,33 @@ Oh my Blue Moon</div>
 </div>
 
 
+<div id="page-utilities" class="hidden">
+
+<section class="relative overflow-hidden">
+  <div class="grid-bg absolute inset-0 -z-10"></div>
+  <div class="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-neon-purple/60 to-transparent"></div>
+  <div class="mx-auto max-w-screen-md px-5 pt-11 pb-8 sm:pt-16 sm:pb-10">
+    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur animate-fade-up">
+      <svg class="h-3.5 w-3.5 text-neon-pink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
+      <span>유용한 기능</span>
+    </div>
+    <h1 class="text-[34px] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl animate-fade-up" style="animation-delay:60ms">
+      기능을 <span class="text-gradient-neon">선택하세요</span>
+    </h1>
+    <p class="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg animate-fade-up" style="animation-delay:140ms">
+      이용할 기능을 골라주세요.
+    </p>
+
+    <div class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 animate-fade-up" style="animation-delay:220ms">
+      <button onclick="showPage('holdem')" class="rounded-xl border border-border bg-surface/60 px-5 py-7 text-center transition-all hover:border-neon-purple/60 hover:bg-surface">
+        <div class="text-lg font-bold text-foreground">홀덤 타이머</div>
+      </button>
+    </div>
+  </div>
+</section>
+
+</div>
+
 <div id="page-boardgame-select" class="hidden">
 
 <section class="relative overflow-hidden">
@@ -8444,10 +8459,10 @@ Oh my Blue Moon</div>
   }
 
   function showPage(page) {
-    ['main', 'slowsix', 'slowsixd', 'slowsixp', 'guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'boardgame-select', 'boardgame', 'holdem', 'holdemevent', 'attendance', 'schedule', 'shotclock', 'apply', 'temp'].forEach(p => {
+    ['main', 'slowsix', 'slowsixd', 'slowsixp', 'guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'boardgame-select', 'boardgame', 'utilities', 'holdem', 'holdemevent', 'attendance', 'schedule', 'shotclock', 'apply', 'temp'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
-      if (btn) btn.className = p === page
+      if (btn) btn.className = (p === page || (p === 'utilities' && page === 'holdem'))
         ? 'rounded-full bg-gradient-to-r from-neon-purple via-neon-pink to-neon-blue px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-semibold text-background transition-all text-center sm:whitespace-nowrap sm:flex-shrink-0'
         : 'rounded-full border border-border px-4 py-1.5 text-[12px] sm:text-[13px] tracking-[-0.7px] sm:tracking-normal font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0';
     });
@@ -8524,6 +8539,7 @@ Oh my Blue Moon</div>
     else if (hash === 'boardgame') showPage('boardgame');
     else if (hash === 'boardgame-select') showPage('boardgame-select');
     else if (hash === 'travel') { showPage('travel'); }
+    else if (hash === 'utilities') { showPage('utilities'); }
     else if (hash === 'holdem') { showPage('holdem'); }
     else if (hash === 'holdemevent') { showPage('holdemevent'); }
     else if (hash === 'attendance') { showPage('attendance'); }
