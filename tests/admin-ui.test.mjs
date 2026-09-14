@@ -7,12 +7,13 @@ const root=new URL('../',import.meta.url);
 const html=await readFile(new URL('admin.html',root),'utf8');
 const code=await readFile(new URL('assets/admin.js',root),'utf8');
 const until=async(fn)=>{for(let i=0;i<150;i++){if(fn())return;await new Promise(r=>setTimeout(r,10))}throw Error('UI did not reach expected state');};
-async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=false){
+async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=false,blockExternal=false){
  const dom=new JSDOM(html,{url:'https://slowsixon.com/admin.html',runScripts:'outside-only'}),w=dom.window;
  const calls=[],stored=[],profits=new Map();let failSave=false,failList=false;
  if(currentDate){const RealFormat=w.Intl.DateTimeFormat;w.Intl.DateTimeFormat=function(locale,options){return locale==='sv-SE'?{format:()=>currentDate}:new RealFormat(locale,options);};}
  w.crypto.randomUUID=randomUUID;w.AbortSignal=timeoutUnsupported?{}:AbortSignal;w.sessionStorage.setItem('ss-admin-session','test-session');
  w.fetch=async(url,opts)=>{
+  if(blockExternal&&new URL(url,w.location.href).origin!==w.location.origin)throw new TypeError("External auth host unavailable");
   const b=JSON.parse(opts.body);calls.push(b);let data;
   if(b.action==='me')data={id:randomUUID(),name:'테스트 관리자',username:'slowsix',role,status:'active'};
   else if(b.action==='save_entry'){
@@ -129,6 +130,13 @@ test('manual profit blocks unqueried date changes, preserves failed input, and r
 
 test('browsers without AbortSignal.timeout can load and save ledger entries',async()=>{
  const h=await screen('2026-09-14','admin',false,true);try{
+  assert.equal(h.$('dashboard').hidden,false);h.fill();await h.submit();
+  assert.equal(h.stored.length,1);assert.match(h.$('save-status').textContent,/저장했습니다/);
+ }finally{h.dom.window.close();}
+});
+
+test('login session and saves work when direct external auth connections are unavailable',async()=>{
+ const h=await screen('2026-09-14','admin',false,false,true);try{
   assert.equal(h.$('dashboard').hidden,false);h.fill();await h.submit();
   assert.equal(h.stored.length,1);assert.match(h.$('save-status').textContent,/저장했습니다/);
  }finally{h.dom.window.close();}

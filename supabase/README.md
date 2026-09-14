@@ -78,3 +78,11 @@ Edge Function에서 Auth 비밀번호를 검증한 뒤 앱용 256비트 난수 �
 3. 사이트 새로고침 후 정산 기간 선택 → 순수익 입력 → 저장·반영. 기존 계정·내역은 유지되며 bootstrap은 다시 실행하지 않습니다.
 
 SQL과 함수 배포를 모두 마쳐야 저장 기능이 작동합니다. 예전 서버와 연결된 화면에서는 수동 입력을 비활성화하고 업데이트가 필요함을 표시합니다.
+
+## 모바일 인증 연결 경로
+
+브라우저는 같은 출처의 `/api/admin`으로 POST하고, Vercel의 고정 external rewrite가 기존 `admin-api` Edge Function으로 전달합니다. 모바일에서 별도 Supabase 호스트의 DNS/TLS 연결이나 CORS 사전 요청에 의존하지 않도록 합니다. 실제 기기 오류의 원인이 네트워크 차단인지 아직 확정되지는 않았습니다.
+
+인증·세션·역할 검사는 기존 Edge Function과 DB에서 그대로 수행합니다. 임의 목적지를 받는 프록시는 아니며 응답은 no-store로 설정합니다. 관리자 페이지 CSP는 connect-src self만 허용합니다. 이 경로 변경은 추가 SQL이나 Edge Function 배포가 필요 없습니다.
+
+Vercel 공식 문서: https://vercel.com/docs/routing/rewrites

@@ -1,4 +1,5 @@
-const API='https://qhvwwdrwfzwpehfjntbv.supabase.co/functions/v1/admin-api';
+// Keep browser authentication requests on the site's own origin.
+const API='/api/admin';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFodnd3ZHJ3Znp3cGVoZmpudGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDk3MzksImV4cCI6MjEwNDc4NTczOX0.0fhW_bYEb9QedKLMb8DDnP8BYnP8aJtfywXLdyUA9ww';
 const $=id=>document.getElementById(id);
 const names={spacecloud:'스클 매출',invoice:'계산서 매출',cash:'현금 매출',fixed:'고정비',expense:'일반지출'};
@@ -22,7 +23,7 @@ async function api(action,p={}){
  try{
   response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({action,...p,sessionToken:session}),signal:controller.signal});
   data=await response.json().catch(error=>{if(controller.signal.aborted)throw error;return {};});
- }catch{throw Error(controller.signal.aborted?'서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.':'서버에 연결하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.');}
+ }catch{throw Error(controller.signal.aborted?'서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.':'관리자 서버와 연결하지 못했습니다. 잠시 후 다시 시도해주세요.');}
  finally{clearTimeout(timeoutId);}
  if(!response.ok){
   if(['SESSION_EXPIRED','ACCESS_DENIED'].includes(data.code)){session='';sessionStorage.removeItem('ss-admin-session');showAuth();}
