@@ -9,6 +9,7 @@ const time=v=>new Date(v).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
 let session=sessionStorage.getItem('ss-admin-session')||'', user=null, records=[], offset=0, count=0, editing=null;
 let requestId=crypto.randomUUID(), linkToken='', linkKind='', loadSequence=0;
 let lastSavedForm='', lastRequestedForm='';
+let profitPeriod=null, profitVersion=0, profitReady=false, profitSaving=false, profitReloadRequired=false;
 let noticeTimer;
 function notice(message,error=false){clearTimeout(noticeTimer);$('notice').textContent=message;$('notice').classList.toggle('error',error);$('notice').hidden=false;noticeTimer=setTimeout(()=>$('notice').hidden=true,error?12000:6000);}
 function elem(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
@@ -24,7 +25,7 @@ async function api(action,p={}){
  }
  return data;
 }
-function clearPrivateViews(){records=[];user=null;editing=null;loadSequence++;$('entries').replaceChildren();$('people').replaceChildren();$('links').replaceChildren();$('audit-list').replaceChildren();$('invite-url').value='';$('invite-result').hidden=true;for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent='—';}
+function clearPrivateViews(){profitPeriod=null;profitReady=false;$('manual-profit').value='';$('profit-status').textContent='';$('profit-form').hidden=true;records=[];user=null;editing=null;loadSequence++;$('entries').replaceChildren();$('people').replaceChildren();$('links').replaceChildren();$('audit-list').replaceChildren();$('invite-url').value='';$('invite-result').hidden=true;for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent='—';}
 function showAuth(){clearPrivateViews();$('dashboard').hidden=true;$('pending-screen').hidden=true;$('auth-screen').hidden=false;$('account-bar').hidden=true;$('back-site').hidden=false;}
 function showAccount(){ $('auth-screen').hidden=true;$('account-bar').hidden=false;$('back-site').hidden=true;$('account-name').textContent=user.name+' · '+(user.role==='admin'?'관리자':'운영자');$('pending-screen').hidden=user.status!=='pending';$('dashboard').hidden=user.status!=='active'; }
 async function enter(){
@@ -38,7 +39,7 @@ function monthKey(year,month){return new Date(Date.UTC(year,month-1,12)).toISOSt
 function settlementMonth(date){const [year,month,day]=date.split('-').map(Number);return monthKey(year,day<12?month-1:month);}
 function setMonth(){const [y,m]=$('month').value.split('-').map(Number);if(!y||!m)return;$('from').value=monthKey(y,m)+'-12';$('to').value=monthKey(y,m+1)+'-11';}
 function period(){const from=$('from').value,to=$('to').value;if(!from||!to||from>to||(Date.parse(to)-Date.parse(from))/86400000>366)throw Error('시작일과 종료일을 확인해주세요. 최대 366일까지 조회할 수 있습니다.');return {from,to}}
-function markLoading(){for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent='—';$('summary-period').textContent='내역을 불러오는 중입니다.';}
+function markLoading(){profitReady=false;$('save-profit').disabled=true;for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent='—';$('summary-period').textContent='내역을 불러오는 중입니다.';}
 // The existing API sorts the entire period newest-first, with 100-row pages.
 // Read the corresponding page from its tail and reverse it for oldest-first.
 // This reverses global order, not just the currently displayed 100 rows.
@@ -66,7 +67,15 @@ async function loadLedger(){const p=period(),seq=++loadSequence;markLoading();le
  }
  if(seq!==loadSequence)return;
  records=data.entries;count=data.count;
- $('summary-period').textContent=p.from+' ~ '+p.to;for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent=money(data.summary[k]);
+ $('summary-period').textContent=p.from+' ~ '+p.to;
+ for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent=data.summary[k]==null?'미입력':money(data.summary[k]);
+ const samePeriod=profitPeriod?.from===p.from&&profitPeriod?.to===p.to;
+ const dirty=!profitReloadRequired&&samePeriod&&$('manual-profit').value!==$('manual-profit').dataset.saved;
+ profitReady=data.summary.profit_mode==='manual';profitPeriod=p;profitReloadRequired=false;
+ if(!dirty){profitVersion=data.summary.profit_version||0;$('manual-profit').value=data.summary.profit??'';$('manual-profit').dataset.saved=$('manual-profit').value;}
+ $('profit-form').hidden=user.role!=='admin';$('manual-profit').disabled=!profitReady;
+ $('save-profit').disabled=!profitReady||profitSaving;
+ $('profit-status').textContent=!profitReady?'순수익 수동 입력 기능의 서버 업데이트가 필요합니다.':dirty?'아직 저장하지 않은 입력값입니다.':data.summary.profit==null?'관리자가 순수익을 입력하면 수수료와 정산금액이 표시됩니다.':'';
  $('entry-count').textContent=count;$('entries').replaceChildren();
  if(!records.length){const tr=elem('tr'),td=elem('td','이 기간에 기록된 내역이 없습니다.\n위에서 첫 매출 또는 지출을 등록해보세요.','empty');td.colSpan=user.role==='admin'?8:7;tr.append(td);$('entries').append(tr);}
  for(const r of records){const tr=elem('tr'),date=elem('td',r.entry_date);date.append(elem('small',r.author));tr.append(date,elem('td',r.description));for(const k of Object.keys(names))tr.append(elem('td',r.category===k?new Intl.NumberFormat('ko-KR').format(r.amount):'—',r.category===k?(['fixed','expense'].includes(k)?'negative':'positive'):''));if(user.role==='admin'){const td=elem('td');td.append(button('수정',()=>editEntry(r)),button('삭제',async()=>{if(await confirmAction('내역 삭제',`${r.entry_date} · ${r.description} · ${money(r.amount)} 내역을 삭제하시겠습니까? 변경 이력에는 보관됩니다.`)){await api('delete_entry',{id:r.id,version:r.version});if(records.length===1&&offset>0)offset-=100;await loadLedger();notice('내역을 삭제했습니다.');}}));tr.append(td);}$('entries').append(tr);}
@@ -84,7 +93,7 @@ function switchTab(name){for(const v of ['ledger','team','audit']){$(v+'-view').
 async function loadTeam(){const expected=session;const data=await api('people');if(session!==expected||user?.role!=='admin')return;$('people').replaceChildren();for(const p of data.people){const card=elem('article',undefined,'panel person');card.append(elem('h3',p.name),elem('p',p.username+' · '+(p.role==='admin'?'관리자':'운영자'),'muted small'),elem('span',statuses[p.status],'badge'));if(p.role==='operator'){const actions=elem('div',undefined,'actions');const change=(status,label)=>button(label,async()=>{if(await confirmAction(label,`${p.name} (${p.username}) 계정을 ${label}하시겠습니까?`)){await api('set_status',{id:p.id,status});await loadTeam();notice('계정 상태를 변경했습니다.');}},status==='active'?'primary':'secondary');if(p.status==='pending'){actions.append(change('active','승인'),change('rejected','거절'));}else if(p.status==='active'){actions.append(change('suspended','접근 중지'));}else{actions.append(change('active','다시 승인'));}card.append(actions);}$('people').append(card);}
  $('links').replaceChildren();for(const l of data.links){const row=elem('div',undefined,'link-row'),status=l.used_at?'사용 완료':l.revoked_at?'취소됨':new Date(l.expires_at)<new Date()?'만료됨':'사용 가능';row.append(elem('p',`${status} · 만료 ${time(l.expires_at)}`,'small muted'));if(status==='사용 가능')row.append(button('링크 취소',async()=>{if(await confirmAction('초대 취소','전달한 링크로 더 이상 가입할 수 없게 됩니다.')){await api('revoke_invite',{id:l.id});await loadTeam();}}));$('links').append(row);}if(!data.links.length)$('links').append(elem('p','발급한 초대 링크가 없습니다.','muted small'));
 }
-async function loadAudit(){const expected=session;const data=await api('audit');if(session!==expected||user?.role!=='admin')return;$('audit-list').replaceChildren();const titles={entry_created:'내역 등록',entry_updated:'내역 수정',entry_deleted:'내역 삭제',account_created:'계정 생성',status_changed:'계정 상태 변경',invite_created:'운영자 초대 발급'};for(const a of data.audit){const row=elem('article',undefined,'audit-row'),main=elem('div');main.append(elem('p',`${a.actor||'관리자'} · ${titles[a.action]||a.action}`));if(a.before_data||a.after_data){const detail=elem('details'),summary=elem('summary','변경 내용 보기','small muted');detail.append(summary);for(const [label,d] of [['변경 전',a.before_data],['변경 후',a.after_data]])if(d){const parts=[];if(d.entry_date)parts.push(d.entry_date,names[d.category],d.description,money(d.amount));if(d.status)parts.push(statuses[d.status]||d.status);if(d.username)parts.push(d.username);detail.append(elem('pre',label+' : '+parts.join(' · ')));}main.append(detail);}row.append(main,elem('time',time(a.created_at)));$('audit-list').append(row);}if(!data.audit.length)$('audit-list').append(elem('p','변경 이력이 없습니다.','muted'));
+async function loadAudit(){const expected=session;const data=await api('audit');if(session!==expected||user?.role!=='admin')return;$('audit-list').replaceChildren();const titles={entry_created:'내역 등록',entry_updated:'내역 수정',entry_deleted:'내역 삭제',account_created:'계정 생성',status_changed:'계정 상태 변경',invite_created:'운영자 초대 발급',profit_saved:'순수익 저장'};for(const a of data.audit){const row=elem('article',undefined,'audit-row'),main=elem('div');main.append(elem('p',`${a.actor||'관리자'} · ${titles[a.action]||a.action}`));if(a.before_data||a.after_data){const detail=elem('details'),summary=elem('summary','변경 내용 보기','small muted');detail.append(summary);for(const [label,d] of [['변경 전',a.before_data],['변경 후',a.after_data]])if(d){const parts=[];if(d.entry_date)parts.push(d.entry_date,names[d.category],d.description,money(d.amount));if(d.period_start)parts.push(d.period_start+' ~ '+d.period_end,money(d.amount));if(d.status)parts.push(statuses[d.status]||d.status);if(d.username)parts.push(d.username);detail.append(elem('pre',label+' : '+parts.join(' · ')));}main.append(detail);}row.append(main,elem('time',time(a.created_at)));$('audit-list').append(row);}if(!data.audit.length)$('audit-list').append(elem('p','변경 이력이 없습니다.','muted'));
 }
 $('auth-form').addEventListener('submit',e=>{e.preventDefault();busy($('auth-submit'),async()=>{
  const username=$('auth-username').value.trim().toLowerCase(),password=$('auth-password').value;
@@ -117,6 +126,24 @@ async function submitEntry(){
  try{await loadLedger();if(session===expectedSession){saveStatus(`${date} 내역을 저장했습니다.`,'success');notice('내역을 저장했습니다.');}}
  catch(e){if(session===expectedSession){saveStatus('내역은 저장되었지만 목록을 불러오지 못했습니다. 다시 등록하지 말고 조회 버튼을 눌러주세요.\n'+e.message,'error');notice('저장은 완료되었습니다. 목록 조회를 다시 시도해주세요.',true);}}
 }
+async function submitProfit(){
+ if(profitSaving||!profitReady||user?.role!=='admin')return;
+ const p=period(),expectedSession=session;
+ if(p.from!==profitPeriod?.from||p.to!==profitPeriod?.to)throw Error('변경한 기간을 먼저 조회해주세요.');
+ const raw=$('manual-profit').value,amount=Number(raw);
+ if(!raw.trim()||!Number.isSafeInteger(amount)||Math.abs(amount)>1e12)throw Error('순수익을 원 단위 정수로 입력해주세요.');
+ profitSaving=true;$('save-profit').disabled=true;$('profit-status').textContent='저장 중입니다…';
+ try{
+  const result=await api('save_profit',{...p,amount,version:profitVersion});
+  if(session!==expectedSession)return;
+  if(profitPeriod?.from===p.from&&profitPeriod?.to===p.to){profitVersion=result.version;$('manual-profit').dataset.saved=String(amount);}
+  try{await loadLedger();if(session===expectedSession)notice('순수익을 저장하고 수수료와 정산금액을 반영했습니다.');}
+  catch(e){if(session===expectedSession)$('profit-status').textContent='순수익은 저장되었습니다. 조회 버튼을 눌러 계산 결과를 확인해주세요.';}
+ }catch(e){if(session===expectedSession){profitReloadRequired=true;$('profit-status').textContent='저장 완료를 확인하지 못했습니다. 입력값을 메모한 뒤 다시 조회해주세요.\n'+e.message;notice(e.message,true);}}
+ finally{profitSaving=false;$('save-profit').disabled=!profitReady;}
+}
+$('profit-form').addEventListener('submit',e=>{e.preventDefault();submitProfit().catch(e=>notice(e.message,true));});
+$('manual-profit').addEventListener('input',()=>{$('profit-status').textContent='저장·반영을 누르면 수수료와 정산금액이 다시 계산됩니다.';});
 $('entry-form').addEventListener('submit',e=>{e.preventDefault();busy($('save-entry'),submitEntry);});
 $('entry-sort').addEventListener('change',()=>{offset=0;sessionStorage.setItem('ss-admin-sort',$('entry-sort').value);loadLedger().catch(e=>notice(e.message,true));});
 $('entry-category').addEventListener('change',categoryHelp);$('cancel-edit').addEventListener('click',resetEntry);

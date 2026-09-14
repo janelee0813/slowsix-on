@@ -2,7 +2,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { harness } from './harness.mjs';
-const root=new URL('../',import.meta.url),h=await harness();
+const root=new URL('../',import.meta.url),h=await harness(),port=Number(process.env.PREVIEW_PORT)||8877;
 const pass='LocalPreview!2026';
 const secret=await h.bootstrap();
 await h.call('register',{linkToken:secret,username:'slowsix',name:'슬로우식스 관리자',password:pass});
@@ -25,4 +25,4 @@ createServer(async(req,res)=>{try{
  if(path==='/assets/admin.js')text=text.replace("const API='https://qhvwwdrwfzwpehfjntbv.supabase.co/functions/v1/admin-api'","const API='/__admin-api'");
  res.writeHead(200,{'Content-Type':mime[path.slice(path.lastIndexOf('.'))]||'text/html','Cache-Control':'no-store'});res.end(text);
  }catch(e){res.writeHead(500);res.end('Preview error');console.error(e.message)}
-}).listen(8877,'127.0.0.1',()=>console.log('Synthetic preview: http://127.0.0.1:8877/admin.html — slowsix / LocalPreview!2026'));
+}).listen(port,'127.0.0.1',()=>console.log(`Synthetic preview: http://127.0.0.1:${port}/admin.html — slowsix / LocalPreview!2026`));

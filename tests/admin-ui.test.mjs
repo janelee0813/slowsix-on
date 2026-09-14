@@ -7,21 +7,24 @@ const root=new URL('../',import.meta.url);
 const html=await readFile(new URL('admin.html',root),'utf8');
 const code=await readFile(new URL('assets/admin.js',root),'utf8');
 const until=async(fn)=>{for(let i=0;i<150;i++){if(fn())return;await new Promise(r=>setTimeout(r,10))}throw Error('UI did not reach expected state');};
-async function screen(currentDate){
+async function screen(currentDate,role="admin",legacy=false){
  const dom=new JSDOM(html,{url:'https://slowsixon.com/admin.html',runScripts:'outside-only'}),w=dom.window;
- const calls=[],stored=[];let failSave=false,failList=false;
+ const calls=[],stored=[],profits=new Map();let failSave=false,failList=false;
  if(currentDate){const RealFormat=w.Intl.DateTimeFormat;w.Intl.DateTimeFormat=function(locale,options){return locale==='sv-SE'?{format:()=>currentDate}:new RealFormat(locale,options);};}
  w.crypto.randomUUID=randomUUID;w.AbortSignal=AbortSignal;w.sessionStorage.setItem('ss-admin-session','test-session');
  w.fetch=async(url,opts)=>{
   const b=JSON.parse(opts.body);calls.push(b);let data;
-  if(b.action==='me')data={id:randomUUID(),name:'테스트 관리자',username:'slowsix',role:'admin',status:'active'};
+  if(b.action==='me')data={id:randomUUID(),name:'테스트 관리자',username:'slowsix',role,status:'active'};
   else if(b.action==='save_entry'){
    if(failSave)return new Response(JSON.stringify({error:'입력값을 확인해주세요.',code:'INVALID_ENTRY'}),{status:400});
    if(!stored.some(r=>r.request_id===b.request_id))stored.push({id:randomUUID(),entry_date:b.date,description:b.description,amount:b.amount,category:b.category,author:'테스트 관리자',request_id:b.request_id});
    data={id:stored.find(r=>r.request_id===b.request_id).id};
+  }else if(b.action==='save_profit'){
+   if(failSave)return new Response(JSON.stringify({error:'저장 오류',code:'INVALID_ENTRY'}),{status:400});
+   const version=(profits.get(b.from+'|'+b.to)?.version||0)+1;profits.set(b.from+'|'+b.to,{amount:b.amount,version});data={version};
   }else if(b.action==='list'){
    if(failList)throw Error('network interrupted');
-   const all=stored.filter(r=>r.entry_date>=b.from&&r.entry_date<=b.to).sort((a,b)=>b.entry_date.localeCompare(a.entry_date)||String(b.created_at||'').localeCompare(String(a.created_at||''))||a.id.localeCompare(b.id));const entries=all.slice(b.offset,b.offset+100);data={entries,count:all.length,summary:{revenue:0,spending:0,profit:0,fee:0,settlement:0}};
+   const all=stored.filter(r=>r.entry_date>=b.from&&r.entry_date<=b.to).sort((a,b)=>b.entry_date.localeCompare(a.entry_date)||String(b.created_at||'').localeCompare(String(a.created_at||''))||a.id.localeCompare(b.id));const entries=all.slice(b.offset,b.offset+100);data={entries,count:all.length,summary:legacy?{revenue:0,spending:0,profit:0,fee:0,settlement:0}:{revenue:0,spending:0,profit_mode:'manual',profit_version:profits.get(b.from+'|'+b.to)?.version||0,profit:profits.get(b.from+'|'+b.to)?.amount??null,fee:profits.has(b.from+'|'+b.to)?Math.round(profits.get(b.from+'|'+b.to).amount*.05):null,settlement:profits.has(b.from+'|'+b.to)?-Math.round(profits.get(b.from+'|'+b.to).amount*.05):null}};
   }else throw Error('unexpected action '+b.action);
   return new Response(JSON.stringify(data),{status:200});
  };
@@ -100,4 +103,26 @@ test('save retains every input and only changed entries create another record',a
   assert.equal(h.stored.length,2);assert.notEqual(h.calls.filter(c=>c.action==='save_entry').at(-1).request_id,firstKey);
   assert.equal(h.$('entry-category').value,'fixed');assert.equal(h.$('entry-date').value,'2026-09-14');assert.equal(h.$('entry-amount').value,'30000');assert.equal(h.$('entry-description').value,'9월 추가 관리비');
  }finally{h.dom.window.close();}
+});
+
+test('manual profit saves and recalculates, survives refresh, and separates periods',async()=>{
+ const h=await screen('2026-09-14');try{
+  assert.equal(h.$('sum-profit').textContent,'미입력');assert.equal(h.$('profit-form').hidden,false);
+  h.$('manual-profit').value='200000';h.$('profit-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));
+  await until(()=>h.$('sum-fee').textContent==='10,000원');assert.equal(h.$('sum-settlement').textContent,'-10,000원');
+  h.$('load-period').click();await until(()=>!h.$('load-period').disabled);assert.equal(h.$('manual-profit').value,'200000');
+  h.$('month').value='2026-08';h.$('month').dispatchEvent(new h.w.Event('change'));await until(()=>!h.$('load-period').disabled);
+  assert.equal(h.$('manual-profit').value,'');assert.equal(h.$('sum-fee').textContent,'미입력');
+  h.$('manual-profit').value='0';h.$('profit-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>h.$('sum-fee').textContent==='0원');
+ }finally{h.dom.window.close();}
+});
+test('manual profit blocks unqueried date changes, preserves failed input, and requires backend support',async()=>{
+ const h=await screen('2026-09-14');try{
+  h.$('manual-profit').value='100';h.$('from').value='2026-09-13';h.$('profit-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>h.$('notice').textContent.includes('먼저 조회'));
+  assert.equal(h.calls.filter(c=>c.action==='save_profit').length,0);
+  h.$('from').value='2026-09-12';h.setFailSave(true);h.$('profit-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>h.$('profit-status').textContent.includes('저장 완료를 확인하지'));
+  assert.equal(h.$('manual-profit').value,'100');assert.equal(h.$('sum-fee').textContent,'미입력');
+ }finally{h.dom.window.close();}
+ const old=await screen('2026-09-14','admin',true);try{assert.equal(old.$('save-profit').disabled,true);assert.match(old.$('profit-status').textContent,/서버 업데이트/);}finally{old.dom.window.close();}
+ const op=await screen('2026-09-14','operator');try{assert.equal(op.$('profit-form').hidden,true);}finally{op.dom.window.close();}
 });

@@ -3,3 +3,5 @@
 .save-status{margin:14px 0 0;padding:12px;border:1px solid var(--line);border-radius:9px;white-space:pre-line}.save-status.error{color:var(--red);border-color:#754353}.save-status.success{color:var(--green);border-color:#365848}
 
 .list-options{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.sort-control{flex-direction:row;align-items:center;gap:8px;white-space:nowrap}.sort-control select{width:auto;padding:7px 10px;font-size:12px}
+
+.profit-form{margin:12px 0}.profit-form label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}.profit-controls{display:flex;gap:8px;align-items:center}.profit-controls input{min-width:0;width:100%}.profit-controls button{flex-shrink:0;white-space:nowrap}.profit-form input{font-variant-numeric:tabular-nums}#profit-status{line-height:1.6;white-space:pre-line}
