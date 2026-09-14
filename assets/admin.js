@@ -16,8 +16,14 @@ function elem(tag,text,cls){const n=document.createElement(tag);if(text!==undefi
 function button(text,fn,cls='quiet'){const b=elem('button',text,cls);b.type='button';b.addEventListener('click',()=>busy(b,fn));return b;}
 async function busy(b,fn){if(b.disabled)return;b.disabled=true;try{await fn()}catch(e){notice(e.message,true)}finally{b.disabled=b.id==='prev'?offset===0:b.id==='next'?offset+100>=count:false}}
 async function api(action,p={}){
- let response;try{response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({action,...p,sessionToken:session}),signal:AbortSignal.timeout(25000)})}catch{throw Error('서버에 연결하지 못했습니다. 연결 상태 또는 초기 설정 완료 여부를 확인해주세요.');}
- const data=await response.json().catch(()=>({}));
+ // AbortSignal.timeout is unavailable in older iOS browser engines.
+ const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),25000);
+ let response,data;
+ try{
+  response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({action,...p,sessionToken:session}),signal:controller.signal});
+  data=await response.json().catch(error=>{if(controller.signal.aborted)throw error;return {};});
+ }catch{throw Error(controller.signal.aborted?'서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.':'서버에 연결하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.');}
+ finally{clearTimeout(timeoutId);}
  if(!response.ok){
   if(['SESSION_EXPIRED','ACCESS_DENIED'].includes(data.code)){session='';sessionStorage.removeItem('ss-admin-session');showAuth();}
   const extra=data.retryAfter?` 약 ${Math.ceil(data.retryAfter/60)}분 후 다시 시도해주세요.`:'';
