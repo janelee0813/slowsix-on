@@ -1,1 +1,12 @@
-{"private":true,"type":"module","scripts":{"test":"node --test admin.test.mjs"},"devDependencies":{"@electric-sql/pglite":"^0.3.14","esbuild":"^0.25.0"}}
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test *.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.14",
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.1.0"
+  }
+}
