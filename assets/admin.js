@@ -32,7 +32,10 @@ async function enter(){
  for(const option of $('entry-category').options)option.disabled=!admin&&!['spacecloud','fixed'].includes(option.value);
  $('entry-permission').textContent=admin?'전체 항목 입력·수정 가능':'스클 매출·고정비 등록 가능';resetEntry();switchTab('ledger');await loadLedger();
 }
-function setMonth(){const [y,m]=$('month').value.split('-').map(Number);if(!y||!m)return;$('from').value=`${y}-${String(m).padStart(2,'0')}-01`;$('to').value=`${y}-${String(m).padStart(2,'0')}-${new Date(y,m,0).getDate()}`;}
+// The selected month names the START of the settlement cycle: 12th → next month's 11th.
+function monthKey(year,month){return new Date(Date.UTC(year,month-1,12)).toISOString().slice(0,7);}
+function settlementMonth(date){const [year,month,day]=date.split('-').map(Number);return monthKey(year,day<12?month-1:month);}
+function setMonth(){const [y,m]=$('month').value.split('-').map(Number);if(!y||!m)return;$('from').value=monthKey(y,m)+'-12';$('to').value=monthKey(y,m+1)+'-11';}
 function period(){const from=$('from').value,to=$('to').value;if(!from||!to||from>to||(Date.parse(to)-Date.parse(from))/86400000>366)throw Error('시작일과 종료일을 확인해주세요. 최대 366일까지 조회할 수 있습니다.');return {from,to}}
 function markLoading(){for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent='—';$('summary-period').textContent='내역을 불러오는 중입니다.';}
 async function loadLedger(){const p=period(),seq=++loadSequence;markLoading();let data;
@@ -83,7 +86,7 @@ async function submitEntry(){
  if(session!==expectedSession)return;
  // A successful write is independent of the following read. Do not suggest resubmitting it.
  resetEntry();offset=0;
- if(!$('from').value||!$('to').value||date<$('from').value||date>$('to').value||$('from').value>$('to').value){$('month').value=date.slice(0,7);setMonth();}
+ if(!$('from').value||!$('to').value||date<$('from').value||date>$('to').value||$('from').value>$('to').value){$('month').value=settlementMonth(date);setMonth();}
  saveStatus(`${date} 내역을 저장했습니다. 목록을 갱신하고 있습니다.`,'success');
  try{await loadLedger();if(session===expectedSession){saveStatus(`${date} 내역을 저장했습니다.`,'success');notice('내역을 저장했습니다.');}}
  catch(e){if(session===expectedSession){saveStatus('내역은 저장되었지만 목록을 불러오지 못했습니다. 다시 등록하지 말고 조회 버튼을 눌러주세요.\n'+e.message,'error');notice('저장은 완료되었습니다. 목록 조회를 다시 시도해주세요.',true);}}
@@ -103,7 +106,7 @@ $('create-invite').addEventListener('click',()=>busy($('create-invite'),async()=
 $('copy-invite').addEventListener('click',()=>busy($('copy-invite'),async()=>{try{await navigator.clipboard.writeText($('invite-url').value);notice('가입 링크를 복사했습니다. 카카오톡으로 직접 전달해주세요.');}catch{$('invite-url').select();notice('링크를 선택했습니다. 복사해서 전달해주세요.');}}));
 function configureLogin(){for(const id of ['name-label','confirm-label','password-guide'])$(id).hidden=true;$('auth-name').required=false;$('auth-confirm').required=false;$('remember-label').hidden=false;$('auth-username').readOnly=false;$('auth-password').autocomplete='current-password';$('auth-password').removeAttribute('minlength');$('auth-title').textContent='관리자 모드 로그인';$('auth-description').textContent='등록한 아이디와 비밀번호를 입력해주세요.';$('auth-submit').textContent='로그인';$('auth-foot').hidden=false;}
 async function init(){
- $('month').value=today().slice(0,7);setMonth();$('entry-date').value=today();categoryHelp();$('auth-username').value=localStorage.getItem('ss-admin-username')||'';$('remember').checked=!!$('auth-username').value;
+ $('month').value=settlementMonth(today());setMonth();$('entry-date').value=today();categoryHelp();$('auth-username').value=localStorage.getItem('ss-admin-username')||'';$('remember').checked=!!$('auth-username').value;
  const hash=new URLSearchParams(location.hash.slice(1)),incoming=hash.get('setup')||hash.get('invite');if(incoming){sessionStorage.setItem('ss-admin-link',incoming);history.replaceState(null,'',location.pathname);}
  linkToken=sessionStorage.getItem('ss-admin-link')||'';
  if(linkToken){showAuth();$('auth-submit').disabled=true;try{const info=await api('link_info',{linkToken});linkKind=info.kind;for(const id of ['name-label','confirm-label','password-guide'])$(id).hidden=false;$('auth-name').required=true;$('auth-confirm').required=true;$('remember-label').hidden=true;$('auth-password').minLength=8;$('auth-password').autocomplete='new-password';$('auth-foot').hidden=true;$('auth-eyebrow').textContent=linkKind==='bootstrap'?'FIRST SETUP':'YOU ARE INVITED';$('auth-title').textContent=linkKind==='bootstrap'?'관리자 계정 설정':'운영자 가입 신청';$('auth-description').textContent=linkKind==='bootstrap'?'slowsix 계정의 비밀번호를 직접 설정해주세요.':'가입 후 관리자의 승인을 기다려주세요.';$('auth-submit').textContent=linkKind==='bootstrap'?'관리자 계정 만들기':'가입 신청';if(linkKind==='bootstrap'){$('auth-username').value='slowsix';$('auth-username').readOnly=true;}}catch(e){sessionStorage.removeItem('ss-admin-link');linkToken='';configureLogin();notice(e.message,true);}finally{$('auth-submit').disabled=false;}}
