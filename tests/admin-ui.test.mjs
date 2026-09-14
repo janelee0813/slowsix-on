@@ -21,7 +21,7 @@ async function screen(currentDate){
    data={id:stored.find(r=>r.request_id===b.request_id).id};
   }else if(b.action==='list'){
    if(failList)throw Error('network interrupted');
-   const entries=stored.filter(r=>r.entry_date>=b.from&&r.entry_date<=b.to);data={entries,count:entries.length,summary:{revenue:0,spending:0,profit:0,fee:0,settlement:0}};
+   const all=stored.filter(r=>r.entry_date>=b.from&&r.entry_date<=b.to).sort((a,b)=>b.entry_date.localeCompare(a.entry_date)||String(b.created_at||'').localeCompare(String(a.created_at||''))||a.id.localeCompare(b.id));const entries=all.slice(b.offset,b.offset+100);data={entries,count:all.length,summary:{revenue:0,spending:0,profit:0,fee:0,settlement:0}};
   }else throw Error('unexpected action '+b.action);
   return new Response(JSON.stringify(data),{status:200});
  };
@@ -35,7 +35,7 @@ test('saving outside the viewed period switches to saved month and displays the 
  const h=await screen();try{h.fill();await h.submit();assert.equal(h.$('month').value,'2026-09');assert.equal(h.$('from').value,'2026-09-12');assert.equal(h.$('to').value,'2026-10-11');assert.equal(h.$('entry-count').textContent,'1');assert.match(h.$('entries').textContent,/9월 입금/);assert.match(h.$('save-status').textContent,/저장했습니다/);}finally{h.dom.window.close();}
 });
 test('successful save with failed refresh states saved and does not submit again',async()=>{
- const h=await screen();try{h.fill();h.setFailList(true);await h.submit();assert.equal(h.stored.length,1);assert.equal(h.$('entry-description').value,'');assert.match(h.$('save-status').textContent,/내역은 저장되었지만/);assert.match(h.$('entries').textContent,/불러오지 못했습니다/);assert.equal(h.$('entry-count').textContent,'—');h.setFailList(false);h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='1');assert.equal(h.calls.filter(c=>c.action==='save_entry').length,1);}finally{h.dom.window.close();}
+ const h=await screen();try{h.fill();h.setFailList(true);await h.submit();assert.equal(h.stored.length,1);assert.equal(h.$('entry-description').value,'9월 입금');assert.match(h.$('save-status').textContent,/내역은 저장되었지만/);assert.match(h.$('entries').textContent,/불러오지 못했습니다/);assert.equal(h.$('entry-count').textContent,'—');h.setFailList(false);h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='1');assert.equal(h.calls.filter(c=>c.action==='save_entry').length,1);}finally{h.dom.window.close();}
 });
 test('failed save retains form and same idempotency key for retry',async()=>{
  const h=await screen();try{h.fill();h.setFailSave(true);await h.submit();assert.equal(h.stored.length,0);assert.equal(h.$('entry-amount').value,'100000');assert.equal(h.$('entry-description').value,'9월 입금');assert.match(h.$('save-status').textContent,/입력값을 확인/);const id=h.calls.find(c=>c.action==='save_entry').request_id;h.setFailSave(false);await h.submit();assert.equal(h.stored.length,1);assert.equal(h.calls.filter(c=>c.action==='save_entry').at(-1).request_id,id);}finally{h.dom.window.close();}
@@ -54,4 +54,50 @@ test('saving an 11th-day entry moves to previous month settlement',async()=>{
 });
 test('changing the settlement month handles December to January',async()=>{
  const h=await screen('2026-09-14');try{h.$('month').value='2026-12';h.$('month').dispatchEvent(new h.w.Event('change'));await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2026-12-12');assert.equal(h.$('to').value,'2027-01-11');assert.equal(h.calls.at(-1).to,'2027-01-11');}finally{h.dom.window.close();}
+});
+
+test('date sorting orders the whole period across pages and resets to page one',async()=>{
+ const h=await screen('2026-09-14');
+ try{
+  for(let i=0;i<205;i++){const date=new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10);h.stored.push({id:randomUUID(),entry_date:date,created_at:date+'T12:00:00Z',description:'정렬 검증 '+i,category:'cash',amount:i+1,author:'관리자'});}
+  h.$('from').value='2026-01-01';h.$('to').value='2026-12-31';h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='205');
+  const dates=()=>Array.from(h.$('entries').querySelectorAll('tr'),r=>r.cells[0].firstChild.textContent);
+  assert.equal(dates()[0],h.stored[204].entry_date);
+  h.$('next').click();await until(()=>h.$('page-label').textContent.startsWith('101–'));
+  assert.equal(dates()[0],h.stored[104].entry_date);
+  const summary=h.$('sum-revenue').textContent;
+  h.$('entry-sort').value='asc';h.$('entry-sort').dispatchEvent(new h.w.Event('change'));
+  await until(()=>h.$('page-label').textContent.startsWith('1–')&&dates()[0]==='2026-01-01');
+  assert.equal(dates()[99],h.stored[99].entry_date);assert.equal(h.$('sum-revenue').textContent,summary);
+  assert.equal(h.w.sessionStorage.getItem('ss-admin-sort'),'asc');
+  h.$('next').click();await until(()=>h.$('page-label').textContent.startsWith('101–'));
+  assert.equal(dates()[0],h.stored[100].entry_date);assert.equal(dates()[99],h.stored[199].entry_date);
+  h.$('next').click();await until(()=>h.$('page-label').textContent.startsWith('201–'));
+  assert.deepEqual(dates(),h.stored.slice(200).map(r=>r.entry_date));assert.equal(h.$('next').disabled,true);
+  h.$('entry-sort').value='desc';h.$('entry-sort').dispatchEvent(new h.w.Event('change'));
+  await until(()=>h.$('page-label').textContent.startsWith('1–')&&dates()[0]===h.stored[204].entry_date);
+  assert.equal(h.$('sum-revenue').textContent,summary);
+ }finally{h.dom.window.close();}
+});
+test('oldest sort is stable for same-day entries and handles exactly 100 rows',async()=>{
+ const h=await screen('2026-09-14');try{
+  for(let i=0;i<100;i++)h.stored.push({id:String(i).padStart(4,'0'),entry_date:'2026-09-14',created_at:'2026-09-14T12:00:00Z',description:'동일 날짜 '+i,category:'cash',amount:1,author:'관리자'});
+  h.$('entry-sort').value='asc';h.$('entry-sort').dispatchEvent(new h.w.Event('change'));await until(()=>h.$('entry-count').textContent==='100');
+  const descriptions=()=>Array.from(h.$('entries').querySelectorAll('tr'),r=>r.cells[1].textContent);
+  assert.equal(descriptions()[0],'동일 날짜 99');assert.equal(descriptions()[99],'동일 날짜 0');assert.equal(h.$('next').disabled,true);
+  h.$('load-period').click();await until(()=>!h.$('load-period').disabled);assert.equal(descriptions()[0],'동일 날짜 99');
+ }finally{h.dom.window.close();}
+});
+
+test('save retains every input and only changed entries create another record',async()=>{
+ const h=await screen('2026-09-14');try{
+  h.fill();h.$('entry-category').value='fixed';
+  await h.submit();
+  assert.equal(h.$('entry-date').value,'2026-09-14');assert.equal(h.$('entry-category').value,'fixed');assert.equal(h.$('entry-amount').value,'100000');assert.equal(h.$('entry-description').value,'9월 입금');
+  const firstKey=h.calls.filter(c=>c.action==='save_entry').at(-1).request_id;
+  await h.submit();assert.equal(h.stored.length,1);assert.equal(h.calls.filter(c=>c.action==='save_entry').length,1);assert.match(h.$('save-status').textContent,/이미 저장한/);
+  h.$('entry-description').value='9월 추가 관리비';h.$('entry-amount').value='30000';await h.submit();
+  assert.equal(h.stored.length,2);assert.notEqual(h.calls.filter(c=>c.action==='save_entry').at(-1).request_id,firstKey);
+  assert.equal(h.$('entry-category').value,'fixed');assert.equal(h.$('entry-date').value,'2026-09-14');assert.equal(h.$('entry-amount').value,'30000');assert.equal(h.$('entry-description').value,'9월 추가 관리비');
+ }finally{h.dom.window.close();}
 });
