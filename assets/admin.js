@@ -43,13 +43,12 @@ async function loadLedger(){const p=period(),seq=++loadSequence;markLoading();le
   if(seq!==loadSequence)return;
   records=[];count=0;$('entry-count').textContent='—';$('entries').replaceChildren();
   const tr=elem('tr'),td=elem('td','내역을 불러오지 못했습니다. 위의 조회 버튼으로 다시 확인해주세요.','empty');td.colSpan=user?.role==='admin'?8:7;tr.append(td);$('entries').append(tr);
-  $('summary-period').textContent='조회 실패 · 다시 조회해주세요.';$('page-label').textContent='조회 실패';$('prev').disabled=true;$('next').disabled=true;$('settlement-warning').hidden=true;
+  $('summary-period').textContent='조회 실패 · 다시 조회해주세요.';$('page-label').textContent='조회 실패';$('prev').disabled=true;$('next').disabled=true;
   throw e;
  }
  if(seq!==loadSequence)return;
  records=data.entries;count=data.count;
  $('summary-period').textContent=p.from+' ~ '+p.to;for(const k of ['revenue','spending','profit','fee','settlement'])$('sum-'+k).textContent=money(data.summary[k]);
- const warnings=[];if(data.summary.profit<0)warnings.push('적자 기간입니다. 운영 수수료도 음수로 계산됩니다.');if(data.summary.settlement<0)warnings.push('정산금액이 음수입니다. 반대 방향 송금 또는 이월 여부는 별도 확인해주세요.');$('settlement-warning').hidden=!warnings.length;$('settlement-warning').textContent=warnings.join(' ');
  $('entry-count').textContent=count;$('entries').replaceChildren();
  if(!records.length){const tr=elem('tr'),td=elem('td','이 기간에 기록된 내역이 없습니다.\n위에서 첫 매출 또는 지출을 등록해보세요.','empty');td.colSpan=user.role==='admin'?8:7;tr.append(td);$('entries').append(tr);}
  for(const r of records){const tr=elem('tr'),date=elem('td',r.entry_date);date.append(elem('small',r.author));tr.append(date,elem('td',r.description));for(const k of Object.keys(names))tr.append(elem('td',r.category===k?new Intl.NumberFormat('ko-KR').format(r.amount):'—',r.category===k?(['fixed','expense'].includes(k)?'negative':'positive'):''));if(user.role==='admin'){const td=elem('td');td.append(button('수정',()=>editEntry(r)),button('삭제',async()=>{if(await confirmAction('내역 삭제',`${r.entry_date} · ${r.description} · ${money(r.amount)} 내역을 삭제하시겠습니까? 변경 이력에는 보관됩니다.`)){await api('delete_entry',{id:r.id,version:r.version});if(records.length===1&&offset>0)offset-=100;await loadLedger();notice('내역을 삭제했습니다.');}}));tr.append(td);}$('entries').append(tr);}
