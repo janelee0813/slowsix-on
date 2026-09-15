@@ -52,7 +52,11 @@ export class HostCalendar {
     const password=inputs.find(e=>e.type==='password'),email=inputs.find(e=>e.type!=='password'&&e.type!=='checkbox');
     return {email_format_valid:!!email&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value),email_field_valid:!!email?.validity.valid,password_present:!!password?.value,password_field_valid:!!password?.validity.valid};
    });
-   this.onStage('login_submit_text',form);await p.getByText('호스트 이메일로 로그인',{exact:true}).click({noWaitAfter:true});
+   const control=p.getByText('호스트 이메일로 로그인',{exact:true});
+   const publicNotice=await control.evaluate(el=>el.parentElement.innerText);
+   // Only this public login-control area is recorded; entered credentials are always redacted.
+   form.notice=publicNotice.replaceAll(this.email,'[email]').replaceAll(this.email.trim(),'[email]').replaceAll(this.password,'[password]').replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g,'[email]').slice(0,700);
+   this.onStage('login_submit_text',form);await control.click({noWaitAfter:true});
    this.onStage('login_result');
    // The host sends successful logins to /auth/mypage; only /auth/login is the login form.
    try{await p.waitForURL(url=>url.origin==='https://partner.spacecloud.kr'&&!/^\/auth\/login\/?$/.test(url.pathname),{timeout:15000});}catch{throw new SyncError('LOGIN_REQUIRED');}
