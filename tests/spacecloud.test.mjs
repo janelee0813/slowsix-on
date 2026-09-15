@@ -7,10 +7,10 @@ import {authorized,makeSyncHandler} from '../api/spacecloud-sync.mjs';
 const sample={id:'12345678-1234-4123-8123-123456789abc',desired:'blocked',starts_at:'2026-12-31T14:00:00Z',ends_at:'2026-12-31T17:00:00Z'};
 test('host profile redirect is accepted after login and for an existing host session',async()=>{
  for(const signedIn of [false,true]){
-  let url='',fills=0;const visits=[],profile='https://partner.spacecloud.kr/auth/mypage';
+  let url='',fills=0,typed=0,blurred=0;const visits=[],profile='https://partner.spacecloud.kr/auth/mypage';
   const page={goto:async target=>{visits.push(target);url=signedIn&&target.endsWith('/auth/login')?profile:target;},url:()=>url,
-   waitForFunction:async()=>{},locator:()=>({waitFor:async()=>{},count:async()=>1,fill:async()=>{fills++;}}),
-   getByText:()=>({click:async()=>{url=profile;}}),
+   waitForFunction:async()=>{},locator:()=>({waitFor:async()=>{},count:async()=>1,fill:async()=>{fills++;},pressSequentially:async()=>{typed++;},press:async key=>{assert.equal(key,'Tab');blurred++;}}),
+   getByText:()=>({click:async()=>{assert.equal(typed,2);assert.equal(blurred,2);url=profile;}}),
    waitForURL:async predicate=>{assert.equal(predicate(new URL(url)),true);assert.equal(predicate(new URL('https://partner.spacecloud.kr/auth/login')),false);}
   };
   const host=new HostCalendar(page,{email:'local-fixture',password:'local-fixture'});await host.connect();

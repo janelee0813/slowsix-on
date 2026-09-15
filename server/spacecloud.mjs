@@ -44,7 +44,10 @@ export class HostCalendar {
    const pass=p.locator('input[type="password"]:visible'),email=p.locator('input:not([type="password"]):not([type="checkbox"]):not([type="hidden"]):visible');
    await pass.waitFor({state:'visible'});
    if(await pass.count()!==1||await email.count()!==1)throw new SyncError('UI_CHANGED');
-   await email.fill(this.email.trim());await pass.fill(this.password);
+   // Send keyboard and blur events so the host can run its field validators.
+   // Use normal key events, without bypassing the disabled control or its validation.
+   await email.fill('');await email.pressSequentially(this.email.trim());await email.press('Tab');
+   await pass.fill('');await pass.pressSequentially(this.password);await pass.press('Tab');
    this.onStage('login_submit_text');await p.getByText('호스트 이메일로 로그인',{exact:true}).click({noWaitAfter:true});
    this.onStage('login_result');
    // The host sends successful logins to /auth/mypage; only /auth/login is the login form.
