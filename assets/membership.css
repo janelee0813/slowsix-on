@@ -5,3 +5,5 @@
 .calendar-external{background:#263d38;color:#c6e5d9}.calendar-name{display:block;font-size:10px;overflow-wrap:anywhere}
 
 .coupon-wallet-panel{margin-bottom:22px}.coupon-wallet{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}.coupon-card{border:1px solid #514665;border-radius:12px;padding:18px;background:#221c30}.coupon-card h3{margin:12px 0 8px;font-size:16px}.coupon-used,.coupon-expired{opacity:.6}.coupon-held{background:#2c281f}.coupon-available .badge{color:#bce2cd;border-color:#527563}
+
+.sc-job{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 0;border-bottom:1px solid var(--border,#393044)}.sc-job>span:first-child{flex:1;min-width:200px}

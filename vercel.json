@@ -65,5 +65,11 @@
       "source": "/api/admin",
       "destination": "https://qhvwwdrwfzwpehfjntbv.supabase.co/functions/v1/admin-api"
     }
-  ]
+  ],
+  "functions": {
+    "api/spacecloud-sync.mjs": {
+      "maxDuration": 180,
+      "memory": 2048
+    }
+  }
 }

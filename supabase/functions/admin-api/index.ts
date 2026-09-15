@@ -6,8 +6,9 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
-const actions = new Set(['member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
+ SC_NOT_CONNECTED:'Vercel 연동 서버 설정과 Supabase 자동 실행 설정을 먼저 완료해주세요.',
  EXTERNAL_CALENDAR_UNAVAILABLE:'스페이스클라우드 일정을 불러오지 못했습니다. 잠시 후 다시 조회해주세요. 예약 요청은 일정 확인 후 가능합니다.',
  COUPON_NOT_APPLICABLE:'선택한 쿠폰을 사용할 수 없는 이용시간입니다.',
  MEMBER_HAS_BOOKINGS:'진행 중인 예약을 먼저 취소하거나 이용을 완료한 후 멤버십을 삭제해주세요.',
@@ -38,6 +39,8 @@ export function safePayload(action: string,b: Record<string,unknown>) {
  if(action.startsWith('member_')) {
   const out:Record<string,unknown>={};
   const limited=(key:string,max:number)=>{if(b[key]!=null&&(typeof b[key]!=='string'||String(b[key]).length>max))throw new AppError('INVALID_ENTRY');return b[key]??'';};
+  if(action==='member_sc_enable'){if(typeof b.enabled!=='boolean')throw new AppError('INVALID_ENTRY');return {enabled:b.enabled};}
+  if(action==='member_sc_retry'){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');return {id:b.id};}
   if(action==='member_coupon_issue'){if(!uuid(b.id)||!uuid(b.member_id)||!['discount5000','night','hours3'].includes(String(b.kind))||typeof b.expires_at!=='string'||!Number.isFinite(Date.parse(b.expires_at)))throw new AppError('INVALID_ENTRY');return {id:b.id,member_id:b.member_id,kind:b.kind,expires_at:b.expires_at};}
   if(['member_quote','member_request'].includes(action)){if(b.coupon_id!=null&&!uuid(b.coupon_id))throw new AppError('INVALID_ENTRY');if(b.coupon_id&&b.use_coupon)throw new AppError('INVALID_ENTRY');out.coupon_id=b.coupon_id??null;}
   if(['member_delete','member_request','member_cancel','member_status','member_revoke','member_person_save','member_block_save','member_block_delete'].includes(action)){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');out.id=b.id;}
@@ -225,17 +228,24 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      const member=await rpc('me',{session_hash});
      if(member.role!=='member')throw new AppError('FORBIDDEN',403);
      if(member.status!=='active')throw new AppError('APPROVAL_REQUIRED');
-     const items=await externalCalendar(true),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
-     if(items.some(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start))throw new AppError('TIME_UNAVAILABLE');
+     // A retry of an already saved request may now see its own external block in iCal.
+     // Let the existing SQL idempotency checks validate that retry before checking the feed.
+     const previous=await rpc('member_bookings',{session_hash,from:payload.starts_at,to:payload.ends_at});
+     if(!previous.items.some((r:any)=>r.id===payload.id)){
+      const items=await externalCalendar(true),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
+      if(items.some(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start))throw new AppError('TIME_UNAVAILABLE');
+     }
     }
     if(action==='create_invite'||action==='member_invite') {
      const secret=token();
      result=await rpc(action,{...payload,session_hash,link_hash:await sha(secret)});
      result.url=site+(action==='member_invite'?'/membership.html#invite=':'/admin.html#invite=')+secret;
-    } else result=await rpc(action,{...payload,session_hash});
+    } else if(action.startsWith('member_sc_'))result=await call('/rest/v1/rpc/ss_spacecloud_admin',{p_action:action,p:{...payload,session_hash}});
+    else result=await rpc(action,{...payload,session_hash});
     if(action==='member_calendar'){
      const items=await externalCalendar(),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
-     result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start));
+     // A mirrored membership block can return through iCal; the local interval already displays it.
+     result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start&&!result.items.some((local:any)=>Date.parse(local.starts_at)<=Date.parse(r.starts_at)&&Date.parse(local.ends_at)>=Date.parse(r.ends_at))));
      result.external_checked_at=new Date().toISOString();
     }
    } else throw new AppError('INVALID_ACTION');
