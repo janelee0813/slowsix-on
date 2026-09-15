@@ -9,7 +9,7 @@ test('host profile redirect is accepted after login and for an existing host ses
  for(const signedIn of [false,true]){
   let url='',fills=0,typed=0,blurred=0;const visits=[],profile='https://partner.spacecloud.kr/auth/mypage';
   const page={goto:async target=>{visits.push(target);url=signedIn&&target.endsWith('/auth/login')?profile:target;},url:()=>url,
-   waitForFunction:async()=>{},locator:()=>({waitFor:async()=>{},count:async()=>1,fill:async()=>{fills++;},pressSequentially:async()=>{typed++;},press:async key=>{assert.equal(key,'Tab');blurred++;}}),
+   waitForFunction:async()=>{},locator:()=>({waitFor:async()=>{},count:async()=>1,fill:async()=>{fills++;},pressSequentially:async()=>{typed++;},press:async key=>{assert.equal(key,'Tab');blurred++;},evaluateAll:async()=>({email_format_valid:true,email_field_valid:true,password_present:true,password_field_valid:true})}),
    getByText:()=>({click:async()=>{assert.equal(typed,2);assert.equal(blurred,2);url=profile;}}),
    waitForURL:async predicate=>{assert.equal(predicate(new URL(url)),true);assert.equal(predicate(new URL('https://partner.spacecloud.kr/auth/login')),false);}
   };

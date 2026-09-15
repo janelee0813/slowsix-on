@@ -48,7 +48,11 @@ export class HostCalendar {
    // Use normal key events, without bypassing the disabled control or its validation.
    await email.fill('');await email.pressSequentially(this.email.trim());await email.press('Tab');
    await pass.fill('');await pass.pressSequentially(this.password);await pass.press('Tab');
-   this.onStage('login_submit_text');await p.getByText('호스트 이메일로 로그인',{exact:true}).click({noWaitAfter:true});
+   const form=await p.locator('input:visible').evaluateAll(inputs=>{
+    const password=inputs.find(e=>e.type==='password'),email=inputs.find(e=>e.type!=='password'&&e.type!=='checkbox');
+    return {email_format_valid:!!email&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value),email_field_valid:!!email?.validity.valid,password_present:!!password?.value,password_field_valid:!!password?.validity.valid};
+   });
+   this.onStage('login_submit_text',form);await p.getByText('호스트 이메일로 로그인',{exact:true}).click({noWaitAfter:true});
    this.onStage('login_result');
    // The host sends successful logins to /auth/mypage; only /auth/login is the login form.
    try{await p.waitForURL(url=>url.origin==='https://partner.spacecloud.kr'&&!/^\/auth\/login\/?$/.test(url.pathname),{timeout:15000});}catch{throw new SyncError('LOGIN_REQUIRED');}
