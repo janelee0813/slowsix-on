@@ -6,7 +6,7 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
-const actions = new Set(['me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
  USERNAME_TAKEN:'사용할 수 없는 아이디입니다.', DUPLICATE:'이미 사용 중인 아이디 또는 중복 요청입니다.',
@@ -31,6 +31,10 @@ export function username(value: unknown) {
 const uuid = (value: unknown) => typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 const validDate = (value: unknown) => typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
 export function safePayload(action: string,b: Record<string,unknown>) {
+ if(action==='recurring_save') {
+  if(!uuid(b.id)||!Number.isInteger(b.version)||Number(b.version)<0||!['fixed','expense'].includes(String(b.category))||typeof b.description!=='string'||!b.description.trim()||b.description.trim().length>200||!Number.isSafeInteger(b.amount)||Number(b.amount)<1||Number(b.amount)>1e10||!validDate(b.start_month)||!String(b.start_month).endsWith('-01')||(b.end_month!=null&&(!validDate(b.end_month)||!String(b.end_month).endsWith('-01')||String(b.end_month)<String(b.start_month)))) throw new AppError('INVALID_ENTRY');
+  return {id:b.id,version:b.version,category:b.category,description:b.description.trim(),amount:b.amount,start_month:b.start_month,end_month:b.end_month??null};
+ }
  if(action==='update_name') {
   if(typeof b.name!=='string'||!b.name.trim()||b.name.trim().length>40) throw new AppError('닉네임은 1~40자로 입력해주세요.');
   return {name:b.name.trim()};
@@ -51,9 +55,9 @@ export function safePayload(action: string,b: Record<string,unknown>) {
   if(b.id&&(!uuid(b.id)||!Number.isInteger(b.version))) throw new AppError('INVALID_ENTRY');
   return {id:b.id||null,version:b.version,date:b.date,description:b.description.trim(),category:b.category,amount:b.amount,request_id:b.request_id};
  }
- if(['delete_entry','set_status','revoke_invite'].includes(action)) {
+ if(['recurring_delete','delete_entry','set_status','revoke_invite'].includes(action)) {
   if(!uuid(b.id)) throw new AppError('INVALID_ENTRY');
-  if(action==='delete_entry'&&!Number.isInteger(b.version)) throw new AppError('INVALID_ENTRY');
+  if(['delete_entry','recurring_delete'].includes(action)&&(!Number.isInteger(b.version)||Number(b.version)<1)) throw new AppError('INVALID_ENTRY');
   if(action==='set_status'&&!['active','rejected','suspended'].includes(String(b.status))) throw new AppError('INVALID_ENTRY');
   return {id:b.id,version:b.version,status:b.status};
  }

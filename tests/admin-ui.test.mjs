@@ -9,7 +9,7 @@ const code=await readFile(new URL('assets/admin.js',root),'utf8');
 const until=async(fn)=>{for(let i=0;i<150;i++){if(fn())return;await new Promise(r=>setTimeout(r,10))}throw Error('UI did not reach expected state');};
 async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=false,blockExternal=false,options={}){
  const dom=new JSDOM(html,{url:'https://slowsixon.com/admin.html',runScripts:'outside-only'}),w=dom.window;
- const calls=[],stored=[],fees=new Map();let failSave=false,failList=false,displayName='테스트 관리자';
+ const calls=[],stored=[],recurring=[],fees=new Map();let failSave=false,failList=false,displayName='테스트 관리자';
  if(currentDate){const RealFormat=w.Intl.DateTimeFormat;w.Intl.DateTimeFormat=function(locale,options){return locale==='sv-SE'?{format:()=>currentDate}:new RealFormat(locale,options);};}
  w.crypto.randomUUID=randomUUID;w.AbortSignal=timeoutUnsupported?{}:AbortSignal;if(!options.noTabSession)w.sessionStorage.setItem('ss-admin-session','test-session');if(options.persisted)w.localStorage.setItem('ss-admin-session',options.persisted);
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
@@ -17,6 +17,8 @@ async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=f
   if(blockExternal&&new URL(url,w.location.href).origin!==w.location.origin)throw new TypeError("External auth host unavailable");
   const b=JSON.parse(opts.body);calls.push(b);let data;
   if(b.action==='me')data={id:randomUUID(),name:displayName,username:'slowsix',role,status:'active'};
+  else if(b.action==='recurring_list')data={items:recurring};
+  else if(b.action==='recurring_save'){recurring.push({...b,version:1});data={id:b.id};}
   else if(b.action==='logout')data={};
   else if(b.action==='update_name'){displayName=b.name.trim();data={name:displayName};}
   else if(b.action==='save_entry'){
@@ -172,4 +174,21 @@ for(const role of ['admin','operator'])test(role+' can change own nickname from 
   await until(()=>h.$('account-name').textContent.includes('새 닉네임'));
   assert.equal(h.$('nickname-dialog').open,false);assert.equal(h.calls.find(c=>c.action==='update_name').name,'새 닉네임');
  }finally{h.dom.window.close();}
+});
+
+test('recurring tab sits between ledger and team; admin can register and operators only view',async()=>{
+ for(const role of ['admin','operator']){const h=await screen('2026-09-15',role);try{
+  const tabs=Array.from(h.w.document.querySelectorAll('.tabs button'),b=>b.id);assert.deepEqual(tabs.slice(0,3),['tab-ledger','tab-recurring','tab-team']);
+  h.$('tab-recurring').click();await until(()=>h.$('recurring-list').textContent.includes('등록한 고정 지출이 없습니다'));
+  assert.equal(h.$('ledger-view').hidden,true);assert.equal(h.$('recurring-editor').hidden,role!=='admin');
+  if(role==='admin'){
+   h.$('recurring-description').value='매월 월세';h.$('recurring-amount').value='700000';assert.equal(h.$('recurring-start').value,'2026-09');
+   h.$('recurring-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>!h.$('recurring-save').disabled);
+   assert.match(h.$('recurring-list').textContent,/매월 월세/);const payload=h.calls.find(c=>c.action==='recurring_save');assert.equal(payload.start_month,'2026-09-01');assert.equal(payload.end_month,null);assert.equal(payload.category,'fixed');
+  }else assert.equal(h.$('recurring-list').querySelectorAll('button').length,0);
+  h.$('tab-ledger').click();await until(()=>!h.$('load-period').disabled);assert.equal(h.$('recurring-view').hidden,true);
+ }finally{h.dom.window.close();}}
+});
+test('automatically applied expenses are labelled and cannot be edited as individual ledger rows',async()=>{
+ const h=await screen('2026-09-15');try{h.stored.push({id:randomUUID(),recurring_id:randomUUID(),entry_date:'2026-09-12',description:'월세',category:'fixed',amount:700000,author:'관리자'});h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='1');assert.match(h.$('entries').textContent,/자동/);assert.equal(h.$('entries').querySelectorAll('button').length,0);}finally{h.dom.window.close();}
 });
