@@ -45,7 +45,7 @@ export class HostCalendar {
    await pass.waitFor({state:'visible'});
    if(await pass.count()!==1||await email.count()!==1)throw new SyncError('UI_CHANGED');
    await email.fill(this.email.trim());await pass.fill(this.password);
-   this.onStage('login_submit');await p.getByRole('button',{name:'호스트 이메일로 로그인',exact:true}).click({noWaitAfter:true});
+   this.onStage('login_submit_text');await p.getByText('호스트 이메일로 로그인',{exact:true}).click({noWaitAfter:true});
    this.onStage('login_result');
    // The host sends successful logins to /auth/mypage; only /auth/login is the login form.
    try{await p.waitForURL(url=>url.origin==='https://partner.spacecloud.kr'&&!/^\/auth\/login\/?$/.test(url.pathname),{timeout:15000});}catch{throw new SyncError('LOGIN_REQUIRED');}

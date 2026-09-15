@@ -48,7 +48,9 @@ export function makeSyncHandler({env=process.env,fetcher=fetch,launch,report=eve
    await browser?.close().catch(()=>{});browser=null;
    const code=e instanceof SyncError?e.code:'UI_CHANGED';
    const kind=e?.name==='TimeoutError'?'timeout':e?.code==='ENOENT'?'missing_file':e?.code==='ERR_MODULE_NOT_FOUND'?'missing_module':e instanceof SyncError?'sync':'runtime';
-   report({event:'spacecloud_sync_failed',stage,code,kind,elapsed_ms:Date.now()-started});
+   const message=String(e?.message||'');
+   const reason=/intercepts pointer events/.test(message)?'pointer_obstructed':/element is not enabled/.test(message)?'disabled':/element is not visible/.test(message)?'not_visible':/element is not stable/.test(message)?'unstable':/waiting for scheduled navigations/.test(message)?'navigation_pending':/waiting for (getByRole|getByText|locator)/.test(message)?'locator_wait':'unspecified';
+   report({event:'spacecloud_sync_failed',stage,code,kind,reason,elapsed_ms:Date.now()-started});
    if(job?.id)await rpc('finish',{id:job.id,lease:job.lease,revision:job.revision,error:code,logged_in:!!adapter?.loggedIn}).catch(()=>{});
    return res.status(503).json({error:code});
   }finally{clearTimeout(timer);await browser?.close().catch(()=>{});}

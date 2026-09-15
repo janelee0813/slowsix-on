@@ -10,7 +10,7 @@ test('host profile redirect is accepted after login and for an existing host ses
   let url='',fills=0;const visits=[],profile='https://partner.spacecloud.kr/auth/mypage';
   const page={goto:async target=>{visits.push(target);url=signedIn&&target.endsWith('/auth/login')?profile:target;},url:()=>url,
    waitForFunction:async()=>{},locator:()=>({waitFor:async()=>{},count:async()=>1,fill:async()=>{fills++;}}),
-   getByRole:()=>({click:async()=>{url=profile;}}),
+   getByText:()=>({click:async()=>{url=profile;}}),
    waitForURL:async predicate=>{assert.equal(predicate(new URL(url)),true);assert.equal(predicate(new URL('https://partner.spacecloud.kr/auth/login')),false);}
   };
   const host=new HostCalendar(page,{email:'local-fixture',password:'local-fixture'});await host.connect();
