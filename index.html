@@ -4,10 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23b566ff'/><stop offset='50%25' stop-color='%23ff5fb0'/><stop offset='100%25' stop-color='%235ec8ff'/></linearGradient></defs><rect width='32' height='32' rx='7' ry='7' fill='url(%23g)'/></svg>"/>
-<title>슬로우식스ON 이용 가이드</title>
-<meta name="description" content="놀기에 최적화된 공간! 슬로우식스ON의 홈페이지 입니다." />
-<meta property="og:title" content="슬로우식스ON 이용 가이드"/>
-<meta property="og:description" content="놀기에 최적화된 공간! 슬로우식스ON의 홈페이지 입니다."/>
+<title>슬로우식스 · 함께하는 공간</title>
+<meta name="description" content="좋은 사람들과, 편하게 머무는 시간. 슬로우식스 ON·D·P 공간 예약과 이용 안내, 보드게임 목록, 멤버십 혜택을 확인하세요." />
+<meta property="og:title" content="슬로우식스 · 함께하는 공간"/>
+<meta property="og:description" content="좋은 사람들과, 편하게 머무는 시간. 슬로우식스 ON·D·P 공간 예약과 이용 안내, 보드게임 목록, 멤버십 혜택을 확인하세요."/>
 <meta property="og:url" content="https://slowsixon.com"/>
 <meta property="og:type" content="website"/>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
@@ -98,6 +98,8 @@
     background: linear-gradient(90deg, transparent, rgba(181,102,255,0.6), rgba(255,95,176,0.5), transparent);
   }
 </style>
+<link rel="stylesheet" href="assets/site-home.css?v=1">
+<script src="assets/site-home.js?v=1" defer></script>
 </head>
 <body id="top" class="min-h-screen bg-background text-foreground font-sans">
 
@@ -123,10 +125,12 @@
   }
   #btn-fortune,#btn-holdemevent{animation:eventGlow 1.4s ease-in-out infinite}
 </style>
-<nav class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
-  <div class="mx-auto max-w-screen-md px-3 sm:px-5">
-    <!-- 모바일: 한 줄당 3개씩 그리드 / 데스크탑: 1줄 -->
-    <div class="grid grid-cols-3 items-start gap-1.5 py-2 sm:flex sm:flex-nowrap sm:py-2.5">
+<nav id="site-nav" aria-label="주 메뉴" class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
+  <div class="home-nav-shell">
+    <button class="home-brand" aria-label="슬로우식스 홈" onclick="showPage('main')">SLOW<span>SIX</span><small>함께하는 공간</small></button>
+    <button id="home-menu-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="home-menu">메뉴 <span aria-hidden="true">☰</span></button>
+    <!-- 모바일: 접이식 메뉴 / 데스크탑: 한 줄 메뉴 -->
+    <div id="home-menu" class="home-nav-menu">
       <button onclick="showPage('slowsix')" id="btn-slowsix" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">슬로우식스ON 안내</button>
       <button onclick="showPage('slowsixd')" id="btn-slowsixd" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">슬로우식스D 안내</button>
       <button onclick="showPage('slowsixp')" id="btn-slowsixp" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">슬로우식스P 안내</button>
@@ -173,9 +177,7 @@
     </div>
   </div>
 </nav>
-<div class="mx-auto max-w-screen-md px-3 sm:px-5 pt-1 text-right">
-  <a href="admin.html" class="inline-block text-[8px] leading-none" style="letter-spacing:.02em;color:#3d3844">관리자 모드</a>
-</div>
+
 <script>
 (function(){
   const SUPABASE_URL='https://teugnaahpcpzejbdayyy.supabase.co';
@@ -192,8 +194,43 @@
 })();
 </script>
 
-<div id="page-main">
-</div>
+<main id="page-main">
+<section class="home-hero relative overflow-hidden">
+ <div class="grid-bg absolute inset-0 -z-10"></div>
+ <div class="home-wrap">
+  <div class="mb-6 inline-flex home-eyebrow"><span class="home-dot"></span> SLOWSIX · A PLACE TOGETHER</div>
+  <h1>좋은 사람들과,<br><span class="text-gradient-neon">편하게 머무는 시간.</span></h1>
+  <p class="mt-5 home-intro">보드게임 한 판부터 함께하는 모임까지.<br>슬로우식스에서 즐거운 시간을 만들어보세요.</p>
+  <div class="mt-10 home-actions"><button class="home-primary" onclick="document.getElementById('home-spaces').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})">공간 선택·예약하기 <span aria-hidden="true">↗</span></button><a class="home-secondary" href="membership.html">멤버십 로그인 <span aria-hidden="true">→</span></a></div>
+  <div class="home-hero-bottom"><span>PLAY. TALK. STAY.</span><span>함께할 공간을 만나보세요 <span aria-hidden="true">↓</span></span></div>
+ </div>
+</section>
+<div class="divider-neon"></div>
+<section id="home-spaces" class="home-section"><div class="home-wrap">
+ <div class="mb-8 home-section-heading"><p class="home-eyebrow">01 / OUR SPACES</p><h2>어느 공간을 이용하시나요?</h2><p>예약 전 공간을 살펴보거나, 이용 중 필요한 안내를 확인하세요.</p></div>
+ <div class="home-grid home-space-grid">
+  <article class="neon-card neon-card-glow home-space"><div class="home-space-art home-on" aria-hidden="true"><span>SLOWSIX</span><strong>ON</strong><span>함께하는 시간의 시작</span></div><div class="home-card-body"><h3>슬로우식스ON</h3><p>서초구 강남대로 381 · 두산베어스텔 606호</p><div class="home-card-actions"><button onclick="showPage('slowsix')">이용 안내 →</button><a href="https://www.spacecloud.kr/space/79746" target="_blank" rel="noopener noreferrer">예약하기 ↗</a></div></div></article>
+  <article class="neon-card neon-card-glow home-space"><div class="home-space-art home-d" aria-hidden="true"><span>SLOWSIX</span><strong>D</strong><span>우리의 모임이 머무는 곳</span></div><div class="home-card-body"><h3>슬로우식스D</h3><p>강남구 역삼동 824-25 · 대우디오빌플러스</p><div class="home-card-actions"><button onclick="showPage('slowsixd')">이용 안내 →</button><a href="https://naver.me/5l7vZADm" target="_blank" rel="noopener noreferrer">예약하기 ↗</a></div></div></article>
+  <article class="neon-card neon-card-glow home-space"><div class="home-space-art home-p" aria-hidden="true"><span>SLOWSIX</span><strong>P</strong><span>같이 놀면 더 즐거우니까</span></div><div class="home-card-body"><h3>슬로우식스P</h3><p>출입·주차부터 퇴실까지, 공간 이용 안내</p><div class="home-card-actions"><button onclick="showPage('slowsixp')">이용 안내 →</button><a href="https://naver.me/5l7vZADm" target="_blank" rel="noopener noreferrer">예약하기 ↗</a></div></div></article>
+ </div>
+</div></section>
+<section class="home-section home-section-tint"><div class="home-wrap">
+ <div class="mb-8 home-section-heading"><p class="home-eyebrow">02 / ENJOY YOUR TIME</p><h2>더 즐겁게 이용하는 방법</h2><p>지금 필요한 메뉴로 바로 이동하세요.</p></div>
+ <div class="home-grid">
+  <button class="neon-card home-shortcut" onclick="showPage('boardgame-select')"><span class="home-icon" aria-hidden="true">♧</span><h3>보드게임 목록 <span>↗</span></h3><p>오늘은 어떤 게임을 해볼까요?<br>공간별 보유 게임을 확인해보세요.</p><span class="home-link-label">ON · D · P</span></button>
+  <button class="neon-card home-shortcut" onclick="showPage('fortune')"><span class="home-icon" aria-hidden="true">+1h</span><h3>1시간 무료연장 <span>↗</span></h3><p>포토후기 남기고 조금 더 여유롭게.<br>참여 방법과 조건을 확인하세요.</p><span class="home-link-label">슬로우식스ON 한정</span></button>
+  <button class="neon-card home-shortcut" onclick="showPage('utilities')"><span class="home-icon" aria-hidden="true">◷</span><h3>유용한 기능 <span>↗</span></h3><p>모임에 필요한 도구를 모았어요.<br>홀덤 타이머를 사용해보세요.</p><span class="home-link-label">모임을 위한 도구</span></button>
+ </div>
+</div></section>
+<section class="home-section home-membership"><div class="home-wrap">
+ <div class="mb-8 home-section-heading"><p class="home-eyebrow">03 / MEMBERSHIP</p><h2>다시 만나서 <span class="text-gradient-neon">반가워요.</span></h2><p>슬로우식스를 찾아주시는 분들을 위한 초대 멤버십</p></div>
+ <div class="home-tier-grid">
+  <article class="neon-card neon-card-glow home-tier"><span class="home-eyebrow">FRIENDS</span><h3>슬로우식스 프렌즈</h3><p>슬로우식스를 자주 찾아주시는 분</p><div class="home-discount"><strong>12<span>%</span></strong><span>공간 이용료 할인</span></div><div class="home-coupon">매월 3,000원 할인쿠폰 <strong>1장</strong></div></article>
+  <article class="neon-card neon-card-glow home-tier home-crew"><span class="home-eyebrow">CREW</span><h3>슬로우식스 크루</h3><p>더 자주, 더 오래 함께해주시는 분</p><div class="home-discount"><strong>20<span>%</span></strong><span>공간 이용료 할인</span></div><div class="home-coupon">매월 3,000원 할인쿠폰 <strong>2장</strong></div></article>
+ </div>
+ <div class="home-member-bottom"><div><p>슬로우식스ON 예약에 적용됩니다.</p><p>초대 후 가입·승인된 회원만 이용할 수 있으며,<br>로그인한 계정의 등급에 따라 혜택이 적용됩니다.</p></div><a href="membership.html" class="home-primary">멤버십 로그인 <span aria-hidden="true">→</span></a></div>
+</div></section>
+</main>
 
 <div id="page-slowsix" class="hidden">
 
@@ -1498,6 +1535,7 @@
   // 히어로 animate-fade-up 즉시 비활성화 (flash 방지)
   const early=document.createElement('style');
   early.textContent=`
+    #page-main section:first-of-type .animate-fade-up,
     #page-guide section:first-of-type .animate-fade-up,
     #page-guide section:first-of-type .animate-glow-pulse,
     #page-fortune section:first-of-type .animate-fade-up,
@@ -1525,7 +1563,7 @@
   }
 
   function setupPage(pageEl){
-    if(!pageEl)return;
+    if(!pageEl||window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
 
     // ── 히어로: 시간 기반 순차 등장 ──
     const hero=pageEl.querySelector('section:first-of-type');
@@ -1596,6 +1634,7 @@
   }
 
   function setup(){
+    setupPage(document.getElementById('page-main'));
     setupPage(document.getElementById('page-guide'));
     setupPage(document.getElementById('page-fortune'));
     setupPage(document.getElementById('page-slowsix'));
@@ -8462,6 +8501,9 @@ Oh my Blue Moon</div>
   }
 
   function showPage(page) {
+    document.getElementById('home-menu-toggle')?.setAttribute('aria-expanded','false');
+    document.getElementById('home-menu-toggle')?.setAttribute('aria-label','메뉴 열기');
+    document.getElementById('site-nav')?.classList.remove('menu-open');
     ['main', 'slowsix', 'slowsixd', 'slowsixp', 'guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'boardgame-select', 'boardgame', 'membership', 'utilities', 'holdem', 'holdemevent', 'attendance', 'schedule', 'shotclock', 'apply', 'temp'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
@@ -9583,5 +9625,6 @@ if (location.hash === '#tamagotchi' && !tamaReady) {
   tamaInit();
 }
 </script>
+<footer id="site-footer"><div class="home-wrap"><div><button class="home-brand" onclick="showPage('main')">SLOW<span>SIX</span></button><p>좋은 사람들과, 편하게 머무는 시간.</p></div><div class="home-footer-links"><a href="https://pf.kakao.com/_kerxgG/chat" target="_blank" rel="noopener noreferrer">카카오톡 문의 ↗</a><a href="admin.html">관리자 모드</a></div></div></footer>
 </body>
 </html>

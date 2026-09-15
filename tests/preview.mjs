@@ -23,7 +23,7 @@ createServer(async(req,res)=>{try{
   const response=await h.handler(new Request('https://mock.supabase.co/functions/v1/admin-api',{method:'POST',headers:{'Content-Type':'application/json',origin:'https://slowsixon.com','x-forwarded-for':'127.0.0.1'},body}));res.writeHead(response.status,{'Content-Type':'application/json'});res.end(await response.text());return;
  }
  const path=new URL(req.url,'http://localhost').pathname;
- const allowed=['/admin.html','/assets/admin.css','/assets/admin.js','/membership.html','/assets/membership.js','/assets/membership.css','/assets/membership-shared.js','/assets/membership-admin.js','/index.html','/'];if(!allowed.includes(path)){res.writeHead(404);res.end();return;}
+ const allowed=['/assets/site-home.css','/assets/site-home.js','/assets/guide-theme.css','/admin.html','/assets/admin.css','/assets/admin.js','/membership.html','/assets/membership.js','/assets/membership.css','/assets/membership-shared.js','/assets/membership-admin.js','/index.html','/'];if(!allowed.includes(path)){res.writeHead(404);res.end();return;}
  let text=await readFile(new URL((path==='/'?'index.html':path.slice(1)),root),'utf8');
  res.writeHead(200,{'Content-Type':mime[path.slice(path.lastIndexOf('.'))]||'text/html','Cache-Control':'no-store'});res.end(text);
  }catch(e){res.writeHead(500);res.end('Preview error');console.error(e.message)}
