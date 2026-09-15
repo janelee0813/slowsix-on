@@ -4,7 +4,7 @@ const bundle=async file=>(await build({entryPoints:[new URL('../assets/'+file,im
 test('member booking form and admin approval work with actual SQL and API',async()=>{
  const h=await harness(),ok=async(a,p={},s)=>{const r=await h.call(a,p,s);assert.equal(r.status,200,JSON.stringify(r.data));return r.data;},password='Preview!Safe2026';
  await ok('register',{linkToken:await h.bootstrap(),username:'slowsix',password,name:'관리자'});const admin=(await ok('login',{username:'slowsix',password})).sessionToken;
- const link=await ok('member_invite',{tier:'friends'},admin);await ok('register',{linkToken:link.url.split('=')[1],username:'friend',password,name:'친구'});const member=(await ok('login',{username:'friend',password})).sessionToken;
+ const link=await ok('member_invite',{tier:'friends'},admin);await ok('register',{linkToken:link.url.split('=')[1],username:'friend',password,name:'친구',gender:'여성',age_group:'30대',purposes:['보드게임']});const member=(await ok('login',{username:'friend',password})).sessionToken;
  const dom=new JSDOM(await readFile(new URL('../membership.html',import.meta.url),'utf8'),{url:'https://slowsixon.com/membership.html',runScripts:'outside-only'}),w=dom.window,$=id=>w.document.getElementById(id);w.crypto.randomUUID=()=>crypto.randomUUID();w.AbortController=AbortController;w.localStorage.setItem('ss-member-session',member);w.confirm=()=>true;
  w.fetch=async(url,opts)=>{const b=JSON.parse(opts.body),r=await h.call(b.action,b,b.sessionToken);return new Response(JSON.stringify(r.data),{status:r.status});};
  let ad;
@@ -19,4 +19,9 @@ test('member booking form and admin approval work with actual SQL and API',async
   $('booking-refresh').click();await until(()=>$('my-bookings').textContent.includes('예약 확정'));assert.equal($('my-bookings').querySelectorAll('button').length,0);
   assert.match($('member-notifications').textContent,/예약이 확정/);
  }finally{dom.window.close();ad?.window.close();await h.db.close();}
+});
+test('invitation form requires gender, age and at least one purpose',async()=>{
+ const dom=new JSDOM(await readFile(new URL('../membership.html',import.meta.url),'utf8'),{url:'https://slowsixon.com/membership.html#invite='+'a'.repeat(64),runScripts:'outside-only'}),w=dom.window,$=id=>w.document.getElementById(id);
+ w.crypto.randomUUID=()=>crypto.randomUUID();w.AbortController=AbortController;w.fetch=async()=>new Response(JSON.stringify({kind:'member',tier:'friends'}),{status:200});
+ try{w.eval(await bundle('membership.js'));await until(()=>$('member-gender').required);$('member-username').value='example';$('member-password').value='Example!2026';$('member-confirm').value='Example!2026';$('member-nickname').value='친구';assert.equal($('member-auth-form').checkValidity(),false);$('member-gender').value='여성';$('member-age').value='30대';assert.equal($('member-auth-form').checkValidity(),false);const purpose=$('member-purposes').querySelector('input');purpose.checked=true;purpose.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal($('member-auth-form').checkValidity(),true);purpose.checked=false;purpose.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal($('member-auth-form').checkValidity(),false);}finally{w.close();}
 });

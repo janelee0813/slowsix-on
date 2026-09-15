@@ -8,6 +8,14 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
  const opLink=await ok('create_invite',{},admin);await ok('register',{username:'operator',password,name:'운영자',linkToken:opLink.url.split('=')[1]});const opResult=await ok('login',{username:'operator',password});const op=opResult.sessionToken;await ok('set_status',{id:opResult.user.id,status:'active'},admin);
  const join=async(username,tier)=>{const link=await ok('member_invite',{tier},admin),linkToken=link.url.split('=')[1];assert.match(link.url,/membership.html#invite=/);assert.equal((await ok('link_info',{linkToken})).tier,tier);await ok('register',{username,password,name:username,linkToken,gender:'여성',age_group:'30대',purposes:['보드게임','친목모임'],tier:'crew',role:'admin'});assert.equal((await call('register',{username:username+'x',password,name:'x',linkToken})).data.code,'LINK_INVALID');return await ok('login',{username,password});};
  const friend=await join('frienduser','friends'),crew=await join('crewuser','crew');const f=friend.sessionToken,c=crew.sessionToken;let booking;
+ await t.test('all membership profile fields are required without consuming the invitation on failure',async()=>{
+  const linkToken=(await ok('member_invite',{tier:'friends'},admin)).url.split('=')[1];
+  const base={linkToken,username:'requireduser',password,name:'필수 회원',gender:'남성',age_group:'20대',purposes:['보드게임']};
+  for(const patch of [{gender:''},{age_group:''},{purposes:[]},{gender:'응답 안 함'},{age_group:'응답 안 함'},{gender:null},{age_group:null},{purposes:null}]){
+   assert.equal((await call('register',{...base,...patch})).data.code,'INVALID_ENTRY');
+  }
+  assert.equal((await ok('link_info',{linkToken})).kind,'member');await ok('register',base);
+ });
  await t.test('invitation grants exact tier; operators and members cannot access admin functions',async()=>{
   assert.equal(friend.user.role,'member');assert.equal((await ok('member_home',{},f)).tier,'friends');
   for(const action of ['member_home','member_people','member_bookings','member_calendar','member_inbox'])assert.equal((await call(action,{from:future(1),to:future(30)},op)).data.code,'FORBIDDEN');

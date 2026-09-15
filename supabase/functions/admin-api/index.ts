@@ -137,7 +137,7 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      let profile:Record<string,unknown>={};
      if(info.kind==='member'){
       const gender=b.gender??'',age_group=b.age_group??'',purposes=b.purposes??[];
-      if(!['','남성','여성','응답 안 함'].includes(gender)||!['','10대','20대','30대','40대','50대','60대 이상','응답 안 함'].includes(age_group)||!Array.isArray(purposes)||purposes.length>6||purposes.some(x=>!['보드게임','홀덤','친목모임','스터디/강의','독서모임','기타'].includes(x)))throw new AppError('INVALID_ENTRY');
+      if(!['남성','여성'].includes(gender)||!['10대','20대','30대','40대','50대','60대 이상'].includes(age_group)||!Array.isArray(purposes)||purposes.length<1||purposes.length>6||purposes.some(x=>!['보드게임','홀덤','친목모임','스터디/강의','독서모임','기타'].includes(x)))throw new AppError('INVALID_ENTRY');
       profile={gender,age_group,purposes:[...new Set(purposes)]};
      }
      const email=crypto.randomUUID()+'@accounts.slowsixon.invalid';
