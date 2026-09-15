@@ -146,6 +146,7 @@
       <!-- 미니홀덤대회 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
       <button onclick="showPage('holdemevent')" id="btn-holdemevent" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">미니홀덤대회</button>
       -->
+      <button onclick="showPage('membership')" id="btn-membership" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">멤버십</button>
       <button onclick="showPage('utilities')" id="btn-utilities" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">유용한 기능</button>
       <!-- 임시 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
       <button onclick="showPage('temp')" id="btn-temp" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">임시</button>
@@ -6452,6 +6453,8 @@ Oh my Blue Moon</div>
 
 </div>
 
+<div id="page-membership" class="hidden"><section class="relative overflow-hidden"><div class="grid-bg absolute inset-0 -z-10"></div><div class="mx-auto max-w-screen-md px-5 pt-11 pb-8 sm:pt-16 sm:pb-10"><p class="text-xs font-semibold text-neon-purple tracking-widest">SLOWSIX ON MEMBERSHIP</p><h1 class="mt-4 text-[34px] font-bold leading-tight sm:text-5xl">다시 만나서 <span class="text-gradient-neon">반가워요</span></h1><p class="mt-5 text-muted-foreground">슬로우식스를 찾아주시는 분들을 위한 초대 멤버십</p><div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2"><a href="membership.html" class="rounded-xl border border-border bg-surface/60 px-6 py-8 text-center transition-all hover:border-neon-purple/60 hover:bg-surface"><h2 class="text-xl font-bold">슬로우식스 프렌즈</h2><p class="mt-3 text-sm text-muted-foreground">슬로우식스를 자주 찾아주시는 분</p><div class="mt-6 text-neon-purple font-bold text-3xl">12% 할인</div><p class="mt-3 text-sm text-muted-foreground">매월 3,000원 할인쿠폰 1장</p></a><a href="membership.html" class="rounded-xl border border-border bg-surface/60 px-6 py-8 text-center transition-all hover:border-neon-purple/60 hover:bg-surface"><h2 class="text-xl font-bold">슬로우식스 크루</h2><p class="mt-3 text-sm text-muted-foreground">더 자주, 더 오래 함께해주시는 분</p><div class="mt-6 text-neon-purple font-bold text-3xl">20% 할인</div><p class="mt-3 text-sm text-muted-foreground">매월 3,000원 할인쿠폰 2장</p></a></div><p class="mt-6 text-xs text-muted-foreground">초대받은 회원만 이용할 수 있습니다. 로그인한 계정의 등급에 따라 혜택이 적용됩니다.</p></div></section></div>
+
 <div id="page-boardgame-select" class="hidden">
 
 <section class="relative overflow-hidden">
@@ -8459,7 +8462,7 @@ Oh my Blue Moon</div>
   }
 
   function showPage(page) {
-    ['main', 'slowsix', 'slowsixd', 'slowsixp', 'guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'boardgame-select', 'boardgame', 'utilities', 'holdem', 'holdemevent', 'attendance', 'schedule', 'shotclock', 'apply', 'temp'].forEach(p => {
+    ['main', 'slowsix', 'slowsixd', 'slowsixp', 'guide', 'test1', 'fortune', 'roulette', 'spin', 'beta', 'boardgame-select', 'boardgame', 'membership', 'utilities', 'holdem', 'holdemevent', 'attendance', 'schedule', 'shotclock', 'apply', 'temp'].forEach(p => {
       document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
       const btn = document.getElementById('btn-' + p);
       if (btn) btn.className = (p === page || (p === 'utilities' && page === 'holdem'))
@@ -8538,6 +8541,7 @@ Oh my Blue Moon</div>
     else if (hash === 'slowsixp') showPage('slowsixp');
     else if (hash === 'boardgame') showPage('boardgame');
     else if (hash === 'boardgame-select') showPage('boardgame-select');
+    else if (hash === 'membership') showPage('membership');
     else if (hash === 'travel') { showPage('travel'); }
     else if (hash === 'utilities') { showPage('utilities'); }
     else if (hash === 'holdem') { showPage('holdem'); }

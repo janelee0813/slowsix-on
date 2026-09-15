@@ -15,7 +15,7 @@ export async function harness(){
   const path=new URL(url).pathname,body=options.body?JSON.parse(options.body):{};
   if(path==='/rest/v1/rpc/ss_admin_gateway'){
    if(options.headers.apikey!=='test-service-key')return json({message:'denied'},403);
-   try{return json((await db.query('select public.ss_admin_gateway($1,$2::jsonb) as result',[body.p_action,JSON.stringify(body.p)])).rows[0].result)}catch(e){return json({message:e.message},400)}
+   try{return json((await db.query('select public.ss_admin_gateway($1,$2::jsonb) as result',[body.p_action,JSON.stringify(body.p)])).rows[0].result)}catch(e){if(process.env.DEBUG_TEST_SQL)console.error(body.p_action,e.message);return json({message:e.message},400)}
   }
   if(path==='/auth/v1/admin/users'){
    const id=crypto.randomUUID();auth.set(id,{...body,id});return json({id});

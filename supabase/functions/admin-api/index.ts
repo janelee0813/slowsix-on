@@ -6,8 +6,9 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
-const actions = new Set(['recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
+ INVALID_BOOKING:'예약은 정각 기준 1~24시간, 6~13명, 향후 1년 이내로 신청해주세요.', TIME_UNAVAILABLE:'선택한 시간에 예약 또는 이용 불가 일정이 있습니다.', COUPON_UNAVAILABLE:'이번 달 사용 가능한 쿠폰이 없습니다.', CANCEL_REQUIRES_ADMIN:'확정되었거나 이용 시간이 지난 예약은 관리자에게 취소를 요청해주세요.', INVALID_TRANSITION:'현재 예약 상태에서는 처리할 수 없습니다. 새로 조회해주세요.', PAYMENT_NOTE_REQUIRED:'입금 안내를 입력해주세요.',
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
  USERNAME_TAKEN:'사용할 수 없는 아이디입니다.', DUPLICATE:'이미 사용 중인 아이디 또는 중복 요청입니다.',
  SESSION_EXPIRED:'로그인이 만료되었습니다. 다시 로그인해주세요.', ACCESS_DENIED:'접근이 중지된 계정입니다. 관리자에게 문의해주세요.',
@@ -31,6 +32,24 @@ export function username(value: unknown) {
 const uuid = (value: unknown) => typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 const validDate = (value: unknown) => typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
 export function safePayload(action: string,b: Record<string,unknown>) {
+ if(action.startsWith('member_')) {
+  const out:Record<string,unknown>={};
+  const limited=(key:string,max:number)=>{if(b[key]!=null&&(typeof b[key]!=='string'||String(b[key]).length>max))throw new AppError('INVALID_ENTRY');return b[key]??'';};
+  if(['member_request','member_cancel','member_status','member_revoke','member_person_save','member_block_save','member_block_delete'].includes(action)){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');out.id=b.id;}
+  if(['member_cancel','member_status','member_person_save'].includes(action)){if(!Number.isInteger(b.version)||Number(b.version)<1)throw new AppError('INVALID_ENTRY');out.version=b.version;}
+  if(['member_quote','member_request','member_block_save'].includes(action)){
+   for(const key of ['starts_at','ends_at']){if(typeof b[key]!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(String(b[key]))||!Number.isFinite(Date.parse(String(b[key]))))throw new AppError('INVALID_BOOKING');out[key]=b[key];}
+   if(action!=='member_block_save'){if(!Number.isInteger(b.guests)||Number(b.guests)<6||Number(b.guests)>13||typeof b.use_coupon!=='boolean')throw new AppError('INVALID_BOOKING');out.guests=b.guests;out.use_coupon=b.use_coupon;}
+   out.note=limited('note',500);
+  }
+  if(['member_calendar','member_bookings'].includes(action)){for(const key of ['from','to']){if(typeof b[key]!=='string'||!Number.isFinite(Date.parse(String(b[key]))))throw new AppError('INVALID_PERIOD');out[key]=b[key];}}
+  if(['member_invite','member_person_save'].includes(action)){if(!['friends','crew'].includes(String(b.tier)))throw new AppError('INVALID_ENTRY');out.tier=b.tier;}
+  if(action==='member_person_save'){if(!['active','suspended'].includes(String(b.status)))throw new AppError('INVALID_ENTRY');out.status=b.status;}
+  if(action==='member_status'){if(!['awaiting_payment','confirmed','rejected','cancelled'].includes(String(b.status)))throw new AppError('INVALID_ENTRY');out.status=b.status;out.admin_note=limited('admin_note',500);out.payment_note=limited('payment_note',1000);}
+  if(action==='member_settings_save')out.payment_note=limited('payment_note',1000);
+  if(action==='member_read'){if(!Number.isSafeInteger(b.through)||Number(b.through)<0)throw new AppError('INVALID_ENTRY');out.through=b.through;}
+  return out;
+ }
  if(action==='recurring_save') {
   if(!uuid(b.id)||!Number.isInteger(b.version)||Number(b.version)<0||!['fixed','expense'].includes(String(b.category))||typeof b.description!=='string'||!b.description.trim()||b.description.trim().length>200||!Number.isSafeInteger(b.amount)||Number(b.amount)<1||Number(b.amount)>1e10||!validDate(b.start_month)||!String(b.start_month).endsWith('-01')||(b.end_month!=null&&(!validDate(b.end_month)||!String(b.end_month).endsWith('-01')||String(b.end_month)<String(b.start_month)))) throw new AppError('INVALID_ENTRY');
   return {id:b.id,version:b.version,category:b.category,description:b.description.trim(),amount:b.amount,start_month:b.start_month,end_month:b.end_month??null};
@@ -114,12 +133,18 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      const user=username(b.username); validatePassword(b.password);
      const name=typeof b.name==='string'?b.name.trim():'';
      if(!name||name.length>40) throw new AppError('이름은 1~40자로 입력해주세요.');
-     if(info.kind==='bootstrap'&&user!=='slowsix'||!['bootstrap','invite'].includes(info.kind)) throw new AppError('LINK_INVALID');
+     if(info.kind==='bootstrap'&&user!=='slowsix'||!['bootstrap','invite','member'].includes(info.kind)) throw new AppError('LINK_INVALID');
+     let profile:Record<string,unknown>={};
+     if(info.kind==='member'){
+      const gender=b.gender??'',age_group=b.age_group??'',purposes=b.purposes??[];
+      if(!['','남성','여성','응답 안 함'].includes(gender)||!['','10대','20대','30대','40대','50대','60대 이상','응답 안 함'].includes(age_group)||!Array.isArray(purposes)||purposes.length>6||purposes.some(x=>!['보드게임','홀덤','친목모임','스터디/강의','독서모임','기타'].includes(x)))throw new AppError('INVALID_ENTRY');
+      profile={gender,age_group,purposes:[...new Set(purposes)]};
+     }
      const email=crypto.randomUUID()+'@accounts.slowsixon.invalid';
      const created=await call('/auth/v1/admin/users',{email,password:b.password,email_confirm:true});
      const id=created.id||created.user?.id;
      if(!uuid(id)) throw new AppError('계정을 생성하지 못했습니다.',503);
-     try { result=await rpc('register',{id,email,username:user,name,link_hash}); }
+     try { result=await rpc('register',{id,email,username:user,name,link_hash,...profile}); }
      catch(err) {
       // Compensation removes a just-created Auth user if the invitation/username transaction fails.
       // Never delete pre-existing users; id comes solely from this create call.
@@ -145,10 +170,10 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
     const session_hash=await sha(b.sessionToken);
     await rate('session:'+session_hash,600);
     const payload=safePayload(action,b);
-    if(action==='create_invite') {
+    if(action==='create_invite'||action==='member_invite') {
      const secret=token();
-     result=await rpc(action,{session_hash,link_hash:await sha(secret)});
-     result.url=site+'/admin.html#invite='+secret;
+     result=await rpc(action,{...payload,session_hash,link_hash:await sha(secret)});
+     result.url=site+(action==='member_invite'?'/membership.html#invite=':'/admin.html#invite=')+secret;
     } else result=await rpc(action,{...payload,session_hash});
    } else throw new AppError('INVALID_ACTION');
    return new Response(JSON.stringify(result),{headers});

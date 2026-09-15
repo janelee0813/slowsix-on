@@ -178,7 +178,7 @@ for(const role of ['admin','operator'])test(role+' can change own nickname from 
 
 test('recurring tab sits between ledger and team; admin can register and operators only view',async()=>{
  for(const role of ['admin','operator']){const h=await screen('2026-09-15',role);try{
-  const tabs=Array.from(h.w.document.querySelectorAll('.tabs button'),b=>b.id);assert.deepEqual(tabs.slice(0,3),['tab-ledger','tab-recurring','tab-team']);
+  const tabs=Array.from(h.w.document.querySelectorAll('.tabs button'),b=>b.id);assert.deepEqual(tabs.filter(t=>t!=='tab-membership').slice(0,3),['tab-ledger','tab-recurring','tab-team']);
   h.$('tab-recurring').click();await until(()=>h.$('recurring-list').textContent.includes('등록한 고정 지출이 없습니다'));
   assert.equal(h.$('ledger-view').hidden,true);assert.equal(h.$('recurring-editor').hidden,role!=='admin');
   if(role==='admin'){
