@@ -7,15 +7,18 @@ const root=new URL('../',import.meta.url);
 const html=await readFile(new URL('admin.html',root),'utf8');
 const code=await readFile(new URL('assets/admin.js',root),'utf8');
 const until=async(fn)=>{for(let i=0;i<150;i++){if(fn())return;await new Promise(r=>setTimeout(r,10))}throw Error('UI did not reach expected state');};
-async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=false,blockExternal=false){
+async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=false,blockExternal=false,options={}){
  const dom=new JSDOM(html,{url:'https://slowsixon.com/admin.html',runScripts:'outside-only'}),w=dom.window;
- const calls=[],stored=[],fees=new Map();let failSave=false,failList=false;
+ const calls=[],stored=[],fees=new Map();let failSave=false,failList=false,displayName='테스트 관리자';
  if(currentDate){const RealFormat=w.Intl.DateTimeFormat;w.Intl.DateTimeFormat=function(locale,options){return locale==='sv-SE'?{format:()=>currentDate}:new RealFormat(locale,options);};}
- w.crypto.randomUUID=randomUUID;w.AbortSignal=timeoutUnsupported?{}:AbortSignal;w.sessionStorage.setItem('ss-admin-session','test-session');
+ w.crypto.randomUUID=randomUUID;w.AbortSignal=timeoutUnsupported?{}:AbortSignal;if(!options.noTabSession)w.sessionStorage.setItem('ss-admin-session','test-session');if(options.persisted)w.localStorage.setItem('ss-admin-session',options.persisted);
+ w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
  w.fetch=async(url,opts)=>{
   if(blockExternal&&new URL(url,w.location.href).origin!==w.location.origin)throw new TypeError("External auth host unavailable");
   const b=JSON.parse(opts.body);calls.push(b);let data;
-  if(b.action==='me')data={id:randomUUID(),name:'테스트 관리자',username:'slowsix',role,status:'active'};
+  if(b.action==='me')data={id:randomUUID(),name:displayName,username:'slowsix',role,status:'active'};
+  else if(b.action==='logout')data={};
+  else if(b.action==='update_name'){displayName=b.name.trim();data={name:displayName};}
   else if(b.action==='save_entry'){
    if(failSave)return new Response(JSON.stringify({error:'입력값을 확인해주세요.',code:'INVALID_ENTRY'}),{status:400});
    if(!stored.some(r=>r.request_id===b.request_id))stored.push({id:randomUUID(),entry_date:b.date,description:b.description,amount:b.amount,category:b.category,author:'테스트 관리자',request_id:b.request_id});
@@ -27,6 +30,7 @@ async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=f
    if(failList)throw Error('network interrupted');
    const all=stored.filter(r=>r.entry_date>=b.from&&r.entry_date<=b.to).sort((a,b)=>b.entry_date.localeCompare(a.entry_date)||String(b.created_at||'').localeCompare(String(a.created_at||''))||a.id.localeCompare(b.id));const entries=all.slice(b.offset,b.offset+100);data={entries,count:all.length,summary:legacy?{revenue:0,spending:0,profit:0,fee:0,settlement:0}:{revenue:0,spending:0,fee_mode:'manual',fee_version:fees.get(b.from+'|'+b.to)?.version||0,profit:0,fee:fees.get(b.from+'|'+b.to)?.amount??null,settlement:fees.has(b.from+'|'+b.to)?-fees.get(b.from+'|'+b.to).amount:null}};
   }else throw Error('unexpected action '+b.action);
+  if(b.action==='list'){data.summary.expense=stored.filter(r=>r.category==='expense'&&r.entry_date>=b.from&&r.entry_date<=b.to).reduce((n,r)=>n+r.amount,0);if(options.modernSort)data.sort_supported=true;}
   return new Response(JSON.stringify(data),{status:200});
  };
  w.eval(code);const $=id=>w.document.getElementById(id);
@@ -139,5 +143,33 @@ test('login session and saves work when direct external auth connections are una
  const h=await screen('2026-09-14','admin',false,false,true);try{
   assert.equal(h.$('dashboard').hidden,false);h.fill();await h.submit();
   assert.equal(h.stored.length,1);assert.match(h.$('save-status').textContent,/저장했습니다/);
+ }finally{h.dom.window.close();}
+});
+
+test('session migrates to persistent storage and survives a new browser context until logout',async()=>{
+ const first=await screen('2026-09-15');let token;try{token=first.w.localStorage.getItem('ss-admin-session');assert.equal(token,'test-session');assert.equal(first.w.sessionStorage.getItem('ss-admin-session'),null);}finally{first.dom.window.close();}
+ const restored=await screen('2026-09-15','admin',false,false,false,{noTabSession:true,persisted:token});try{
+  assert.equal(restored.$('dashboard').hidden,false);assert.equal(restored.calls[0].action,'me');assert.equal(restored.calls[0].sessionToken,token);
+  restored.$('logout').click();await until(()=>restored.$('dashboard').hidden);assert.equal(restored.w.localStorage.getItem('ss-admin-session'),null);
+ }finally{restored.dom.window.close();}
+});
+test('all column headers select sorting and general expenses show a period total',async()=>{
+ const h=await screen('2026-09-15','admin',false,false,false,{modernSort:true});try{
+  h.stored.push({id:'expense1',entry_date:'2026-09-15',category:'expense',amount:12345,description:'청소',author:'운영자'});
+  h.stored.push({id:'expense2',entry_date:'2026-08-15',category:'expense',amount:99999,description:'이전',author:'운영자'});
+  for(const key of ['date','author','description','spacecloud','invoice','cash','fixed','expense']){
+   const b=h.w.document.querySelector('[data-sort-key="'+key+'"]');const before=h.calls.length;b.click();await until(()=>h.calls.length>before&&h.$('summary-period').textContent.includes('2026-09-12'));
+   assert.equal(h.calls.at(-1).sort_by,key);assert.equal(b.getAttribute('aria-pressed'),'true');
+  }
+  assert.equal(h.$('sum-expense').textContent,'12,345원');
+  assert.ok(h.$('sum-fee').parentElement.nextElementSibling.contains(h.$('sum-expense')));
+ }finally{h.dom.window.close();}
+});
+for(const role of ['admin','operator'])test(role+' can change own nickname from the account bar',async()=>{
+ const h=await screen('2026-09-15',role);try{
+  h.$('edit-nickname').click();assert.equal(h.$('nickname-dialog').open,true);
+  h.$('nickname-input').value='새 닉네임';h.$('nickname-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));
+  await until(()=>h.$('account-name').textContent.includes('새 닉네임'));
+  assert.equal(h.$('nickname-dialog').open,false);assert.equal(h.calls.find(c=>c.action==='update_name').name,'새 닉네임');
  }finally{h.dom.window.close();}
 });

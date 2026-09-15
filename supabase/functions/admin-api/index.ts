@@ -1,12 +1,12 @@
 // Deploy as `admin-api`. Only this function has service-role access.
 // Auth passwords are managed by Supabase Auth; browser clients never receive Auth JWTs.
-// Financial RPCs require a separate random, expiring session on every call.
+// Financial RPCs require a separate random, revocable session on every call.
 declare const Deno: { env: { get(name: string): string | undefined }; serve(handler: (req: Request) => Promise<Response>): void };
 const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
-const actions = new Set(['me','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
  USERNAME_TAKEN:'사용할 수 없는 아이디입니다.', DUPLICATE:'이미 사용 중인 아이디 또는 중복 요청입니다.',
@@ -31,9 +31,15 @@ export function username(value: unknown) {
 const uuid = (value: unknown) => typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 const validDate = (value: unknown) => typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
 export function safePayload(action: string,b: Record<string,unknown>) {
+ if(action==='update_name') {
+  if(typeof b.name!=='string'||!b.name.trim()||b.name.trim().length>40) throw new AppError('닉네임은 1~40자로 입력해주세요.');
+  return {name:b.name.trim()};
+ }
  if(action==='list') {
   if(!validDate(b.from)||!validDate(b.to)||!Number.isInteger(b.offset)||Number(b.offset)<0) throw new AppError('INVALID_PERIOD');
-  return {from:b.from,to:b.to,offset:b.offset};
+  const sort_by=b.sort_by??'date',sort_dir=b.sort_dir??'desc';
+  if(!['date','author','description','spacecloud','invoice','cash','fixed','expense'].includes(String(sort_by))||!['asc','desc'].includes(String(sort_dir))) throw new AppError('INVALID_ENTRY');
+  return {from:b.from,to:b.to,offset:b.offset,sort_by,sort_dir};
  }
  if(action==='save_fee') {
   if(!validDate(b.from)||!validDate(b.to)) throw new AppError('INVALID_PERIOD');

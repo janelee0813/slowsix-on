@@ -15,7 +15,7 @@
 
 대상 프로젝트: **qhvwwdrwfzwpehfjntbv**. 기존 teugnaahpcpzejbdayyy 프로젝트에는 실행하지 않습니다.
 
-1. SQL Editor → New query에서 `migrations/`의 SQL 파일을 파일명 순서대로 각각 실행합니다 (초기 설치 → 이전 순수익 변경 → 수수료 수동 입력으로 정정).
+1. SQL Editor → New query에서 `migrations/`의 SQL 파일을 파일명 순서대로 각각 실행합니다 (파일명 순서대로 전체 적용).
 2. Edge Functions → Deploy a new function → Via Editor. 함수 이름을 **admin-api**로 지정하고 `functions/admin-api/index.ts` 전체로 교체한 뒤 Deploy.
 3. admin-api 함수의 설정에서 **Verify JWT with legacy secret**을 끕니다. 이 함수는 별도의 세션 인증을 코드와 SQL 양쪽에서 수행합니다. 공개 로그인·초대 확인 요청이 있으므로 Supabase의 기존 JWT 사전 검증은 사용하지 않습니다. 서비스 키는 브라우저에 보내지 않으며, 함수 실행환경의 SUPABASE_SERVICE_ROLE_KEY / SUPABASE_ANON_KEY / SUPABASE_URL을 사용합니다. 이 변수들이 없는 프로젝트 환경이라면 Supabase의 기본 API 키 설정을 먼저 확인해야 합니다.
 4. Authentication의 Sign In / Providers(또는 Providers)에서 **Email 로그인은 활성화**하고 **Allow new users to sign up은 비활성화**합니다. 기존 설정의 Confirm email은 해제할 필요가 없습니다. 가입은 서버의 admin.createUser로만 수행됩니다.
@@ -30,7 +30,7 @@ bootstrap.sql을 다시 실행하면 미사용 이전 관리자 설정 링크는
 
 Supabase Auth는 내부의 무작위 기술용 이메일 식별자를 사용합니다. 사용자에게 이메일을 요구하거나 메일을 발송하지 않습니다. 이 식별자는 비밀 키가 아니며 실제 이메일 주소도 아닙니다. `ss_admin.people`에서 영문 아이디와 Auth 사용자 ID를 연결합니다.
 
-Edge Function에서 Auth 비밀번호를 검증한 뒤 앱용 256비트 난수 세션을 발급합니다. Auth access/refresh token은 클라이언트에 노출하지 않습니다. 앱 세션은 SHA-256 해시만 DB에 보관하며 8시간 후 만료됩니다. 브라우저의 sessionStorage에 세션을 보관하고 로그아웃 시 서버 세션도 제거합니다. 계정 상태는 매 요청마다 DB에서 확인합니다.
+Edge Function에서 Auth 비밀번호를 검증한 뒤 앱용 256비트 난수 세션을 발급합니다. Auth access/refresh token은 클라이언트에 노출하지 않습니다. 앱 세션은 SHA-256 해시만 DB에 보관하며 사용자의 로그인 유지 요청에 따라 자동 만료 없이 유지되며, 로그아웃·계정 접근 중지로 폐기됩니다. 브라우저의 localStorage에 세션 토큰만 보관하며 새로고침·브라우저 재실행 시 재사용합니다. 로그아웃 시 저장 토큰과 서버 세션을 제거하고 다른 탭에도 반영합니다. 계정 상태는 매 요청마다 DB에서 확인합니다.
 
 데이터 테이블은 비공개 `ss_admin` 스키마에 두고 RLS를 활성화했습니다. anon/authenticated에 테이블·스키마 접근과 RPC 실행 권한을 주지 않습니다. `public.ss_admin_gateway`는 service_role만 호출 가능합니다. 서버 RPC 안에서도 세션과 현재 역할을 확인하므로 요청 본문의 role/status/사용자 ID 위조로 권한을 얻을 수 없습니다. 이 스키마를 Data API의 Exposed schemas에 추가하지 마세요.
 
@@ -88,3 +88,12 @@ SQL과 함수 배포를 모두 마쳐야 저장 기능이 작동합니다. 예�
 Vercel 공식 문서: https://vercel.com/docs/routing/rewrites
 
 이전 수동 순수익 값은 이력 보존을 위해 그대로 두지만 현재 계산에 사용하지 않습니다. 기존 값을 수수료로 변환하지 않습니다.
+
+## 내역 보기·로그인 유지·닉네임 업데이트 (2026-09-15)
+
+- 행 간격 축소, 날짜·작성자·내용·각 매출/지출 금액별 오름차순·내림차순. 열 제목 또는 정렬 선택 상자를 사용합니다. 서버에서 전체 기간을 정렬한 뒤 100건씩 나눠 반환하며 금액이 없는 행은 항상 마지막입니다.
+- 운영 수수료 아래에 일반지출 합계를 표시합니다.
+- 관리자와 운영자는 상단 닉네임 변경에서 본인 표시 이름만 수정할 수 있습니다. 로그인 아이디와 권한은 수정하지 않습니다.
+- 현재 유효한 세션과 신규 세션은 자동 만료 없이 유지합니다. 이미 만료된 세션은 복구하지 않으며 다시 로그인해야 합니다. 접근 중지와 로그아웃은 계속 서버에서 검증됩니다.
+
+기존 설치는 `migrations/202609150002_ledger_sort_sessions.sql`을 실행하고 `functions/admin-api/index.ts`로 Edge Function을 업데이트합니다. 수수료 업데이트까지 포함되어 있습니다. 기존 계정·거래·수수료 입력값을 유지합니다.

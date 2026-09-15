@@ -55,7 +55,7 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   const period={from:'2026-08-12',to:'2026-09-11'};
   const summary=async()=> (await ok('list',{...period,offset:0},op)).summary;
   await db.query("insert into ss_admin.period_profits(period_start,period_end,amount,updated_by) select '2026-08-12','2026-09-11',999999,id from ss_admin.people where role='admin'");
-  await db.exec(await readFile(new URL('../supabase/migrations/202609150001_manual_fee.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202609150002_ledger_sort_sessions.sql',import.meta.url),'utf8'));
   assert.equal((await ok('list',{from:'2026-09-01',to:'2026-09-30',offset:0},admin)).summary.fee,73000);
   assert.equal((await call('save_profit',{...period,amount:1,version:0},admin)).data.code,'INVALID_ACTION');
   assert.equal((await db.query('select amount from ss_admin.period_profits')).rows[0].amount,999999);
@@ -72,6 +72,31 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   for(const amount of [null,'0',1.5,1e12+1])assert.equal((await call('save_fee',{...period,amount,version:2},admin)).data.code,'INVALID_ENTRY');
   assert.equal((await call('save_fee',{from:'2026-09-12',to:'2026-08-11',amount:1,version:0},admin)).data.code,'INVALID_PERIOD');
   const audit=await ok('audit',{},admin);assert.ok(audit.audit.some(a=>a.action==='fee_saved'&&a.before_data?.amount===1000010&&a.after_data.amount===0));
+ });
+ await t.test('all data columns sort globally with blank amounts last',async()=>{
+  admin=(await ok('login',{username:'slowsix',password})).sessionToken;
+  const period={from:'2026-11-12',to:'2026-12-11'};
+  await db.query("insert into ss_admin.entries(entry_date,description,category,amount,created_by,updated_by,request_id) select date '2026-11-12'+(i%20),lpad(i::text,3,'0'),(array['spacecloud','invoice','cash','fixed','expense'])[1+i%5],i,u.id,u.id,gen_random_uuid() from generate_series(1,205) i cross join ss_admin.people u where u.role='admin'");
+  for(const key of ['date','author','description','spacecloud','invoice','cash','fixed','expense'])for(const dir of ['asc','desc']){
+   const rows=[];for(const offset of [0,100,200]){const result=await ok('list',{...period,offset,sort_by:key,sort_dir:dir},admin);assert.equal(result.sort_supported,true);rows.push(...result.entries);}
+   assert.equal(rows.length,205);
+   const value=r=>key==='date'?r.entry_date:key==='author'?r.author:key==='description'?r.description:r.category===key?r.amount:null;
+   const values=rows.map(value),present=values.filter(v=>v!==null);assert.deepEqual(values.slice(0,present.length),present);
+   for(let i=1;i<present.length;i++)assert.ok(dir==='asc'?present[i-1]<=present[i]:present[i-1]>=present[i]);
+  }
+  assert.equal((await call('list',{...period,offset:0,sort_by:'untrusted'},admin)).data.code,'INVALID_ENTRY');
+ });
+ await t.test('persistent sessions stay revocable and both roles may change only their own nickname',async()=>{
+  // Get fresh sessions so the large sorting test does not exhaust the request window.
+  admin=(await ok('login',{username:'slowsix',password})).sessionToken;
+  const me=await ok('me',{},admin),beforeOp=await ok('me',{},op);
+  assert.equal((await db.query("select expires_at::text as expiry from ss_admin.sessions where token_hash=$1",[await edge.sha(admin)])).rows[0].expiry,'infinity');
+  await ok('update_name',{name:'새 관리자',id:beforeOp.id,role:'operator'},admin);
+  await ok('update_name',{name:'새 운영자',id:me.id,role:'admin'},op);
+  assert.equal((await ok('me',{},admin)).username,'slowsix');assert.equal((await ok('me',{},admin)).name,'새 관리자');
+  assert.equal((await ok('me',{},op)).role,'operator');assert.equal((await ok('me',{},op)).name,'새 운영자');
+  assert.equal((await call('update_name',{name:'  '},op)).status,400);
+  const extra=(await ok('login',{username:'slowsix',password})).sessionToken;await ok('logout',{},extra);assert.equal((await call('me',{},extra)).data.code,'SESSION_EXPIRED');
  });
  await t.test('operator cap, suspended sessions and immutable admin role',async()=>{
   op2=await inviteUser('operatortwo');await ok('set_status',{id:op2.user.id,status:'active'},admin);
