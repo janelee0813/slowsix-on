@@ -71,7 +71,7 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
   const home=await ok('member_home',{},admin);assert.ok(home.notifications.some(n=>n.message.includes('요청')));await ok('member_read',{through:Math.max(...home.notifications.map(n=>Number(n.id)))},admin);assert.ok((await ok('member_home',{},admin)).notifications.every(n=>n.read_at));
   const me=(await ok('member_people',{},admin)).items.find(x=>x.id===friend.user.id);await ok('member_person_save',{id:me.id,version:me.version,tier:'friends',status:'suspended'},admin);assert.equal((await call('member_home',{},f)).data.code,'SESSION_EXPIRED');
   for(const role of ['anon','authenticated']){await db.exec('set role '+role);try{await assert.rejects(db.query('select * from ss_admin.bookings'));await assert.rejects(db.query("select ss_admin.finance_gateway('people','{}')"));}finally{await db.exec('reset role');}}
-  await db.exec(await readFile(new URL('../supabase/migrations/202609150006_member_delete.sql',import.meta.url),'utf8'));assert.ok((await ok('member_inbox',{},admin)).items.length);
+  await db.exec(await readFile(new URL('../supabase/migrations/202609150007_coupon_wallet.sql',import.meta.url),'utf8'));assert.ok((await ok('member_inbox',{},admin)).items.length);
  });
  await t.test('only administrators may delete members; sessions revoked and history protected',async()=>{
   const fresh=await join('deletetest','friends');const member=(await ok('member_people',{},admin)).items.find(x=>x.id===fresh.user.id);

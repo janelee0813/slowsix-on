@@ -57,7 +57,7 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   await db.query("insert into ss_admin.period_profits(period_start,period_end,amount,updated_by) select '2026-08-12','2026-09-11',999999,id from ss_admin.people where role='admin'");
   await db.exec(await readFile(new URL('../supabase/migrations/202609150003_recurring_expenses.sql',import.meta.url),'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202609150004_membership.sql',import.meta.url),'utf8'));
-  await db.exec(await readFile(new URL('../supabase/migrations/202609150006_member_delete.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202609150007_coupon_wallet.sql',import.meta.url),'utf8'));
   assert.equal((await ok('list',{from:'2026-09-01',to:'2026-09-30',offset:0},admin)).summary.fee,73000);
   assert.equal((await call('save_profit',{...period,amount:1,version:0},admin)).data.code,'INVALID_ACTION');
   assert.equal((await db.query('select amount from ss_admin.period_profits')).rows[0].amount,999999);
@@ -134,7 +134,7 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   const audit=await ok('audit',{},admin);assert.ok(audit.audit.some(r=>r.action==='recurring_saved'));assert.ok(audit.audit.some(r=>r.action==='recurring_deleted'));
   await db.exec(await readFile(new URL('../supabase/migrations/202609150003_recurring_expenses.sql',import.meta.url),'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202609150004_membership.sql',import.meta.url),'utf8'));
-  await db.exec(await readFile(new URL('../supabase/migrations/202609150006_member_delete.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202609150007_coupon_wallet.sql',import.meta.url),'utf8'));
   assert.equal((await ok('list',period,admin)).summary.fixed,700000);
  });
  await t.test('operator cap, suspended sessions and immutable admin role',async()=>{

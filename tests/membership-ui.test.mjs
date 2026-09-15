@@ -18,7 +18,7 @@ test('member booking form and admin approval work with actual SQL and API',async
   $('booking-refresh').click();await until(()=>$('my-bookings').textContent.includes('테스트은행 12345'));assert.match($('my-bookings').textContent,/입금 대기/);
   Array.from(inbox.querySelectorAll('button')).find(b=>b.textContent==='입금 확인·예약 확정').click();await until(()=>inbox.textContent.includes('처리할 예약이 없습니다'));
   $('booking-refresh').click();await until(()=>$('my-bookings').textContent.includes('예약 확정'));assert.equal($('my-bookings').querySelectorAll('button').length,0);
-  assert.match($('member-notifications').textContent,/예약이 확정/);
+  assert.match($('member-notifications').textContent,/예약이 확정/);await until(()=>!$('booking-refresh').disabled);
  }finally{dom.window.close();ad?.window.close();await h.db.close();}
 });
 test('invitation form requires gender, age and at least one purpose',async()=>{

@@ -5,9 +5,9 @@
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>관리자 모드 · 슬로우식스ON</title>
-<link rel="stylesheet" href="assets/admin.css?v=20260915-spacecloud">
-<script type="module" src="assets/admin.js?v=20260915-spacecloud"></script>
-<link rel="stylesheet" href="assets/membership.css?v=3">
+<link rel="stylesheet" href="assets/admin.css?v=20260915-coupons">
+<script type="module" src="assets/admin.js?v=20260915-coupons"></script>
+<link rel="stylesheet" href="assets/membership.css?v=4">
 </head>
 <body>
 <header class="topbar"><a href="/" class="brand">SLOWSIX<span>ON</span><small>관리자 모드</small></a><div id="account-bar" hidden><span id="account-name"></span><button id="edit-nickname" class="quiet">닉네임 변경</button><button id="logout" class="quiet">로그아웃</button></div><a id="back-site" href="/" class="quiet">사이트로 돌아가기 ↗</a></header>
@@ -34,7 +34,7 @@
  <div class="page-heading"><div><p class="eyebrow">MANAGEMENT / SETTLEMENT</p><h1>정산 관리</h1><p class="muted">들어온 금액과 사용한 금액을 기록하고, 정산을 확인하세요.</p></div><span class="badge" id="role-badge"></span></div>
  <nav class="tabs" aria-label="관리 메뉴"><button id="tab-ledger" class="active">정산 내역</button><button id="tab-recurring">고정 지출</button><button id="tab-membership" hidden>멤버십 관리</button><button id="tab-team" hidden>운영자 관리</button><button id="tab-audit" hidden>변경 이력</button></nav>
  <div id="ledger-view">
-  <div class="toolbar panel"><label>정산 월<input id="month" type="month"></label><div class="range"><label>시작일<input id="from" type="date" required></label><span>—</span><label>종료일<input id="to" type="date" required></label></div><button id="load-period" class="secondary">조회</button></div>
+  <div class="toolbar panel"><div><span class="small muted">정산 월</span><div class="month-navigation" role="group" aria-label="월 이동"><button id="month-prev" type="button" class="secondary" aria-label="이전 달">‹</button><output id="month-label" aria-live="polite"></output><button id="month-next" type="button" class="secondary" aria-label="다음 달">›</button><input id="month" type="hidden"></div></div><div class="range"><label>시작일<input id="from" type="date" required></label><span>—</span><label>종료일<input id="to" type="date" required></label></div><button id="load-period" class="secondary">조회</button></div>
   <div class="workspace">
    <div class="ledger-main">
     <section class="panel entry-panel"><div class="section-heading"><h2 id="entry-title">새 내역 기록</h2><span class="muted small" id="entry-permission"></span></div>
