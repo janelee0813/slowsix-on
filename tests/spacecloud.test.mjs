@@ -17,6 +17,21 @@ test('host profile redirect is accepted after login and for an existing host ses
   assert.equal(host.loggedIn,true);assert.equal(visits.at(-1),calendarURL);assert.equal(fills,signedIn?0:2);
  }
 });
+test('unfinished host security verification stops the worker without opening or changing the calendar',async()=>{
+ const calls=[],reports=[],visits=[],secret='a'.repeat(64);let closed=false;
+ const page={setDefaultTimeout(){},setDefaultNavigationTimeout(){},url:()=> 'https://partner.spacecloud.kr/auth/login',goto:async url=>visits.push(url),waitForFunction:async()=>{},
+  locator:()=>({waitFor:async()=>{},count:async()=>1,fill:async()=>{},pressSequentially:async()=>{},press:async()=>{}}),
+  getByText:()=>({click:async options=>{assert.equal(options.force,undefined);throw new Error('element is not enabled');},isDisabled:async()=>true})
+ };
+ const handler=makeSyncHandler({env:{SPACECLOUD_SYNC_SECRET:secret,SUPABASE_SERVICE_ROLE_KEY:'private-key',SPACECLOUD_EMAIL:'private-email',SPACECLOUD_PASSWORD:'private-password'},report:event=>reports.push(event),
+  fetcher:async(_url,options)=>{const body=JSON.parse(options.body);calls.push(body);return new Response(JSON.stringify(body.p_action==='claim'?{...sample,lease:'lease',revision:1}:{}));},
+  launch:async()=>({newContext:async()=>({newPage:async()=>page}),close:async()=>{closed=true;}})
+ });
+ const res={setHeader(){},status(){return this;},json:value=>value};
+ assert.deepEqual(await handler({method:'POST',headers:{authorization:'Bearer '+secret}},res),{error:'LOGIN_REQUIRED'});
+ assert.equal(reports[0].stage,'login_verification');assert.equal(calls.at(-1).p.error,'LOGIN_REQUIRED');assert.equal(calls.at(-1).p.logged_in,false);
+ assert.equal(closed,true);assert.deepEqual(visits,['https://partner.spacecloud.kr/auth/login']);assert.equal(JSON.stringify(reports).includes('private-'),false);
+});
 test('overnight synchronization is idempotent and releases only its exact markers',async()=>{
  const parts=segments(sample);assert.deepEqual(parts.map(p=>[p.date,p.start,p.end]),[['2026-12-31',23,24],['2027-01-01',0,2]]);
  let store=[],adds=0,removes=0;

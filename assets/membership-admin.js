@@ -12,7 +12,7 @@ export function mountMembershipAdmin(root,api,notice){
  const busy=async(button,fn)=>{if(button.disabled)return;button.disabled=true;try{await fn();}catch(e){notice(e.message,true);}finally{button.disabled=false;}};
  const button=(text,fn,cls='secondary')=>{const b=el('button',text,cls);b.type='button';b.addEventListener('click',()=>busy(b,fn));return b;};
  const scLabels={pending:'연동 대기',working:'처리 중',blocked:'스클 차단 완료',released:'스클 차단 해제 완료',error:'연결 오류',needs_login:'로그인 확인 필요',conflict:'다른 예약과 겹침',review:'직접 확인 필요'};
- const scErrors={LOGIN_REQUIRED:'서버에서 스클 로그인을 완료하지 못했습니다. 로그인 정보를 확인해주세요.',TIME_CONFLICT:'스클의 다른 예약과 시간이 겹칩니다.',UI_CHANGED:'스클 화면 확인 또는 서버 브라우저 실행에 실패했습니다.',INTERRUPTED:'서버 실행이 중단되거나 제한 시간을 넘었습니다.',UNVERIFIED:'스클 처리 결과를 확인하지 못했습니다. 캘린더 확인 후 재시도해주세요.',NETWORK:'서버 통신에 실패했습니다.',PARTIAL:'일정 일부만 처리됐습니다. 캘린더를 확인해주세요.',CONFIGURATION:'서버 설정을 확인해주세요.',PAST_BOOKING:'이미 시작된 예약은 자동으로 등록하지 않습니다.'};
+ const scErrors={LOGIN_REQUIRED:'서버에서 스클 로그인 또는 보안 인증을 완료하지 못해 자동 연동을 중지했습니다. PC에서 로그인해도 서버 인증은 완료되지 않습니다.',TIME_CONFLICT:'스클의 다른 예약과 시간이 겹칩니다.',UI_CHANGED:'스클 화면 확인 또는 서버 브라우저 실행에 실패했습니다.',INTERRUPTED:'서버 실행이 중단되거나 제한 시간을 넘었습니다.',UNVERIFIED:'스클 처리 결과를 확인하지 못했습니다. 캘린더 확인 후 재시도해주세요.',NETWORK:'서버 통신에 실패했습니다.',PARTIAL:'일정 일부만 처리됐습니다. 캘린더를 확인해주세요.',CONFIGURATION:'서버 설정을 확인해주세요.',PAST_BOOKING:'이미 시작된 예약은 자동으로 등록하지 않습니다.'};
  async function loadSc(){
   const seq=generation;
   try{

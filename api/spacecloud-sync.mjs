@@ -19,8 +19,8 @@ export function makeSyncHandler({env=process.env,fetcher=fetch,launch,report=eve
    });
    if(!response.ok)throw new SyncError('NETWORK');return response.json();
   }
-  let browser,job,adapter,timer,timedOut=false,stage='claim',form;
-  const started=Date.now(),onStage=(value,details)=>{stage=value;form=details;};
+  let browser,job,adapter,timer,timedOut=false,stage='claim';
+  const started=Date.now(),onStage=value=>{stage=value;};
   try{
    job=await rpc('claim');if(!job.id)return res.status(200).json({state:'idle'});
    const run=async()=>{
@@ -50,7 +50,7 @@ export function makeSyncHandler({env=process.env,fetcher=fetch,launch,report=eve
    const kind=e?.name==='TimeoutError'?'timeout':e?.code==='ENOENT'?'missing_file':e?.code==='ERR_MODULE_NOT_FOUND'?'missing_module':e instanceof SyncError?'sync':'runtime';
    const message=String(e?.message||'');
    const reason=/intercepts pointer events/.test(message)?'pointer_obstructed':/element is not enabled/.test(message)?'disabled':/element is not visible/.test(message)?'not_visible':/element is not stable/.test(message)?'unstable':/waiting for scheduled navigations/.test(message)?'navigation_pending':/waiting for (getByRole|getByText|locator)/.test(message)?'locator_wait':'unspecified';
-   report({event:'spacecloud_sync_failed',stage,code,kind,reason,form,elapsed_ms:Date.now()-started});
+   report({event:'spacecloud_sync_failed',stage,code,kind,reason,elapsed_ms:Date.now()-started});
    if(job?.id)await rpc('finish',{id:job.id,lease:job.lease,revision:job.revision,error:code,logged_in:!!adapter?.loggedIn}).catch(()=>{});
    return res.status(503).json({error:code});
   }finally{clearTimeout(timer);await browser?.close().catch(()=>{});}
