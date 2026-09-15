@@ -127,3 +127,6 @@ Vercel 공식 문서: https://vercel.com/docs/routing/rewrites
 
 ### 신규 회원 승인 (202609150005)
 `202609150005_member_approval.sql` 적용 시 신규 회원은 pending으로 생성됩니다. 올바른 비밀번호라도 승인 전에는 세션을 발급하지 않습니다. 관리자 member_person_save로 active 승인 후 로그인 가능합니다. 기존 회원 상태는 보존합니다. UI는 가입 후 자동 로그인하지 않고 승인 대기를 안내합니다. 관리자에게 가입 요청 알림과 대기 인원, 가입 승인 버튼이 표시됩니다. Edge Function 변경 없이 SQL만 적용합니다.
+
+### 멤버십 삭제 및 로그인 진입 수정 (202609150006)
+006 SQL과 admin-api를 적용합니다. 관리자는 회원 목록의 멤버십 삭제로 논리 삭제하며 sessions를 제거하고 people.status를 rejected로 변경합니다. 예약 이력과 아이디는 보존합니다. 진행 중인 requested/awaiting_payment 또는 아직 종료되지 않은 confirmed 예약이 있으면 삭제를 막습니다. 재활성화 우회도 차단합니다. 실제 테스트 회원은 자동으로 삭제하지 않습니다. 일반 로그인 진입은 남은 초대 캐시를 무시하며 해당 초대 history entry의 새로고침에서만 초대를 복원합니다.

@@ -6,8 +6,9 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
-const actions = new Set(['member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
+ MEMBER_HAS_BOOKINGS:'진행 중인 예약을 먼저 취소하거나 이용을 완료한 후 멤버십을 삭제해주세요.',
  INVALID_BOOKING:'예약은 정각 기준 1~24시간, 6~13명, 향후 1년 이내로 신청해주세요.', TIME_UNAVAILABLE:'선택한 시간에 예약 또는 이용 불가 일정이 있습니다.', COUPON_UNAVAILABLE:'이번 달 사용 가능한 쿠폰이 없습니다.', CANCEL_REQUIRES_ADMIN:'확정되었거나 이용 시간이 지난 예약은 관리자에게 취소를 요청해주세요.', INVALID_TRANSITION:'현재 예약 상태에서는 처리할 수 없습니다. 새로 조회해주세요.', PAYMENT_NOTE_REQUIRED:'입금 안내를 입력해주세요.',
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
  USERNAME_TAKEN:'사용할 수 없는 아이디입니다.', DUPLICATE:'이미 사용 중인 아이디 또는 중복 요청입니다.',
@@ -35,8 +36,8 @@ export function safePayload(action: string,b: Record<string,unknown>) {
  if(action.startsWith('member_')) {
   const out:Record<string,unknown>={};
   const limited=(key:string,max:number)=>{if(b[key]!=null&&(typeof b[key]!=='string'||String(b[key]).length>max))throw new AppError('INVALID_ENTRY');return b[key]??'';};
-  if(['member_request','member_cancel','member_status','member_revoke','member_person_save','member_block_save','member_block_delete'].includes(action)){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');out.id=b.id;}
-  if(['member_cancel','member_status','member_person_save'].includes(action)){if(!Number.isInteger(b.version)||Number(b.version)<1)throw new AppError('INVALID_ENTRY');out.version=b.version;}
+  if(['member_delete','member_request','member_cancel','member_status','member_revoke','member_person_save','member_block_save','member_block_delete'].includes(action)){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');out.id=b.id;}
+  if(['member_delete','member_cancel','member_status','member_person_save'].includes(action)){if(!Number.isInteger(b.version)||Number(b.version)<1)throw new AppError('INVALID_ENTRY');out.version=b.version;}
   if(['member_quote','member_request','member_block_save'].includes(action)){
    for(const key of ['starts_at','ends_at']){if(typeof b[key]!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(String(b[key]))||!Number.isFinite(Date.parse(String(b[key]))))throw new AppError('INVALID_BOOKING');out[key]=b[key];}
    if(action!=='member_block_save'){if(!Number.isInteger(b.guests)||Number(b.guests)<6||Number(b.guests)>13||typeof b.use_coupon!=='boolean')throw new AppError('INVALID_BOOKING');out.guests=b.guests;out.use_coupon=b.use_coupon;}

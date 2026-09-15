@@ -71,7 +71,14 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
   const home=await ok('member_home',{},admin);assert.ok(home.notifications.some(n=>n.message.includes('요청')));await ok('member_read',{through:Math.max(...home.notifications.map(n=>Number(n.id)))},admin);assert.ok((await ok('member_home',{},admin)).notifications.every(n=>n.read_at));
   const me=(await ok('member_people',{},admin)).items.find(x=>x.id===friend.user.id);await ok('member_person_save',{id:me.id,version:me.version,tier:'friends',status:'suspended'},admin);assert.equal((await call('member_home',{},f)).data.code,'SESSION_EXPIRED');
   for(const role of ['anon','authenticated']){await db.exec('set role '+role);try{await assert.rejects(db.query('select * from ss_admin.bookings'));await assert.rejects(db.query("select ss_admin.finance_gateway('people','{}')"));}finally{await db.exec('reset role');}}
-  await db.exec(await readFile(new URL('../supabase/migrations/202609150005_member_approval.sql',import.meta.url),'utf8'));assert.ok((await ok('member_inbox',{},admin)).items.length);
+  await db.exec(await readFile(new URL('../supabase/migrations/202609150006_member_delete.sql',import.meta.url),'utf8'));assert.ok((await ok('member_inbox',{},admin)).items.length);
+ });
+ await t.test('only administrators may delete members; sessions revoked and history protected',async()=>{
+  const fresh=await join('deletetest','friends');const member=(await ok('member_people',{},admin)).items.find(x=>x.id===fresh.user.id);
+  assert.equal((await call('member_delete',{id:member.id,version:member.version},op)).data.code,'FORBIDDEN');assert.equal((await call('member_delete',{id:member.id,version:member.version},f)).status!==200,true);
+  const crewMember=(await ok('member_people',{},admin)).items.find(x=>x.id===crew.user.id);assert.equal((await call('member_delete',{id:crewMember.id,version:crewMember.version},admin)).data.code,'MEMBER_HAS_BOOKINGS');
+  await ok('member_delete',{id:member.id,version:member.version},admin);assert.equal((await ok('member_people',{},admin)).items.some(x=>x.id===member.id),false);assert.equal((await call('member_home',{},fresh.sessionToken)).data.code,'SESSION_EXPIRED');assert.equal((await call('login',{username:'deletetest',password})).data.code,'ACCESS_DENIED');
+  assert.equal((await call('member_person_save',{id:member.id,version:member.version+1,tier:'friends',status:'active'},admin)).data.code,'CONFLICT');
  });
  await t.test('session browsing allowance does not weaken the ten-attempt login limit',async()=>{const fresh=(await ok('login',{username:'slowsix',password})).sessionToken;for(let i=0;i<105;i++)await ok('member_home',{},fresh);});
  await db.close();

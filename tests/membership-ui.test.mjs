@@ -32,3 +32,7 @@ test('direct end-time selection handles same-day, overnight and 24-hour bookings
  const night=timeRange('2026-09-18',23,1);assert.equal(night.duration,2);assert.equal(night.ends_at,'2026-09-18T16:00:00.000Z');assert.equal(pricePreview(night.starts_at,night.ends_at,6,'friends',false).base_amount,27000);
  const full=timeRange('2026-09-18',18,18);assert.equal(full.duration,24);assert.equal(full.ends_at,'2026-09-19T09:00:00.000Z');
 });
+
+test('normal membership entry ignores stale invitation data while invitation reload retains it',async()=>{
+ for(const invitationReload of [false,true]){const dom=new JSDOM(await readFile(new URL('../membership.html',import.meta.url),'utf8'),{url:'https://slowsixon.com/membership.html',runScripts:'outside-only'}),w=dom.window;w.crypto.randomUUID=()=>crypto.randomUUID();w.AbortController=AbortController;w.sessionStorage.setItem('ss-member-invite','a'.repeat(64));if(invitationReload)w.history.replaceState({membershipInvite:true},'');const actions=[];w.fetch=async(url,opts)=>{actions.push(JSON.parse(opts.body).action);return new Response(JSON.stringify({kind:'member',tier:'friends'}));};try{w.eval(await bundle('membership.js'));if(invitationReload){await until(()=>!w.document.getElementById('join-fields').hidden);assert.equal(actions[0],'link_info');}else{assert.equal(w.document.getElementById('join-fields').hidden,true);assert.equal(w.document.getElementById('login-title').textContent,'멤버십 로그인');assert.equal(actions.length,0);assert.equal(w.sessionStorage.getItem('ss-member-invite'),null);}}finally{w.close();}}
+});
