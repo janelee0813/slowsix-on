@@ -15,7 +15,7 @@
 
 대상 프로젝트: **qhvwwdrwfzwpehfjntbv**. 기존 teugnaahpcpzejbdayyy 프로젝트에는 실행하지 않습니다.
 
-1. SQL Editor → New query에서 `migrations/`의 SQL 파일을 파일명 순서대로 각각 실행합니다 (초기 설치 → 수동 순수익).
+1. SQL Editor → New query에서 `migrations/`의 SQL 파일을 파일명 순서대로 각각 실행합니다 (초기 설치 → 이전 순수익 변경 → 수수료 수동 입력으로 정정).
 2. Edge Functions → Deploy a new function → Via Editor. 함수 이름을 **admin-api**로 지정하고 `functions/admin-api/index.ts` 전체로 교체한 뒤 Deploy.
 3. admin-api 함수의 설정에서 **Verify JWT with legacy secret**을 끕니다. 이 함수는 별도의 세션 인증을 코드와 SQL 양쪽에서 수행합니다. 공개 로그인·초대 확인 요청이 있으므로 Supabase의 기존 JWT 사전 검증은 사용하지 않습니다. 서비스 키는 브라우저에 보내지 않으며, 함수 실행환경의 SUPABASE_SERVICE_ROLE_KEY / SUPABASE_ANON_KEY / SUPABASE_URL을 사용합니다. 이 변수들이 없는 프로젝트 환경이라면 Supabase의 기본 API 키 설정을 먼저 확인해야 합니다.
 4. Authentication의 Sign In / Providers(또는 Providers)에서 **Email 로그인은 활성화**하고 **Allow new users to sign up은 비활성화**합니다. 기존 설정의 Confirm email은 해제할 필요가 없습니다. 가입은 서버의 admin.createUser로만 수행됩니다.
@@ -44,11 +44,11 @@ Edge Function에서 Auth 비밀번호를 검증한 뒤 앱용 256비트 난수 �
 
 - 총 매출 = 스클 + 계산서 + 현금
 - 총 지출 = 고정비 + 일반지출
-- 순수익 = 관리자가 해당 시작일·종료일에 직접 입력한 금액 (0원·음수 가능, 최대 절댓값 1조 원). 입력 전에는 순수익·수수료·정산금액을 미입력으로 표시.
-- 운영 수수료 = 순수익 × 5%, 원 단위 반올림
+- 순수익 = 총 매출 − 총 지출 (자동 계산)
+- 운영 수수료 = 관리자가 조회한 시작일·종료일별로 직접 저장한 금액. 0원·음수 허용, 최대 절댓값 1조 원. 입력 전에는 수수료와 정산금액을 미입력으로 표시. 5% 자동 계산은 사용하지 않음.
 - 정산금액 = 계산서 + 현금 - 일반지출 - 운영 수수료
 
-적자에도 같은 계산식을 적용하며 별도 경고 문구는 표시하지 않습니다. 순수익은 매출·지출 내역이 변경되어도 유지됩니다. 다른 시작일·종료일로 조회하면 별도의 순수익을 사용하며, 월별 입력값을 임의로 합산하지 않습니다. 변경 권한과 버전 충돌 검사는 서버에서 수행하고 변경 전후 금액을 이력에 보관합니다. 송금·자동 확정·월 마감·이월은 수행하지 않습니다. 금액 환불은 음수 입력을 지원하지 않으며 필요한 경우 관리자 정정으로 처리합니다.
+적자에도 같은 계산식을 적용하며 별도 경고 문구는 표시하지 않습니다. 순수익은 매출·지출 변경 시 자동으로 갱신되고, 저장한 운영 수수료는 유지됩니다. 다른 시작일·종료일로 조회하면 별도의 수수료를 사용하며, 월별 입력값을 임의로 합산하지 않습니다. 변경 권한과 버전 충돌 검사는 서버에서 수행하고 변경 전후 금액을 이력에 보관합니다. 송금·자동 확정·월 마감·이월은 수행하지 않습니다. 금액 환불은 음수 입력을 지원하지 않으며 필요한 경우 관리자 정정으로 처리합니다.
 
 ## 계정 복구
 
@@ -71,11 +71,11 @@ Edge Function에서 Auth 비밀번호를 검증한 뒤 앱용 256비트 난수 �
 - https://supabase.com/docs/guides/functions/secrets
 - https://supabase.com/docs/reference/javascript/auth-admin-createuser
 
-## 기존 설치의 수동 순수익 업데이트
+## 기존 설치의 수수료 수동 입력 정정
 
-1. SQL Editor에서 `migrations/202609140001_manual_profit.sql` 전체 실행.
+1. SQL Editor에서 `migrations/202609150001_manual_fee.sql` 전체 실행. 이전 순수익 SQL 실행 여부와 관계없이 기존 관리자 설치에 적용 가능.
 2. 기존 Edge Function `admin-api` 코드를 `functions/admin-api/index.ts` 전체로 교체하고 Deploy updates.
-3. 사이트 새로고침 후 정산 기간 선택 → 순수익 입력 → 저장·반영. 기존 계정·내역은 유지되며 bootstrap은 다시 실행하지 않습니다.
+3. 사이트 새로고침 후 정산 기간 선택 → 운영 수수료 입력 → 저장·반영. 기존 계정·내역은 유지되며 bootstrap은 다시 실행하지 않습니다.
 
 SQL과 함수 배포를 모두 마쳐야 저장 기능이 작동합니다. 예전 서버와 연결된 화면에서는 수동 입력을 비활성화하고 업데이트가 필요함을 표시합니다.
 
@@ -86,3 +86,5 @@ SQL과 함수 배포를 모두 마쳐야 저장 기능이 작동합니다. 예�
 인증·세션·역할 검사는 기존 Edge Function과 DB에서 그대로 수행합니다. 임의 목적지를 받는 프록시는 아니며 응답은 no-store로 설정합니다. 관리자 페이지 CSP는 connect-src self만 허용합니다. 이 경로 변경은 추가 SQL이나 Edge Function 배포가 필요 없습니다.
 
 Vercel 공식 문서: https://vercel.com/docs/routing/rewrites
+
+이전 수동 순수익 값은 이력 보존을 위해 그대로 두지만 현재 계산에 사용하지 않습니다. 기존 값을 수수료로 변환하지 않습니다.

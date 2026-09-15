@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {harness} from './harness.mjs';
 const password='Sample!Only123';
@@ -36,9 +37,9 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
  });
  await t.test('correct totals, filtering and optimistic edits with audit',async()=>{
   await ok('save_entry',save('invoice',300000),admin);await ok('save_entry',save('cash',200000),admin);await ok('save_entry',save('expense',100000),admin);
-  await ok('save_profit',{from:'2026-09-01',to:'2026-09-30',amount:1200000,version:0},admin);
+  await ok('save_fee',{from:'2026-09-01',to:'2026-09-30',amount:73000,version:0},admin);
   const data=await ok('list',{from:'2026-09-01',to:'2026-09-30',offset:0},admin);
-  assert.equal(data.count,5);assert.deepEqual(data.summary,{spacecloud:1000000,invoice:300000,cash:200000,fixed:200000,expense:100000,revenue:1500000,spending:300000,profit_mode:'manual',profit_version:1,profit:1200000,fee:60000,settlement:340000});
+  assert.equal(data.count,5);assert.deepEqual(data.summary,{spacecloud:1000000,invoice:300000,cash:200000,fixed:200000,expense:100000,revenue:1500000,spending:300000,fee_mode:'manual',fee_version:1,profit:1200000,fee:73000,settlement:327000});
   assert.equal((await ok('list',{from:'2026-10-01',to:'2026-10-31',offset:0},admin)).count,0);
   await ok('save_entry',save('spacecloud',1100000,{id:entryId,version:1}),admin);
   assert.equal((await call('save_entry',save('spacecloud',500,{id:entryId,version:1}),admin)).data.code,'CONFLICT');
@@ -47,25 +48,30 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   const a=await ok('audit',{},admin);assert.ok(a.audit.some(x=>x.action==='entry_updated'&&x.before_data.amount===1000000&&x.after_data.amount===1100000));
   assert.ok(a.audit.some(x=>x.action==='entry_deleted'));
   const neg=save('expense',101,{date:'2026-10-01'});await ok('save_entry',neg,admin);
-  await ok('save_profit',{from:'2026-10-01',to:'2026-10-31',amount:-101,version:0},admin);
-  const s=(await ok('list',{from:'2026-10-01',to:'2026-10-31',offset:0},admin)).summary;assert.equal(s.fee,-5);assert.equal(s.settlement,-96);
+  await ok('save_fee',{from:'2026-10-01',to:'2026-10-31',amount:-7,version:0},admin);
+  const s=(await ok('list',{from:'2026-10-01',to:'2026-10-31',offset:0},admin)).summary;assert.equal(s.profit,-101);assert.equal(s.fee,-7);assert.equal(s.settlement,-94);
  });
- await t.test('manual profit persists by exact period, accepts zero and rejects operators/stale writes',async()=>{
+ await t.test('manual fee persists by exact period, accepts zero and rejects operators/stale writes',async()=>{
   const period={from:'2026-08-12',to:'2026-09-11'};
   const summary=async()=> (await ok('list',{...period,offset:0},op)).summary;
-  assert.equal((await summary()).profit,null);assert.equal((await summary()).fee,null);assert.equal((await summary()).settlement,null);
-  assert.equal((await call('save_profit',{...period,amount:999,version:0,role:'admin'},op)).data.code,'FORBIDDEN');
-  await ok('save_profit',{...period,amount:1000010,version:0},admin);
-  assert.equal((await summary()).fee,50001);assert.equal((await summary()).settlement,-50001);
-  assert.equal((await call('save_profit',{...period,amount:123,version:0},admin)).data.code,'CONFLICT');
-  await ok('save_profit',{...period,amount:0,version:1},admin);
+  await db.query("insert into ss_admin.period_profits(period_start,period_end,amount,updated_by) select '2026-08-12','2026-09-11',999999,id from ss_admin.people where role='admin'");
+  await db.exec(await readFile(new URL('../supabase/migrations/202609150001_manual_fee.sql',import.meta.url),'utf8'));
+  assert.equal((await ok('list',{from:'2026-09-01',to:'2026-09-30',offset:0},admin)).summary.fee,73000);
+  assert.equal((await call('save_profit',{...period,amount:1,version:0},admin)).data.code,'INVALID_ACTION');
+  assert.equal((await db.query('select amount from ss_admin.period_profits')).rows[0].amount,999999);
+  assert.equal((await summary()).profit,0);assert.equal((await summary()).fee,null);assert.equal((await summary()).settlement,null);
+  assert.equal((await call('save_fee',{...period,amount:999,version:0,role:'admin'},op)).data.code,'FORBIDDEN');
+  await ok('save_fee',{...period,amount:1000010,version:0},admin);
+  assert.equal((await summary()).fee,1000010);assert.equal((await summary()).settlement,-1000010);
+  assert.equal((await call('save_fee',{...period,amount:123,version:0},admin)).data.code,'CONFLICT');
+  await ok('save_fee',{...period,amount:0,version:1},admin);
   assert.equal((await summary()).profit,0);assert.equal((await summary()).fee,0);
-  assert.equal((await ok('list',{from:'2026-08-12',to:'2026-09-10',offset:0},admin)).summary.profit,null);
+  assert.equal((await ok('list',{from:'2026-08-12',to:'2026-09-10',offset:0},admin)).summary.fee,null);
   await ok('save_entry',save('cash',50000,{date:'2026-09-01'}),admin);
-  const changed=await summary();assert.equal(changed.profit,0);assert.equal(changed.revenue,50000);assert.equal(changed.settlement,50000);
-  for(const amount of [null,'0',1.5,1e12+1])assert.equal((await call('save_profit',{...period,amount,version:2},admin)).data.code,'INVALID_ENTRY');
-  assert.equal((await call('save_profit',{from:'2026-09-12',to:'2026-08-11',amount:1,version:0},admin)).data.code,'INVALID_PERIOD');
-  const audit=await ok('audit',{},admin);assert.ok(audit.audit.some(a=>a.action==='profit_saved'&&a.before_data?.amount===1000010&&a.after_data.amount===0));
+  const changed=await summary();assert.equal(changed.profit,50000);assert.equal(changed.revenue,50000);assert.equal(changed.settlement,50000);
+  for(const amount of [null,'0',1.5,1e12+1])assert.equal((await call('save_fee',{...period,amount,version:2},admin)).data.code,'INVALID_ENTRY');
+  assert.equal((await call('save_fee',{from:'2026-09-12',to:'2026-08-11',amount:1,version:0},admin)).data.code,'INVALID_PERIOD');
+  const audit=await ok('audit',{},admin);assert.ok(audit.audit.some(a=>a.action==='fee_saved'&&a.before_data?.amount===1000010&&a.after_data.amount===0));
  });
  await t.test('operator cap, suspended sessions and immutable admin role',async()=>{
   op2=await inviteUser('operatortwo');await ok('set_status',{id:op2.user.id,status:'active'},admin);
@@ -87,6 +93,7 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
    await assert.rejects(db.query("select public.ss_admin_gateway('people','{}')"),/permission denied/);
    await assert.rejects(db.query('select * from ss_admin.entries'),/permission denied/);
    await assert.rejects(db.query('select * from ss_admin.period_profits'),/permission denied/);
+   await assert.rejects(db.query('select * from ss_admin.period_fees'),/permission denied/);
    await db.exec('reset role');
   }
  });

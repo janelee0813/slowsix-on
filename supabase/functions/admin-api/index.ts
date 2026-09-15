@@ -6,7 +6,7 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
-const actions = new Set(['me','logout','list','save_profit','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['me','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
  USERNAME_TAKEN:'사용할 수 없는 아이디입니다.', DUPLICATE:'이미 사용 중인 아이디 또는 중복 요청입니다.',
@@ -35,7 +35,7 @@ export function safePayload(action: string,b: Record<string,unknown>) {
   if(!validDate(b.from)||!validDate(b.to)||!Number.isInteger(b.offset)||Number(b.offset)<0) throw new AppError('INVALID_PERIOD');
   return {from:b.from,to:b.to,offset:b.offset};
  }
- if(action==='save_profit') {
+ if(action==='save_fee') {
   if(!validDate(b.from)||!validDate(b.to)) throw new AppError('INVALID_PERIOD');
   if(!Number.isSafeInteger(b.amount)||Math.abs(Number(b.amount))>1e12||!Number.isInteger(b.version)||Number(b.version)<0) throw new AppError('INVALID_ENTRY');
   return {from:b.from,to:b.to,amount:b.amount,version:b.version};
