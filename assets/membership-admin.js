@@ -12,7 +12,36 @@ export function mountMembershipAdmin(root,api,notice){
  const busy=async(button,fn)=>{if(button.disabled)return;button.disabled=true;try{await fn();}catch(e){notice(e.message,true);}finally{button.disabled=false;}};
  const button=(text,fn,cls='secondary')=>{const b=el('button',text,cls);b.type='button';b.addEventListener('click',()=>busy(b,fn));return b;};
  const scLabels={pending:'연동 대기',working:'처리 중',blocked:'스클 차단 완료',released:'스클 차단 해제 완료',error:'연결 오류',needs_login:'로그인 확인 필요',conflict:'다른 예약과 겹침',review:'직접 확인 필요'};
- async function loadSc(){const seq=generation;try{const data=await api('member_sc_state');if(seq!==generation||!$('ma-sc-status')||!root.isConnected)return;scEnabled=data.settings.enabled;$('ma-sc-toggle').disabled=false;$('ma-sc-toggle').textContent=scEnabled?'자동 연동 끄기':'자동 연동 켜기';$('ma-sc-status').textContent=(scEnabled?'자동 연동 켜짐':'자동 연동 꺼짐')+' · '+(data.settings.worker_seen_at?'서버 확인 '+stamp(data.settings.worker_seen_at):'서버 설정 대기');$('ma-sc-jobs').replaceChildren();for(const j of data.items){const row=el('div',null,'sc-job');row.append(el('span',stamp(j.starts_at)+' → '+stamp(j.ends_at),'small'),el('span',(scLabels[j.state]||j.state)+(j.desired==='released'&&!['released'].includes(j.state)?' · 차단 해제 요청':''),'badge'));if(!['working','blocked','released'].includes(j.state))row.append(button('확인 후 재시도',async()=>{if(!confirm('스클 캘린더에서 해당 시간을 확인하셨나요? 기존 연동 기록을 확인한 뒤 재처리합니다.'))return;await api('member_sc_retry',{id:j.booking_id});await loadSc();}));$('ma-sc-jobs').append(row);}if(!data.items.length)$('ma-sc-jobs').append(el('p','아직 연동 요청이 없습니다.','small muted'));}catch{if(seq!==generation||!$('ma-sc-status'))return;$('ma-sc-status').textContent='스클 연동용 서버 업데이트가 필요합니다. 기존 예약 기능은 계속 사용할 수 있습니다.';$('ma-sc-toggle').disabled=true;}}
+ const scErrors={LOGIN_REQUIRED:'서버에서 스클 로그인을 완료하지 못했습니다. 로그인 정보를 확인해주세요.',TIME_CONFLICT:'스클의 다른 예약과 시간이 겹칩니다.',UI_CHANGED:'스클 화면 확인 또는 서버 브라우저 실행에 실패했습니다.',INTERRUPTED:'서버 실행이 중단되거나 제한 시간을 넘었습니다.',UNVERIFIED:'스클 처리 결과를 확인하지 못했습니다. 캘린더 확인 후 재시도해주세요.',NETWORK:'서버 통신에 실패했습니다.',PARTIAL:'일정 일부만 처리됐습니다. 캘린더를 확인해주세요.',CONFIGURATION:'서버 설정을 확인해주세요.',PAST_BOOKING:'이미 시작된 예약은 자동으로 등록하지 않습니다.'};
+ async function loadSc(){
+  const seq=generation;
+  try{
+   const data=await api('member_sc_state');
+   if(seq!==generation||!$('ma-sc-status')||!root.isConnected)return;
+   scEnabled=data.settings.enabled;
+   $('ma-sc-toggle').disabled=false;
+   $('ma-sc-toggle').textContent=scEnabled?'자동 연동 끄기':'자동 연동 켜기';
+   $('ma-sc-status').textContent=(scEnabled?'자동 연동 켜짐':'자동 연동 꺼짐')+' · '+
+    (data.settings.worker_seen_at?'서버 확인 '+stamp(data.settings.worker_seen_at):'서버 설정 대기')+' · '+
+    (data.settings.login_checked_at?'스클 로그인 확인 '+stamp(data.settings.login_checked_at):'스클 로그인 아직 확인되지 않음');
+   $('ma-sc-jobs').replaceChildren();
+   for(const j of data.items){
+    const row=el('div',null,'sc-job');
+    row.append(el('span',stamp(j.starts_at)+' → '+stamp(j.ends_at),'small'),el('span',(scLabels[j.state]||j.state)+(j.desired==='released'&&j.state!=='released'?' · 차단 해제 요청':''),'badge'));
+    if(j.error_code)row.append(el('span',scErrors[j.error_code]||'연동 결과를 확인해주세요.','small muted'));
+    if(!['working','blocked','released'].includes(j.state))row.append(button('확인 후 재시도',async()=>{
+     if(!confirm('스클 캘린더에서 해당 시간을 확인하셨나요? 기존 연동 기록을 확인한 뒤 재처리합니다.'))return;
+     await api('member_sc_retry',{id:j.booking_id});await loadSc();
+    }));
+    $('ma-sc-jobs').append(row);
+   }
+   if(!data.items.length)$('ma-sc-jobs').append(el('p','아직 연동 요청이 없습니다.','small muted'));
+  }catch{
+   if(seq!==generation||!$('ma-sc-status'))return;
+   $('ma-sc-status').textContent='스클 연동용 서버 업데이트가 필요합니다. 기존 예약 기능은 계속 사용할 수 있습니다.';
+   $('ma-sc-toggle').disabled=true;
+  }
+ }
  $('ma-sc-refresh').addEventListener('click',()=>busy($('ma-sc-refresh'),loadSc));
  $('ma-sc-toggle').addEventListener('click',()=>busy($('ma-sc-toggle'),async()=>{if(!confirm(scEnabled?'자동 연동을 끌까요? 기존 스클 차단은 유지되며, 이후 취소 건은 직접 처리해야 합니다.':'서버 설정을 마친 경우에만 켜주세요. 대기 중인 요청부터 스클 일정 차단·해제를 실행합니다.'))return;await api('member_sc_enable',{enabled:!scEnabled});await loadSc();}));
  function adminCard(b){const card=bookingCard(b);card.prepend(el('p',b.nickname+' · '+b.username,'small muted'));const actions=el('div',null,'actions');const note=el('textarea');note.maxLength=500;note.placeholder='회원에게 전달할 안내 또는 거절·취소 사유';note.setAttribute('aria-label','회원 안내');const payment=el('textarea');payment.maxLength=1000;payment.placeholder='입금 계좌·예금주·기한';payment.setAttribute('aria-label','입금 안내');payment.value=defaultPayment;
