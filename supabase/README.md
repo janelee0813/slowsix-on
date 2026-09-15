@@ -130,3 +130,6 @@ Vercel 공식 문서: https://vercel.com/docs/routing/rewrites
 
 ### 멤버십 삭제 및 로그인 진입 수정 (202609150006)
 006 SQL과 admin-api를 적용합니다. 관리자는 회원 목록의 멤버십 삭제로 논리 삭제하며 sessions를 제거하고 people.status를 rejected로 변경합니다. 예약 이력과 아이디는 보존합니다. 진행 중인 requested/awaiting_payment 또는 아직 종료되지 않은 confirmed 예약이 있으면 삭제를 막습니다. 재활성화 우회도 차단합니다. 실제 테스트 회원은 자동으로 삭제하지 않습니다. 일반 로그인 진입은 남은 초대 캐시를 무시하며 해당 초대 history entry의 새로고침에서만 초대를 복원합니다.
+
+### 스페이스클라우드 iCal 연동
+Edge Function Secret `SPACECLOUD_ICAL_UID`에 제공받은 iCal UID를 설정하고 admin-api를 재배포합니다. product_id=133597, api.spacecloud.kr의 고정 경로만 조회하며 브라우저에서 원본 URL을 받지 않습니다. 원본 이름·설명·UID를 반환하지 않고 첫 글자와 별표로 변환한 이름/시간/source만 반환합니다. 한국 시간 floating/TZID와 UTC, 줄 접기를 처리합니다. 취소/transparent는 제외하며 미지원 반복 일정·형식 오류·네트워크 오류는 빈 일정 대신 오류를 반환합니다. 캘린더는 30초 캐시, 예약 요청은 새로 확인하며 기존 SQL 겹침 검사도 유지합니다. 스페이스클라우드의 제공 범위와 갱신 지연에 따르므로 외부 시스템 간 원자적 예약 확정을 보장하지 않습니다. SQL 변경은 없습니다.

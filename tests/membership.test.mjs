@@ -80,6 +80,17 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
   await ok('member_delete',{id:member.id,version:member.version},admin);assert.equal((await ok('member_people',{},admin)).items.some(x=>x.id===member.id),false);assert.equal((await call('member_home',{},fresh.sessionToken)).data.code,'SESSION_EXPIRED');assert.equal((await call('login',{username:'deletetest',password})).data.code,'ACCESS_DENIED');
   assert.equal((await call('member_person_save',{id:member.id,version:member.version+1,tier:'friends',status:'active'},admin)).data.code,'CONFLICT');
  });
+ await t.test('external reservations are masked on server and block requests; feed errors fail closed',async()=>{
+  const p=payload(33,18,{use_coupon:false}),ical=v=>v.replace(/[-:]/g,'').replace(/\.000Z$/,'Z');
+  const raw='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nDTSTART:'+ical(new Date(p.starts_at).toISOString())+'\r\nDTEND:'+ical(p.ends_at)+'\r\nSUMMARY:홍길동\r\nDESCRIPTION:private@example.com 01012345678\r\nEND:VEVENT\r\nEND:VCALENDAR';
+  h.setCalendarFeed(raw);assert.equal((await call('member_request',p,c)).data.code,'TIME_UNAVAILABLE');
+  const data=await ok('member_calendar',{from:future(32),to:future(35)},c);const event=data.items.find(x=>x.source==='spacecloud');assert.equal(event.masked_name,'홍**');assert.ok(!JSON.stringify(data).includes('길동'));assert.ok(!JSON.stringify(data).includes('private@'));assert.deepEqual(Object.keys(event).sort(),['ends_at','masked_name','source','starts_at']);
+  const parsed=h.edge.parseReservationFeed('BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART:20260918T230000\nDTEND:20260919T010000\nSUMMARY:김가\n 나\nEND:VEVENT\nEND:VCALENDAR');assert.equal(parsed[0].masked_name,'김**');assert.equal(parsed[0].starts_at,'2026-09-18T14:00:00.000Z');
+  assert.equal(h.edge.parseReservationFeed(raw.replace('SUMMARY:홍길동','STATUS:CANCELLED\r\nSUMMARY:홍길동')).length,0);
+  assert.throws(()=>h.edge.parseReservationFeed(raw.replace('BEGIN:VEVENT','BEGIN:VEVENT\r\nRRULE:FREQ=DAILY')));
+  assert.throws(()=>h.edge.parseReservationFeed('not a calendar'));
+  h.setCalendarFeed(null);assert.equal((await call('member_request',payload(34,18,{use_coupon:false}),c)).data.code,'EXTERNAL_CALENDAR_UNAVAILABLE');
+ });
  await t.test('session browsing allowance does not weaken the ten-attempt login limit',async()=>{const fresh=(await ok('login',{username:'slowsix',password})).sessionToken;for(let i=0;i<105;i++)await ok('member_home',{},fresh);});
  await db.close();
 });

@@ -8,6 +8,7 @@ const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register']);
 const actions = new Set(['member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
+ EXTERNAL_CALENDAR_UNAVAILABLE:'스페이스클라우드 일정을 불러오지 못했습니다. 잠시 후 다시 조회해주세요. 예약 요청은 일정 확인 후 가능합니다.',
  MEMBER_HAS_BOOKINGS:'진행 중인 예약을 먼저 취소하거나 이용을 완료한 후 멤버십을 삭제해주세요.',
  INVALID_BOOKING:'예약은 정각 기준 1~24시간, 6~13명, 향후 1년 이내로 신청해주세요.', TIME_UNAVAILABLE:'선택한 시간에 예약 또는 이용 불가 일정이 있습니다.', COUPON_UNAVAILABLE:'이번 달 사용 가능한 쿠폰이 없습니다.', CANCEL_REQUIRES_ADMIN:'확정되었거나 이용 시간이 지난 예약은 관리자에게 취소를 요청해주세요.', INVALID_TRANSITION:'현재 예약 상태에서는 처리할 수 없습니다. 새로 조회해주세요.', PAYMENT_NOTE_REQUIRED:'입금 안내를 입력해주세요.',
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
@@ -83,6 +84,41 @@ export function safePayload(action: string,b: Record<string,unknown>) {
  }
  return {};
 }
+// Calendar access token is kept in the Edge Function environment, not browser or repository code.
+export function parseReservationFeed(raw:string) {
+ if(raw.length>2000000||!raw.includes('BEGIN:VCALENDAR')||!raw.includes('END:VCALENDAR'))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+ const lines=raw.replace(/^\uFEFF/,'').replace(/\r?\n[ \t]/g,'').split(/\r?\n/);
+ const items:Array<{starts_at:string,ends_at:string,masked_name:string,source:string}>=[];
+ let event:Record<string,{value:string,params:string}>|null=null;
+ const date=(field:{value:string,params:string}|undefined)=>{
+  if(!field)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const v=field.value,match=/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2}))?(Z)?$/.exec(v);
+  if(!match||(/TZID=/.test(field.params)&&!/TZID="?(Asia\/Seoul|UTC)"?(?:;|$)/.test(field.params)))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const [,y,m,d,hh='00',mm='00',ss='00',z]=match,offset=z||/TZID="?UTC/.test(field.params)?'Z':'+09:00';
+  const iso=`${y}-${m}-${d}T${hh}:${mm}:${ss}${offset}`,ms=Date.parse(iso);
+  if(!Number.isFinite(ms)||Number(hh)>23||Number(mm)>59||Number(ss)>59||new Date(ms+(offset==='Z'?0:9*3600000)).toISOString().slice(0,19)!==`${y}-${m}-${d}T${hh}:${mm}:${ss}`)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  return new Date(ms).toISOString();
+ };
+ for(const line of lines){
+  if(line==='BEGIN:VEVENT'){if(event)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);event={};continue;}
+  if(line==='END:VEVENT'){
+   if(!event)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+   if(event.STATUS?.value!=='CANCELLED'&&event.TRANSP?.value!=='TRANSPARENT'){
+    if(event.RRULE||event.RDATE||event['RECURRENCE-ID'])throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+    const starts_at=date(event.DTSTART),ends_at=date(event.DTEND);
+    if(ends_at<=starts_at)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+    const name=(event.SUMMARY?.value||'').replace(/\\[nN]/g,' ').replace(/\\([,;\\])/g,'$1').trim();
+    const chars=Array.from(name);const masked_name=chars.length?chars[0]+'*'.repeat(Math.min(30,Math.max(1,chars.length-1))):'예약자';
+    items.push({starts_at,ends_at,masked_name,source:'spacecloud'});
+   }
+   event=null;continue;
+  }
+  if(event){const colon=line.indexOf(':');if(colon<0)continue;const left=line.slice(0,colon),key=left.split(';')[0];event[key]={value:line.slice(colon+1),params:left};}
+ }
+ if(event)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+ return items;
+}
+
 export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeof fetch=fetch) {
  const base=env('SUPABASE_URL')||project;
  const service=env('SUPABASE_SERVICE_ROLE_KEY');
@@ -98,6 +134,17 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
    throw new AppError('관리자 모드 연결이 준비되지 않았거나 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',503);
   }
   return data;
+ }
+ let feedCache:{until:number,items:ReturnType<typeof parseReservationFeed>}|null=null;
+ async function externalCalendar(fresh=false){
+  if(!fresh&&feedCache&&feedCache.until>Date.now())return feedCache.items;
+  try{
+   const feedUID=env('SPACECLOUD_ICAL_UID');if(!feedUID)throw Error('feed configuration');
+   const reservationFeed='https://api.spacecloud.kr/partner/reservations/ical?product_id=133597&ical_uid='+encodeURIComponent(feedUID);
+   const response=await fetcher(reservationFeed,{headers:{Accept:'text/calendar'},signal:AbortSignal.timeout(10000)});
+   if(!response.ok)throw Error('feed');
+   const items=parseReservationFeed(await response.text());feedCache={until:Date.now()+30000,items};return items;
+  }catch{throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);}
  }
  const rpc=(action:string,p:unknown)=>call('/rest/v1/rpc/ss_admin_gateway',{p_action:action,p});
  async function rate(key:string,cap:number) {
@@ -171,11 +218,23 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
     const session_hash=await sha(b.sessionToken);
     await rate('session:'+session_hash,600);
     const payload=safePayload(action,b);
+    if(action==='member_request'){
+     const member=await rpc('me',{session_hash});
+     if(member.role!=='member')throw new AppError('FORBIDDEN',403);
+     if(member.status!=='active')throw new AppError('APPROVAL_REQUIRED');
+     const items=await externalCalendar(true),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
+     if(items.some(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start))throw new AppError('TIME_UNAVAILABLE');
+    }
     if(action==='create_invite'||action==='member_invite') {
      const secret=token();
      result=await rpc(action,{...payload,session_hash,link_hash:await sha(secret)});
      result.url=site+(action==='member_invite'?'/membership.html#invite=':'/admin.html#invite=')+secret;
     } else result=await rpc(action,{...payload,session_hash});
+    if(action==='member_calendar'){
+     const items=await externalCalendar(),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
+     result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start));
+     result.external_checked_at=new Date().toISOString();
+    }
    } else throw new AppError('INVALID_ACTION');
    return new Response(JSON.stringify(result),{headers});
   }catch(error) {

@@ -11,7 +11,9 @@ export async function harness(){
  const edge=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
  const auth=new Map();
  const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});
+ let calendarFeed='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR';
  const fetcher=async(url,options)=>{
+  if(new URL(url).hostname==='api.spacecloud.kr')return calendarFeed===null?json({error:'unavailable'},503):new Response(calendarFeed,{headers:{'Content-Type':'text/calendar'}});
   const path=new URL(url).pathname,body=options.body?JSON.parse(options.body):{};
   if(path==='/rest/v1/rpc/ss_admin_gateway'){
    if(options.headers.apikey!=='test-service-key')return json({message:'denied'},403);
@@ -27,12 +29,12 @@ export async function harness(){
   }
   throw Error('Unexpected path '+path);
  };
- const handler=edge.makeHandler(k=>({SUPABASE_URL:'https://mock.supabase.co',SUPABASE_ANON_KEY:'test-anon-key',SUPABASE_SERVICE_ROLE_KEY:'test-service-key'}[k]),fetcher);
+ const handler=edge.makeHandler(k=>({SPACECLOUD_ICAL_UID:'test-feed',SUPABASE_URL:'https://mock.supabase.co',SUPABASE_ANON_KEY:'test-anon-key',SUPABASE_SERVICE_ROLE_KEY:'test-service-key'}[k]),fetcher);
  let ip=0;
  const call=async(action,p={},sessionToken)=>{
   const req=new Request('https://mock.supabase.co/functions/v1/admin-api',{method:'POST',headers:{origin:'https://slowsixon.com','Content-Type':'application/json','x-forwarded-for':'192.0.2.'+(++ip)},body:JSON.stringify({action,...p,sessionToken})});
   const response=await handler(req);return {status:response.status,data:await response.json()};
  };
  const bootstrap=async()=>{const result=await db.query(await readFile(new URL('supabase/bootstrap.sql',root),'utf8'));return result.rows[0]?.['관리자_비밀번호_설정_링크'].split('=')[1];};
- return {db,edge,handler,auth,call,bootstrap};
+ return {db,edge,handler,auth,call,bootstrap,setCalendarFeed:value=>{calendarFeed=value;}};
 }
