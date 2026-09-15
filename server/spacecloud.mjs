@@ -37,18 +37,20 @@ export class HostCalendar {
  async connect(){
   this.onStage('login_page');
   const p=this.page;await p.goto('https://partner.spacecloud.kr/auth/login',{waitUntil:'domcontentloaded'});
-  await p.waitForFunction(()=>location.pathname.includes('/auth/')||document.querySelector('.calendar_tit.short'));
-  if(new URL(p.url()).pathname.includes('/auth/')){
+  await p.waitForFunction(()=>!/^\/auth\/login\/?$/.test(location.pathname)||document.querySelector('input[type="password"]'));
+  if(/^\/auth\/login\/?$/.test(new URL(p.url()).pathname)){
    if(new URL(p.url()).origin!=='https://partner.spacecloud.kr')throw new SyncError('LOGIN_REQUIRED');
    this.onStage('login_form');
    const pass=p.locator('input[type="password"]:visible'),email=p.locator('input:not([type="password"]):not([type="checkbox"]):not([type="hidden"]):visible');
    await pass.waitFor({state:'visible'});
    if(await pass.count()!==1||await email.count()!==1)throw new SyncError('UI_CHANGED');
-   await email.fill(this.email);await pass.fill(this.password);
-   this.onStage('login_submit');await p.getByRole('button',{name:'호스트 이메일로 로그인',exact:true}).click();
-   try{await p.waitForURL(url=>url.origin==='https://partner.spacecloud.kr'&&!url.pathname.startsWith('/auth/'),{timeout:15000});}catch{throw new SyncError('LOGIN_REQUIRED');}
-   this.onStage('calendar_open');await p.goto(calendarURL,{waitUntil:'domcontentloaded'});
+   await email.fill(this.email.trim());await pass.fill(this.password);
+   this.onStage('login_submit');await p.getByRole('button',{name:'호스트 이메일로 로그인',exact:true}).click({noWaitAfter:true});
+   this.onStage('login_result');
+   // The host sends successful logins to /auth/mypage; only /auth/login is the login form.
+   try{await p.waitForURL(url=>url.origin==='https://partner.spacecloud.kr'&&!/^\/auth\/login\/?$/.test(url.pathname),{timeout:15000});}catch{throw new SyncError('LOGIN_REQUIRED');}
   }
+  this.onStage('calendar_open');await p.goto(calendarURL,{waitUntil:'domcontentloaded'});
   try{await p.locator('.calendar_tit.short').waitFor({state:'visible'});}catch{throw new SyncError('LOGIN_REQUIRED');}
   const url=new URL(p.url());if(url.origin!=='https://partner.spacecloud.kr'||url.searchParams.get('product')!=='133597'||url.searchParams.get('space')!=='79746')throw new SyncError('CONFIGURATION');
   this.loggedIn=true;
