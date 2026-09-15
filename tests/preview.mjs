@@ -14,6 +14,7 @@ await h.call('set_status',{id:op.user.id,status:'active'},a.sessionToken);
 for(const [category,amount,description,date] of [['spacecloud',1540000,'스페이스클라우드 정산 입금','2026-09-12'],['invoice',400000,'기업 워크숍 대관','2026-09-11'],['cash',220000,'주말 모임 대관','2026-09-10'],['fixed',700000,'9월 월세','2026-09-05'],['fixed',112000,'9월 관리비','2026-09-06'],['expense',140000,'청소 알바비','2026-09-09']])await h.call('save_entry',{category,amount,description,date,request_id:crypto.randomUUID()},a.sessionToken);
 const memberLink=(await h.call('member_invite',{tier:'friends'},a.sessionToken)).data.url.split('=')[1];
 await h.call('register',{linkToken:memberLink,username:'frienduser',name:'프렌즈 미리보기',password:pass,gender:'여성',age_group:'30대',purposes:['보드게임']});
+const pendingMember=(await h.call('member_people',{},a.sessionToken)).data.items.find(x=>x.username==='frienduser');await h.call('member_person_save',{id:pendingMember.id,version:pendingMember.version,tier:'friends',status:'active'},a.sessionToken);
 console.log('Synthetic member: frienduser / LocalPreview!2026');
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript'};
 createServer(async(req,res)=>{try{
