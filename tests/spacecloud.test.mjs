@@ -29,6 +29,19 @@ test('server rejects unauthorized requests before launching browser or touching 
  await handler({method:'POST',headers:{}},response);assert.equal(status,401);assert.equal(touched,false);
  await handler({method:'POST',headers:{authorization:'Bearer '+secret}},response);assert.equal(status,503);assert.equal(touched,false);
 });
+test('worker reports only safe failure stage metadata, never provider errors or credentials',async()=>{
+ const reports=[],calls=[],secret='a'.repeat(64);
+ const handler=makeSyncHandler({env:{SPACECLOUD_SYNC_SECRET:secret,SUPABASE_SERVICE_ROLE_KEY:'private-service-key',SPACECLOUD_EMAIL:'private-email',SPACECLOUD_PASSWORD:'private-password'},
+  report:event=>reports.push(event),
+  fetcher:async(_url,options)=>{const body=JSON.parse(options.body);calls.push(body);return new Response(JSON.stringify(body.p_action==='claim'?{...sample,lease:'test-lease',revision:1}:{}));},
+  launch:async()=>{throw new Error('private-password private-email secret provider page');}
+ });
+ const res={setHeader(){},status(){return this;},json(value){return value;}};
+ await handler({method:'POST',headers:{authorization:'Bearer '+secret}},res);
+ assert.equal(reports[0].stage,'browser_launch');assert.equal(reports[0].kind,'runtime');
+ assert.equal(calls.at(-1).p.error,'UI_CHANGED');assert.equal(calls.at(-1).p.logged_in,false);
+ assert.equal(/private-|secret provider/.test(JSON.stringify(reports)),false);
+});
 test('durable queue permissions, single worker, cancellation during a write, interrupted recovery',async()=>{
  const h=await harness(),ok=async(a,p={},s)=>{const r=await h.call(a,p,s);assert.equal(r.status,200,JSON.stringify(r.data));return r.data;};
  const worker=async(a,p={})=>(await h.db.query('select public.ss_spacecloud_worker($1,$2::jsonb) as r',[a,JSON.stringify(p)])).rows[0].r;

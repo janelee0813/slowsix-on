@@ -33,19 +33,21 @@ export async function reconcile(adapter,job){
 }
 
 export class HostCalendar {
- constructor(page,{email,password}){this.page=page;this.email=email;this.password=password;this.loggedIn=false;}
+ constructor(page,{email,password,onStage=()=>{}}){this.page=page;this.email=email;this.password=password;this.onStage=onStage;this.loggedIn=false;}
  async connect(){
+  this.onStage('login_page');
   const p=this.page;await p.goto('https://partner.spacecloud.kr/auth/login',{waitUntil:'domcontentloaded'});
   await p.waitForFunction(()=>location.pathname.includes('/auth/')||document.querySelector('.calendar_tit.short'));
   if(new URL(p.url()).pathname.includes('/auth/')){
    if(new URL(p.url()).origin!=='https://partner.spacecloud.kr')throw new SyncError('LOGIN_REQUIRED');
+   this.onStage('login_form');
    const pass=p.locator('input[type="password"]:visible'),email=p.locator('input:not([type="password"]):not([type="checkbox"]):not([type="hidden"]):visible');
    await pass.waitFor({state:'visible'});
    if(await pass.count()!==1||await email.count()!==1)throw new SyncError('UI_CHANGED');
    await email.fill(this.email);await pass.fill(this.password);
-   await p.getByRole('button',{name:'호스트 이메일로 로그인',exact:true}).click();
+   this.onStage('login_submit');await p.getByRole('button',{name:'호스트 이메일로 로그인',exact:true}).click();
    try{await p.waitForURL(url=>url.origin==='https://partner.spacecloud.kr'&&!url.pathname.startsWith('/auth/'),{timeout:15000});}catch{throw new SyncError('LOGIN_REQUIRED');}
-   await p.goto(calendarURL,{waitUntil:'domcontentloaded'});
+   this.onStage('calendar_open');await p.goto(calendarURL,{waitUntil:'domcontentloaded'});
   }
   try{await p.locator('.calendar_tit.short').waitFor({state:'visible'});}catch{throw new SyncError('LOGIN_REQUIRED');}
   const url=new URL(p.url());if(url.origin!=='https://partner.spacecloud.kr'||url.searchParams.get('product')!=='133597'||url.searchParams.get('space')!=='79746')throw new SyncError('CONFIGURATION');
@@ -62,6 +64,7 @@ export class HostCalendar {
   throw new SyncError('UI_CHANGED');
  }
  async rows(date,reload=false){
+  this.onStage('calendar_read');
   if(reload){await this.page.reload({waitUntil:'domcontentloaded'});await this.page.locator('.calendar_tit.short').waitFor({state:'visible'});}
   await this.month(date);
   // Allow the host's month request to settle; no ongoing background requests are used as truth.
@@ -75,6 +78,7 @@ export class HostCalendar {
   return rows;
  }
  async add(part){
+  this.onStage('calendar_add');
   const p=this.page;await p.getByText('예약추가',{exact:true}).click();
   const dialog=p.locator('.popup_wrap').filter({hasText:'외부예약/휴무일 추가'});
   await dialog.waitFor({state:'visible'});await dialog.locator('._miniCalOpen').click();
@@ -97,6 +101,7 @@ export class HostCalendar {
   try{await dialog.locator('#_addExternalSchedule').click();await dialog.waitFor({state:'hidden'});}catch{throw new SyncError('UNVERIFIED');}
  }
  async remove(part){
+  this.onStage('calendar_remove');
   await this.month(part.date);
   const link=this.page.locator('#contents .booking_list a.type5').filter({hasText:part.marker});
   if(await link.count()!==1)throw new SyncError('UNVERIFIED');await link.click();
