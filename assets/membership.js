@@ -1,4 +1,4 @@
-import {shiftMonth,monthLabel,couponNames,couponHelp,tierNames,statusNames,money,el,koreaDate,stamp,monthPeriod,timeRange,pricePreview,renderCalendar,bookingCard,renderNotifications} from './membership-shared.js?v=calendar2';
+import {shiftMonth,monthLabel,couponNames,couponHelp,tierNames,statusNames,money,el,koreaDate,stamp,monthPeriod,timeRange,pricePreview,renderCalendar,bookingCard,renderNotifications} from './membership-shared.js?v=calendar3';
 const PUBLIC_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFodnd3ZHJ3Znp3cGVoZmpudGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDk3MzksImV4cCI6MjEwNDc4NTczOX0.0fhW_bYEb9QedKLMb8DDnP8BYnP8aJtfywXLdyUA9ww';
 const $=id=>document.getElementById(id),key='ss-member-session';let session=localStorage.getItem(key)||'',user=null,home=null,invite='',requestId=crypto.randomUUID(),requestFingerprint='',loadId=0,notifications=[],wallet=[],selectedCoupon='';
 function notice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error);$('notice').hidden=false;}
