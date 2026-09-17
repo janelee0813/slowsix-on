@@ -141,3 +141,9 @@ Edge Function Secret `SPACECLOUD_ICAL_UID`에 제공받은 iCal UID를 설정하
 
 ### 스페이스클라우드 직접 연동 (202609150008)
 008 SQL과 admin-api, Vercel Node 함수, spacecloud-scheduler.sql을 함께 적용합니다. 환경변수와 테스트 절차는 docs/spacecloud-sync.md를 참고합니다. 기본 꺼짐이며 예약 상태 변경을 outbox에 기록합니다. service_role 전용 worker RPC로 단일 실행권·lease·revision을 검증합니다. 실행 중 취소는 이후 해제 작업으로 이어지고, 불확실한 실행은 확인 필요 상태로 남습니다. 호스트 화면 제어로 구현했으며 실제 공급자 등록·해제 검증 전에는 활성화하지 않습니다. 기존 iCal은 계속 읽기 연동에 사용합니다.
+
+## Space calendars (202609170001)
+
+Apply `202609170001_membership_spaces.sql`, then deploy `admin-api` and the frontend. Existing bookings/blocks default to `on`. Calendar and booking requests default to ON for old clients; the server accepts only on/p/d. ON: 6–13, P: 8–9, D: 6–12 guests; all retain existing hourly rates and discounts. Overlap checks are scoped per space; coupons remain shared across spaces. SpaceCloud outbox/retry is ON-only.
+
+Set Edge Function secret `GONGJIPSA_CALENDAR_ID` to the customer Google Calendar ID. P maps only to Gongjipsa 3호점, D only to 1호점. 2호점 is ignored; ON still uses the existing SpaceCloud feed. Gongjipsa exports all-day dates with title time ranges; convert those times in Asia/Seoul, including overnight bookings. Cancelled/transparent events are excluded. Selected-space parse/fetch failures return errors and block new requests; they never imply availability. Names are masked on the server. No original URL/title/description/customer contact data reaches members. Cache lasts 30 seconds, the visible member calendar refreshes every three minutes, and new requests bypass the cache. Upstream publication may be delayed, so this is not atomic cross-platform booking or write-back.

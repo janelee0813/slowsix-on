@@ -9,10 +9,10 @@ const publicActions = new Set(['login','link_info','register']);
 const actions = new Set(['member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
  SC_NOT_CONNECTED:'Vercel 연동 서버 설정과 Supabase 자동 실행 설정을 먼저 완료해주세요.',
- EXTERNAL_CALENDAR_UNAVAILABLE:'스페이스클라우드 일정을 불러오지 못했습니다. 잠시 후 다시 조회해주세요. 예약 요청은 일정 확인 후 가능합니다.',
+ EXTERNAL_CALENDAR_UNAVAILABLE:'선택한 공간의 외부 예약 일정을 불러오지 못했습니다. 잠시 후 다시 조회해주세요. 예약 요청은 일정 확인 후 가능합니다.',
  COUPON_NOT_APPLICABLE:'선택한 쿠폰을 사용할 수 없는 이용시간입니다.',
  MEMBER_HAS_BOOKINGS:'진행 중인 예약을 먼저 취소하거나 이용을 완료한 후 멤버십을 삭제해주세요.',
- INVALID_BOOKING:'예약은 정각 기준 1~24시간, 6~13명, 향후 1년 이내로 신청해주세요.', TIME_UNAVAILABLE:'선택한 시간에 예약 또는 이용 불가 일정이 있습니다.', COUPON_UNAVAILABLE:'이번 달 사용 가능한 쿠폰이 없습니다.', CANCEL_REQUIRES_ADMIN:'확정되었거나 이용 시간이 지난 예약은 관리자에게 취소를 요청해주세요.', INVALID_TRANSITION:'현재 예약 상태에서는 처리할 수 없습니다. 새로 조회해주세요.', PAYMENT_NOTE_REQUIRED:'입금 안내를 입력해주세요.',
+ INVALID_BOOKING:'예약은 정각 기준 1~24시간, ON 6~13명 / D 6~12명 / P 8~9명, 향후 1년 이내로 신청해주세요.', TIME_UNAVAILABLE:'선택한 시간에 예약 또는 이용 불가 일정이 있습니다.', COUPON_UNAVAILABLE:'이번 달 사용 가능한 쿠폰이 없습니다.', CANCEL_REQUIRES_ADMIN:'확정되었거나 이용 시간이 지난 예약은 관리자에게 취소를 요청해주세요.', INVALID_TRANSITION:'현재 예약 상태에서는 처리할 수 없습니다. 새로 조회해주세요.', PAYMENT_NOTE_REQUIRED:'입금 안내를 입력해주세요.',
  LINK_INVALID:'링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.',
  USERNAME_TAKEN:'사용할 수 없는 아이디입니다.', DUPLICATE:'이미 사용 중인 아이디 또는 중복 요청입니다.',
  SESSION_EXPIRED:'로그인이 만료되었습니다. 다시 로그인해주세요.', ACCESS_DENIED:'접근이 중지된 계정입니다. 관리자에게 문의해주세요.',
@@ -38,6 +38,7 @@ const validDate = (value: unknown) => typeof value==='string'&&/^\d{4}-\d{2}-\d{
 export function safePayload(action: string,b: Record<string,unknown>) {
  if(action.startsWith('member_')) {
   const out:Record<string,unknown>={};
+  if(['member_quote','member_request','member_calendar','member_bookings','member_block_save'].includes(action)){const space=b.space??'on';if(!['on','p','d'].includes(String(space)))throw new AppError('INVALID_ENTRY');out.space=space;}
   const limited=(key:string,max:number)=>{if(b[key]!=null&&(typeof b[key]!=='string'||String(b[key]).length>max))throw new AppError('INVALID_ENTRY');return b[key]??'';};
   if(action==='member_sc_enable'){if(typeof b.enabled!=='boolean')throw new AppError('INVALID_ENTRY');return {enabled:b.enabled};}
   if(action==='member_sc_retry'){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');return {id:b.id};}
@@ -47,7 +48,7 @@ export function safePayload(action: string,b: Record<string,unknown>) {
   if(['member_delete','member_cancel','member_status','member_person_save'].includes(action)){if(!Number.isInteger(b.version)||Number(b.version)<1)throw new AppError('INVALID_ENTRY');out.version=b.version;}
   if(['member_quote','member_request','member_block_save'].includes(action)){
    for(const key of ['starts_at','ends_at']){if(typeof b[key]!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(String(b[key]))||!Number.isFinite(Date.parse(String(b[key]))))throw new AppError('INVALID_BOOKING');out[key]=b[key];}
-   if(action!=='member_block_save'){if(!Number.isInteger(b.guests)||Number(b.guests)<6||Number(b.guests)>13||typeof b.use_coupon!=='boolean')throw new AppError('INVALID_BOOKING');out.guests=b.guests;out.use_coupon=b.use_coupon;}
+   if(action!=='member_block_save'){if(!Number.isInteger(b.guests)||Number(b.guests)<(out.space==='p'?8:6)||Number(b.guests)>(out.space==='p'?9:out.space==='d'?12:13)||typeof b.use_coupon!=='boolean')throw new AppError('INVALID_BOOKING');out.guests=b.guests;out.use_coupon=b.use_coupon;}
    out.note=limited('note',500);
   }
   if(['member_calendar','member_bookings'].includes(action)){for(const key of ['from','to']){if(typeof b[key]!=='string'||!Number.isFinite(Date.parse(String(b[key]))))throw new AppError('INVALID_PERIOD');out[key]=b[key];}}
@@ -94,7 +95,7 @@ export function safePayload(action: string,b: Record<string,unknown>) {
 export function parseReservationFeed(raw:string) {
  if(raw.length>2000000||!raw.includes('BEGIN:VCALENDAR')||!raw.includes('END:VCALENDAR'))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
  const lines=raw.replace(/^\uFEFF/,'').replace(/\r?\n[ \t]/g,'').split(/\r?\n/);
- const items:Array<{starts_at:string,ends_at:string,masked_name:string,source:string}>=[];
+ const items:Array<{starts_at:string,ends_at:string,masked_name:string,source:string,space:string}>=[];
  let event:Record<string,{value:string,params:string}>|null=null;
  const date=(field:{value:string,params:string}|undefined)=>{
   if(!field)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
@@ -115,7 +116,7 @@ export function parseReservationFeed(raw:string) {
     if(ends_at<=starts_at)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
     const name=(event.SUMMARY?.value||'').replace(/\\[nN]/g,' ').replace(/\\([,;\\])/g,'$1').trim();
     const chars=Array.from(name);const masked_name=chars.length?chars[0]+'*'.repeat(Math.min(30,Math.max(1,chars.length-1))):'예약자';
-    items.push({starts_at,ends_at,masked_name,source:'spacecloud'});
+    items.push({starts_at,ends_at,masked_name,source:'spacecloud',space:'on'});
    }
    event=null;continue;
   }
@@ -123,6 +124,39 @@ export function parseReservationFeed(raw:string) {
  }
  if(event)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
  return items;
+}
+
+// Gongjipsa exports all-day events with "1호점 19-23 이름" in SUMMARY.
+// Never interpret the entire date as booked; convert title times to Korean instants.
+export function parseGongjipsaFeed(raw:string,space:string) {
+ if(!['p','d'].includes(space)||raw.length>2000000||!raw.includes('BEGIN:VCALENDAR')||!raw.includes('END:VCALENDAR'))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+ const branch=space==='p'?'3':'1';
+ const items:ReturnType<typeof parseReservationFeed>=[];
+ const unfolded=raw.replace(/\r?\n[ \t]/g,'');
+ for(const block of unfolded.split('BEGIN:VEVENT').slice(1)){
+  if(!block.includes('END:VEVENT'))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const fields=block.split('END:VEVENT')[0];
+  const summary=/^SUMMARY:(.*)$/m.exec(fields)?.[1]?.trim()||'';
+  if(!new RegExp('^'+branch+'호점(?:\\s|$)').test(summary))continue;
+  if(/^STATUS:CANCELLED\r?$/m.test(fields)||/^TRANSP:TRANSPARENT\r?$/m.test(fields))continue;
+  if(/^(RRULE|RDATE|RECURRENCE-ID)[;:]/m.test(fields))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const match=/^[13]호점\s+(\d{1,2})(?::(\d{2}))?-(\d{1,2})(?::(\d{2}))?(?:\s+(.*))?$/.exec(summary);
+  const start=/^DTSTART;VALUE=DATE:(\d{8})\r?$/m.exec(fields)?.[1];
+  const end=/^DTEND;VALUE=DATE:(\d{8})\r?$/m.exec(fields)?.[1];
+  if(!match||!start||!end)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const [,sh,sm='00',eh,em='00',name='']=match;
+  const beginMinute=Number(sh)*60+Number(sm),endMinute=Number(eh)*60+Number(em);
+  if(Number(sh)>23||Number(eh)>24||Number(sm)>59||Number(em)>59||(Number(eh)===24&&Number(em)!==0))throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const base=parseReservationFeed('BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART;VALUE=DATE:'+start+'\nDTEND;VALUE=DATE:'+end+'\nEND:VEVENT\nEND:VCALENDAR')[0];
+  const days=(Date.parse(base.ends_at)-Date.parse(base.starts_at))/86400000;
+  const endDay=days>1?days-1:(endMinute<=beginMinute?1:0);
+  const starts_at=new Date(Date.parse(base.starts_at)+beginMinute*60000).toISOString();
+  const ends_at=new Date(Date.parse(base.starts_at)+endDay*86400000+endMinute*60000).toISOString();
+  if(ends_at<=starts_at)throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);
+  const first=Array.from(name.replace(/\\[nN]/g,' ').trim())[0];
+  items.push({starts_at,ends_at,space,source:'gongjipsa',masked_name:first?first+'**':'예약자'});
+ }
+ return items.filter((r,i,a)=>a.findIndex(x=>x.starts_at===r.starts_at&&x.ends_at===r.ends_at)===i);
 }
 
 export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeof fetch=fetch) {
@@ -141,15 +175,24 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
   }
   return data;
  }
- let feedCache:{until:number,items:ReturnType<typeof parseReservationFeed>}|null=null;
- async function externalCalendar(fresh=false){
-  if(!fresh&&feedCache&&feedCache.until>Date.now())return feedCache.items;
+ const feedCache=new Map<string,{until:number,items:ReturnType<typeof parseReservationFeed>}>();
+ async function externalCalendar(space='on',fresh=false){
+  const cached=feedCache.get(space);
+  if(!fresh&&cached&&cached.until>Date.now())return cached.items;
   try{
-   const feedUID=env('SPACECLOUD_ICAL_UID');if(!feedUID)throw Error('feed configuration');
-   const reservationFeed='https://api.spacecloud.kr/partner/reservations/ical?product_id=133597&ical_uid='+encodeURIComponent(feedUID);
-   const response=await fetcher(reservationFeed,{headers:{Accept:'text/calendar'},signal:AbortSignal.timeout(10000)});
+   let url:string;
+   if(space==='on'){
+    const feedUID=env('SPACECLOUD_ICAL_UID');if(!feedUID)throw Error('feed configuration');
+    url='https://api.spacecloud.kr/partner/reservations/ical?product_id=133597&ical_uid='+encodeURIComponent(feedUID);
+   }else{
+    const calendar=env('GONGJIPSA_CALENDAR_ID');
+    if(!calendar||!/^[-a-zA-Z0-9_]+@group\.calendar\.google\.com$/.test(calendar))throw Error('feed configuration');
+    url='https://calendar.google.com/calendar/ical/'+encodeURIComponent(calendar)+'/public/basic.ics';
+   }
+   const response=await fetcher(url,{headers:{Accept:'text/calendar'},signal:AbortSignal.timeout(10000)});
    if(!response.ok)throw Error('feed');
-   const items=parseReservationFeed(await response.text());feedCache={until:Date.now()+30000,items};return items;
+   const raw=await response.text(),items=space==='on'?parseReservationFeed(raw):parseGongjipsaFeed(raw,space);
+   feedCache.set(space,{until:Date.now()+30000,items});return items;
   }catch{throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);}
  }
  const rpc=(action:string,p:unknown)=>call('/rest/v1/rpc/ss_admin_gateway',{p_action:action,p});
@@ -230,9 +273,9 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      if(member.status!=='active')throw new AppError('APPROVAL_REQUIRED');
      // A retry of an already saved request may now see its own external block in iCal.
      // Let the existing SQL idempotency checks validate that retry before checking the feed.
-     const previous=await rpc('member_bookings',{session_hash,from:payload.starts_at,to:payload.ends_at});
+     const previous=await rpc('member_bookings',{session_hash,from:payload.starts_at,to:payload.ends_at,space:payload.space});
      if(!previous.items.some((r:any)=>r.id===payload.id)){
-      const items=await externalCalendar(true),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
+      const items=await externalCalendar(String(payload.space),true),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
       if(items.some(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start))throw new AppError('TIME_UNAVAILABLE');
      }
     }
@@ -243,7 +286,7 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
     } else if(action.startsWith('member_sc_'))result=await call('/rest/v1/rpc/ss_spacecloud_admin',{p_action:action,p:{...payload,session_hash}});
     else result=await rpc(action,{...payload,session_hash});
     if(action==='member_calendar'){
-     const items=await externalCalendar(),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
+     const items=await externalCalendar(String(payload.space)),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
      // A mirrored membership block can return through iCal; the local interval already displays it.
      result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start&&!result.items.some((local:any)=>Date.parse(local.starts_at)<=Date.parse(r.starts_at)&&Date.parse(local.ends_at)>=Date.parse(r.ends_at))));
      result.external_checked_at=new Date().toISOString();

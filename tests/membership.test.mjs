@@ -35,7 +35,7 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
  });
  await t.test('availability is private and overlapping requests are blocked',async()=>{
   const p={from:new Date(Date.now()).toISOString(),to:new Date(Date.now()+30*86400000).toISOString()};
-  const calendar=await ok('member_calendar',p,c);assert.ok(calendar.items.length);assert.deepEqual(Object.keys(calendar.items[0]).sort(),['ends_at','starts_at']);
+  const calendar=await ok('member_calendar',p,c);assert.ok(calendar.items.length);assert.deepEqual(Object.keys(calendar.items[0]).sort(),['ends_at','space','starts_at']);
   assert.equal((await ok('member_bookings',p,c)).items.length,0);
   assert.equal((await call('member_request',{...payload(),starts_at:booking.starts_at,ends_at:booking.ends_at},c)).data.code,'TIME_UNAVAILABLE');
   assert.equal((await call('member_cancel',{id:booking.id,version:1},c)).data.code,'FORBIDDEN');
@@ -84,7 +84,7 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
   const p=payload(33,18,{use_coupon:false}),ical=v=>v.replace(/[-:]/g,'').replace(/\.000Z$/,'Z');
   const raw='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nDTSTART:'+ical(new Date(p.starts_at).toISOString())+'\r\nDTEND:'+ical(p.ends_at)+'\r\nSUMMARY:홍길동\r\nDESCRIPTION:private@example.com 01012345678\r\nEND:VEVENT\r\nEND:VCALENDAR';
   h.setCalendarFeed(raw);assert.equal((await call('member_request',p,c)).data.code,'TIME_UNAVAILABLE');
-  const data=await ok('member_calendar',{from:future(32),to:future(35)},c);const event=data.items.find(x=>x.source==='spacecloud');assert.equal(event.masked_name,'홍**');assert.ok(!JSON.stringify(data).includes('길동'));assert.ok(!JSON.stringify(data).includes('private@'));assert.deepEqual(Object.keys(event).sort(),['ends_at','masked_name','source','starts_at']);
+  const data=await ok('member_calendar',{from:future(32),to:future(35)},c);const event=data.items.find(x=>x.source==='spacecloud');assert.equal(event.masked_name,'홍**');assert.ok(!JSON.stringify(data).includes('길동'));assert.ok(!JSON.stringify(data).includes('private@'));assert.deepEqual(Object.keys(event).sort(),['ends_at','masked_name','source','space','starts_at']);
   const parsed=h.edge.parseReservationFeed('BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART:20260918T230000\nDTEND:20260919T010000\nSUMMARY:김가\n 나\nEND:VEVENT\nEND:VCALENDAR');assert.equal(parsed[0].masked_name,'김**');assert.equal(parsed[0].starts_at,'2026-09-18T14:00:00.000Z');
   assert.equal(h.edge.parseReservationFeed(raw.replace('SUMMARY:홍길동','STATUS:CANCELLED\r\nSUMMARY:홍길동')).length,0);
   assert.throws(()=>h.edge.parseReservationFeed(raw.replace('BEGIN:VEVENT','BEGIN:VEVENT\r\nRRULE:FREQ=DAILY')));
