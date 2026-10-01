@@ -1,2 +1,6 @@
 [functions.admin-api]
 verify_jwt = false
+
+[functions.ppurio-test]
+# Gateway JWT plus exact server-secret validation inside the handler.
+verify_jwt = true
