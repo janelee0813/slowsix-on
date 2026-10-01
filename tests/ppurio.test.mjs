@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {transform} from 'esbuild';
+import {verify} from '../api/ppurio-relay.mjs';
 const {code}=await transform(await readFile(new URL('../supabase/functions/ppurio-test/index.ts',import.meta.url),'utf8'),{loader:'ts',format:'esm'});
 const {makeHandler}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
 const settings={SUPABASE_SERVICE_ROLE_KEY:'private-service',PPURIO_ACCOUNT:'slowsix',PPURIO_ACCESS_KEY:'private-access'};
@@ -33,4 +34,15 @@ test('dashboard secret key works while public apikey cannot authenticate',async(
   assert.equal(response.status,status);
  }
  assert.equal(calls,1);
+});
+test('Fixie route signs the relay request and never exposes the returned token',async()=>{
+ const service='private-service-long-enough-for-signing-123456';
+ const handler=makeHandler(k=>({...settings,SUPABASE_SERVICE_ROLE_KEY:service})[k],async(url,options)=>{
+  assert.equal(url,'https://slowsixon.com/api/ppurio-relay');
+  assert.equal(verify(service,options.headers['x-ss-timestamp'],options.headers['x-ss-signature'],options.body),true);
+  assert.equal(JSON.parse(options.body).action,'token');
+  return Response.json({status:200,data:{token:'private-token',code:1000}});
+ });
+ const result=await handler(new Request('https://test',{method:'POST',headers:{Authorization:'Bearer '+service},body:JSON.stringify({route:'fixie'})}));
+ assert.deepEqual(await result.json(),{stage:'token',route:'fixie',authenticated:true,providerHttpStatus:200,providerCode:1000,messageSent:false});
 });
