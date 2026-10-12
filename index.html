@@ -100,6 +100,8 @@
 </style>
 <link rel="stylesheet" href="assets/site-home.css?v=2">
 <script src="assets/site-home.js?v=1" defer></script>
+<link rel="stylesheet" href="assets/schedule.css?v=1">
+<script type="module" src="assets/schedule.js?v=1"></script>
 </head>
 <body id="top" class="min-h-screen bg-background text-foreground font-sans">
 
@@ -150,6 +152,7 @@
       <!-- 미니홀덤대회 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
       <button onclick="showPage('holdemevent')" id="btn-holdemevent" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">미니홀덤대회</button>
       -->
+      <button onclick="showPage('schedule')" id="btn-schedule" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">스케줄</button>
       <button onclick="showPage('membership')" id="btn-membership" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">멤버십</button>
       <button onclick="showPage('utilities')" id="btn-utilities" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">유용한 기능</button>
       <!-- 임시 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
@@ -166,9 +169,6 @@
       -->
       <!-- 임시-출석이벤트 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
       <button onclick="showPage('attendance')" id="btn-attendance" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">임시-출석이벤트</button>
-      -->
-      <!-- 임시-스케줄 버튼 숨김 (재사용 시 아래 주석 해제, 페이지·URL은 그대로 유지)
-      <button onclick="showPage('schedule')" id="btn-schedule" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">임시-스케줄</button>
       -->
       <!-- 여행 버튼 숨김 (재사용 시 아래 주석 해제)
       <button onclick="showPage('travel')" id="btn-travel" class="rounded-full border border-border px-3.5 py-1.5 text-[12px] sm:text-[12.5px] font-medium text-muted-foreground transition-all hover:border-neon-purple/50 hover:text-neon-purple text-center sm:whitespace-nowrap sm:flex-shrink-0">여행</button>
@@ -5322,91 +5322,31 @@ Oh my Blue Moon</div>
 
 </div>
 
-<!-- 임시-스케줄 페이지 -->
+<!-- 공개 예약 스케줄 -->
 <div id="page-schedule" class="hidden">
-
-<section class="relative overflow-hidden">
-  <div class="grid-bg absolute inset-0 -z-10"></div>
-  <div class="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-neon-purple/60 to-transparent"></div>
-  <div class="mx-auto max-w-screen-md px-5 pt-8 pb-4 sm:pt-10 sm:pb-6">
-    <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-      <span style="font-size:14px">🌷</span>
-      <span>7월 스케줄</span>
+ <div class="home-wrap">
+  <section class="schedule-intro">
+   <p class="home-eyebrow">SLOWSIX / SCHEDULE</p>
+   <h1>함께할 시간을 <span class="text-gradient-neon">확인해보세요.</span></h1>
+   <p>ON·P·D, 원하는 공간을 선택해 예약 현황을 확인하세요.</p>
+  </section>
+  <section class="schedule-panel" aria-labelledby="schedule-space-title">
+   <div class="schedule-toolbar">
+    <label class="schedule-space-filter">공간<select id="schedule-space"><option value="on">슬로우식스ON</option><option value="p">슬로우식스P</option><option value="d">슬로우식스D</option></select></label>
+    <div class="schedule-month-nav" role="group" aria-label="월 이동">
+     <button id="schedule-prev" class="schedule-button" type="button" aria-label="이전 달">‹</button>
+     <output id="schedule-month-label" aria-live="polite"></output>
+     <button id="schedule-next" class="schedule-button" type="button" aria-label="다음 달">›</button>
     </div>
-    <h1 class="text-[28px] font-bold leading-[1.15] tracking-tight sm:text-4xl">
-      💕 <span class="text-gradient-neon">7월 스케줄</span> 💕
-    </h1>
-  </div>
-</section>
-
-<section class="px-5 pb-16 sm:pb-20">
-  <div class="mx-auto max-w-screen-md">
-    <div id="schedule-list" class="space-y-6"></div>
-  </div>
-</section>
-
-<script>
-(function(){
-  const scheduleData = [
-    { week: '첫째주', items: [
-      { date: '7/2', day: '목', venue: '러너펍 별내점' },
-      { date: '7/3', day: '금', venue: '러너펍 인계점 오픈행사' },
-      { date: '7/4', day: '토', venue: '러너펍 노원점' },
-    ]},
-    { week: '둘째주', items: [
-      { date: '7/6', day: '월', venue: '러너펍 논현점' },
-      { date: '7/8', day: '수', venue: '러너펍 영등포점' },
-      { date: '7/10', day: '금', venue: '러너펍 구디점' },
-      { date: '7/11', day: '토', venue: '러너펍 노원점' },
-      { date: '7/12', day: '일', venue: '랭킹전' },
-    ]},
-    { week: '셋째주', items: [
-      { date: '7/13', day: '월', venue: '러너펍 논현점' },
-      { date: '7/15', day: '수', venue: 'KMGM 논현점' },
-      { date: '7/16', day: '목', venue: '러너펍 압구정점' },
-      { date: '7/17', day: '금', venue: '러너펍 구디점' },
-      { date: '7/19', day: '일', venue: 'KMGM 선릉' },
-    ]},
-    { week: '넷째주', items: [
-      { date: '7/22', day: '수', venue: '러너펍 선릉점' },
-      { date: '7/23', day: '목', venue: '충남 포커랜드 첫방문 🎉🎉', highlight: true },
-      { date: '7/24', day: '금', venue: '러너펍 구디점' },
-      { date: '7/25', day: '토', venue: '러너펍 노원점' },
-      { date: '7/26', day: '일', venue: '래빗 페스티벌' },
-    ]},
-    { week: '마지막주', items: [
-      { date: '7/28', day: '화', venue: '러너펍 구디점' },
-      { date: '7/29', day: '수', venue: '제이블러프 언주점' },
-      { date: '7/30', day: '목', venue: '러너펍 별내점' },
-      { date: '7/31', day: '금', venue: '러너펍 구디점' },
-    ]},
-  ];
-
-  function renderSchedule(data){
-    const el = document.getElementById('schedule-list');
-    if (!el) return;
-    el.innerHTML = data.map(w => `
-      <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="font-size:13px">☀️</span>
-          <span style="font-size:13px;font-weight:700;color:#b566ff;letter-spacing:0.04em">${w.week}</span>
-          <div style="flex:1;height:1px;background:rgba(140,110,200,0.25)"></div>
-        </div>
-        <div class="neon-card p-4 sm:p-5" style="display:flex;flex-direction:column;gap:10px">
-          ${w.items.map(it => `
-          <div style="display:flex;align-items:center;gap:12px">
-            <span style="flex-shrink:0;min-width:64px;text-align:center;font-size:11.5px;font-weight:700;color:${it.highlight ? '#ffd76a' : '#e5e0f0'};background:${it.highlight ? 'rgba(255,215,106,0.12)' : 'rgba(140,110,200,0.12)'};border:1px solid ${it.highlight ? 'rgba(255,215,106,0.4)' : 'rgba(140,110,200,0.3)'};border-radius:8px;padding:4px 8px">${it.date}(${it.day})</span>
-            <span style="font-size:13.5px;${it.highlight ? 'font-weight:700;color:#ffd76a' : 'color:#cfc9e0'}">${it.venue}</span>
-          </div>`).join('')}
-        </div>
-      </div>
-    `).join('');
-  }
-
-  renderSchedule(scheduleData);
-})();
-</script>
-
+    <div class="schedule-actions"><button id="schedule-today" class="schedule-button" type="button">이번 달</button><button id="schedule-refresh" class="schedule-button" type="button">새로고침</button></div>
+   </div>
+   <h2 id="schedule-space-title">슬로우식스ON</h2>
+   <p id="schedule-status" role="status" aria-live="polite"></p>
+   <div id="schedule-calendar" aria-label="월별 예약 현황" aria-busy="false"></div>
+   <p class="schedule-help">선택한 공간의 예약만 표시됩니다. 예약자 이름은 첫 글자를 제외하고 가려집니다.<br>외부 예약은 반영에 시간이 걸릴 수 있습니다. 최종 예약 가능 여부는 예약 시 확인해주세요.</p>
+  </section>
+  <div class="schedule-links"><button class="home-secondary" onclick="showPage('main')">공간 선택·예약하기 <span aria-hidden="true">↗</span></button><a class="home-secondary" href="https://pf.kakao.com/_kerxgG/chat" target="_blank" rel="noopener noreferrer">예약 문의하기 <span aria-hidden="true">↗</span></a></div>
+ </div>
 </div>
 
 <!-- 미니홀덤대회 페이지 -->
@@ -8514,6 +8454,7 @@ Oh my Blue Moon</div>
     const hash = page === 'main' ? '' : page === 'slowsix' ? '#slowsixon' : page === 'test1' ? '#calculator' : page === 'fortune' ? '#event' : page === 'roulette' ? '#tamagotchi' : page === 'spin' ? '#spin' : page === 'travel' ? '#travel' : page === 'pinball' ? '#pinball' : page === 'holdem' ? '#holdem' : page === 'holdemevent' ? '#holdemevent' : page === 'attendance' ? '#attendance' : page === 'schedule' ? '#schedule' : page === 'shotclock' ? '#shotclock' : page === 'apply' ? '#apply' : '#' + page;
     history.replaceState(null, '', location.pathname + hash);
     window.scrollTo(0, 0);
+    document.dispatchEvent(new CustomEvent('slowsix:pagechange', {detail:page}));
     if (page === 'roulette') {
       requestAnimationFrame(() => {
         document.querySelectorAll('#page-roulette .te').forEach(el => {

@@ -17,6 +17,10 @@ export async function harness(){
   if(new URL(url).hostname==='calendar.google.com')return gongFeed===null?json({error:'unavailable'},503):new Response(gongFeed);
   if(new URL(url).hostname==='api.spacecloud.kr')return calendarFeed===null?json({error:'unavailable'},503):new Response(calendarFeed,{headers:{'Content-Type':'text/calendar'}});
   const path=new URL(url).pathname,body=options.body?JSON.parse(options.body):{};
+  if(path==='/rest/v1/rpc/ss_public_schedule'){
+   if(options.headers.apikey!=='test-service-key')return json({message:'denied'},403);
+   try{return json((await db.query('select public.ss_public_schedule($1::jsonb) as result',[JSON.stringify(body.p)])).rows[0].result)}catch(e){return json({message:e.message},400)}
+  }
   if(['/rest/v1/rpc/ss_admin_gateway','/rest/v1/rpc/ss_spacecloud_admin','/rest/v1/rpc/ss_spacecloud_worker'].includes(path)){
    if(options.headers.apikey!=='test-service-key')return json({message:'denied'},403);
    try{return json((await db.query('select public.'+path.split('/').at(-1)+'($1,$2::jsonb) as result',[body.p_action,JSON.stringify(body.p)])).rows[0].result)}catch(e){if(process.env.DEBUG_TEST_SQL)console.error(body.p_action,e.message);return json({message:e.message},400)}

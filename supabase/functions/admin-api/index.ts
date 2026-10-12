@@ -5,7 +5,7 @@ declare const Deno: { env: { get(name: string): string | undefined }; serve(hand
 const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
-const publicActions = new Set(['login','link_info','register']);
+const publicActions = new Set(['login','link_info','register','public_calendar']);
 const actions = new Set(['member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
  SC_NOT_CONNECTED:'Vercel 연동 서버 설정과 Supabase 자동 실행 설정을 먼저 완료해주세요.',
@@ -196,6 +196,13 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
   }catch{throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);}
  }
  const rpc=(action:string,p:unknown)=>call('/rest/v1/rpc/ss_admin_gateway',{p_action:action,p});
+ async function withExternalCalendar(result:any,payload:Record<string,unknown>){
+  const items=await externalCalendar(String(payload.space)),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
+  // A mirrored local reservation can also appear in the external feed.
+  result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start&&!result.items.some((local:any)=>Date.parse(local.starts_at)<=Date.parse(r.starts_at)&&Date.parse(local.ends_at)>=Date.parse(r.ends_at))));
+  result.external_checked_at=new Date().toISOString();
+  return result;
+ }
  async function rate(key:string,cap:number) {
   const r=await rpc('rate',{key,cap});
   if(!r.allowed) throw new AppError('로그인 또는 요청 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.',429,Number(r.retryAfter)||900);
@@ -220,7 +227,12 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
     const ip=(req.headers.get('x-forwarded-for')||req.headers.get('cf-connecting-ip')||'unknown').split(',')[0].trim().slice(0,100);
     await rate('ip:'+await sha(ip),60);
    }
-   if(action==='link_info'||action==='register') {
+   if(action==='public_calendar') {
+    const payload=safePayload('member_calendar',b),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
+    if(end<=start||end-start>32*86400000)throw new AppError('INVALID_PERIOD');
+    result=await call('/rest/v1/rpc/ss_public_schedule',{p:payload});
+    result=await withExternalCalendar(result,payload);
+   } else if(action==='link_info'||action==='register') {
     if(typeof b.linkToken!=='string'||!/^[a-f0-9]{64}$/.test(b.linkToken)) throw new AppError('LINK_INVALID');
     const link_hash=await sha(b.linkToken);
     await rate('link:'+link_hash,action==='register'?10:60);
@@ -285,12 +297,7 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      result.url=site+(action==='member_invite'?'/membership.html#invite=':'/admin.html#invite=')+secret;
     } else if(action.startsWith('member_sc_'))result=await call('/rest/v1/rpc/ss_spacecloud_admin',{p_action:action,p:{...payload,session_hash}});
     else result=await rpc(action,{...payload,session_hash});
-    if(action==='member_calendar'){
-     const items=await externalCalendar(String(payload.space)),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
-     // A mirrored membership block can return through iCal; the local interval already displays it.
-     result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start&&!result.items.some((local:any)=>Date.parse(local.starts_at)<=Date.parse(r.starts_at)&&Date.parse(local.ends_at)>=Date.parse(r.ends_at))));
-     result.external_checked_at=new Date().toISOString();
-    }
+    if(action==='member_calendar')result=await withExternalCalendar(result,payload);
    } else throw new AppError('INVALID_ACTION');
    return new Response(JSON.stringify(result),{headers});
   }catch(error) {

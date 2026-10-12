@@ -147,3 +147,17 @@ Edge Function Secret `SPACECLOUD_ICAL_UID`에 제공받은 iCal UID를 설정하
 Apply `202609170001_membership_spaces.sql`, then deploy `admin-api` and the frontend. Existing bookings/blocks default to `on`. Calendar and booking requests default to ON for old clients; the server accepts only on/p/d. ON: 6–13, P: 8–9, D: 6–12 guests; all retain existing hourly rates and discounts. Overlap checks are scoped per space; coupons remain shared across spaces. SpaceCloud outbox/retry is ON-only.
 
 Set Edge Function secret `GONGJIPSA_CALENDAR_ID` to the customer Google Calendar ID. P maps only to Gongjipsa 3호점, D only to 1호점. 2호점 is ignored; ON still uses the existing SpaceCloud feed. Gongjipsa exports all-day dates with title time ranges; convert those times in Asia/Seoul, including overnight bookings. Cancelled/transparent events are excluded. Selected-space parse/fetch failures return errors and block new requests; they never imply availability. Names are masked on the server. No original URL/title/description/customer contact data reaches members. Cache lasts 30 seconds, the visible member calendar refreshes every three minutes, and new requests bypass the cache. Upstream publication may be delayed, so this is not atomic cross-platform booking or write-back.
+
+## 공개 스케줄 (2026-10-12)
+
+홈페이지의 `/#schedule`은 로그인 없이 ON·P·D 예약 현황을 조회한다.
+`202610120001_public_schedule.sql`을 적용하고 `admin-api`를 배포해야 한다.
+두 작업은 2026-10-12 운영 프로젝트에 적용했다.
+
+브라우저는 기존 `/api/admin` 주소에 `public_calendar`, `space`, `from`, `to`를 보낸다.
+서버 전용 `ss_public_schedule(jsonb)`는 최대 32일의 예약·이용 불가 시간과 호점만 반환한다.
+회원 이름·연락처·결제금액·요청사항·예약번호는 조회하지 않는다.
+공개 요청에도 IP 제한을 적용하며, 데이터베이스 함수는 service_role만 호출할 수 있다.
+외부 일정은 멤버십과 같은 읽기·이름 마스킹·중복 제거 로직을 사용한다.
+ON은 스페이스클라우드, P는 공집사 3호점, D는 공집사 1호점이며 2호점은 제외한다.
+외부 일정 조회가 실패하면 빈 달력으로 표시하지 않고 조회 실패를 알린다.
