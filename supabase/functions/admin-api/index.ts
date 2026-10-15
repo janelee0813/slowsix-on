@@ -6,8 +6,10 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register','public_calendar']);
-const actions = new Set(['member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['settle','cancel_settlement','save_bank_opening','description_suggestions','member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
+ FEE_METHOD_CONFLICT:'운영수수료 출금 내역과 정산금 공제를 함께 적용할 수 없습니다. 수수료 지급 방식을 운영 통장에서 별도 출금으로 설정하거나 중복 내역을 정리해주세요.',
+ ENTRY_SETTLED:'이미 정산한 내역입니다. 해당 정산 처리를 취소한 뒤 수정해주세요.', FEE_REQUIRED:'이 기간의 운영 수수료를 먼저 저장해주세요. 수수료가 없으면 0원을 저장하세요.', NOTHING_TO_SETTLE:'정산할 내역이 없습니다.',
  SC_NOT_CONNECTED:'Vercel 연동 서버 설정과 Supabase 자동 실행 설정을 먼저 완료해주세요.',
  EXTERNAL_CALENDAR_UNAVAILABLE:'선택한 공간의 외부 예약 일정을 불러오지 못했습니다. 잠시 후 다시 조회해주세요. 예약 요청은 일정 확인 후 가능합니다.',
  COUPON_NOT_APPLICABLE:'선택한 쿠폰을 사용할 수 없는 이용시간입니다.',
@@ -34,6 +36,7 @@ export function username(value: unknown) {
  return s;
 }
 const uuid = (value: unknown) => typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+const ledgerCategories=['spacecloud','invoice','cash','fixed','expense','labor','operating_deposit','operating_withdrawal','profit_withdrawal','fee_withdrawal'];
 const validDate = (value: unknown) => typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
 export function safePayload(action: string,b: Record<string,unknown>) {
  if(action.startsWith('member_')) {
@@ -60,7 +63,7 @@ export function safePayload(action: string,b: Record<string,unknown>) {
   return out;
  }
  if(action==='recurring_save') {
-  if(!uuid(b.id)||!Number.isInteger(b.version)||Number(b.version)<0||!['fixed','expense'].includes(String(b.category))||typeof b.description!=='string'||!b.description.trim()||b.description.trim().length>200||!Number.isSafeInteger(b.amount)||Number(b.amount)<1||Number(b.amount)>1e10||!validDate(b.start_month)||!String(b.start_month).endsWith('-01')||(b.end_month!=null&&(!validDate(b.end_month)||!String(b.end_month).endsWith('-01')||String(b.end_month)<String(b.start_month)))) throw new AppError('INVALID_ENTRY');
+  if(!uuid(b.id)||!Number.isInteger(b.version)||Number(b.version)<0||!['fixed','expense','labor'].includes(String(b.category))||typeof b.description!=='string'||!b.description.trim()||b.description.trim().length>200||!Number.isSafeInteger(b.amount)||Number(b.amount)<1||Number(b.amount)>1e10||!validDate(b.start_month)||!String(b.start_month).endsWith('-01')||(b.end_month!=null&&(!validDate(b.end_month)||!String(b.end_month).endsWith('-01')||String(b.end_month)<String(b.start_month)))) throw new AppError('INVALID_ENTRY');
   return {id:b.id,version:b.version,category:b.category,description:b.description.trim(),amount:b.amount,start_month:b.start_month,end_month:b.end_month??null};
  }
  if(action==='update_name') {
@@ -70,18 +73,27 @@ export function safePayload(action: string,b: Record<string,unknown>) {
  if(action==='list') {
   if(!validDate(b.from)||!validDate(b.to)||!Number.isInteger(b.offset)||Number(b.offset)<0) throw new AppError('INVALID_PERIOD');
   const sort_by=b.sort_by??'date',sort_dir=b.sort_dir??'desc';
-  if(!['date','author','description','spacecloud','invoice','cash','fixed','expense'].includes(String(sort_by))||!['asc','desc'].includes(String(sort_dir))) throw new AppError('INVALID_ENTRY');
+  if(!['date','author','description','category','amount','payment_source','party','settlement_status',...ledgerCategories].includes(String(sort_by))||!['asc','desc'].includes(String(sort_dir))) throw new AppError('INVALID_ENTRY');
   return {from:b.from,to:b.to,offset:b.offset,sort_by,sort_dir};
  }
+ if(action==='settle'){
+  if(!uuid(b.id)||!uuid(b.party_id)||!validDate(b.from)||!validDate(b.to)||!validDate(b.date)||typeof b.fingerprint!=='string'||! /^[a-f0-9]{32}$/.test(b.fingerprint))throw new AppError('INVALID_ENTRY');
+  return {id:b.id,party_id:b.party_id,from:b.from,to:b.to,date:b.date,fingerprint:b.fingerprint};
+ }
+ if(action==='cancel_settlement'){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');return {id:b.id};}
+ if(action==='description_suggestions'){if(!ledgerCategories.includes(String(b.category)))throw new AppError('INVALID_ENTRY');return {category:b.category};}
+ if(action==='save_bank_opening'){if(!Number.isSafeInteger(b.amount)||Math.abs(Number(b.amount))>1e12||!Number.isInteger(b.version)||Number(b.version)<0)throw new AppError('INVALID_ENTRY');return {amount:b.amount,version:b.version};}
  if(action==='save_fee') {
   if(!validDate(b.from)||!validDate(b.to)) throw new AppError('INVALID_PERIOD');
   if(!Number.isSafeInteger(b.amount)||Math.abs(Number(b.amount))>1e12||!Number.isInteger(b.version)||Number(b.version)<0) throw new AppError('INVALID_ENTRY');
-  return {from:b.from,to:b.to,amount:b.amount,version:b.version};
+  if(b.payment_method!=null&&!['withhold','bank'].includes(String(b.payment_method)))throw new AppError('INVALID_ENTRY');
+  return {from:b.from,to:b.to,amount:b.amount,version:b.version,payment_method:b.payment_method??'withhold'};
  }
  if(action==='save_entry') {
-  if(!validDate(b.date)||!['spacecloud','invoice','cash','fixed','expense'].includes(String(b.category))||typeof b.description!=='string'||!b.description.trim()||b.description.trim().length>200||!Number.isSafeInteger(b.amount)||Number(b.amount)<1||Number(b.amount)>1e10||!uuid(b.request_id)) throw new AppError('INVALID_ENTRY');
+  if(!validDate(b.date)||!ledgerCategories.includes(String(b.category))||typeof b.description!=='string'||!b.description.trim()||b.description.trim().length>200||!Number.isSafeInteger(b.amount)||Number(b.amount)<1||Number(b.amount)>1e10||!uuid(b.request_id)) throw new AppError('INVALID_ENTRY');
   if(b.id&&(!uuid(b.id)||!Number.isInteger(b.version))) throw new AppError('INVALID_ENTRY');
-  return {id:b.id||null,version:b.version,date:b.date,description:b.description.trim(),category:b.category,amount:b.amount,request_id:b.request_id};
+  if(b.payment_source!=null&&!['main','external'].includes(String(b.payment_source))||b.party_id!=null&&!uuid(b.party_id))throw new AppError('INVALID_ENTRY');
+  return {payment_source:b.payment_source,party_id:b.party_id,id:b.id||null,version:b.version,date:b.date,description:b.description.trim(),category:b.category,amount:b.amount,request_id:b.request_id};
  }
  if(['recurring_delete','delete_entry','set_status','revoke_invite'].includes(action)) {
   if(!uuid(b.id)) throw new AppError('INVALID_ENTRY');

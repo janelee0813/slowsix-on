@@ -14,7 +14,7 @@ returns table(id uuid,entry_date date,description text,category text,amount bigi
  created_by uuid,updated_by uuid,version int,created_at timestamptz,updated_at timestamptz,
  deleted_at timestamptz,request_id uuid,recurring_id uuid)
 language sql stable set search_path=pg_catalog,ss_admin as $$
- select e.*,null::uuid from ss_admin.entries e where e.deleted_at is null and e.entry_date between d1 and d2
+ select e.id,e.entry_date,e.description,e.category,e.amount,e.created_by,e.updated_by,e.version,e.created_at,e.updated_at,e.deleted_at,e.request_id,null::uuid from ss_admin.entries e where e.deleted_at is null and e.entry_date between d1 and d2
  union all
  select md5(r.id::text||':'||m.day::date::text)::uuid,m.day::date,r.description,r.category,r.amount,
  r.created_by,r.updated_by,r.version,r.created_at,r.updated_at,null::timestamptz,null::uuid,r.id

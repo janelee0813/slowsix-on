@@ -17,6 +17,7 @@ async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=f
   if(blockExternal&&new URL(url,w.location.href).origin!==w.location.origin)throw new TypeError("External auth host unavailable");
   const b=JSON.parse(opts.body);calls.push(b);let data;
   if(b.action==='me')data={id:randomUUID(),name:displayName,username:'slowsix',role,status:'active'};
+  else if(b.action==='description_suggestions')data={items:stored.filter(r=>r.category===b.category).map(r=>({description:r.description}))};
   else if(b.action==='recurring_list')data={items:recurring};
   else if(b.action==='recurring_save'){recurring.push({...b,version:1});data={id:b.id};}
   else if(b.action==='logout')data={};
@@ -169,7 +170,7 @@ test('all column headers select sorting and general expenses show a period total
  const h=await screen('2026-09-15','admin',false,false,false,{modernSort:true});try{
   h.stored.push({id:'expense1',entry_date:'2026-09-15',category:'expense',amount:12345,description:'청소',author:'운영자'});
   h.stored.push({id:'expense2',entry_date:'2026-08-15',category:'expense',amount:99999,description:'이전',author:'운영자'});
-  for(const key of ['date','author','description','spacecloud','invoice','cash','fixed','expense']){
+  for(const key of ['date','author','description','category','payment_source','party','settlement_status','amount']){
    const b=h.w.document.querySelector('[data-sort-key="'+key+'"]');const before=h.calls.length;b.click();await until(()=>h.calls.length>before&&h.$('summary-period').textContent.includes('2026-09-01'));
    assert.equal(h.calls.at(-1).sort_by,key);assert.equal(b.getAttribute('aria-pressed'),'true');
   }

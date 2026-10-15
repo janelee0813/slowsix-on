@@ -39,7 +39,7 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   await ok('save_entry',save('invoice',300000),admin);await ok('save_entry',save('cash',200000),admin);await ok('save_entry',save('expense',100000),admin);
   await ok('save_fee',{from:'2026-09-01',to:'2026-09-30',amount:73000,version:0},admin);
   const data=await ok('list',{from:'2026-09-01',to:'2026-09-30',offset:0},admin);
-  assert.equal(data.count,5);assert.deepEqual(data.summary,{spacecloud:1000000,invoice:300000,cash:200000,fixed:200000,expense:100000,revenue:1500000,spending:300000,fee_mode:'manual',fee_version:1,profit:1200000,fee:73000,settlement:327000});
+  assert.equal(data.count,5);const expectedSummary={spacecloud:1000000,invoice:300000,cash:200000,fixed:200000,expense:100000,revenue:1500000,spending:300000,fee_mode:'manual',fee_version:1,profit:1200000,fee:73000,settlement:327000};for(const [key,value] of Object.entries(expectedSummary))assert.equal(data.summary[key],value,key);
   assert.equal((await ok('list',{from:'2026-10-01',to:'2026-10-31',offset:0},admin)).count,0);
   await ok('save_entry',save('spacecloud',1100000,{id:entryId,version:1}),admin);
   assert.equal((await call('save_entry',save('spacecloud',500,{id:entryId,version:1}),admin)).data.code,'CONFLICT');
@@ -114,7 +114,7 @@ test('real SQL gateway + Edge API authorization and accounting',async t=>{
   await ok('save_entry',save('cash',1000000,{date:'2040-12-05'}),admin);
   const a=await ok('list',period,admin),b=await ok('list',period,op);
   assert.equal(a.count,3);assert.deepEqual(a,b);assert.equal(a.summary.fixed,700000);assert.equal(a.summary.expense,100000);
-  assert.equal(a.summary.spending,800000);assert.equal(a.summary.profit,200000);assert.equal(a.summary.settlement,897000);
+  assert.equal(a.summary.spending,800000);assert.equal(a.summary.profit,200000);assert.equal(a.summary.settlement,997000);
   assert.equal(a.entries.filter(r=>r.recurring_id).length,2);assert.ok(a.entries.filter(r=>r.recurring_id).every(r=>r.entry_date==='2040-12-01'));
   assert.equal((await db.query("select count(*)::int n from ss_admin.entries where entry_date between '2040-12-01' and '2040-12-31'")).rows[0].n,1);
   assert.equal((await ok('list',{from:'2040-12-06',to:'2040-12-11',offset:0},admin)).count,0);
