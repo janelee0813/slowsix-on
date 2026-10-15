@@ -72,7 +72,6 @@ test('income and expense shortcuts respect operator access and preserve entered 
    h.$('entry-description').value='입력 중인 내용';h.$('entry-amount').value='12345';
    h.$('entry-expense').click();assert.equal(h.$('entry-category').value,role==='admin'?'expense':'fixed');assert.equal(h.$('entry-expense').getAttribute('aria-pressed'),'true');
    h.$('entry-income').click();assert.equal(h.$('entry-category').value,'spacecloud');assert.equal(h.$('entry-description').value,'입력 중인 내용');assert.equal(h.$('entry-amount').value,'12345');
-   h.$('month-prev').click();await until(()=>!h.$('load-period').disabled);h.$('month-current').click();await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2026-10-01');assert.equal(h.$('to').value,'2026-10-31');
   }finally{h.dom.window.close();}
  }
 });

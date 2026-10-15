@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>관리자 모드 · 슬로우식스ON</title>
 <link rel="stylesheet" href="assets/admin.css?v=20260915-calendar2">
-<script type="module" src="assets/admin.js?v=20261015-monthly1"></script>
+<script type="module" src="assets/admin.js?v=20261015-monthly2"></script>
 <link rel="stylesheet" href="assets/membership.css?v=spaces1">
 <link rel="stylesheet" href="assets/guide-theme.css?v=1">
 <link rel="stylesheet" href="assets/admin-theme.css?v=20261015-1">
@@ -36,7 +36,7 @@
  <div class="page-heading"><div><p class="eyebrow">MANAGEMENT / SETTLEMENT</p><h1>정산 관리</h1><p class="muted">매월 1일~말일 기준으로 매출·지출을 기록하고 정산하세요.</p></div><span class="badge" id="role-badge"></span></div>
  <nav class="tabs" aria-label="관리 메뉴"><button id="tab-ledger" class="active">정산 내역</button><button id="tab-recurring">고정 지출</button><button id="tab-membership" hidden>멤버십 관리</button><button id="tab-team" hidden>운영자 관리</button><button id="tab-audit" hidden>변경 이력</button></nav>
  <div id="ledger-view">
-  <div class="toolbar panel"><div class="period-selector"><span class="small muted">정산 월</span><div class="month-navigation" role="group" aria-label="월 이동"><button id="month-prev" type="button" class="secondary" aria-label="이전 달">‹</button><output id="month-label" aria-live="polite"></output><button id="month-next" type="button" class="secondary" aria-label="다음 달">›</button><input id="month" type="hidden"></div></div><button id="month-current" type="button" class="secondary">이번 달</button><details class="period-custom"><summary>기간 직접 설정</summary><div class="range"><label>시작일<input id="from" type="date" required></label><span>—</span><label>종료일<input id="to" type="date" required></label></div><p class="small muted">기간을 바꾼 뒤 조회를 눌러주세요.</p></details><button id="load-period" class="secondary">조회</button></div>
+  <div class="toolbar panel"><div class="period-selector"><span class="small muted">정산 월</span><div class="month-navigation" role="group" aria-label="월 이동"><button id="month-prev" type="button" class="secondary" aria-label="이전 달">‹</button><output id="month-label" aria-live="polite"></output><button id="month-next" type="button" class="secondary" aria-label="다음 달">›</button><input id="month" type="hidden"></div></div><details class="period-custom"><summary>기간 직접 설정</summary><div class="range"><label>시작일<input id="from" type="date" required></label><span>—</span><label>종료일<input id="to" type="date" required></label></div><p class="small muted">기간을 바꾼 뒤 조회를 눌러주세요.</p></details><button id="load-period" class="secondary">조회</button></div>
   <div class="workspace">
    <div class="ledger-main">
     <section class="panel entry-panel"><div class="section-heading"><h2 id="entry-title">새 내역 기록</h2><span class="muted small" id="entry-permission"></span></div>

@@ -177,7 +177,6 @@ $('entry-sort').addEventListener('change',()=>{offset=0;sessionStorage.setItem('
 $('entry-category').addEventListener('change',categoryHelp);$('cancel-edit').addEventListener('click',resetEntry);
 for(const [suffix,delta] of [['prev',-1],['next',1]])$('month-'+suffix).addEventListener('click',()=>{const [y,m]=$('month').value.split('-').map(Number);$('month').value=monthKey(y,m+delta);$('month').dispatchEvent(new Event('change'));});
 $('month').addEventListener('change',()=>{setMonth();offset=0;busy($('load-period'),loadLedger)});
-$('month-current').addEventListener('click',()=>{$('month').value=settlementMonth(today());$('month').dispatchEvent(new Event('change'));});
 for(const kind of ['income','expense'])$('entry-'+kind).addEventListener('click',()=>{const spending=['fixed','expense'].includes($('entry-category').value);if(spending!==(kind==='expense'))$('entry-category').value=kind==='income'?'spacecloud':user?.role==='admin'?'expense':'fixed';categoryHelp();$('entry-amount').focus();});
 $('load-period').addEventListener('click',()=>{offset=0;busy($('load-period'),loadLedger)});
 $('prev').addEventListener('click',()=>{offset=Math.max(0,offset-100);busy($('prev'),loadLedger)});
