@@ -5,6 +5,8 @@ const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
 const $=id=>document.getElementById(id);
 const names={"spacecloud": "매출 - 스클", "invoice": "매출 - 계산서", "cash": "매출 - 현금", "fixed": "지출 - 고정비", "expense": "지출 - 일반", "labor": "지출 - 인건비", "operating_deposit": "입금 - 운영비", "operating_withdrawal": "출금 - 운영비", "profit_withdrawal": "출금 - 수익", "fee_withdrawal": "출금 - 운영수수료"};
 const incomes=['spacecloud','invoice','cash'],expenses=['fixed','expense','labor'];
+const entryGroups={income:{label:'매출',items:incomes},expense:{label:'지출',items:expenses},deposit:{label:'입금',items:['operating_deposit']},withdrawal:{label:'출금',items:['operating_withdrawal','profit_withdrawal','fee_withdrawal']}};
+const entryGroup=c=>Object.keys(entryGroups).find(k=>entryGroups[k].items.includes(c))||'income';
 const statuses={pending:'승인 대기',active:'이용 중',rejected:'가입 거절',suspended:'접근 중지'};
 const money=v=>new Intl.NumberFormat('ko-KR').format(v)+'원';
 const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date());
@@ -42,7 +44,7 @@ function showAuth(){if($('nickname-dialog').open)$('nickname-dialog').close();cl
 function showAccount(){ $('auth-screen').hidden=true;$('account-bar').hidden=false;$('back-site').hidden=true;$('account-name').textContent=user.name+' · '+(user.role==='admin'?'관리자':'운영자');$('pending-screen').hidden=user.status!=='pending';$('dashboard').hidden=user.status!=='active'; }
 async function enter(){
  user=await api('me');if(user.role==='member'){session='';storeSession('');showAuth();throw Error('멤버십 계정은 멤버십 페이지에서 로그인해주세요.');}showAccount();if(user.status!=='active')return;
- const admin=user.role==='admin';$('entry-transfer').hidden=!admin;$('bank-opening-editor').hidden=!admin;$('role-badge').textContent=admin?'관리자':'운영자';$('tab-team').hidden=!admin;$('tab-membership').hidden=!admin;$('tab-audit').hidden=!admin;$('edit-heading').hidden=!admin;$('recurring-editor').hidden=!admin;$('recurring-permission').textContent=admin?'관리자는 고정 지출을 등록·수정할 수 있습니다.':'고정 지출 설정은 관리자만 변경할 수 있습니다.';resetRecurring();
+ const admin=user.role==='admin';$('entry-deposit').hidden=!admin;$('entry-withdrawal').hidden=!admin;$('bank-opening-editor').hidden=!admin;$('role-badge').textContent=admin?'관리자':'운영자';$('tab-team').hidden=!admin;$('tab-membership').hidden=!admin;$('tab-audit').hidden=!admin;$('edit-heading').hidden=!admin;$('recurring-editor').hidden=!admin;$('recurring-permission').textContent=admin?'관리자는 고정 지출을 등록·수정할 수 있습니다.':'고정 지출 설정은 관리자만 변경할 수 있습니다.';resetRecurring();
  for(const option of $('entry-category').options)option.disabled=!admin&&!['spacecloud','fixed'].includes(option.value);
  $('entry-permission').textContent=admin?'전체 항목 입력·수정 가능':'스클 매출·고정비 등록 가능';resetEntry();switchTab('ledger');await loadLedger();
 }
@@ -108,12 +110,17 @@ async function loadLedger(){const p=period(),seq=++loadSequence;markLoading();le
 }
 function resetEntry({keepValues=false}={}){
  $('save-status').hidden=true;editing=null;
- if(!keepValues){requestId=crypto.randomUUID();lastSavedForm='';lastRequestedForm='';$('entry-form').reset();lastCategory='';$('entry-party').value=user?.id||'';$('entry-date').value=today();}
+ if(!keepValues){requestId=crypto.randomUUID();lastSavedForm='';lastRequestedForm='';$('entry-form').reset();setEntryCategory('spacecloud');lastCategory='';$('entry-party').value=user?.id||'';$('entry-date').value=today();}
  $('entry-title').textContent='새 내역 기록';$('save-entry').textContent='내역 등록';$('cancel-edit').hidden=true;categoryHelp();
 }
+function setEntryCategory(category){
+ const group=entryGroups[entryGroup(category)],select=$('entry-category');select.replaceChildren();
+ for(const value of group.items){const option=elem('option',names[value].split(' - ')[1]);option.value=value;option.disabled=user?.role==='operator'&&!['spacecloud','fixed'].includes(value);select.append(option);}
+ select.value=category;$('entry-category-label').textContent=group.label+' 항목';
+}
 function categoryHelp(){
- const c=$('entry-category').value,kind=incomes.includes(c)?'income':expenses.includes(c)?'expense':'transfer';
- document.querySelector('.entry-panel').dataset.kind=kind;for(const k of ['income','expense','transfer'])$('entry-'+k).setAttribute('aria-pressed',String(k===kind));
+ const c=$('entry-category').value,kind=entryGroup(c);
+ document.querySelector('.entry-panel').dataset.kind=kind;for(const k of Object.keys(entryGroups))$('entry-'+k).setAttribute('aria-pressed',String(k===kind));
  const flexible=['invoice','cash','expense','labor'].includes(c),funds=['operating_deposit','operating_withdrawal'].includes(c);
  if(lastCategory!==c){$('entry-source').value=flexible?'external':'main';lastCategory=c;}
  if(!flexible)$('entry-source').value='main';
@@ -133,7 +140,7 @@ async function loadSuggestions(){
   for(const item of data.items||[]){const o=elem('option');o.value=item.description;$('entry-suggestions').append(o);$('description-chips').append(button(item.description,()=>{$('entry-description').value=item.description;$('entry-description').focus();},'description-chip'));}
  }catch{} // Suggestions never block saving an entry.
 }
-function editEntry(r){editing=r;$('entry-date').value=r.entry_date;$('entry-category').value=r.category;lastCategory=r.category;$('entry-source').value=r.payment_source||(['invoice','cash','expense','labor'].includes(r.category)?'external':'main');$('entry-party').value=r.party_id||user.id;$('entry-description').value=r.description;$('entry-amount').value=r.amount;$('entry-title').textContent='내역 수정';$('save-entry').textContent='변경 저장';$('cancel-edit').hidden=false;categoryHelp();$('entry-form').scrollIntoView({behavior:'smooth',block:'center'});}
+function editEntry(r){editing=r;$('entry-date').value=r.entry_date;setEntryCategory(r.category);lastCategory=r.category;$('entry-source').value=r.payment_source||(['invoice','cash','expense','labor'].includes(r.category)?'external':'main');$('entry-party').value=r.party_id||user.id;$('entry-description').value=r.description;$('entry-amount').value=r.amount;$('entry-title').textContent='내역 수정';$('save-entry').textContent='변경 저장';$('cancel-edit').hidden=false;categoryHelp();$('entry-form').scrollIntoView({behavior:'smooth',block:'center'});}
 function renderFinance(data,p){
  financeData=data;const summary=data.summary,selected=$('entry-party').value||user.id;
  $('entry-party').replaceChildren();for(const person of data.parties||[{id:user.id,name:user.name}]){const o=elem('option',person.name);o.value=person.id;$('entry-party').append(o);}
@@ -256,7 +263,11 @@ $('entry-sort').addEventListener('change',()=>{offset=0;sessionStorage.setItem('
 $('entry-category').addEventListener('change',categoryHelp);$('entry-source').addEventListener('change',categoryHelp);$('cancel-edit').addEventListener('click',resetEntry);
 for(const [suffix,delta] of [['prev',-1],['next',1]])$('month-'+suffix).addEventListener('click',()=>{const [y,m]=$('month').value.split('-').map(Number);$('month').value=monthKey(y,m+delta);$('month').dispatchEvent(new Event('change'));});
 $('month').addEventListener('change',()=>{setMonth();offset=0;busy($('load-period'),loadLedger)});
-for(const kind of ['income','expense','transfer'])$('entry-'+kind).addEventListener('click',()=>{const c=$('entry-category').value,current=incomes.includes(c)?'income':expenses.includes(c)?'expense':'transfer';if(kind==='transfer'&&user?.role!=='admin')return;if(current!==kind)$('entry-category').value=kind==='income'?'spacecloud':kind==='expense'?(user?.role==='admin'?'expense':'fixed'):'operating_deposit';categoryHelp();$('entry-amount').focus();});
+for(const kind of Object.keys(entryGroups))$('entry-'+kind).addEventListener('click',()=>{
+ if(['deposit','withdrawal'].includes(kind)&&user?.role!=='admin')return;
+ if(entryGroup($('entry-category').value)!==kind)setEntryCategory(kind==='expense'&&user?.role==='admin'?'expense':entryGroups[kind].items[0]);
+ categoryHelp();$('entry-category').focus();
+});
 $('load-period').addEventListener('click',()=>{offset=0;busy($('load-period'),loadLedger)});
 $('prev').addEventListener('click',()=>{offset=Math.max(0,offset-100);busy($('prev'),loadLedger)});
 $('next').addEventListener('click',()=>{offset+=100;busy($('next'),loadLedger)});
@@ -306,7 +317,7 @@ $('recurring-form').addEventListener('submit',e=>{e.preventDefault();busy($('rec
 
 async function init(){
  const savedSort=sessionStorage.getItem('ss-admin-sort');$('entry-sort').value=Array.from($('entry-sort').options).some(o=>o.value===savedSort)?savedSort:'desc';updateSortHeaders();
- $('month').value=settlementMonth(today());setMonth();$('entry-date').value=today();categoryHelp();$('auth-username').value=localStorage.getItem('ss-admin-username')||'';$('remember').checked=!!$('auth-username').value;
+ $('month').value=settlementMonth(today());setMonth();$('entry-date').value=today();setEntryCategory('spacecloud');categoryHelp();$('auth-username').value=localStorage.getItem('ss-admin-username')||'';$('remember').checked=!!$('auth-username').value;
  const hash=new URLSearchParams(location.hash.slice(1)),incoming=hash.get('setup')||hash.get('invite');if(incoming){sessionStorage.setItem('ss-admin-link',incoming);history.replaceState(null,'',location.pathname);}
  linkToken=sessionStorage.getItem('ss-admin-link')||'';
  if(linkToken){showAuth();$('auth-submit').disabled=true;try{const info=await api('link_info',{linkToken});linkKind=info.kind;for(const id of ['name-label','confirm-label','password-guide'])$(id).hidden=false;$('auth-name').required=true;$('auth-confirm').required=true;$('remember-label').hidden=true;$('auth-password').minLength=8;$('auth-password').autocomplete='new-password';$('auth-foot').hidden=true;$('auth-eyebrow').textContent=linkKind==='bootstrap'?'FIRST SETUP':'YOU ARE INVITED';$('auth-title').textContent=linkKind==='bootstrap'?'관리자 계정 설정':'운영자 가입 신청';$('auth-description').textContent=linkKind==='bootstrap'?'slowsix 계정의 비밀번호를 직접 설정해주세요.':'가입 후 관리자의 승인을 기다려주세요.';$('auth-submit').textContent=linkKind==='bootstrap'?'관리자 계정 만들기':'가입 신청';if(linkKind==='bootstrap'){$('auth-username').value='slowsix';$('auth-username').readOnly=true;}}catch(e){sessionStorage.removeItem('ss-admin-link');linkToken='';configureLogin();notice(e.message,true);}finally{$('auth-submit').disabled=false;}}

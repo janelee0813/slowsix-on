@@ -68,8 +68,8 @@ body.admin-app{background:#f3f6fa;color:var(--text)}
 @media(prefers-reduced-motion:reduce){.admin-app *{scroll-behavior:auto!important;transition:none!important}}
 /* Separate business results, pending settlements and actual account cash. */
 .admin-app .summary{position:static;--muted:#607086}
-.admin-app .entry-panel[data-kind=transfer]{border-top-color:#4c88bb}
-.entry-kind-switch #entry-transfer[aria-pressed=true]{background:#e8f1fc;color:#245da7;border-color:#acc5e8}
+.admin-app .entry-panel[data-kind=deposit]{border-top-color:#4c88bb}
+.entry-kind-switch #entry-deposit[aria-pressed=true]{background:#e8f1fc;color:#245da7;border-color:#acc5e8}
 .admin-app .description-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:-3px}
 .description-chips>span{width:100%}.admin-app .description-chip{padding:5px 10px;background:#f1f5f9;color:#526479;border:1px solid #dce4ed;font-size:11px;max-width:100%;overflow-wrap:anywhere;text-align:left}
 .admin-app .description-chip:hover{background:#e7effa;border-color:#acc5e8}
@@ -89,3 +89,6 @@ body.admin-app{background:#f3f6fa;color:var(--text)}
 .settlement-history{border-top:1px solid var(--line);padding-top:16px;margin-top:18px;font-size:12px}.settlement-history-row{border-bottom:1px solid var(--line);padding:12px 0}.settlement-history-row p{margin:0 0 3px}.settlement-history-row button{font-size:11px;color:#b4233c}
 #settlement-preview>strong{display:block;font-size:28px;color:#245da7}#settlement-preview>p{margin-bottom:10px}#settlement-form{margin-top:20px}#settlement-error{color:#b4233c}
 @media(max-width:800px){.admin-app .summary{order:0}.settlement-parties{grid-template-columns:1fr}.admin-app .form-grid>label:nth-child(3){grid-column:auto}.admin-app .form-grid>.description{grid-column:1/-1}.admin-app .entry-kind-switch{gap:5px}.admin-app .entry-kind-switch button{padding:10px 5px;font-size:12px}.admin-app .bank-card>strong{font-size:30px}.admin-app .description-chip{padding:8px 11px}.admin-app .table-panel .sort-control select{max-width:180px}}
+
+.admin-app .entry-panel[data-kind=withdrawal]{border-top-color:#ce8291}
+.entry-kind-switch #entry-withdrawal[aria-pressed=true]{background:#fceef1;color:#a13c56;border-color:#e6b6c2}

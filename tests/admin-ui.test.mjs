@@ -67,12 +67,23 @@ test('changing the settlement month handles December to January',async()=>{
  const h=await screen('2026-09-14');try{h.$('month').value='2026-12';h.$('month').dispatchEvent(new h.w.Event('change'));await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2026-12-01');assert.equal(h.$('to').value,'2026-12-31');assert.equal(h.calls.at(-1).to,'2026-12-31');h.$('month-next').click();await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2027-01-01');assert.equal(h.$('to').value,'2027-01-31');}finally{h.dom.window.close();}
 });
 
-test('income and expense shortcuts respect operator access and preserve entered values',async()=>{
+test('entry groups limit detail choices, preserve values and respect operator access',async()=>{
  for(const role of ['admin','operator']){
   const h=await screen('2026-10-15',role);try{
    h.$('entry-description').value='입력 중인 내용';h.$('entry-amount').value='12345';
    h.$('entry-expense').click();assert.equal(h.$('entry-category').value,role==='admin'?'expense':'fixed');assert.equal(h.$('entry-expense').getAttribute('aria-pressed'),'true');
    h.$('entry-income').click();assert.equal(h.$('entry-category').value,'spacecloud');assert.equal(h.$('entry-description').value,'입력 중인 내용');assert.equal(h.$('entry-amount').value,'12345');
+   assert.deepEqual(Array.from(h.$('entry-category').options,o=>o.value),['spacecloud','invoice','cash']);
+   if(role==='admin'){
+    h.$('entry-deposit').click();assert.deepEqual(Array.from(h.$('entry-category').options,o=>o.value),['operating_deposit']);assert.equal(h.$('entry-category-label').textContent,'입금 항목');
+    h.$('entry-withdrawal').click();assert.deepEqual(Array.from(h.$('entry-category').options,o=>o.value),['operating_withdrawal','profit_withdrawal','fee_withdrawal']);assert.equal(h.$('entry-withdrawal').getAttribute('aria-pressed'),'true');
+    assert.equal(h.$('entry-description').value,'입력 중인 내용');assert.equal(h.$('entry-amount').value,'12345');
+   }else{
+    assert.equal(h.$('entry-deposit').hidden,true);assert.equal(h.$('entry-withdrawal').hidden,true);
+    h.$('entry-withdrawal').click();assert.equal(h.$('entry-category').value,'spacecloud');
+    h.$('entry-expense').click();assert.deepEqual(Array.from(h.$('entry-category').options).filter(o=>!o.disabled).map(o=>o.value),['fixed']);
+   }
+
   }finally{h.dom.window.close();}
  }
 });
@@ -112,7 +123,7 @@ test('oldest sort is stable for same-day entries and handles exactly 100 rows',a
 
 test('save retains every input and only changed entries create another record',async()=>{
  const h=await screen('2026-09-14');try{
-  h.fill();h.$('entry-category').value='fixed';
+  h.fill();h.$('entry-expense').click();h.$('entry-category').value='fixed';h.$('entry-category').dispatchEvent(new h.w.Event('change'));
   await h.submit();
   assert.equal(h.$('entry-date').value,'2026-09-14');assert.equal(h.$('entry-category').value,'fixed');assert.equal(h.$('entry-amount').value,'100000');assert.equal(h.$('entry-description').value,'9월 입금');
   const firstKey=h.calls.filter(c=>c.action==='save_entry').at(-1).request_id;
