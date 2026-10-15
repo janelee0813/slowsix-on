@@ -38,11 +38,11 @@ async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=f
  w.eval(code);const $=id=>w.document.getElementById(id);
  await until(()=>$('page-label').textContent==='0건');
  const submit=async()=>{$('entry-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await until(()=>!$('save-entry').disabled);};
- const fill=()=>{$('month').value='2026-08';$('from').value='2026-08-12';$('to').value='2026-09-11';$('entry-date').value='2026-09-14';$('entry-description').value='9월 입금';$('entry-amount').value='100000';};
+ const fill=()=>{$('month').value='2026-08';$('from').value='2026-08-01';$('to').value='2026-08-31';$('entry-date').value='2026-09-14';$('entry-description').value='9월 입금';$('entry-amount').value='100000';};
  return{dom,w,$,calls,stored,submit,fill,setFailSave:x=>failSave=x,setFailList:x=>failList=x};
 }
 test('saving outside the viewed period switches to saved month and displays the entry',async()=>{
- const h=await screen();try{h.fill();await h.submit();assert.equal(h.$('month').value,'2026-09');assert.equal(h.$('from').value,'2026-09-12');assert.equal(h.$('to').value,'2026-10-11');assert.equal(h.$('entry-count').textContent,'1');assert.match(h.$('entries').textContent,/9월 입금/);assert.match(h.$('save-status').textContent,/저장했습니다/);}finally{h.dom.window.close();}
+ const h=await screen();try{h.fill();await h.submit();assert.equal(h.$('month').value,'2026-09');assert.equal(h.$('from').value,'2026-09-01');assert.equal(h.$('to').value,'2026-09-30');assert.equal(h.$('entry-count').textContent,'1');assert.match(h.$('entries').textContent,/9월 입금/);assert.match(h.$('save-status').textContent,/저장했습니다/);}finally{h.dom.window.close();}
 });
 test('successful save with failed refresh states saved and does not submit again',async()=>{
  const h=await screen();try{h.fill();h.setFailList(true);await h.submit();assert.equal(h.stored.length,1);assert.equal(h.$('entry-description').value,'9월 입금');assert.match(h.$('save-status').textContent,/내역은 저장되었지만/);assert.match(h.$('entries').textContent,/불러오지 못했습니다/);assert.equal(h.$('entry-count').textContent,'—');h.setFailList(false);h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='1');assert.equal(h.calls.filter(c=>c.action==='save_entry').length,1);}finally{h.dom.window.close();}
@@ -52,18 +52,29 @@ test('failed save retains form and same idempotency key for retry',async()=>{
 });
 
 for(const [day,month,from,to] of [
- ['2026-09-11','2026-08','2026-08-12','2026-09-11'],
- ['2026-09-12','2026-09','2026-09-12','2026-10-11'],
- ['2027-01-01','2026-12','2026-12-12','2027-01-11'],
- ['2024-02-29','2024-02','2024-02-12','2024-03-11'],
+ ['2026-09-11','2026-09','2026-09-01','2026-09-30'],
+ ['2026-09-12','2026-09','2026-09-01','2026-09-30'],
+ ['2027-01-01','2027-01','2027-01-01','2027-01-31'],
+ ['2024-02-29','2024-02','2024-02-01','2024-02-29'],
 ])test(`initial settlement period contains ${day}`,async()=>{
  const h=await screen(day);try{assert.equal(h.$('month').value,month);assert.equal(h.$('from').value,from);assert.equal(h.$('to').value,to);}finally{h.dom.window.close();}
 });
-test('saving an 11th-day entry moves to previous month settlement',async()=>{
- const h=await screen('2026-09-14');try{h.fill();h.$('month').value='2026-09';h.$('from').value='2026-09-12';h.$('to').value='2026-10-11';h.$('entry-date').value='2026-09-11';await h.submit();assert.equal(h.$('month').value,'2026-08');assert.equal(h.$('from').value,'2026-08-12');assert.equal(h.$('to').value,'2026-09-11');assert.equal(h.$('entry-count').textContent,'1');}finally{h.dom.window.close();}
+test('saving an earlier-month entry selects its full calendar month',async()=>{
+ const h=await screen('2026-09-14');try{h.fill();h.$('month').value='2026-09';h.$('from').value='2026-09-12';h.$('to').value='2026-10-11';h.$('entry-date').value='2026-08-31';await h.submit();assert.equal(h.$('month').value,'2026-08');assert.equal(h.$('from').value,'2026-08-01');assert.equal(h.$('to').value,'2026-08-31');assert.equal(h.$('entry-count').textContent,'1');}finally{h.dom.window.close();}
 });
 test('changing the settlement month handles December to January',async()=>{
- const h=await screen('2026-09-14');try{h.$('month').value='2026-12';h.$('month').dispatchEvent(new h.w.Event('change'));await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2026-12-12');assert.equal(h.$('to').value,'2027-01-11');assert.equal(h.calls.at(-1).to,'2027-01-11');}finally{h.dom.window.close();}
+ const h=await screen('2026-09-14');try{h.$('month').value='2026-12';h.$('month').dispatchEvent(new h.w.Event('change'));await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2026-12-01');assert.equal(h.$('to').value,'2026-12-31');assert.equal(h.calls.at(-1).to,'2026-12-31');h.$('month-next').click();await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2027-01-01');assert.equal(h.$('to').value,'2027-01-31');}finally{h.dom.window.close();}
+});
+
+test('income and expense shortcuts respect operator access and preserve entered values',async()=>{
+ for(const role of ['admin','operator']){
+  const h=await screen('2026-10-15',role);try{
+   h.$('entry-description').value='입력 중인 내용';h.$('entry-amount').value='12345';
+   h.$('entry-expense').click();assert.equal(h.$('entry-category').value,role==='admin'?'expense':'fixed');assert.equal(h.$('entry-expense').getAttribute('aria-pressed'),'true');
+   h.$('entry-income').click();assert.equal(h.$('entry-category').value,'spacecloud');assert.equal(h.$('entry-description').value,'입력 중인 내용');assert.equal(h.$('entry-amount').value,'12345');
+   h.$('month-prev').click();await until(()=>!h.$('load-period').disabled);h.$('month-current').click();await until(()=>!h.$('load-period').disabled);assert.equal(h.$('from').value,'2026-10-01');assert.equal(h.$('to').value,'2026-10-31');
+  }finally{h.dom.window.close();}
+ }
 });
 
 test('date sorting orders the whole period across pages and resets to page one',async()=>{
@@ -127,7 +138,7 @@ test('manual fee blocks unqueried date changes, preserves failed input, and requ
  const h=await screen('2026-09-14');try{
   h.$('manual-fee').value='100';h.$('from').value='2026-09-13';h.$('fee-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>h.$('notice').textContent.includes('먼저 조회'));
   assert.equal(h.calls.filter(c=>c.action==='save_fee').length,0);
-  h.$('from').value='2026-09-12';h.setFailSave(true);h.$('fee-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>h.$('fee-status').textContent.includes('저장 완료를 확인하지'));
+  h.$('from').value='2026-09-01';h.setFailSave(true);h.$('fee-form').dispatchEvent(new h.w.Event('submit',{cancelable:true}));await until(()=>h.$('fee-status').textContent.includes('저장 완료를 확인하지'));
   assert.equal(h.$('manual-fee').value,'100');assert.equal(h.$('sum-fee').textContent,'미입력');
  }finally{h.dom.window.close();}
  const old=await screen('2026-09-14','admin',true);try{assert.equal(old.$('save-fee').disabled,true);assert.match(old.$('fee-status').textContent,/서버 업데이트/);}finally{old.dom.window.close();}
@@ -160,7 +171,7 @@ test('all column headers select sorting and general expenses show a period total
   h.stored.push({id:'expense1',entry_date:'2026-09-15',category:'expense',amount:12345,description:'청소',author:'운영자'});
   h.stored.push({id:'expense2',entry_date:'2026-08-15',category:'expense',amount:99999,description:'이전',author:'운영자'});
   for(const key of ['date','author','description','spacecloud','invoice','cash','fixed','expense']){
-   const b=h.w.document.querySelector('[data-sort-key="'+key+'"]');const before=h.calls.length;b.click();await until(()=>h.calls.length>before&&h.$('summary-period').textContent.includes('2026-09-12'));
+   const b=h.w.document.querySelector('[data-sort-key="'+key+'"]');const before=h.calls.length;b.click();await until(()=>h.calls.length>before&&h.$('summary-period').textContent.includes('2026-09-01'));
    assert.equal(h.calls.at(-1).sort_by,key);assert.equal(b.getAttribute('aria-pressed'),'true');
   }
   assert.equal(h.$('sum-expense').textContent,'12,345원');

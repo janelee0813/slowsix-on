@@ -1,0 +1,68 @@
+/* A clear, light workspace for administration; public/member pages keep their theme. */
+:root{color-scheme:light;--bg:#f3f6fa;--panel:#fff;--line:#dce4ed;--border:#dce4ed;--text:#1e293b;--muted:#607086;--purple:#2563eb;--green:#087f5b;--red:#b4233c}
+body.admin-app{background:#f3f6fa;color:var(--text)}
+.admin-app .topbar{background:#fff;border-color:var(--line);height:auto;min-height:76px;padding-block:14px}
+.admin-app .brand{color:#18263b}.admin-app .brand small{color:var(--muted)}
+.admin-app .panel{background:#fff;border-color:var(--line);box-shadow:0 3px 14px #1e293b05}
+.admin-app .eyebrow{color:#51708f}.admin-app .auth-intro h1 span{background:none;color:#2563eb;-webkit-text-fill-color:currentColor}
+.admin-app .primary{background:#2563eb;color:#fff;box-shadow:0 2px 4px #2563eb18}
+.admin-app .primary:hover{background:#1d4ed8;filter:none}
+.admin-app .secondary{background:#fff;color:#334155;border-color:#ccd7e5}.admin-app .secondary:hover{background:#eff5ff;border-color:#a8c2e8}
+.admin-app .quiet{color:#53657a}.admin-app .quiet:hover{color:#1d4ed8;background:#edf4ff}
+.admin-app button:focus-visible,.admin-app a:focus-visible{outline:2px solid #2563eb;outline-offset:3px}
+.admin-app label{color:#43556a;font-weight:550}
+.admin-app input,.admin-app select,.admin-app textarea{background:#fff;color:var(--text);border-color:#cbd5e1;color-scheme:light}
+.admin-app input:focus,.admin-app select:focus,.admin-app textarea:focus{border-color:#2563eb;outline:2px solid #2563eb22}
+.admin-app input::placeholder,.admin-app textarea::placeholder{color:#8b98aa}
+.admin-app input[readonly]{background:#f4f7fb}.admin-app input:disabled{background:#eef2f7}
+.admin-app .badge{color:#245da7;border-color:#bdd1ec;background:#edf5ff}
+.admin-app .tabs{background:#e7edf5;border:0;border-radius:12px;padding:5px;gap:5px;margin-bottom:22px}
+.admin-app .tabs button{border:0;border-radius:8px;padding:11px 18px;font-size:13px;font-weight:600;color:#596b81}
+.admin-app .tabs button.active{color:#1d4ed8;background:#fff;box-shadow:0 1px 5px #24364c12}
+.admin-app .toolbar{align-items:center;gap:14px;padding:18px 22px;position:relative}
+.period-selector>span{display:block;margin-bottom:7px}.period-custom{margin-left:auto;font-size:12px;color:var(--muted)}
+.period-custom summary{cursor:pointer;padding:10px 4px}.period-custom .range{margin-top:12px}.period-custom p{margin:10px 0 0}
+.admin-app .toolbar>.secondary{margin-left:0}.admin-app .month-navigation output{font-size:18px;min-width:130px}
+.admin-app .month-navigation button{width:34px;height:34px;padding:0;font-size:22px;background:#f8fafc}
+.admin-app .entry-panel{border-top:3px solid #22a67d}
+.admin-app .entry-panel[data-kind=expense]{border-top-color:#e5a23d}
+.entry-kind-switch{display:flex;gap:8px;margin:0 0 20px}
+.entry-kind-switch button{background:#f8fafc;color:#66758a;border-color:#dce4ed;font-size:13px;font-weight:650;flex:1;max-width:180px}
+.entry-kind-switch #entry-income[aria-pressed=true]{background:#e6f5ee;color:#087f5b;border-color:#96d3ba}
+.entry-kind-switch #entry-expense[aria-pressed=true]{background:#fff3e0;color:#a6600b;border-color:#eac284}
+.admin-app #category-help{line-height:1.7;max-width:480px}
+.admin-app .table-panel{border-top:3px solid #94a3b8}.admin-app .count{background:#eaf0f7;color:#4c6079}
+.admin-app th{background:#f7f9fc;color:#52647b;border-color:var(--line);font-size:11px}
+.admin-app th:nth-child(3),.admin-app th:nth-child(4),.admin-app th:nth-child(5){background:#eef8f4;color:#16634d}
+.admin-app th:nth-child(6),.admin-app th:nth-child(7){background:#fff6e9;color:#9a5d16}
+.admin-app th button[data-sort-key][aria-pressed=true]{color:#1d4ed8;font-weight:700}
+.admin-app td{border-bottom-color:#e8edf3}.admin-app #entries tr:nth-child(even){background:#fafcfe}.admin-app #entries tr:hover{background:#f0f6ff}
+.admin-app #entries td{padding:8px 10px;line-height:1.4}.admin-app #entries td small{color:#7b8ba0}
+.admin-app td.positive{color:#087f5b;font-weight:650}.admin-app td.negative{color:#a6600b;font-weight:650}
+.admin-app td.positive,.admin-app td.negative{background:#ffffff80}
+.admin-app .panel.summary{--muted:#58708c;--line:#cfdded;background:#edf4fc;border-color:#c4d6ec;border-top:3px solid #6d9cd5}
+.admin-app .summary>.eyebrow{color:#426a9a;letter-spacing:.5px}.admin-app .summary h2{color:#203b5d}
+.admin-app .summary dl{display:grid;grid-template-columns:1fr;gap:7px;margin:18px 0}
+.admin-app .summary dl>div{background:#ffffffb8;border:1px solid #dce6f1;border-radius:9px;padding:12px;gap:8px}
+.admin-app .summary dt{font-size:12px}.admin-app .summary dt small{font-size:10px}.admin-app .summary dd{font-size:18px;white-space:normal;overflow-wrap:anywhere;text-align:right}
+.admin-app .summary .metric-revenue{background:#e8f5ef;border-color:#c6e6d6}.admin-app .metric-revenue dd{color:#087f5b}
+.admin-app .summary .metric-spending{background:#fff3e1;border-color:#f0dec1}.admin-app .metric-spending dd{color:#a6600b}
+.admin-app .summary .metric-profit{border-color:#b5ceee}.admin-app .metric-profit dd{color:#245da7}
+.admin-app .summary .settlement{background:#245da7;border-color:#245da7;color:#fff}
+.admin-app .summary .settlement>span,.admin-app .summary .settlement p{color:#e0edff}.admin-app .summary .settlement strong{color:#fff;font-size:28px}
+.admin-app .fee-form{padding:13px 0;margin:0}.admin-app .fee-form label{color:#435f80}.admin-app .fee-controls button{padding:10px;font-size:12px}
+.admin-app .summary .formula{color:#506b8c}.admin-app .automatic{background:#e5f5ec;color:#13724f;border-radius:4px;padding:2px 5px;font-weight:500}
+.admin-app #notice{background:#eff6ff;border-color:#96b8e6;color:#1f4f8e;box-shadow:0 10px 32px #18263b20}
+.admin-app #notice.error{background:#fff0f2;color:#aa2440;border-color:#edb8c2}
+.admin-app dialog{background:#fff;color:var(--text);box-shadow:0 20px 80px #172b4d30}.admin-app dialog::backdrop{background:#172b4d66}
+.admin-app .save-status.success{background:#edf8f2;color:#087f5b;border-color:#b9ddc9}.admin-app .save-status.error{background:#fff1f3;color:#b4233c;border-color:#ecc3cb}
+.admin-app .recurring-intro{border-left:4px solid #e5a23d}.admin-app .recurring-item .actions .quiet:last-child,.admin-app #entries td:last-child .quiet:last-child{color:#b4233c}
+.admin-app .member-admin-panel .booking-card,.admin-app .member-admin-panel .member-person{border-color:var(--line)}
+.admin-app .member-admin-panel .calendar-weekday{background:#eff4fa}.admin-app .member-admin-panel .calendar-event{background:#e7f0fc;color:#245da7}.admin-app .member-admin-panel .calendar-external{background:#e5f5ef;color:#087f5b}
+.admin-app .member-admin-panel .payment-note{background:#e7f5ed}.admin-app .member-admin-panel .price-box{background:#edf4fc;border-color:#c4d6ec}.admin-app .price-box>strong{color:#245da7}
+.admin-app .status-requested,.admin-app .status-awaiting_payment,.admin-app .approval-pending-note{background:#fff4df;border-color:#e4c99c;color:#92610b}
+.admin-app .status-confirmed{background:#e7f5ee;color:#087f5b;border-color:#b5d9c8}.admin-app .status-cancelled,.admin-app .status-rejected{background:#f1f4f8;color:#66758a;border-color:#d8e0e9}
+.admin-app .coupon-card{background:#f7fafc;border-color:#d6e1ec}.admin-app .coupon-held{background:#fff4df}
+@media(max-width:1100px){.admin-app .workspace{grid-template-columns:minmax(0,1fr) 290px}.admin-app .summary{padding:17px}}
+@media(max-width:800px){.admin-app main{padding:22px 16px 40px}.admin-app .workspace{display:flex;flex-direction:column}.admin-app .ledger-main,.admin-app .summary{width:100%}.admin-app .summary{order:-1}.admin-app .summary dl{grid-template-columns:1fr 1fr;gap:7px}.admin-app .summary dl>div{padding:10px}.admin-app .summary dd{text-align:left;font-size:18px}.admin-app .toolbar{gap:10px;padding:15px}.period-selector{flex:1}.period-custom{order:4;width:100%;margin-left:0;border-top:1px solid var(--line)}.period-custom:not([open]){display:block}.period-custom summary{padding:10px 0 0}.admin-app .period-custom .range{width:100%}.admin-app .tabs button{padding:10px 13px;font-size:12px}.admin-app .table-panel .section-heading{padding:0 16px}.admin-app .entry-panel{padding:18px}.admin-app .form-grid{gap:12px}.admin-app .sort-control select{max-width:185px}.admin-app .topbar{padding-inline:16px}.admin-app #account-name{max-width:125px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.admin-app *{scroll-behavior:auto!important;transition:none!important}}

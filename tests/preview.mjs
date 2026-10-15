@@ -11,7 +11,7 @@ const invitation=(await h.call('create_invite',{},a.sessionToken)).data.url.spli
 await h.call('register',{linkToken:invitation,username:'operatorone',name:'운영자 하나',password:pass});
 const op=(await h.call('login',{username:'operatorone',password:pass})).data;
 await h.call('set_status',{id:op.user.id,status:'active'},a.sessionToken);
-for(const [category,amount,description,date] of [['spacecloud',1540000,'스페이스클라우드 정산 입금','2026-09-12'],['invoice',400000,'기업 워크숍 대관','2026-09-11'],['cash',220000,'주말 모임 대관','2026-09-10'],['fixed',700000,'9월 월세','2026-09-05'],['fixed',112000,'9월 관리비','2026-09-06'],['expense',140000,'청소 알바비','2026-09-09']])await h.call('save_entry',{category,amount,description,date,request_id:crypto.randomUUID()},a.sessionToken);
+for(const [category,amount,description,date] of [['spacecloud',1540000,'스페이스클라우드 정산 입금','2026-10-12'],['invoice',400000,'기업 워크숍 대관','2026-10-11'],['cash',220000,'주말 모임 대관','2026-10-10'],['fixed',700000,'10월 월세','2026-10-05'],['fixed',112000,'10월 관리비','2026-10-06'],['expense',140000,'청소 알바비','2026-10-09']])await h.call('save_entry',{category,amount,description,date,request_id:crypto.randomUUID()},a.sessionToken);
 const memberLink=(await h.call('member_invite',{tier:'friends'},a.sessionToken)).data.url.split('=')[1];
 await h.call('register',{linkToken:memberLink,username:'frienduser',name:'프렌즈 미리보기',password:pass,gender:'여성',age_group:'30대',purposes:['보드게임']});
 const pendingMember=(await h.call('member_people',{},a.sessionToken)).data.items.find(x=>x.username==='frienduser');await h.call('member_person_save',{id:pendingMember.id,version:pendingMember.version,tier:'friends',status:'active'},a.sessionToken);
@@ -23,7 +23,7 @@ createServer(async(req,res)=>{try{
   const response=await h.handler(new Request('https://mock.supabase.co/functions/v1/admin-api',{method:'POST',headers:{'Content-Type':'application/json',origin:'https://slowsixon.com','x-forwarded-for':'127.0.0.1'},body}));res.writeHead(response.status,{'Content-Type':'application/json'});res.end(await response.text());return;
  }
  const path=new URL(req.url,'http://localhost').pathname;
- const allowed=['/assets/schedule.css','/assets/schedule.js','/assets/site-home.css','/assets/site-home.js','/assets/guide-theme.css','/admin.html','/assets/admin.css','/assets/admin.js','/membership.html','/assets/membership.js','/assets/membership.css','/assets/membership-shared.js','/assets/membership-admin.js','/index.html','/'];if(!allowed.includes(path)){res.writeHead(404);res.end();return;}
+ const allowed=['/assets/admin-theme.css','/assets/schedule.css','/assets/schedule.js','/assets/site-home.css','/assets/site-home.js','/assets/guide-theme.css','/admin.html','/assets/admin.css','/assets/admin.js','/membership.html','/assets/membership.js','/assets/membership.css','/assets/membership-shared.js','/assets/membership-admin.js','/index.html','/'];if(!allowed.includes(path)){res.writeHead(404);res.end();return;}
  let text=await readFile(new URL((path==='/'?'index.html':path.slice(1)),root),'utf8');
  res.writeHead(200,{'Content-Type':mime[path.slice(path.lastIndexOf('.'))]||'text/html','Cache-Control':'no-store'});res.end(text);
  }catch(e){res.writeHead(500);res.end('Preview error');console.error(e.message)}
