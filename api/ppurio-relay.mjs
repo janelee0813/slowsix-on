@@ -27,14 +27,21 @@ export function proxyRequest(proxy,authorization){
   req.end();
  });
 }
-export function makeHandler({env=process.env,request=proxyRequest,now=Date.now}={}){
+export function makeHandler({env=process.env,request=proxyRequest,now=Date.now,report=event=>console.error(JSON.stringify(event))}={}){
  return async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   if(req.method!=='POST')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});
   let body;try{body=typeof req.body==='string'?JSON.parse(req.body):req.body;}catch{return res.status(400).json({error:'INVALID_REQUEST'});}
   const raw=JSON.stringify(body??{});
   if(raw.length>2048)return res.status(413).json({error:'INVALID_REQUEST'});
-  if(!verify(env.SUPABASE_SERVICE_ROLE_KEY,req.headers['x-ss-timestamp'],req.headers['x-ss-signature'],raw,now()))return res.status(403).json({error:'FORBIDDEN'});
+  const secret=env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if(!verify(secret,req.headers['x-ss-timestamp'],req.headers['x-ss-signature'],raw,now())){
+   // Diagnostic metadata only: never log the key, signature, request body or token.
+   let keyKind=!secret?'missing':secret.startsWith('sb_secret_')?'secret':'other',projectMatches=false;
+   if(secret?.split('.').length===3){keyKind='jwt';try{projectMatches=JSON.parse(Buffer.from(secret.split('.')[1],'base64url').toString()).ref==='qhvwwdrwfzwpehfjntbv';}catch{}}
+   report({event:'ppurio_relay_auth_rejected',keyKind,projectMatches,timestampValid:typeof req.headers['x-ss-timestamp']==='string'&&Math.abs(now()-Number(req.headers['x-ss-timestamp']))<=60000,signaturePresent:typeof req.headers['x-ss-signature']==='string'});
+   return res.status(403).json({error:'FORBIDDEN'});
+  }
   if(body?.action!=='token'||typeof body.authorization!=='string'||!/^Basic [A-Za-z0-9+/=]+$/.test(body.authorization))return res.status(400).json({error:'INVALID_REQUEST'});
   if(!env.FIXIE_URL)return res.status(503).json({error:'FIXIE_CONFIGURATION'});
   try{

@@ -21,3 +21,13 @@ test('only signed token requests use proxy and do not return raw provider errors
  const unsupported={action:'send',authorization:'Basic abc=',url:'https://evil.test'};
  const invalid=response();await handler({method:'POST',body:unsupported,headers:{...headers,'x-ss-signature':sign(secret,timestamp,JSON.stringify(unsupported))}},invalid);assert.equal(invalid.code,400);assert.equal(calls,1);
 });
+test('relay trims copied whitespace and logs only safe authentication metadata',async()=>{
+ const events=[];
+ const body={action:'token',authorization:'Basic cHJpdmF0ZQ=='};
+ const handler=makeHandler({env:{SUPABASE_SERVICE_ROLE_KEY:'\n'+secret+'\n',FIXIE_URL:'http://test:test@example.usefixie.com:80'},now:()=>now,report:e=>events.push(e),request:async()=>({status:200,data:{token:'private-token'}})});
+ const good=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':sign(secret,timestamp,JSON.stringify(body))}},good);
+ assert.equal(good.code,200);assert.equal(events.length,0);
+ const bad=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':'0'.repeat(64)}},bad);
+ assert.equal(bad.code,403);assert.deepEqual(events,[{event:'ppurio_relay_auth_rejected',keyKind:'other',projectMatches:false,timestampValid:true,signaturePresent:true}]);
+ for(const value of [secret,body.authorization,'private-token','0'.repeat(64)])assert.ok(!JSON.stringify(events).includes(value));
+});
