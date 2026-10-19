@@ -37,9 +37,9 @@ export function makeHandler({env=process.env,request=proxyRequest,now=Date.now,r
   const secret=env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if(!verify(secret,req.headers['x-ss-timestamp'],req.headers['x-ss-signature'],raw,now())){
    // Diagnostic metadata only: never log the key, signature, request body or token.
-   let keyKind=!secret?'missing':secret.startsWith('sb_secret_')?'secret':'other',projectMatches=false;
-   if(secret?.split('.').length===3){keyKind='jwt';try{projectMatches=JSON.parse(Buffer.from(secret.split('.')[1],'base64url').toString()).ref==='qhvwwdrwfzwpehfjntbv';}catch{}}
-   report({event:'ppurio_relay_auth_rejected',keyKind,projectMatches,timestampValid:typeof req.headers['x-ss-timestamp']==='string'&&Math.abs(now()-Number(req.headers['x-ss-timestamp']))<=60000,signaturePresent:typeof req.headers['x-ss-signature']==='string'});
+   let keyKind=!secret?'missing':secret.startsWith('sb_secret_')?'secret':'other',projectMatches=false,serviceRole=false;
+   if(secret?.split('.').length===3){keyKind='jwt';try{const claims=JSON.parse(Buffer.from(secret.split('.')[1],'base64url').toString());projectMatches=claims.ref==='qhvwwdrwfzwpehfjntbv';serviceRole=claims.role==='service_role';}catch{}}
+   report({event:'ppurio_relay_auth_rejected',keyKind,projectMatches,serviceRole,timestampValid:typeof req.headers['x-ss-timestamp']==='string'&&Math.abs(now()-Number(req.headers['x-ss-timestamp']))<=60000,signaturePresent:typeof req.headers['x-ss-signature']==='string'});
    return res.status(403).json({error:'FORBIDDEN'});
   }
   if(body?.action!=='token'||typeof body.authorization!=='string'||!/^Basic [A-Za-z0-9+/=]+$/.test(body.authorization))return res.status(400).json({error:'INVALID_REQUEST'});

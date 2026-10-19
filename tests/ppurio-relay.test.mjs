@@ -28,6 +28,6 @@ test('relay trims copied whitespace and logs only safe authentication metadata',
  const good=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':sign(secret,timestamp,JSON.stringify(body))}},good);
  assert.equal(good.code,200);assert.equal(events.length,0);
  const bad=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':'0'.repeat(64)}},bad);
- assert.equal(bad.code,403);assert.deepEqual(events,[{event:'ppurio_relay_auth_rejected',keyKind:'other',projectMatches:false,timestampValid:true,signaturePresent:true}]);
+ assert.equal(bad.code,403);assert.deepEqual(events,[{event:'ppurio_relay_auth_rejected',keyKind:'other',projectMatches:false,serviceRole:false,timestampValid:true,signaturePresent:true}]);
  for(const value of [secret,body.authorization,'private-token','0'.repeat(64)])assert.ok(!JSON.stringify(events).includes(value));
 });
