@@ -64,3 +64,11 @@ changeWord 문서는 `var1` → `[*1*]` 치환으로 안내한다. 실제 API �
 - https://message.ppurio.com/api-docs/
 - https://supabase.com/docs/guides/troubleshooting/why-supabase-edge-functions-cannot-provide-static-egress-ips-for-whitelisting-3d78b0
 - https://usefixie.com/documentation/http-and-https-requests
+
+## 재개 검사 (2026-10-19)
+
+- 뿌리오 로그인 화면에서 발신프로필 `슬로우식스(@slowsix)`와 위 템플릿 5개의 승인 상태를 확인했다. 코드 및 API 치환 변수는 기존 기록과 일치한다.
+- 실제 Supabase Dashboard에서 `ppurio-test`에 `{"route":"fixie"}`로 진단했다. Supabase 함수 인증은 통과했으나 응답은 `stage=relay`, `relayHttpStatus=403`, `error=FORBIDDEN`, `authenticated=false`, `messageSent=false`였다.
+- Vercel Production에 `FIXIE_URL`과 `SUPABASE_SERVICE_ROLE_KEY` 이름의 Secret 설정이 존재한다. 값 일치 여부는 아직 확인하지 않았다. 중계 HMAC 인증 오류이므로 뿌리오의 IP 허용 여부는 이 검사로 확인할 수 없다.
+- 사용자가 관리자 번호로 테스트 알림톡 1건 발송을 승인했다. 테스트 예약 정보만 사용한다. 실제 발송은 아직 하지 않았다.
+- 다음 단계: 양 서버의 중계 서명 키 설정 일치 및 배포 반영을 확인하고 인증 진단을 다시 실행한다. 성공 후 테스트 발송 경로 구현·배포 및 1건 수신 확인을 진행한다. 현재 relay는 여전히 토큰 진단 전용이다.
