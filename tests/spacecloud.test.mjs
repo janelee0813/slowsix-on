@@ -75,7 +75,7 @@ test('durable queue permissions, single worker, cancellation during a write, int
  try{
   const password='LocalTest!2026';await ok('register',{linkToken:await h.bootstrap(),username:'slowsix',password,name:'관리자'});
   const admin=(await ok('login',{username:'slowsix',password})).sessionToken;
-  const invite=await ok('member_invite',{tier:'friends'},admin);await ok('register',{linkToken:invite.url.split('=')[1],username:'testmember',password,name:'테스트',gender:'여성',age_group:'30대',purposes:['보드게임']});
+  const invite=await ok('member_invite',{tier:'friends'},admin);await ok('register',{linkToken:invite.url.split('=')[1],username:'testmember',password,name:'테스트',gender:'여성',age_group:'30대',phone:'01000000000',purposes:['보드게임']});
   const person=(await ok('member_people',{},admin)).items[0];await ok('member_person_save',{id:person.id,version:person.version,tier:'friends',status:'active'},admin);
   const member=(await ok('login',{username:'testmember',password})).sessionToken;
   assert.equal((await h.call('member_sc_state',{},member)).status,403);

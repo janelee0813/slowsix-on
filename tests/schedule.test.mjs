@@ -9,7 +9,7 @@ test('public schedule matches member availability without exposing booking or ac
   await ok('register',{linkToken:await h.bootstrap(),username:'slowsix',password,name:'관리자'});
   const admin=(await ok('login',{username:'slowsix',password})).sessionToken;
   const link=await ok('member_invite',{tier:'friends'},admin);
-  await ok('register',{linkToken:link.url.split('=')[1],username:'schedulefriend',password,name:'비공개닉네임',gender:'여성',age_group:'30대',purposes:['보드게임']});
+  await ok('register',{linkToken:link.url.split('=')[1],username:'schedulefriend',password,name:'비공개닉네임',gender:'여성',age_group:'30대',phone:'01000000000',purposes:['보드게임']});
   const person=(await ok('member_people',{},admin)).items[0];
   await ok('member_person_save',{id:person.id,version:person.version,tier:'friends',status:'active'},admin);
   const member=(await ok('login',{username:'schedulefriend',password})).sessionToken;

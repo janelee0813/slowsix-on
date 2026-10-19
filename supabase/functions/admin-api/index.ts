@@ -6,8 +6,9 @@ const project = 'https://qhvwwdrwfzwpehfjntbv.supabase.co';
 const site = 'https://slowsixon.com';
 const allowedOrigins = new Set([site, 'https://www.slowsixon.com']);
 const publicActions = new Set(['login','link_info','register','public_calendar']);
-const actions = new Set(['settle','cancel_settlement','save_bank_opening','description_suggestions','member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
+const actions = new Set(['settle','cancel_settlement','save_bank_opening','description_suggestions','member_phone_save','member_alimtalk','member_alimtalk_retry','member_sc_state','member_sc_enable','member_sc_retry','member_coupon_wallet','member_coupon_issue','member_delete','member_inbox','member_home','member_read','member_calendar','member_bookings','member_quote','member_request','member_cancel','member_invite','member_invites','member_revoke','member_people','member_person_save','member_settings','member_settings_save','member_blocks','member_block_save','member_block_delete','member_status','recurring_list','recurring_save','recurring_delete','me','update_name','logout','list','save_fee','save_entry','delete_entry','people','set_status','create_invite','revoke_invite','audit']);
 const errors: Record<string,string> = {
+ PHONE_REQUIRED:'예약 안내를 받을 010 휴대폰 번호 11자리를 등록해주세요.',
  FEE_METHOD_CONFLICT:'운영수수료 출금 내역과 정산금 공제를 함께 적용할 수 없습니다. 수수료 지급 방식을 운영 통장에서 별도 출금으로 설정하거나 중복 내역을 정리해주세요.',
  ENTRY_SETTLED:'이미 정산한 내역입니다. 해당 정산 처리를 취소한 뒤 수정해주세요.', FEE_REQUIRED:'이 기간의 운영 수수료를 먼저 저장해주세요. 수수료가 없으면 0원을 저장하세요.', NOTHING_TO_SETTLE:'정산할 내역이 없습니다.',
  SC_NOT_CONNECTED:'Vercel 연동 서버 설정과 Supabase 자동 실행 설정을 먼저 완료해주세요.',
@@ -43,6 +44,8 @@ export function safePayload(action: string,b: Record<string,unknown>) {
   const out:Record<string,unknown>={};
   if(['member_quote','member_request','member_calendar','member_bookings','member_block_save'].includes(action)){const space=b.space??'on';if(!['on','p','d'].includes(String(space)))throw new AppError('INVALID_ENTRY');out.space=space;}
   const limited=(key:string,max:number)=>{if(b[key]!=null&&(typeof b[key]!=='string'||String(b[key]).length>max))throw new AppError('INVALID_ENTRY');return b[key]??'';};
+  if(action==='member_phone_save'){const phone=typeof b.phone==='string'?b.phone.replace(/[ -]/g,''):'';if(!/^010[0-9]{8}$/.test(phone)||!Number.isInteger(b.version)||Number(b.version)<1)throw new AppError('PHONE_REQUIRED');return {phone,version:b.version};}
+  if(action==='member_alimtalk_retry'){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');return {id:b.id};}
   if(action==='member_sc_enable'){if(typeof b.enabled!=='boolean')throw new AppError('INVALID_ENTRY');return {enabled:b.enabled};}
   if(action==='member_sc_retry'){if(!uuid(b.id))throw new AppError('INVALID_ENTRY');return {id:b.id};}
   if(action==='member_coupon_issue'){if(!uuid(b.id)||!uuid(b.member_id)||!['discount5000','night','hours3'].includes(String(b.kind))||typeof b.expires_at!=='string'||!Number.isFinite(Date.parse(b.expires_at)))throw new AppError('INVALID_ENTRY');return {id:b.id,member_id:b.member_id,kind:b.kind,expires_at:b.expires_at};}
@@ -259,7 +262,8 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      if(info.kind==='member'){
       const gender=b.gender??'',age_group=b.age_group??'',purposes=b.purposes??[];
       if(!['남성','여성'].includes(gender)||!['10대','20대','30대','40대','50대','60대 이상'].includes(age_group)||!Array.isArray(purposes)||purposes.length<1||purposes.length>6||purposes.some(x=>!['보드게임','홀덤','친목모임','스터디/강의','독서모임','기타'].includes(x)))throw new AppError('INVALID_ENTRY');
-      profile={gender,age_group,purposes:[...new Set(purposes)]};
+      const phone=typeof b.phone==='string'?b.phone.replace(/[ -]/g,''):'';if(!/^010[0-9]{8}$/.test(phone))throw new AppError('PHONE_REQUIRED');
+      profile={gender,age_group,purposes:[...new Set(purposes)],phone};
      }
      const email=crypto.randomUUID()+'@accounts.slowsixon.invalid';
      const created=await call('/auth/v1/admin/users',{email,password:b.password,email_confirm:true});

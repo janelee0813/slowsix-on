@@ -25,7 +25,7 @@ test('booking availability, blocks, coupons and SpaceCloud outbox are scoped cor
  const h=await harness(),ok=async(a,p={},s)=>{const r=await h.call(a,p,s);assert.equal(r.status,200,JSON.stringify(r.data));return r.data;};
  try{
  const password='SpaceBooking!2026';await ok('register',{linkToken:await h.bootstrap(),username:'slowsix',password,name:'관리자'});const admin=(await ok('login',{username:'slowsix',password})).sessionToken;
- const link=await ok('member_invite',{tier:'friends'},admin);await ok('register',{linkToken:link.url.split('=')[1],username:'spacefriend',password,name:'친구',gender:'여성',age_group:'30대',purposes:['보드게임']});const member=(await ok('member_people',{},admin)).items[0];await ok('member_person_save',{id:member.id,version:member.version,tier:'friends',status:'active'},admin);const token=(await ok('login',{username:'spacefriend',password})).sessionToken;
+ const link=await ok('member_invite',{tier:'friends'},admin);await ok('register',{linkToken:link.url.split('=')[1],username:'spacefriend',password,name:'친구',gender:'여성',age_group:'30대',phone:'01000000000',purposes:['보드게임']});const member=(await ok('member_people',{},admin)).items[0];await ok('member_person_save',{id:member.id,version:member.version,tier:'friends',status:'active'},admin);const token=(await ok('login',{username:'spacefriend',password})).sessionToken;
  const date=new Date(Date.now()+10*86400000).toISOString().slice(0,10),starts_at=date+'T18:00:00+09:00',ends_at=date+'T20:00:00+09:00';
  const payload={id:crypto.randomUUID(),starts_at,ends_at,guests:6,use_coupon:false,note:''};const period={from:date+'T00:00:00+09:00',to:date+'T23:59:00+09:00'};
  const on=await ok('member_request',payload,token);assert.equal(on.space,'on');
