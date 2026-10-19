@@ -53,3 +53,61 @@ test('Fixie requires dedicated shared secret and never falls back to database cr
  const response=await handler(new Request('https://test',{method:'POST',headers:{Authorization:'Bearer private-service'},body:JSON.stringify({route:'fixie'})}));
  assert.equal(response.status,503);assert.equal(calls,0);assert.deepEqual(await response.json(),{error:'RELAY_SECRET_REQUIRED',messageSent:false});
 });
+const testId='slowsix-admin-test-20261019-01';
+const testRequest=()=>new Request('https://test',{method:'POST',headers:{Authorization:'Bearer private-service'},body:JSON.stringify({route:'fixie',action:'send_test',testId})});
+test('explicit test is persistently claimed before sending, and cannot be sent a second time',async()=>{
+ let claimed=false,sends=0,patch;
+ const handler=makeHandler(k=>settings[k],async(url,options)=>{
+  const body=JSON.parse(options.body);
+  if(url==='https://slowsixon.com/api/ppurio-relay'){
+   if(body.action==='token')return Response.json({status:200,data:{token:'private-token'}});
+   assert.equal(claimed,true);assert.equal(body.action,'kakao_test');sends++;return Response.json({status:200,data:{code:1000,messageKey:'accepted-key'}});
+  }
+  assert.match(url,/\/rest\/v1\/ss_ppurio_test_runs/);
+  if(options.method==='POST'){
+   if(claimed)return Response.json({}, {status:409});
+   claimed=true;assert.deepEqual(body,{id:testId,state:'attempted'});return Response.json([body],{status:201});
+  }
+  assert.equal(options.method,'PATCH');patch=body;return new Response(null,{status:204});
+ });
+ const first=await handler(testRequest());assert.equal(first.status,200);assert.equal((await first.json()).messageSubmitted,true);assert.equal(patch.state,'accepted');
+ const second=await handler(testRequest());assert.equal(second.status,409);assert.equal(sends,1);
+});
+test('ambiguous send timeout remains recorded and is not automatically retried',async()=>{
+ let claimed=false,sends=0,patch;
+ const handler=makeHandler(k=>settings[k],async(url,options)=>{
+  const body=JSON.parse(options.body);
+  if(url==='https://slowsixon.com/api/ppurio-relay'){
+   if(body.action==='token')return Response.json({status:200,data:{token:'private-token'}});
+   sends++;throw Error('private-provider-error');
+  }
+  if(options.method==='POST'){if(claimed)return Response.json({},{status:409});claimed=true;return Response.json([body],{status:201});}
+  patch=body;return new Response(null,{status:204});
+ });
+ const first=await handler(testRequest());assert.equal(first.status,502);assert.equal((await first.json()).state,'unknown');assert.equal(patch.state,'unknown');
+ assert.equal((await handler(testRequest())).status,409);assert.equal(sends,1);
+});
+test('missing test storage blocks dispatch and ordinary diagnostic never creates test records',async()=>{
+ let sends=0;
+ const handler=makeHandler(k=>settings[k],async(url,options)=>{
+  if(url==='https://slowsixon.com/api/ppurio-relay'){assert.equal(JSON.parse(options.body).action,'token');return Response.json({status:200,data:{token:'private-token'}});}
+  if(options.method==='POST')return Response.json({}, {status:404});sends++;throw Error('must not send');
+ });
+ const res=await handler(testRequest());assert.equal(res.status,503);assert.deepEqual(await res.json(),{error:'TEST_LOG_REQUIRED',messageSent:false});assert.equal(sends,0);
+});
+test('test log migration enforces unique claims and denies public/member writes',async()=>{
+ const {PGlite}=await import('@electric-sql/pglite');const db=new PGlite();
+ try{
+  await db.exec('create role anon; create role authenticated; create role service_role bypassrls;');
+  const sql=await readFile(new URL('../supabase/migrations/202610190001_ppurio_test.sql',import.meta.url),'utf8');
+  await db.exec(sql);await db.exec(sql);
+  for(const role of ['anon','authenticated']){
+   await db.exec('set role '+role);
+   await assert.rejects(()=>db.query("insert into public.ss_ppurio_test_runs(id,state) values ('forbidden','attempted')"));
+   await assert.rejects(()=>db.query('select * from public.ss_ppurio_test_runs'));
+   await db.exec('reset role');
+  }
+  await db.exec('set role service_role');await db.query("insert into public.ss_ppurio_test_runs(id,state) values ('unique','attempted')");
+  await assert.rejects(()=>db.query("insert into public.ss_ppurio_test_runs(id,state) values ('unique','attempted')"));
+ }finally{await db.close();}
+});

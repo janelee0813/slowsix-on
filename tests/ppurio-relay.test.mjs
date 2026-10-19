@@ -31,3 +31,11 @@ test('relay trims copied whitespace and logs only safe authentication metadata',
  assert.equal(bad.code,403);assert.equal(events[0].keyTag.length,16);assert.equal(events[0].bodyTag.length,16);const {keyTag,bodyTag,...metadata}=events[0];assert.deepEqual([metadata],[{event:'ppurio_relay_auth_rejected',keyKind:'other',projectMatches:false,serviceRole:false,timestampValid:true,signaturePresent:true}]);
  for(const value of [secret,body.authorization,'private-token','0'.repeat(64)])assert.ok(!JSON.stringify(events).includes(value));
 });
+test('signed test sends only the approved recipient and template, without SMS fallback',async()=>{
+ let received;
+ const handler=makeHandler({env:{PPURIO_RELAY_SECRET:secret,FIXIE_URL:'http://test:test@example.usefixie.com:80'},now:()=>now,request:async(proxy,authorization,path,payload)=>{received={authorization,path,payload};return {status:200,data:{code:1000,messsageKey:'accepted-key',token:'never-return-this'}};}});
+ const body={action:'kakao_test',authorization:'Bearer private-token',to:'01000000000',url:'https://evil.test'};
+ const res=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':sign(secret,timestamp,JSON.stringify(body))}},res);
+ assert.equal(received.path,'/v1/kakao');assert.equal(received.payload.targets.length,1);assert.equal(received.payload.targets[0].to,'01051667412');assert.equal(received.payload.templateCode,'ppur_2026091713562747407967598');assert.equal(received.payload.senderProfile,'@slowsix');assert.equal(received.payload.isResend,'N');assert.equal(received.payload.refKey.length<=32,true);
+ assert.deepEqual(res.body,{status:200,data:{code:1000,messageKey:'accepted-key'}});
+});
