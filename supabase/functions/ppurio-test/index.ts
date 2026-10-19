@@ -23,6 +23,8 @@ export function makeHandler(env: (name: string) => string | undefined, fetcher =
     const signature=Array.from(new Uint8Array(await crypto.subtle.sign('HMAC',signingKey,new TextEncoder().encode(`ppurio-relay\n${timestamp}\n${body}`))),b=>b.toString(16).padStart(2,'0')).join('');
     const response=await fetcher('https://slowsixon.com/api/ppurio-relay',{method:'POST',headers:{'Content-Type':'application/json','x-ss-timestamp':timestamp,'x-ss-signature':signature},body,redirect:'error',signal:AbortSignal.timeout(25000)});
     const result=await response.json();
+    const tag=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('').slice(0,16);
+    if(response.status===403)return json({stage:'relay',authenticated:false,relayHttpStatus:403,error:'FORBIDDEN',keyTag:await tag(service),bodyTag:await tag(body),messageSent:false},502);
     if(!response.ok)return json({stage:'relay',authenticated:false,relayHttpStatus:response.status,error:['FIXIE_CONFIGURATION','PROXY_CONNECTION_FAILED','FORBIDDEN'].includes(result.error)?result.error:'RELAY_FAILED',messageSent:false},502);
     return json({stage:'token',route:'fixie',authenticated:result.status===200&&typeof result.data?.token==='string'&&result.data.token.length>0,providerHttpStatus:result.status,providerCode:result.data?.code??null,messageSent:false});
    }
