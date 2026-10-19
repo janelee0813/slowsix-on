@@ -34,7 +34,7 @@ export function makeHandler({env=process.env,request=proxyRequest,now=Date.now,r
   let body;try{body=typeof req.body==='string'?JSON.parse(req.body):req.body;}catch{return res.status(400).json({error:'INVALID_REQUEST'});}
   const raw=JSON.stringify(body??{});
   if(raw.length>2048)return res.status(413).json({error:'INVALID_REQUEST'});
-  const secret=env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const secret=env.PPURIO_RELAY_SECRET?.trim();
   if(!verify(secret,req.headers['x-ss-timestamp'],req.headers['x-ss-signature'],raw,now())){
    // Diagnostic metadata only: never log the key, signature, request body or token.
    let keyKind=!secret?'missing':secret.startsWith('sb_secret_')?'secret':'other',projectMatches=false,serviceRole=false;

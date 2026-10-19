@@ -12,7 +12,7 @@ test('relay rejects absent, altered, stale and future signatures',()=>{
 });
 test('only signed token requests use proxy and do not return raw provider errors',async()=>{
  let calls=0;
- const handler=makeHandler({env:{SUPABASE_SERVICE_ROLE_KEY:secret,FIXIE_URL:'http://test:test@example.usefixie.com:80'},now:()=>now,request:async()=>{calls++;return {status:400,data:{code:'3003',description:'private credentials'}};}});
+ const handler=makeHandler({env:{PPURIO_RELAY_SECRET:secret,FIXIE_URL:'http://test:test@example.usefixie.com:80'},now:()=>now,request:async()=>{calls++;return {status:400,data:{code:'3003',description:'private credentials'}};}});
  const body={action:'token',authorization:'Basic abc='};
  const headers={'x-ss-timestamp':timestamp,'x-ss-signature':sign(secret,timestamp,JSON.stringify(body))};
  const res=response();await handler({method:'POST',body,headers},res);
@@ -24,7 +24,7 @@ test('only signed token requests use proxy and do not return raw provider errors
 test('relay trims copied whitespace and logs only safe authentication metadata',async()=>{
  const events=[];
  const body={action:'token',authorization:'Basic cHJpdmF0ZQ=='};
- const handler=makeHandler({env:{SUPABASE_SERVICE_ROLE_KEY:'\n'+secret+'\n',FIXIE_URL:'http://test:test@example.usefixie.com:80'},now:()=>now,report:e=>events.push(e),request:async()=>({status:200,data:{token:'private-token'}})});
+ const handler=makeHandler({env:{PPURIO_RELAY_SECRET:'\n'+secret+'\n',FIXIE_URL:'http://test:test@example.usefixie.com:80'},now:()=>now,report:e=>events.push(e),request:async()=>({status:200,data:{token:'private-token'}})});
  const good=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':sign(secret,timestamp,JSON.stringify(body))}},good);
  assert.equal(good.code,200);assert.equal(events.length,0);
  const bad=response();await handler({method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':'0'.repeat(64)}},bad);
