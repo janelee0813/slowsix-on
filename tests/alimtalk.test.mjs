@@ -4,7 +4,7 @@ const {makeHandler,workerAuthorized,bookingMessage}=await import('data:text/java
 const secret='dedicated-relay-secret-32-characters-for-tests',timestamp=String(Date.now()),body=JSON.stringify({action:'dispatch',route:'fixie'});
 const sign=(purpose='ppurio-worker')=>createHmac('sha256',secret).update(`${purpose}\n${timestamp}\n${body}`).digest('hex');
 const workerRequest=()=>new Request('https://test',{method:'POST',body,headers:{'x-ss-timestamp':timestamp,'x-ss-signature':sign()}});
-const job={id:crypto.randomUUID(),lease:crypto.randomUUID(),booking_id:crypto.randomUUID(),kind:'confirmed',phone:'01000000000',snapshot:{nickname:'테스트',space:'p',starts_at:'2026-10-20T05:00:00Z',ends_at:'2026-10-20T07:00:00Z',guests:8,total_amount:28160}};
+const job={id:crypto.randomUUID(),lease:crypto.randomUUID(),booking_id:crypto.randomUUID(),kind:'confirmed',phone:'01000000000',snapshot:{booking_code:'SS-000123',nickname:'테스트',space:'p',starts_at:'2026-10-20T05:00:00Z',ends_at:'2026-10-20T07:00:00Z',guests:8,total_amount:28160}};
 test('worker signature is scoped and anonymous/admin-body dispatch cannot bypass it',async()=>{
  assert.equal(await workerAuthorized(workerRequest(),body,secret),true);
  const cross=new Request('https://test',{headers:{'x-ss-timestamp':timestamp,'x-ss-signature':sign('ppurio-relay')}});
@@ -14,7 +14,7 @@ test('worker signature is scoped and anonymous/admin-body dispatch cannot bypass
 });
 test('all five booking templates preserve snapshot values and disallow arbitrary recipients or templates',()=>{
  for(const kind of ['requested','awaiting_payment','confirmed','rejected','cancelled']){
-  const p=bookingMessage({...job,kind});assert.equal(approvedPayload(p).targets[0].to,job.phone);assert.match(p.targets[0].changeWord.var2,/슬로우식스P 2026-10-20 14:00/);
+  const p=bookingMessage({...job,kind});assert.equal(approvedPayload(p).targets[0].to,job.phone);assert.equal(p.targets[0].changeWord.var1,'SS-000123');assert.match(p.targets[0].changeWord.var2,/슬로우식스P 2026-10-20 14:00/);
   if(['rejected','cancelled'].includes(kind))assert.deepEqual(Object.keys(p.targets[0].changeWord),['var1','var2']);else assert.equal(p.targets[0].changeWord.var4,'28,160');
   for(const patch of [{templateCode:'other'},{isResend:'Y'},{targets:[{...p.targets[0],to:'not-a-phone'}]}])assert.throws(()=>approvedPayload({...p,...patch}));
  }
@@ -48,7 +48,7 @@ test('booking outbox is atomic, private, immutable and never retries an uncertai
   assert.equal((await call('member_request',p,session)).data.code,'PHONE_REQUIRED');await ok('member_phone_save',{phone:reg.phone,version:home.phone_version},session);
   const b=await ok('member_request',p,session);await ok('member_request',p,session);assert.equal((await db.query('select count(*)::int n from ss_admin.alimtalk_jobs')).rows[0].n,1);
   const rpc=async(a,p={})=>(await db.query('select public.ss_ppurio_worker($1,$2::jsonb) r',[a,JSON.stringify(p)])).rows[0].r;
-  let j=await rpc('claim');assert.equal(j.phone,'01051667412');assert.equal(j.kind,'requested');assert.equal(j.snapshot.total_amount,b.total_amount);await rpc('dispatch',{id:j.id,lease:j.lease});await rpc('finish',{id:j.id,lease:j.lease,state:'sent',provider_code:'1000'});
+  let j=await rpc('claim');assert.equal(j.phone,'01051667412');assert.equal(j.kind,'requested');assert.equal(j.snapshot.total_amount,b.total_amount);assert.match(b.booking_code,/^SS-[0-9]{6,}$/);assert.equal(j.snapshot.booking_code,b.booking_code);await rpc('dispatch',{id:j.id,lease:j.lease});await rpc('finish',{id:j.id,lease:j.lease,state:'sent',provider_code:'1000'});
   await ok('member_status',{id:b.id,version:1,status:'awaiting_payment',payment_note:'테스트 입금 안내'},admin);await ok('member_status',{id:b.id,version:2,status:'confirmed'},admin);
   assert.equal((await db.query("select state from ss_admin.alimtalk_jobs where kind='awaiting_payment'")).rows[0].state,'skipped');j=await rpc('claim');assert.equal(j.kind,'confirmed');assert.equal(j.phone,reg.phone);
   await rpc('dispatch',{id:j.id,lease:j.lease});await assert.rejects(()=>rpc('finish',{id:j.id,lease:j.lease,state:'retry'}));await db.query("update ss_admin.alimtalk_jobs set lease_until=now()-interval '1 minute' where id=$1",[j.id]);assert.deepEqual(await rpc('claim'),{});

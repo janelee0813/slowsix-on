@@ -3,10 +3,10 @@ import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
 import { transform } from 'esbuild';
 import { readFile, readdir } from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
-export async function harness(){
+export async function harness({through}={}){
  const db=new PGlite({extensions:{pgcrypto}});
  await db.exec('create role anon; create role authenticated; create role service_role;');
- for(const file of (await readdir(new URL('supabase/migrations/',root))).filter(f=>f.endsWith('.sql')).sort()) await db.exec(await readFile(new URL('supabase/migrations/'+file,root),'utf8'));
+ for(const file of (await readdir(new URL('supabase/migrations/',root))).filter(f=>f.endsWith('.sql')&&(!through||f<=through)).sort()) await db.exec(await readFile(new URL('supabase/migrations/'+file,root),'utf8'));
  const {code}=await transform(await readFile(new URL('supabase/functions/admin-api/index.ts',root),'utf8'),{loader:'ts',format:'esm',target:'es2022'});
  const edge=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
  const auth=new Map();

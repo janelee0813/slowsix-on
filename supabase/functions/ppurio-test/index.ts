@@ -3,7 +3,7 @@ declare const Deno: { env: { get(name: string): string | undefined }; serve(hand
 export const templates:Record<string,string>={requested:'ppur_2026091713562747407967598',awaiting_payment:'ppur_2026091713565824417631569',confirmed:'ppur_2026091713573124417016883',rejected:'ppur_2026091713580424417116780',cancelled:'ppur_2026091713583347407004301'};
 export function bookingMessage(job:any){
  const b=job.snapshot,stamp=(v:string)=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v));
- const words:Record<string,string>={var1:job.booking_id,var2:('슬로우식스'+String(b.space).toUpperCase()+' '+stamp(b.starts_at)+'~'+stamp(b.ends_at)).slice(0,100)};
+ const words:Record<string,string>={var1:b.booking_code||job.booking_id,var2:('슬로우식스'+String(b.space).toUpperCase()+' '+stamp(b.starts_at)+'~'+stamp(b.ends_at)).slice(0,100)};
  if(['requested','awaiting_payment','confirmed'].includes(job.kind)){words.var3=String(b.guests);words.var4=Number(b.total_amount).toLocaleString('en-US');}
  return {account:'slowsix',messageType:'ALT',senderProfile:'@slowsix',templateCode:templates[job.kind],duplicateFlag:'N',targetCount:1,targets:[{to:job.phone,name:String(b.nickname).slice(0,100),changeWord:words}],isResend:'N',refKey:String(job.id).replaceAll('-','')};
 }
