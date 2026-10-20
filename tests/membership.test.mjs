@@ -27,7 +27,7 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
   let friday=2;while(new Date(Date.parse(future(friday))+9*3600000).getUTCDay()!==5)friday++;
   const p=payload(friday,23);const q=await ok('member_quote',{...p,tier:'crew',base_amount:0,total_amount:1},f);
   assert.equal(q.base_amount,27000);assert.equal(q.discount_percent,12);assert.equal(q.total_amount,20760);
-  const cq=await ok('member_quote',p,c);assert.equal(cq.total_amount,18600);
+  const cq=await ok('member_quote',p,c);assert.equal(cq.total_amount,19950);
   for(const patch of [{guests:5},{guests:14},{starts_at:future(2,10).replace(':00:',':30:')},{ends_at:future(1)}])assert.equal((await call('member_quote',{...p,...patch},f)).status,400);
   booking=await ok('member_request',{...p,total_amount:0},f);assert.equal(booking.total_amount,q.total_amount);
   assert.equal((await ok('member_request',p,f)).id,booking.id);
@@ -51,17 +51,17 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
   const confirmed=await ok('member_status',{id:booking.id,version:2,status:'confirmed'},admin);assert.equal(confirmed.discount_percent,12);assert.equal(confirmed.total_amount,booking.total_amount);
   assert.equal((await call('member_cancel',{id:booking.id,version:3},f)).data.code,'CANCEL_REQUIRES_ADMIN');
   assert.equal((await call('member_status',{id:booking.id,version:1,status:'cancelled'},admin)).data.code,'CONFLICT');
-  await ok('member_status',{id:booking.id,version:3,status:'cancelled'},admin);assert.equal((await ok('member_home',{},f)).coupon_remaining,2);
+  await ok('member_status',{id:booking.id,version:3,status:'cancelled'},admin);assert.equal((await ok('member_home',{},f)).coupon_remaining,3);
   assert.ok((await ok('member_home',{},f)).notifications.some(n=>n.message.includes('확정')));
  });
- await t.test('crew has exactly two coupons and monthly issuance/restoration is bounded',async()=>{
-  await ok('member_request',payload(25),c);assert.equal((await ok('member_home',{},c)).coupon_remaining,0);
+ await t.test('crew has exactly three coupons and monthly issuance/restoration is bounded',async()=>{
+  const booking=await ok('member_request',payload(25),c);assert.equal(booking.discount_percent,15);assert.equal(booking.discount_amount,booking.base_amount*0.15);assert.equal((await ok('member_home',{},c)).coupon_remaining,1);await ok('member_request',payload(26,13),c);assert.equal((await ok('member_home',{},c)).coupon_remaining,0);assert.equal((await ok('member_coupon_wallet',{},c)).items.filter(x=>x.kind==='monthly').length,3);
   assert.equal((await call('member_request',payload(26),c)).data.code,'COUPON_UNAVAILABLE');
   const noCoupon=await ok('member_request',payload(26,10,{use_coupon:false}),c);assert.equal(noCoupon.coupon_amount,0);
   await db.query("update ss_admin.bookings set coupon_month=(date_trunc('month',now() at time zone 'Asia/Seoul')-interval '1 month')::date where member_id=$1 and coupon_slot is not null",[crew.user.id]);
-  assert.equal((await ok('member_home',{},c)).coupon_remaining,2);
-  const fresh=await ok('member_request',payload(27),c);assert.equal((await ok('member_home',{},c)).coupon_remaining,1);
-  await ok('member_cancel',{id:fresh.id,version:1},c);assert.equal((await ok('member_home',{},c)).coupon_remaining,2);
+  assert.equal((await ok('member_home',{},c)).coupon_remaining,3);
+  const fresh=await ok('member_request',payload(27),c);assert.equal((await ok('member_home',{},c)).coupon_remaining,2);
+  await ok('member_cancel',{id:fresh.id,version:1},c);assert.equal((await ok('member_home',{},c)).coupon_remaining,3);
  });
  await t.test('admin blocks, revocation, notifications and suspension are enforced',async()=>{
   admin=(await ok('login',{username:'slowsix',password})).sessionToken;
