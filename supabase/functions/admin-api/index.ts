@@ -190,10 +190,7 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
   }
   return data;
  }
- const feedCache=new Map<string,{until:number,items:ReturnType<typeof parseReservationFeed>}>();
- async function externalCalendar(space='on',fresh=false){
-  const cached=feedCache.get(space);
-  if(!fresh&&cached&&cached.until>Date.now())return cached.items;
+ async function externalCalendar(space='on'){
   try{
    let url:string;
    if(space==='on'){
@@ -204,17 +201,18 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
     if(!calendar||!/^[-a-zA-Z0-9_]+@group\.calendar\.google\.com$/.test(calendar))throw Error('feed configuration');
     url='https://calendar.google.com/calendar/ical/'+encodeURIComponent(calendar)+'/public/basic.ics';
    }
-   const response=await fetcher(url,{headers:{Accept:'text/calendar'},signal:AbortSignal.timeout(10000)});
+   const response=await fetcher(url,{cache:'no-store',headers:{Accept:'text/calendar','Cache-Control':'no-cache'},signal:AbortSignal.timeout(10000)});
    if(!response.ok)throw Error('feed');
    const raw=await response.text(),items=space==='on'?parseReservationFeed(raw):parseGongjipsaFeed(raw,space);
-   feedCache.set(space,{until:Date.now()+30000,items});return items;
+   return items;
   }catch{throw new AppError('EXTERNAL_CALENDAR_UNAVAILABLE',503);}
  }
  const rpc=(action:string,p:unknown)=>call('/rest/v1/rpc/ss_admin_gateway',{p_action:action,p});
  async function withExternalCalendar(result:any,payload:Record<string,unknown>){
   const items=await externalCalendar(String(payload.space)),start=Date.parse(String(payload.from)),end=Date.parse(String(payload.to));
-  // A mirrored local reservation can also appear in the external feed.
-  result.items.push(...items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start&&!result.items.some((local:any)=>Date.parse(local.starts_at)<=Date.parse(r.starts_at)&&Date.parse(local.ends_at)>=Date.parse(r.ends_at))));
+  // Display only provider events. Local requests remain in booking history and
+  // SQL conflict checks; they must never hide or extend an external event.
+  result.items=items.filter(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at));
   result.external_checked_at=new Date().toISOString();
   return result;
  }
@@ -303,7 +301,7 @@ export function makeHandler(env: (name:string)=>string|undefined, fetcher: typeo
      // Let the existing SQL idempotency checks validate that retry before checking the feed.
      const previous=await rpc('member_bookings',{session_hash,from:payload.starts_at,to:payload.ends_at,space:payload.space});
      if(!previous.items.some((r:any)=>r.id===payload.id)){
-      const items=await externalCalendar(String(payload.space),true),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
+      const items=await externalCalendar(String(payload.space)),start=Date.parse(String(payload.starts_at)),end=Date.parse(String(payload.ends_at));
       if(items.some(r=>Date.parse(r.starts_at)<end&&Date.parse(r.ends_at)>start))throw new AppError('TIME_UNAVAILABLE');
      }
     }

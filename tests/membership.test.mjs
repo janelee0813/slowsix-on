@@ -35,7 +35,7 @@ test('membership permissions, price snapshots, coupon and booking lifecycle',asy
  });
  await t.test('availability is private and overlapping requests are blocked',async()=>{
   const p={from:new Date(Date.now()).toISOString(),to:new Date(Date.now()+30*86400000).toISOString()};
-  const calendar=await ok('member_calendar',p,c);assert.ok(calendar.items.length);assert.deepEqual(Object.keys(calendar.items[0]).sort(),['ends_at','space','starts_at']);
+  const calendar=await ok('member_calendar',p,c);assert.equal(calendar.items.length,0);
   assert.equal((await ok('member_bookings',p,c)).items.length,0);
   assert.equal((await call('member_request',{...payload(),starts_at:booking.starts_at,ends_at:booking.ends_at},c)).data.code,'TIME_UNAVAILABLE');
   assert.equal((await call('member_cancel',{id:booking.id,version:1},c)).data.code,'FORBIDDEN');

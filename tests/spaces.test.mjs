@@ -33,7 +33,7 @@ test('booking availability, blocks, coupons and SpaceCloud outbox are scoped cor
  const d=await ok('member_request',{...payload,id:crypto.randomUUID(),space:'d'},token);assert.equal(d.space,'d');
  assert.equal((await h.call('member_request',{...payload,id:crypto.randomUUID(),space:'p',guests:8},token)).data.code,'TIME_UNAVAILABLE');
  assert.equal((await h.call('member_request',{...payload,space:'d'},token)).data.code,'CONFLICT');
- for(const space of ['on','p','d']){const cal=await ok('member_calendar',{...period,space},token);assert.equal(cal.items.length,1);assert.equal(cal.items[0].space,space);const b=await ok('member_bookings',{...period,space},token);assert.equal(b.items.length,1);assert.equal(b.items[0].space,space);}
+ for(const space of ['on','p','d']){const cal=await ok('member_calendar',{...period,space},token);assert.equal(cal.items.length,0);const b=await ok('member_bookings',{...period,space},token);assert.equal(b.items.length,1);assert.equal(b.items[0].space,space);}
  const jobs=(await h.db.query('select booking_id from ss_admin.sc_jobs')).rows;assert.deepEqual(jobs.map(x=>x.booking_id),[on.id]);
  assert.equal((await h.call('member_sc_retry',{id:p.id},admin)).data.code,'INVALID_ENTRY');
  assert.equal((await h.call('member_calendar',{...period,space:'2'},token)).data.code,'INVALID_ENTRY');
