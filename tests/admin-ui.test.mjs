@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {randomUUID} from 'node:crypto';
+import {collectLedger} from '../assets/settlement-export.js';
 const root=new URL('../',import.meta.url);
 const html=await readFile(new URL('admin.html',root),'utf8');
 const code=await readFile(new URL('assets/admin.js',root),'utf8');
@@ -36,7 +37,8 @@ async function screen(currentDate,role="admin",legacy=false,timeoutUnsupported=f
   if(b.action==='list'){data.summary.expense=stored.filter(r=>r.category==='expense'&&r.entry_date>=b.from&&r.entry_date<=b.to).reduce((n,r)=>n+r.amount,0);if(options.modernSort)data.sort_supported=true;}
   return new Response(JSON.stringify(data),{status:200});
  };
- w.eval(code);const $=id=>w.document.getElementById(id);
+ if(options.exporter)w.testExporter=options.exporter;
+ w.eval(options.exporter?code.replace("import('./settlement-export.js?v=20261109')",'Promise.resolve(window.testExporter)'):code);const $=id=>w.document.getElementById(id);
  await until(()=>$('page-label').textContent==='0건');
  const submit=async()=>{$('entry-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await until(()=>!$('save-entry').disabled);};
  const fill=()=>{$('month').value='2026-08';$('from').value='2026-08-01';$('to').value='2026-08-31';$('entry-date').value='2026-09-14';$('entry-description').value='9월 입금';$('entry-amount').value='100000';};
@@ -213,4 +215,19 @@ test('recurring tab sits between ledger and team; admin can register and operato
 });
 test('automatically applied expenses are labelled and cannot be edited as individual ledger rows',async()=>{
  const h=await screen('2026-09-15');try{h.stored.push({id:randomUUID(),recurring_id:randomUUID(),entry_date:'2026-09-12',description:'월세',category:'fixed',amount:700000,author:'관리자'});h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='1');assert.match(h.$('entries').textContent,/자동/);assert.equal(h.$('entries').querySelectorAll('button').length,0);}finally{h.dom.window.close();}
+});
+
+test('Excel button downloads the selected full period, not only the displayed page',async()=>{
+ let captured,downloaded;
+ const exporter={collectLedger,loadExcel:async()=>({}),buildWorkbook:(_lib,data,period)=>{captured={data,period};return {xlsx:{writeBuffer:async()=>new Uint8Array([1,2])}};},downloadWorkbook:(buffer,period)=>{downloaded={buffer,period};}};
+ const h=await screen('2026-11-09','admin',false,false,false,{exporter});
+ try{
+  for(let i=0;i<205;i++)h.stored.push({id:String(i),entry_date:'2026-11-03',description:'내역 '+i,category:'cash',amount:100,author:'관리자'});
+  h.$('load-period').click();await until(()=>h.$('entry-count').textContent==='205');
+  h.$('export-excel').click();await until(()=>downloaded);
+  assert.equal(captured.data.entries.length,205);assert.equal(downloaded.period.from,'2026-11-01');assert.equal(downloaded.period.to,'2026-11-30');
+  assert.equal(h.$('entries').children.length,100);
+  h.$('from').value='2026-11-02';downloaded=null;h.$('export-excel').click();await until(()=>!h.$('export-excel').disabled);
+  assert.equal(downloaded,null);assert.match(h.$('notice').textContent,/먼저 조회/);
+ }finally{h.dom.window.close();}
 });

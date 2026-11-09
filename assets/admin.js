@@ -269,6 +269,21 @@ for(const kind of Object.keys(entryGroups))$('entry-'+kind).addEventListener('cl
  categoryHelp();$('entry-category').focus();
 });
 $('load-period').addEventListener('click',()=>{offset=0;busy($('load-period'),loadLedger)});
+$('export-excel').addEventListener('click',()=>busy($('export-excel'),async()=>{
+ if(!user||user.status!=='active')return;
+ const p=period(),expected=session,seq=loadSequence,order=$('entry-sort').value;
+ if(!financeData||!feePeriod||feePeriod.from!==p.from||feePeriod.to!==p.to)throw Error('다운로드할 기간을 먼저 조회해주세요.');
+ if(user.role==='admin'&&($('manual-fee').value!==$('manual-fee').dataset.saved||$('fee-method').value!==$('fee-method').dataset.saved||$('bank-opening').value!==$('bank-opening').dataset.saved))throw Error('변경한 운영 수수료나 기초잔액을 먼저 저장해주세요.');
+ const b=$('export-excel');b.textContent='엑셀 만드는 중…';
+ try{
+  const exporter=await import('./settlement-export.js?v=20261109');
+  const [ExcelJS,data]=await Promise.all([exporter.loadExcel(),exporter.collectLedger(fetchLedgerPage,p,order)]);
+  const buffer=await exporter.buildWorkbook(ExcelJS,data,p,names).xlsx.writeBuffer();
+  if(session!==expected||!user||seq!==loadSequence||period().from!==p.from||period().to!==p.to)throw Error('조회 상태가 변경되었습니다. 다시 다운로드해주세요.');
+  exporter.downloadWorkbook(buffer,p);notice('정산 엑셀 파일을 다운로드했습니다.');
+ }finally{b.textContent='엑셀 다운로드';}
+}));
+
 $('prev').addEventListener('click',()=>{offset=Math.max(0,offset-100);busy($('prev'),loadLedger)});
 $('next').addEventListener('click',()=>{offset+=100;busy($('next'),loadLedger)});
 $('edit-nickname').addEventListener('click',()=>{$('nickname-input').value=user.name;$('nickname-error').textContent='';$('nickname-dialog').showModal();});
