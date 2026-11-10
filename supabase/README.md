@@ -150,17 +150,17 @@ Set Edge Function secret `GONGJIPSA_CALENDAR_ID` to the customer Google Calendar
 
 ## 공개 스케줄 (2026-10-12)
 
-홈페이지의 `/#schedule`은 로그인 없이 ON·P·D 예약 현황을 조회한다.
+홈페이지의 공개 스케줄 화면은 2026-11-10에 제거했다. 기존 `/#schedule` 링크는 홈을 연다.
 `202610120001_public_schedule.sql`을 적용하고 `admin-api`를 배포해야 한다.
 두 작업은 2026-10-12 운영 프로젝트에 적용했다.
 
-브라우저는 기존 `/api/admin` 주소에 `public_calendar`, `space`, `from`, `to`를 보낸다.
+공개 API는 기존 `/api/admin` 주소에서 `public_calendar`, `space`, `from`, `to`를 받는다.
 서버 전용 `ss_public_schedule(jsonb)`는 최대 32일의 예약·이용 불가 시간과 호점만 반환한다.
 회원 이름·연락처·결제금액·요청사항·예약번호는 조회하지 않는다.
 공개 요청에도 IP 제한을 적용하며, 데이터베이스 함수는 service_role만 호출할 수 있다.
-외부 일정은 멤버십과 같은 읽기·이름 마스킹·중복 제거 로직을 사용한다.
+외부 일정은 멤버십과 같은 읽기·이름 마스킹 로직을 사용한다.
 ON은 스페이스클라우드, P는 공집사 3호점, D는 공집사 1호점이며 2호점은 제외한다.
-외부 일정 조회가 실패하면 빈 달력으로 표시하지 않고 조회 실패를 알린다.
+외부 일정 조회에 실패하면 API가 오류를 반환한다.
 
 
 ## 정산 재시작 및 관리자 화면 개편 (2026-10-15)
