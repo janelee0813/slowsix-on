@@ -6,3 +6,5 @@
 @media(prefers-reduced-motion:reduce){#page-main *,#site-nav *{animation:none!important;transition:none!important}html{scroll-behavior:auto!important}}
 
 #site-footer .home-brand,#site-footer .home-brand>span{color:#fff}
+
+@media(min-width:701px){.home-section-tint .home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
